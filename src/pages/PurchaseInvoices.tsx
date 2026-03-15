@@ -52,6 +52,9 @@ interface InvoiceItem {
   id: string;
   product_id: string;
   product_name: string;
+  barcode?: string;
+  brand?: string;
+  category_name?: string;
   quantity: number;
   unit_price: number;
   total_price: number;
@@ -63,7 +66,6 @@ interface PurchaseInvoice {
   supplier_id: string;
   supplier_name?: string;
   subtotal: number;
-  tax_amount: number;
   discount_amount: number;
   total_amount: number;
   status: 'pending' | 'paid' | 'cancelled' | 'overdue';
@@ -343,10 +345,18 @@ export default function PurchaseInvoices() {
 
       if (suppliersError) throw suppliersError;
 
-      // Load invoice items
+      // Load invoice items with product details
       const { data: itemsData, error: itemsError } = await supabase
         .from('invoice_items')
-        .select('*');
+        .select(`
+          id,
+          product_id,
+          product_name,
+          quantity,
+          unit_price,
+          total_price,
+          products!inner(barcode, brand, category_id, categories(name))
+        `);
 
       if (itemsError) throw itemsError;
 
@@ -354,7 +364,12 @@ export default function PurchaseInvoices() {
       const enrichedInvoices = (invoicesData || []).map((inv: any) => ({
         ...inv,
         supplier_name: suppliersData?.find((s: any) => s.id === inv.supplier_id)?.name || 'Unknown',
-        items: itemsData?.filter((item: any) => item.invoice_id === inv.id) || [],
+        items: itemsData?.filter((item: any) => item.invoice_id === inv.id).map((item: any) => ({
+          ...item,
+          barcode: item.products?.barcode || '',
+          brand: item.products?.brand || '',
+          category_name: item.products?.categories?.name || '',
+        })) || [],
       }));
 
       setInvoices(enrichedInvoices);
@@ -401,7 +416,6 @@ export default function PurchaseInvoices() {
           type: 'purchase',
           supplier_id: selectedSupplierId,
           subtotal,
-          tax_amount: 0,
           discount_amount: 0,
           total_amount: totalAmount,
           status: amountPaid >= totalAmount ? 'paid' : 'pending',
@@ -1094,12 +1108,23 @@ export default function PurchaseInvoices() {
                               transition={{ delay: idx * 0.05 }}
                               className="p-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 hover:shadow-md transition-shadow"
                             >
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
                                   <p className="font-semibold text-slate-900 dark:text-white">{item.product_name}</p>
-                                  <p className="text-xs text-slate-600 dark:text-slate-400">📊 {item.quantity} × {currency(item.unit_price)}</p>
+                                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                                    {item.barcode && (
+                                      <p className="text-slate-600 dark:text-slate-400">🔲 {item.barcode}</p>
+                                    )}
+                                    {item.brand && (
+                                      <p className="text-slate-600 dark:text-slate-400">🏷️ {item.brand}</p>
+                                    )}
+                                    {item.category_name && (
+                                      <p className="text-slate-600 dark:text-slate-400">📂 {item.category_name}</p>
+                                    )}
+                                    <p className="text-slate-600 dark:text-slate-400">📊 {item.quantity} × {currency(item.unit_price)}</p>
+                                  </div>
                                 </div>
-                                <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded text-sm">
+                                <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded text-sm whitespace-nowrap">
                                   {currency(item.total_price)}
                                 </span>
                               </div>
@@ -1117,14 +1142,6 @@ export default function PurchaseInvoices() {
                         </span>
                         <span className="font-semibold text-slate-900 dark:text-white">{currency(invoice.subtotal)}</span>
                       </div>
-                      {invoice.tax_amount > 0 && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                            <span>🏛️</span> {getText('tax')}
-                          </span>
-                          <span className="font-semibold text-amber-600 dark:text-amber-400">{currency(invoice.tax_amount)}</span>
-                        </div>
-                      )}
                       {invoice.discount_amount > 0 && (
                         <div className="flex justify-between items-center">
                           <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -1133,7 +1150,7 @@ export default function PurchaseInvoices() {
                           <span className="font-semibold text-green-600 dark:text-green-400">-{currency(invoice.discount_amount)}</span>
                         </div>
                       )}
-                      <div className="border-t border-slate-300 dark:border-slate-600 pt-2 flex justify-between items-center">
+                      <div className="border-t border-slate-300 dark:border-slate-600 pt-2 mt-2 flex justify-between items-center">
                         <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                           <span>💰</span> {getText('total')}
                         </span>
@@ -1245,15 +1262,26 @@ export default function PurchaseInvoices() {
                                         whileHover={{ x: 4 }}
                                         className="p-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-lg border border-slate-300 dark:border-slate-600 shadow-sm hover:shadow-md transition-shadow"
                                       >
-                                        <div className="flex justify-between items-start mb-2">
+                                        <div className="flex justify-between items-start">
                                           <div className="flex-1">
                                             <p className="font-bold text-slate-900 dark:text-white text-base">{item.product_name}</p>
-                                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                                              <span className="inline-block mr-4">📊 {item.quantity} {language === 'ar' ? 'وحدة' : 'unité(s)'}</span>
-                                              <span className="inline-block">💲 {currency(item.unit_price)}/{language === 'ar' ? 'وحدة' : 'unité'}</span>
+                                            <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                                              {item.barcode && (
+                                                <p className="text-slate-600 dark:text-slate-400">🔲 <span className="font-medium">{item.barcode}</span></p>
+                                              )}
+                                              {item.brand && (
+                                                <p className="text-slate-600 dark:text-slate-400">🏷️ <span className="font-medium">{item.brand}</span></p>
+                                              )}
+                                              {item.category_name && (
+                                                <p className="text-slate-600 dark:text-slate-400">📂 <span className="font-medium">{item.category_name}</span></p>
+                                              )}
+                                              <p className="text-slate-600 dark:text-slate-400">📊 {item.quantity} {language === 'ar' ? 'وحدة' : 'unité(s)'}</p>
+                                            </div>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                                              💲 {currency(item.unit_price)}/{language === 'ar' ? 'وحدة' : 'unité'}
                                             </p>
                                           </div>
-                                          <motion.div whileHover={{ scale: 1.1 }} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg font-bold">
+                                          <motion.div whileHover={{ scale: 1.1 }} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-lg font-bold whitespace-nowrap">
                                             {currency(item.total_price)}
                                           </motion.div>
                                         </div>
@@ -1276,15 +1304,6 @@ export default function PurchaseInvoices() {
                                     </span>
                                     <span className="font-bold text-slate-900 dark:text-white">{currency(selectedInvoice.subtotal)}</span>
                                   </div>
-                                  
-                                  {selectedInvoice.tax_amount > 0 && (
-                                    <div className="flex justify-between items-center p-2 bg-white dark:bg-slate-900/30 rounded">
-                                      <span className="text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2">
-                                        <span>🏛️</span> {getText('tax')}
-                                      </span>
-                                      <span className="font-bold text-amber-600 dark:text-amber-400">{currency(selectedInvoice.tax_amount)}</span>
-                                    </div>
-                                  )}
                                   
                                   {selectedInvoice.discount_amount > 0 && (
                                     <div className="flex justify-between items-center p-2 bg-white dark:bg-slate-900/30 rounded">
