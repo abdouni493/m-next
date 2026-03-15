@@ -1,5 +1,5 @@
 -- ===================================================================
--- SUPABASE SQL MIGRATIONS FOR KHACHIRI AUTOPIECES
+-- SUPABASE SQL MIGRATIONS FOR AUTO PARTS
 -- Project URL: https://zpbgthdmzgelzilipunw.supabase.co
 -- ===================================================================
 

@@ -248,7 +248,7 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between pb-6">
         <div>
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">
-            🏭 KHACHIRI AUTO PIÈCES
+            🏭 AUTO PARTS KOUBA
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 mt-1">
             👋 Bienvenue, <span className="font-semibold text-blue-600">{user?.name || user?.username || 'Admin'}</span>!

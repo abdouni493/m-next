@@ -597,7 +597,7 @@ export default function Settings() {
             <CardContent className="p-8">
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Khachiri Autopieces</h2>
+                  <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Auto Parts Kouba</h2>
                   <p className="text-muted-foreground">Système de Gestion Commercial</p>
                   <Badge variant="outline" className="mt-2">Version {systemInfo.version}</Badge>
                 </div>

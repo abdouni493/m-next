@@ -48,7 +48,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
           </div>
           {isOpen && (
             <div className={isRTL ? 'text-right' : ''}>
-              <h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">Khachiri</h1>
+              <h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">Auto Parts</h1>
               <p className="text-xs text-slate-600 dark:text-slate-400">Autopieces</p>
             </div>
           )}

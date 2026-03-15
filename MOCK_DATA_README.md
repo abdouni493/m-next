@@ -28,7 +28,7 @@ The application has been converted from SQLite database to **local mock data onl
 5. **Tech Auto Solutions** - Marrakech (Ahmed Khalid)
 
 ### Employees (3 staff)
-1. **Khachiri** - Admin - Casablanca
+1. **Admin** - Admin - Kouba
 2. **Fatima Bennani** - Employee - Casablanca (€4,500/month)
 3. **Omar Alami** - Employee - Casablanca (€4,200/month)
 

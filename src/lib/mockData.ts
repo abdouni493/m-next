@@ -1,4 +1,4 @@
-// Mock Data pour Khachiri Autopieces
+// Mock Data pour Auto Parts Kouba
 // Données de test pour la version de démonstration
 
 export interface User {
@@ -72,8 +72,8 @@ export interface Customer {
 export const mockUsers: User[] = [
   {
     id: '1',
-    name: '  Khachiri',
-    email: ' @khachiri-auto.ma',
+    name: '  Admin',
+    email: ' @autoparts-kouba.dz',
     role: 'admin',
     phone: '+212 6 12 34 56 78',
     address: 'Casablanca, Maroc',
@@ -82,7 +82,7 @@ export const mockUsers: User[] = [
   {
     id: '2',
     name: 'Fatima Bennani',
-    email: 'fatima@khachiri-auto.ma',
+    email: 'fatima@autoparts-kouba.dz',
     role: 'employee',
     phone: '+212 6 98 76 54 32',
     address: 'Casablanca, Maroc',
@@ -92,7 +92,7 @@ export const mockUsers: User[] = [
   {
     id: '3',
     name: 'Omar Alami',
-    email: 'omar@khachiri-auto.ma',
+    email: 'omar@autoparts-kouba.dz',
     role: 'employee',
     phone: '+212 6 11 22 33 44',
     address: 'Casablanca, Maroc',
