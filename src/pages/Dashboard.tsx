@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -12,7 +13,8 @@ import {
   ClipboardList,
   RefreshCw,
   Clock,
-  Briefcase
+  Briefcase,
+  AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -130,11 +132,98 @@ const RecentActivity = ({ activity }: { activity: any[] }) => (
   </Card>
 );
 
+// Component for displaying product alerts
+const ProductAlerts = ({ products }: { products: any[] }) => {
+  const alertProducts = products.filter(p => p.current_quantity <= p.min_quantity).slice(0, 5);
+  const criticalProducts = alertProducts.filter(p => p.current_quantity === 0);
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-3"
+    >
+      {alertProducts.length > 0 ? (
+        alertProducts.map((product, index) => (
+          <motion.div
+            key={product.id}
+            variants={itemVariants}
+            className={`p-4 rounded-lg flex items-center justify-between border-2 transition-all duration-300 ${
+              product.current_quantity === 0
+                ? 'bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+                : 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700'
+            }`}
+          >
+            <div className="flex items-center gap-3 flex-1">
+              <div className={`p-2 rounded-full ${
+                product.current_quantity === 0 
+                  ? 'bg-red-200 dark:bg-red-800' 
+                  : 'bg-yellow-200 dark:bg-yellow-800'
+              }`}>
+                <AlertCircle className={`h-5 w-5 ${
+                  product.current_quantity === 0
+                    ? 'text-red-600'
+                    : 'text-yellow-600'
+                }`} />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-sm md:text-base">{product.name}</p>
+                <p className="text-xs md:text-sm text-gray-700 dark:text-gray-300">
+                  En stock: <span className="font-bold">{product.current_quantity}</span> / Minimum: <span className="font-bold">{product.min_quantity}</span>
+                </p>
+              </div>
+            </div>
+            <Badge className={`${
+              product.current_quantity === 0
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-yellow-600 hover:bg-yellow-700'
+            } text-white whitespace-nowrap ml-2`}>
+              {product.current_quantity === 0 ? '❌ RUPTURE' : '⚠️ BAS'}
+            </Badge>
+          </motion.div>
+        ))
+      ) : (
+        <motion.div
+          variants={itemVariants}
+          className="p-8 rounded-lg bg-green-100 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 text-center"
+        >
+          <p className="text-2xl mb-2">✅</p>
+          <p className="font-semibold text-green-700 dark:text-green-400">
+            Aucun produit en stock bas - Inventaire optimal!
+          </p>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
 export default function Dashboard() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -151,8 +240,14 @@ export default function Dashboard() {
         supabase.from('invoices').select('*')
       ]);
 
+      // Get low stock products
+      const lowStock = (productsRes.data || [])
+        .filter(p => p.current_quantity <= p.min_quantity)
+        .sort((a, b) => a.current_quantity - b.current_quantity);
+      setLowStockProducts(lowStock);
+
       // Count products with low stock
-      const lowStockCount = (productsRes.data || []).filter(p => p.current_quantity < p.min_quantity).length;
+      const lowStockCount = lowStock.length;
 
       // Calculate sales stats
       const saleInvoices = (invoicesRes.data || []).filter(inv => inv.type === 'sale' && inv.status === 'paid');
@@ -275,6 +370,28 @@ export default function Dashboard() {
           <AlertTriangle className="h-5 w-5" />
           <p className="font-medium">Impossible de récupérer les statistiques. Affichage des valeurs par défaut.</p>
         </div>
+      )}
+
+      {/* Product Alerts Section - TOP PRIORITY */}
+      {lowStockProducts.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl p-6 border-2 border-red-200 dark:border-red-800"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <AlertTriangle className="h-7 w-7 text-red-600" />
+            <h2 className="text-2xl font-bold text-red-700 dark:text-red-400">
+              ⚠️ Alertes Produits ({lowStockProducts.length})
+            </h2>
+          </div>
+          <ProductAlerts products={lowStockProducts} />
+          <Link to="/inventory" className="block mt-4">
+            <Button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold">
+              📦 Gérer l'inventaire <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </motion.section>
       )}
 
       {/* Main Stats and Financial Overview */}
