@@ -75,6 +75,7 @@ interface Product {
   description?: string;
   buying_price: number;
   selling_price: number;
+  last_price_to_sell?: number;
   margin_percent?: number;
   initial_quantity: number;
   current_quantity: number;
@@ -82,6 +83,7 @@ interface Product {
   supplier_id?: string;
   supplier?: { id: string; name: string };
   store_id?: string;
+  amount_paid?: number;
   shelving_location?: string;
   shelving_line?: number;
   is_active: boolean;
@@ -409,8 +411,29 @@ export default function Inventory() {
               shelvings={shelvings}
               onSave={async (formData) => {
                 try {
+                  // Filter formData to only include valid database fields
+                  const validProductData = {
+                    name: formData.name,
+                    barcode: formData.barcode,
+                    brand: formData.brand,
+                    description: formData.description,
+                    category_id: formData.category_id,
+                    supplier_id: formData.supplier_id,
+                    buying_price: formData.buying_price,
+                    selling_price: formData.selling_price,
+                    last_price_to_sell: formData.last_price_to_sell,
+                    margin_percent: formData.margin_percent,
+                    initial_quantity: formData.initial_quantity,
+                    current_quantity: formData.current_quantity,
+                    min_quantity: formData.min_quantity,
+                    store_id: formData.store_id || null,
+                    amount_paid: formData.amount_paid || 0,
+                    shelving_location: formData.shelving_location || null,
+                    shelving_line: formData.shelving_line || null,
+                  };
+
                   if (editingProduct) {
-                    await updateProduct(editingProduct.id, formData);
+                    await updateProduct(editingProduct.id, validProductData);
                     toast({
                       title: getText('product_updated', language),
                       description: language === 'ar' ? 'تم تحديث المنتج' : 'Le produit a été mis à jour',
@@ -418,7 +441,7 @@ export default function Inventory() {
                   } else {
                     // Create product without payment tracking fields
                     // Payment tracking is handled separately via invoices
-                    const createdProduct = await createProduct(formData);
+                    const createdProduct = await createProduct(validProductData);
                     
                     // Automatically create a purchase invoice for the new product
                     if (createdProduct && formData.supplier_id && formData.initial_quantity > 0) {
@@ -595,7 +618,7 @@ export default function Inventory() {
                       )}
 
                       {/* Pricing */}
-                      <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="grid grid-cols-3 gap-2 mb-4">
                         <div className="p-3 bg-blue-50 rounded-lg">
                           <p className="text-xs text-blue-600 font-semibold">💵 Achat</p>
                           <p className="text-lg font-bold text-blue-700">
@@ -606,6 +629,12 @@ export default function Inventory() {
                           <p className="text-xs text-emerald-600 font-semibold">💰 Vente</p>
                           <p className="text-lg font-bold text-emerald-700">
                             {product.selling_price.toFixed(2)} DZD
+                          </p>
+                        </div>
+                        <div className="p-3 bg-purple-50 rounded-lg">
+                          <p className="text-xs text-purple-600 font-semibold">⏱️ Derni.</p>
+                          <p className="text-lg font-bold text-purple-700">
+                            {(product.last_price_to_sell || product.selling_price).toFixed(2)} DZD
                           </p>
                         </div>
                       </div>
@@ -813,7 +842,7 @@ export default function Inventory() {
               {/* Pricing Section */}
               <div className="border-t pt-4">
                 <h4 className="font-bold text-slate-800 mb-3">💰 Prix & Marge</h4>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-3">
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <p className="text-xs text-blue-600 font-semibold">💵 Achat</p>
                     <p className="text-lg font-bold text-blue-700">{selectedProduct.buying_price.toFixed(2)} DZD</p>
@@ -822,10 +851,14 @@ export default function Inventory() {
                     <p className="text-xs text-emerald-600 font-semibold">💰 Vente</p>
                     <p className="text-lg font-bold text-emerald-700">{selectedProduct.selling_price.toFixed(2)} DZD</p>
                   </div>
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <p className="text-xs text-purple-600 font-semibold">⏱️ Derni.</p>
+                    <p className="text-lg font-bold text-purple-700">{(selectedProduct.last_price_to_sell || selectedProduct.selling_price).toFixed(2)} DZD</p>
+                  </div>
                   {selectedProduct.margin_percent !== undefined && (
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <p className="text-xs text-purple-600 font-semibold">📈 Marge</p>
-                      <p className="text-lg font-bold text-purple-700">{selectedProduct.margin_percent.toFixed(2)}%</p>
+                    <div className="p-3 bg-orange-50 rounded-lg">
+                      <p className="text-xs text-orange-600 font-semibold">📈 Marge</p>
+                      <p className="text-lg font-bold text-orange-700">{selectedProduct.margin_percent.toFixed(2)}%</p>
                     </div>
                   )}
                 </div>
@@ -923,18 +956,19 @@ function ProductForm({
     buying_price: product?.buying_price || 0,
     margin_percent: product?.margin_percent || 0,
     selling_price: product?.selling_price || 0,
+    last_price_to_sell: product?.last_price_to_sell || 0,
     initial_quantity: product?.initial_quantity || 0,
     current_quantity: product?.current_quantity || 0,
     min_quantity: product?.min_quantity || 0,
+    store_id: product?.store_id || '',
+    amount_paid: product?.amount_paid || 0,
     shelving_location: product?.shelving_location || '',
     shelving_line: product?.shelving_line || 1,
-    store_id: '',
   });
 
   const [totalPrice, setTotalPrice] = useState(
     product ? product.buying_price * product.initial_quantity : 0
   );
-  const [amountPaid, setAmountPaid] = useState(0);
   const [remaining, setRemaining] = useState(totalPrice);
   const [showAddSupplier, setShowAddSupplier] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
@@ -955,8 +989,8 @@ function ProductForm({
   useEffect(() => {
     const total = formData.buying_price * formData.initial_quantity;
     setTotalPrice(total);
-    setRemaining(Math.max(0, total - amountPaid));
-  }, [formData.buying_price, formData.initial_quantity, amountPaid]);
+    setRemaining(Math.max(0, total - (formData.amount_paid || 0)));
+  }, [formData.buying_price, formData.initial_quantity, formData.amount_paid]);
 
   const handlePriceChange = (type: 'buying' | 'margin' | 'selling', value: number) => {
     if (type === 'buying') {
@@ -1069,7 +1103,7 @@ function ProductForm({
       >
         <h3 className="text-lg font-bold text-emerald-900 mb-4">💵 {language === 'ar' ? 'التسعير' : 'Tarification'}</h3>
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Buying Price */}
             <div>
               <Label className="text-sm font-semibold text-emerald-900">{getText('buying_price', language)}</Label>
@@ -1104,6 +1138,23 @@ function ProductForm({
                 onChange={(e) => handlePriceChange('selling', parseFloat(e.target.value) || 0)}
                 className="mt-1 rounded-lg border-emerald-300 focus:border-emerald-500"
               />
+            </div>
+
+            {/* Last Price to Sell - Purple Highlighted */}
+            <div className="p-3 border-2 border-purple-200 rounded-lg bg-purple-50">
+              <Label className="text-sm font-semibold text-purple-900">
+                {language === 'ar' ? '⏱️ آخر سعر بيع' : '⏱️ Dernier Prix Vente'}
+              </Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={formData.last_price_to_sell || ''}
+                onChange={(e) => setFormData({ ...formData, last_price_to_sell: parseFloat(e.target.value) || 0 })}
+                className="mt-1 rounded-lg border-purple-300 focus:border-purple-500 bg-white"
+              />
+              <p className="text-xs text-purple-600 mt-2">
+                {language === 'ar' ? 'آخر سعر بيع للمنتج' : 'Dernier prix de vente du produit'}
+              </p>
             </div>
           </div>
         </div>
@@ -1317,13 +1368,24 @@ function ProductForm({
                   <SelectValue placeholder={getText('shelving', language)} />
                 </SelectTrigger>
                 <SelectContent>
-                  {shelvings
-                    .filter((s) => !formData.store_id || s.store_id === formData.store_id)
-                    .map((shelving) => (
-                      <SelectItem key={shelving.id} value={shelving.name}>
-                        {shelving.name}
-                      </SelectItem>
-                    ))}
+                  {shelvings && shelvings.length > 0 ? (
+                    shelvings
+                      .filter((s) => {
+                        // Show all shelvings if no store selected, or if store matches
+                        if (!formData.store_id) return true;
+                        if (!s.store_id) return true; // Show shelvings without store_id
+                        return s.store_id === formData.store_id;
+                      })
+                      .map((shelving) => (
+                        <SelectItem key={shelving.id} value={shelving.name}>
+                          {shelving.name}
+                        </SelectItem>
+                      ))
+                  ) : (
+                    <SelectItem value="" disabled>
+                      {language === 'ar' ? 'لا توجد رفوف متاحة' : 'Aucun étager disponible'}
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <Button
@@ -1438,8 +1500,8 @@ function ProductForm({
             <Input
               type="number"
               placeholder="0"
-              value={amountPaid || ''}
-              onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+              value={formData.amount_paid || ''}
+              onChange={(e) => setFormData({ ...formData, amount_paid: parseFloat(e.target.value) || 0 })}
               className="mt-1 rounded-lg border-rose-300 focus:border-rose-500"
             />
           </div>

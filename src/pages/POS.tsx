@@ -56,8 +56,10 @@ interface Product {
   barcode: string;
   brand: string;
   category: string;
+  description?: string;
   buying_price: number;
   selling_price: number;
+  last_price_to_sell?: number;
   margin_percent: number;
   initial_quantity: number;
   current_quantity: number;
@@ -169,6 +171,8 @@ export default function POS() {
         current_quantity: p.current_quantity || 0,
         initial_quantity: p.initial_quantity || 0,
         min_quantity: p.min_quantity || 0,
+        description: p.description || '',
+        last_price_to_sell: typeof p.last_price_to_sell === 'number' ? p.last_price_to_sell : (parseFloat(p.last_price_to_sell) || 0),
         store_id: p.store_id || ''
       }));
       setProducts(formattedData);
@@ -611,6 +615,13 @@ export default function POS() {
                                 </Badge>
                               </div>
 
+                              {/* Description */}
+                              {product.description && (
+                                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 italic">
+                                  📝 {product.description}
+                                </p>
+                              )}
+
                               {/* Brand and Barcode */}
                               {product.brand && (
                                 <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
@@ -622,13 +633,21 @@ export default function POS() {
                               </p>
 
                               {/* Price Section */}
-                              <div className="border-t border-blue-200 dark:border-slate-500 pt-3 mt-auto">
-                                <div className="flex items-baseline justify-between mb-2">
-                                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? '💰 السعر' : '💰 Prix'}</span>
+                              <div className="border-t border-blue-200 dark:border-slate-500 pt-3 mt-auto space-y-2">
+                                <div className="flex items-baseline justify-between">
+                                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? '💰 السعر الحالي' : '💰 Prix Actuel'}</span>
                                   <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                     {formatCurrencyLocal(product.selling_price, language)}
                                   </span>
                                 </div>
+                                {product.last_price_to_sell && product.last_price_to_sell > 0 ? (
+                                  <div className="flex items-baseline justify-between">
+                                    <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? '⏱️ آخر سعر' : '⏱️ Dernier Prix'}</span>
+                                    <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                                      {formatCurrencyLocal(product.last_price_to_sell, language)}
+                                    </span>
+                                  </div>
+                                ) : null}
                                 <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
                                   ✨ {language === 'ar' ? 'انقر للإضافة' : 'Cliquez pour ajouter'}
                                 </p>

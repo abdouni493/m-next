@@ -29,6 +29,7 @@ export interface ProductFormData {
   category_id: number | null;
   buying_price: number;
   selling_price: number;
+  last_price_to_sell?: number;
   margin_percent: number;
   initial_quantity: number;
   current_quantity: number;
@@ -86,6 +87,7 @@ export function ProductFormDialog({
     category_id: null,
     buying_price: 0,
     selling_price: 0,
+    last_price_to_sell: 0,
     margin_percent: 0,
     initial_quantity: 0,
     current_quantity: 0,
@@ -117,7 +119,45 @@ export function ProductFormDialog({
     if (open) {
       loadDependencies();
       if (initialData) {
-        setFormData({ ...formData, ...initialData });
+        setFormData({ 
+          ...{
+            name: "",
+            barcode: "",
+            brand: "",
+            category_id: null,
+            buying_price: 0,
+            selling_price: 0,
+            last_price_to_sell: 0,
+            margin_percent: 0,
+            initial_quantity: 0,
+            current_quantity: 0,
+            min_quantity: 0,
+            supplier_id: null,
+            shelving_id: null,
+            shelving_line: null,
+            store_id: null,
+          },
+          ...initialData 
+        });
+      } else {
+        // Reset form when opening for new product
+        setFormData({
+          name: "",
+          barcode: "",
+          brand: "",
+          category_id: null,
+          buying_price: 0,
+          selling_price: 0,
+          last_price_to_sell: 0,
+          margin_percent: 0,
+          initial_quantity: 0,
+          current_quantity: 0,
+          min_quantity: 0,
+          supplier_id: null,
+          shelving_id: null,
+          shelving_line: null,
+          store_id: null,
+        });
       }
     }
   }, [open]);
@@ -276,6 +316,7 @@ export function ProductFormDialog({
         category_id: null,
         buying_price: 0,
         selling_price: 0,
+        last_price_to_sell: 0,
         margin_percent: 0,
         initial_quantity: 0,
         current_quantity: 0,
@@ -385,9 +426,9 @@ export function ProductFormDialog({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label>{language === "ar" ? "سعر الشراء" : "Prix achat"}</Label>
+                <div className="grid grid-cols-2 gap-4 w-full">
+                  <div className="w-full">
+                    <Label>{language === "ar" ? "سعر الشراء" : "💵 Prix achat"}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -396,8 +437,8 @@ export function ProductFormDialog({
                       placeholder="0.00"
                     />
                   </div>
-                  <div>
-                    <Label>{language === "ar" ? "هامش %" : "Marge %"}</Label>
+                  <div className="w-full">
+                    <Label>{language === "ar" ? "هامش %" : "📈 Marge %"}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -406,8 +447,8 @@ export function ProductFormDialog({
                       placeholder="0.00"
                     />
                   </div>
-                  <div>
-                    <Label>{language === "ar" ? "سعر البيع" : "Prix vente"}</Label>
+                  <div className="w-full">
+                    <Label>{language === "ar" ? "سعر البيع" : "💰 Prix vente"}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -415,6 +456,20 @@ export function ProductFormDialog({
                       onChange={(e) => handleSellingPriceChange(Number(e.target.value))}
                       placeholder="0.00"
                     />
+                  </div>
+                  <div className="w-full p-3 border-2 border-purple-200 dark:border-purple-700 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                    <Label className="text-purple-700 dark:text-purple-300">{language === "ar" ? "⏱️ آخر سعر بيع" : "⏱️ Dernier Prix Vente"}</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.last_price_to_sell || 0}
+                      onChange={(e) => setFormData({ ...formData, last_price_to_sell: Number(e.target.value) })}
+                      placeholder="0.00"
+                      className="mt-2 border-purple-400 dark:border-purple-600 focus:border-purple-600 dark:focus:border-purple-500 bg-white dark:bg-slate-700"
+                    />
+                    <p className="text-xs text-purple-600 dark:text-purple-300 mt-2">
+                      {language === "ar" ? "آخر سعر بيع للمنتج" : "Dernier prix de vente du produit"}
+                    </p>
                   </div>
                 </div>
               </CardContent>
