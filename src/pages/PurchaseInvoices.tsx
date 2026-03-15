@@ -68,6 +68,7 @@ interface PurchaseInvoice {
   subtotal: number;
   discount_amount: number;
   total_amount: number;
+  amount_paid: number;
   status: 'pending' | 'paid' | 'cancelled' | 'overdue';
   payment_method: string;
   payment_date: string;
@@ -418,6 +419,7 @@ export default function PurchaseInvoices() {
           subtotal,
           discount_amount: 0,
           total_amount: totalAmount,
+          amount_paid: amountPaid,
           status: amountPaid >= totalAmount ? 'paid' : 'pending',
           payment_method: amountPaid > 0 ? 'cash' : null,
           payment_date: amountPaid >= totalAmount ? new Date().toISOString() : null,
@@ -488,12 +490,18 @@ export default function PurchaseInvoices() {
     }
   };
 
-  const markAsPaid = async (id: string) => {
+  const markAsPaid = async (id: string, amountToPayValue?: number) => {
     try {
+      const invoiceToUpdate = invoices.find(inv => inv.id === id);
+      if (!invoiceToUpdate) return;
+
+      const amountPaidValue = amountToPayValue !== undefined ? amountToPayValue : invoiceToUpdate.total_amount;
+
       const { error } = await supabase
         .from('invoices')
         .update({
           status: 'paid',
+          amount_paid: amountPaidValue,
           payment_date: new Date().toISOString(),
           payment_method: 'cash',
         })
@@ -507,6 +515,7 @@ export default function PurchaseInvoices() {
             ? {
                 ...inv,
                 status: 'paid',
+                amount_paid: amountPaidValue,
                 payment_date: new Date().toISOString(),
                 payment_method: 'cash',
               }
@@ -1136,21 +1145,7 @@ export default function PurchaseInvoices() {
 
                     {/* Cost Summary Section */}
                     <div className="bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-700 p-4 rounded-lg border border-slate-300 dark:border-slate-600 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span>📋</span> {getText('subtotal')}
-                        </span>
-                        <span className="font-semibold text-slate-900 dark:text-white">{currency(invoice.subtotal)}</span>
-                      </div>
-                      {invoice.discount_amount > 0 && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                            <span>🎁</span> {getText('discount')}
-                          </span>
-                          <span className="font-semibold text-green-600 dark:text-green-400">-{currency(invoice.discount_amount)}</span>
-                        </div>
-                      )}
-                      <div className="border-t border-slate-300 dark:border-slate-600 pt-2 mt-2 flex justify-between items-center">
+                      <div className="border-t border-slate-300 dark:border-slate-600 pt-2 flex justify-between items-center">
                         <span className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                           <span>💰</span> {getText('total')}
                         </span>
@@ -1169,13 +1164,13 @@ export default function PurchaseInvoices() {
                         <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
                           <span>✅</span> {getText('amount_paid')}
                         </span>
-                        <span className="font-bold text-green-600 dark:text-green-400">{currency(0)}</span>
+                        <span className="font-bold text-green-600 dark:text-green-400">{currency(invoice.amount_paid || 0)}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
                           <span>🔄</span> {getText('remaining')}
                         </span>
-                        <span className="font-bold text-orange-600 dark:text-orange-400">{currency(invoice.total_amount)}</span>
+                        <span className="font-bold text-orange-600 dark:text-orange-400">{currency((invoice.total_amount || 0) - (invoice.amount_paid || 0))}</span>
                       </div>
                     </div>
 
@@ -1298,27 +1293,25 @@ export default function PurchaseInvoices() {
                                 </h3>
                                 
                                 <div className="space-y-2">
-                                  <div className="flex justify-between items-center p-2 bg-white dark:bg-slate-900/30 rounded">
-                                    <span className="text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2">
-                                      <span>📋</span> {getText('subtotal')}
-                                    </span>
-                                    <span className="font-bold text-slate-900 dark:text-white">{currency(selectedInvoice.subtotal)}</span>
-                                  </div>
-                                  
-                                  {selectedInvoice.discount_amount > 0 && (
-                                    <div className="flex justify-between items-center p-2 bg-white dark:bg-slate-900/30 rounded">
-                                      <span className="text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2">
-                                        <span>🎁</span> {getText('discount')}
-                                      </span>
-                                      <span className="font-bold text-green-600 dark:text-green-400">-{currency(selectedInvoice.discount_amount)}</span>
-                                    </div>
-                                  )}
-                                  
-                                  <div className="border-t-2 border-slate-400 dark:border-slate-500 pt-3 flex justify-between items-center p-2 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-500 dark:to-blue-400 rounded-lg text-white">
+                                  <div className="border-t-2 border-slate-400 dark:border-slate-500 pt-3 flex justify-between items-center p-2 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-500 dark:to-blue-400 rounded-lg text-white mb-3">
                                     <span className="font-bold text-base flex items-center gap-2">
                                       <span>💵</span> {getText('total')}
                                     </span>
                                     <span className="font-bold text-xl">{currency(selectedInvoice.total_amount)}</span>
+                                  </div>
+
+                                  <div className="flex justify-between items-center p-2 bg-white dark:bg-slate-900/30 rounded">
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2">
+                                      <span>✅</span> {getText('amount_paid')}
+                                    </span>
+                                    <span className="font-bold text-green-600 dark:text-green-400">{currency(selectedInvoice.amount_paid || 0)}</span>
+                                  </div>
+
+                                  <div className="flex justify-between items-center p-2 bg-white dark:bg-slate-900/30 rounded">
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2">
+                                      <span>🔄</span> {getText('remaining')}
+                                    </span>
+                                    <span className="font-bold text-orange-600 dark:text-orange-400">{currency((selectedInvoice.total_amount || 0) - (selectedInvoice.amount_paid || 0))}</span>
                                   </div>
                                 </div>
                               </motion.div>

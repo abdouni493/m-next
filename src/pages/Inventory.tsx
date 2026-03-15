@@ -258,7 +258,7 @@ export default function Inventory() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [productsData, suppliersData, categoriesData, storesData, shelvingsData] =
+      const [productsResponse, suppliersResponse, categoriesResponse, storesResponse, shelvingsResponse] =
         await Promise.all([
           supabase.from('products').select('*').eq('is_active', true),
           supabase.from('suppliers').select('*').eq('is_active', true),
@@ -267,21 +267,22 @@ export default function Inventory() {
           supabase.from('shelvings').select('*').eq('is_active', true),
         ]);
 
-      if (productsData.error) throw productsData.error;
-      if (suppliersData.error) throw suppliersData.error;
-      if (categoriesData.error) throw categoriesData.error;
-      if (storesData.error) throw storesData.error;
-      if (shelvingsData.error) throw shelvingsData.error;
+      if (productsResponse.error) throw productsResponse.error;
+      if (suppliersResponse.error) throw suppliersResponse.error;
+      if (categoriesResponse.error) throw categoriesResponse.error;
+      if (storesResponse.error) throw storesResponse.error;
+      if (shelvingsResponse.error) throw shelvingsResponse.error;
 
-      setProducts(productsData.data || []);
-      setSuppliers(suppliersData.data || []);
-      setCategories(categoriesData.data || []);
-      setStores(storesData.data || []);
-      setShelvings(shelvingsData.data || []);
+      setProducts(productsResponse.data || []);
+      setSuppliers(suppliersResponse.data || []);
+      setCategories(categoriesResponse.data || []);
+      setStores(storesResponse.data || []);
+      setShelvings(shelvingsResponse.data || []);
     } catch (err: any) {
+      console.error('Error loading data:', err);
       toast({
         title: getText('error', language),
-        description: err.message,
+        description: err.message || 'Failed to load data',
         variant: 'destructive',
       });
     } finally {
