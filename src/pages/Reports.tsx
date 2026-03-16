@@ -200,8 +200,7 @@ export default function Reports() {
       // Fetch all invoices
       const { data: allInvoices, error: invoicesError } = await supabase
         .from('invoices')
-        .select('*')
-        .order('invoice_date', { ascending: false });
+        .select('*');
 
       if (invoicesError) throw invoicesError;
 
@@ -214,16 +213,14 @@ export default function Reports() {
       // Fetch products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*')
-        .order('name', { ascending: true });
+        .select('*');
 
       if (productsError) throw productsError;
 
       // Fetch suppliers
       const { data: suppliersData, error: suppliersError } = await supabase
         .from('suppliers')
-        .select('*')
-        .order('name', { ascending: true });
+        .select('*');
 
       if (suppliersError) throw suppliersError;
 
@@ -231,16 +228,14 @@ export default function Reports() {
       const { data: employeesData, error: employeesError } = await supabase
         .from('employees')
         .select('*')
-        .eq('is_active', true)
-        .order('name', { ascending: true });
+        .eq('is_active', true);
 
       if (employeesError) throw employeesError;
 
       // Fetch payments
       const { data: paymentsData, error: paymentsError } = await supabase
         .from('payments')
-        .select('*')
-        .order('date', { ascending: false });
+        .select('*');
 
       if (paymentsError) throw paymentsError;
 
