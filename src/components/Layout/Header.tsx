@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Menu, 
   Search, 
@@ -33,6 +33,16 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
     return document.documentElement.classList.contains('dark');
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [storeDisplayName, setStoreDisplayName] = useState('Auto Parts');
+  const [storeLogoUrl, setStoreLogoUrl] = useState('');
+
+  useEffect(() => {
+    const savedName = localStorage.getItem('storeDisplayName');
+    const savedLogo = localStorage.getItem('storeLogoUrl');
+
+    if (savedName) setStoreDisplayName(savedName);
+    if (savedLogo) setStoreLogoUrl(savedLogo);
+  }, []);
 
   const { logout, user } = useAuth();          // ✅ get logout and user from context
   const navigate = useNavigate();        // ✅ use navigation
@@ -70,7 +80,14 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
             <Menu className="w-5 h-5" />
           </Button>
 
-          
+          <div className="hidden sm:flex items-center gap-2">
+            {storeLogoUrl ? (
+              <img src={storeLogoUrl} alt="Logo magasin" className="w-8 h-8 rounded-sm object-cover border" />
+            ) : (
+              <div className="w-8 h-8 rounded-sm bg-blue-200 flex items-center justify-center">🚗</div>
+            )}
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{storeDisplayName}</span>
+          </div>
         </div>
 
         {/* Right Section */}

@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +12,20 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
   const location = useLocation();
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
+
+  const [storeName, setStoreName] = useState('Auto Parts');
+  const [storeDisplayName, setStoreDisplayName] = useState('Auto Parts');
+  const [storeLogoUrl, setStoreLogoUrl] = useState('');
+
+  useEffect(() => {
+    const localStoreName = localStorage.getItem('storeName');
+    const localDisplayName = localStorage.getItem('storeDisplayName');
+    const localLogoUrl = localStorage.getItem('storeLogoUrl');
+
+    if (localStoreName) setStoreName(localStoreName);
+    if (localDisplayName) setStoreDisplayName(localDisplayName);
+    if (localLogoUrl) setStoreLogoUrl(localLogoUrl);
+  }, []);
 
   const navigationItems = [
     { title: t('nav.dashboard'), href: '/', emoji: '📊' },
@@ -43,13 +58,17 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
       {/* Logo Section */}
       <div className="p-6 border-b border-blue-200 dark:border-slate-700 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-slate-800 dark:to-slate-700">
         <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg hover:scale-110 transition-transform">
-            🚗
+          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg border border-white/50 bg-white flex items-center justify-center">
+            {storeLogoUrl ? (
+              <img src={storeLogoUrl} alt="Logo magasin" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xl">🚗</div>
+            )}
           </div>
           {isOpen && (
             <div className={isRTL ? 'text-right' : ''}>
-              <h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">Auto Parts</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Autopieces</p>
+              <h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">{storeDisplayName || storeName}</h1>
+              <p className="text-xs text-slate-600 dark:text-slate-400">{storeName}</p>
             </div>
           )}
         </div>

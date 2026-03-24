@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   Settings as SettingsIcon,
   Globe,
@@ -64,13 +65,42 @@ export default function Settings() {
     networkStatus: 'disconnected'
   });
 
+  const [storeSettings, setStoreSettings] = useState({
+    id: '',
+    name: '',
+    display_name: '',
+    logo_url: ''
+  });
+
+  const [stores, setStores] = useState<{id: string; name: string; display_name?: string; logo_url?: string}[]>([]);
+
   const API_URL = 'http://localhost:5000/api';
 
   useEffect(() => {
     fetchSystemInfo();
     fetchBackupHistory();
     fetchUserInfo();
+    fetchStoreSettings();
   }, []);
+
+  const fetchStoreSettings = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/stores`);
+      setStores(res.data || []);
+
+      if (res.data && res.data.length > 0) {
+        const selected = res.data[0];
+        setStoreSettings({
+          id: selected.id,
+          name: selected.name,
+          display_name: selected.display_name || selected.name,
+          logo_url: selected.logo_url || ''
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch store settings:', err);
+    }
+  };
 
   const fetchUserInfo = async () => {
     try {
@@ -227,6 +257,43 @@ export default function Settings() {
     }
   };
 
+  const handleStoreUpdate = async () => {
+    if (!storeSettings.id) {
+      toast({
+        title: 'Erreur',
+        description: 'Aucun magasin sélectionné',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      await axios.put(`${API_URL}/stores/${storeSettings.id}`, {
+        name: storeSettings.name,
+        display_name: storeSettings.display_name,
+        logo_url: storeSettings.logo_url
+      });
+
+      localStorage.setItem('storeName', storeSettings.name);
+      localStorage.setItem('storeDisplayName', storeSettings.display_name || storeSettings.name);
+      localStorage.setItem('storeLogoUrl', storeSettings.logo_url || '');
+
+      toast({
+        title: 'Magasin mis à jour',
+        description: 'Nom et logo du magasin sauvegardés.',
+      });
+
+      await fetchStoreSettings();
+    } catch (err) {
+      console.error('Store update failed:', err);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de mettre à jour le magasin.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const handlePasswordChange = async () => {
     if (settings.newPassword !== settings.confirmPassword) {
       toast({
@@ -282,7 +349,12 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-8 lg:p-12 animate-fade-in">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+      className="space-y-6 p-4 md:p-8 lg:p-12"
+    >
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
@@ -423,6 +495,91 @@ export default function Settings() {
               <Button onClick={handleAccountUpdate} className="gradient-primary text-primary-foreground">
                 <Save className="mr-2 h-4 w-4" />
                 Sauvegarder les informations
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Store Branding */}
+          <Card className="card-elevated border-2 border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Printer className="h-5 w-5 text-indigo-600" />
+                Configuration du Magasin
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="storeSelect">Magasin actif</Label>
+                  <Select
+                    id="storeSelect"
+                    value={storeSettings.id}
+                    onValueChange={(value) => {
+                      const selectedStore = stores.find(store => store.id === value);
+                      if (selectedStore) {
+                        setStoreSettings({
+                          id: selectedStore.id,
+                          name: selectedStore.name,
+                          display_name: selectedStore.display_name || selectedStore.name,
+                          logo_url: selectedStore.logo_url || ''
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un magasin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stores.length === 0 && <SelectItem value="">Aucun magasin</SelectItem>}
+                      {stores.map((store) => (
+                        <SelectItem key={store.id} value={store.id}>{store.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="storeName">Nom du magasin</Label>
+                  <Input
+                    id="storeName"
+                    value={storeSettings.name}
+                    onChange={(e) => setStoreSettings(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="displayName">Nom d'affichage</Label>
+                  <Input
+                    id="displayName"
+                    value={storeSettings.display_name}
+                    onChange={(e) => setStoreSettings(prev => ({ ...prev, display_name: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="logoUrl">URL du logo</Label>
+                  <Input
+                    id="logoUrl"
+                    value={storeSettings.logo_url}
+                    onChange={(e) => setStoreSettings(prev => ({ ...prev, logo_url: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {storeSettings.logo_url ? (
+                  <img src={storeSettings.logo_url} alt="Logo du magasin" className="w-16 h-16 rounded-lg object-cover shadow-sm" />
+                ) : (
+                  <div className="w-16 h-16 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600">?</div>
+                )}
+                <div>
+                  <p className="font-semibold">{storeSettings.display_name || 'Aucun magasin sélectionné'}</p>
+                  <p className="text-xs text-muted-foreground">Identifiant : {storeSettings.id || 'N/A'}</p>
+                </div>
+              </div>
+
+              <Button onClick={handleStoreUpdate} className="bg-indigo-600 hover:bg-indigo-700 text-white w-full">
+                Mettre à jour le magasin
               </Button>
             </CardContent>
           </Card>
@@ -607,11 +764,23 @@ export default function Settings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                   <div>
                     <h3 className="font-semibold mb-2">Informations Système</h3>
-                    <div className="text-left">
-                      <p className="text-muted-foreground">Base de données: <Badge>{systemInfo.database}</Badge></p>
-                      <p className="text-muted-foreground">Taille du fichier: <Badge>{systemInfo.diskSpace}</Badge></p>
-                      <p className="text-muted-foreground">Temps de fonctionnement: <Badge>{systemInfo.uptime}</Badge></p>
-                      <p className="text-muted-foreground">Statut du réseau: <Badge variant={systemInfo.networkStatus === 'connected' ? "default" : "destructive"}>{systemInfo.networkStatus === 'connected' ? 'Connecté' : 'Déconnecté'}</Badge></p>
+                    <div className="text-left space-y-2">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span>Base de données:</span>
+                        <Badge>{systemInfo.database}</Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span>Taille du fichier:</span>
+                        <Badge>{systemInfo.diskSpace}</Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span>Temps de fonctionnement:</span>
+                        <Badge>{systemInfo.uptime}</Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span>Statut du réseau:</span>
+                        <Badge variant={systemInfo.networkStatus === 'connected' ? "default" : "destructive"}>{systemInfo.networkStatus === 'connected' ? 'Connecté' : 'Déconnecté'}</Badge>
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -642,6 +811,6 @@ export default function Settings() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }
