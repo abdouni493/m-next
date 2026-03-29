@@ -377,11 +377,6 @@ export default function Login({ onLogin }: LoginProps) {
 
               {/* Toggle between login and signup */}
               <div className="mt-6 pt-6 border-t border-blue-100 dark:border-blue-900">
-                <p className="text-center text-sm text-muted-foreground mb-3">
-                  {mode === 'login' 
-                    ? "🤔 Vous n'avez pas de compte ?" 
-                    : "✔️ Vous avez déjà un compte ?"}
-                </p>
                 <Button
                   type="button"
                   variant="outline"

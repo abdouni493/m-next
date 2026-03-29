@@ -577,13 +577,11 @@ export default function Inventory() {
             <thead className="bg-gradient-to-r from-blue-50 to-emerald-50 border-b border-slate-200">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">📦 {language === 'ar' ? 'المنتج' : 'Produit'}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">📂 {language === 'ar' ? 'الفئة' : 'Catégorie'}</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">🏷️ {language === 'ar' ? 'العلامة' : 'Marque'}</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">📝 {language === 'ar' ? 'الوصف' : 'Description'}</th>
                 <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">💵 {language === 'ar' ? 'الشراء' : 'Achat'}</th>
                 <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">💰 {language === 'ar' ? 'البيع' : 'Vente'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">📊 {language === 'ar' ? 'الحالي' : 'Actuel'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">📦 {language === 'ar' ? 'الأولي' : 'Initial'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">⚠️ {language === 'ar' ? 'الحد الأدنى' : 'Minimum'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">📍 {language === 'ar' ? 'الحالة' : 'Statut'}</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">📊 {language === 'ar' ? 'الحالي' : 'Actuel'} ⏱️ {language === 'ar' ? 'آخر سعر البيع' : 'Dernier Prix Vente'}</th>
                 <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">⚙️</th>
               </tr>
             </thead>
@@ -622,8 +620,11 @@ export default function Inventory() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
-                        {product.category?.name || '-'}
+                      <td className="px-4 py-3 text-sm text-slate-600 text-center">
+                        {product.brand || '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-600 text-center">
+                        {product.description || '-'}
                       </td>
                       <td className="px-4 py-3 text-center font-semibold text-blue-700">
                         {product.buying_price.toFixed(2)} DZD
@@ -631,17 +632,11 @@ export default function Inventory() {
                       <td className="px-4 py-3 text-center font-semibold text-emerald-700">
                         {product.selling_price.toFixed(2)} DZD
                       </td>
-                      <td className="px-4 py-3 text-center font-bold text-purple-700">
-                        {product.current_quantity}
-                      </td>
-                      <td className="px-4 py-3 text-center font-semibold text-slate-700">
-                        {product.initial_quantity}
-                      </td>
-                      <td className="px-4 py-3 text-center font-semibold text-orange-700">
-                        {product.min_quantity}
-                      </td>
                       <td className="px-4 py-3 text-center">
-                        <Badge className={statusColor}>{statusText}</Badge>
+                        <div className="flex flex-col items-center">
+                          <span className="font-bold text-purple-700">{product.current_quantity}</span>
+                          <span className="text-xs text-slate-500">({(product.last_price_to_sell || product.selling_price).toFixed(2)} DZD)</span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <DropdownMenu>

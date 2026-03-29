@@ -642,8 +642,9 @@ export default function POS() {
                           <tr>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">📦 {language === 'ar' ? 'المنتج' : 'Produit'}</th>
                             <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">🏷️ {language === 'ar' ? 'العلامة' : 'Marque'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">💰 {language === 'ar' ? 'السعر' : 'Prix'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">📊 {language === 'ar' ? 'المخزون' : 'Stock'}</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">📝 {language === 'ar' ? 'الوصف' : 'Description'}</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">💰 {language === 'ar' ? 'البيع' : 'Vente'}</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">📊 {language === 'ar' ? 'الحالي' : 'Actuel'} ⏱️ {language === 'ar' ? 'آخر سعر البيع' : 'Dernier Prix Vente'}</th>
                             <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">⚙️</th>
                           </tr>
                         </thead>
@@ -673,19 +674,25 @@ export default function POS() {
                                   <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-center">
                                     {product.brand || '-'}
                                   </td>
-                                  <td className="px-4 py-3 text-center font-bold text-blue-700 dark:text-blue-400">
+                                  <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-center">
+                                    {product.description || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400">
                                     {formatCurrencyLocal(product.selling_price, language)}
                                   </td>
                                   <td className="px-4 py-3 text-center">
-                                    <Badge 
-                                      className={`${
-                                        isLowStock
-                                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                          : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                      }`}
-                                    >
-                                      {product.current_quantity}
-                                    </Badge>
+                                    <div className="flex flex-col items-center">
+                                      <Badge 
+                                        className={`${
+                                          isLowStock
+                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                        }`}
+                                      >
+                                        {product.current_quantity}
+                                      </Badge>
+                                      <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">({formatCurrencyLocal(product.last_price_to_sell || product.selling_price, language)})</span>
+                                    </div>
                                   </td>
                                   <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                                     <DropdownMenu>
