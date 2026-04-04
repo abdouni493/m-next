@@ -1,341 +1,639 @@
-'use client';
-
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
+  Plus,
   Search,
-  AlertTriangle,
+  Edit2,
+  Trash2,
+  Image as ImageIcon,
+  AlertCircle,
+  ChevronDown,
   X,
-  Zap,
-  Barcode,
-  Package,
-  Store,
-  Archive,
-  Hash,
-  FileText,
-  MoreVertical,
-  Grid,
-  Table as TableIcon,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import {
-  supabase,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  createCategory,
-  deleteCategory,
-  getStores,
-  createStore,
-  deleteStore,
-  getShelvings,
-  createShelving,
-  deleteShelving,
-  createPurchaseInvoice,
-  getSuppliers,
-  createSupplier,
-} from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
-// ================= INTERFACES =================
-interface Product {
+interface Charger {
   id: string;
   name: string;
-  barcode?: string;
-  brand?: string;
-  category_id?: string;
-  category?: { id: string; name: string };
-  description?: string;
-  buying_price: number;
+  mark?: { name: string; id: string };
+  connector_type?: { name: string; id: string };
+  mark_id?: string;
+  connector_type_id?: string;
+  voltage: number;
+  wattage: number;
+  amperage: number;
+  model_number?: string;
+  quantity_actual: number;
+  quantity_initial?: number;
+  quantity_minimal: number;
+  purchase_price: number;
   selling_price: number;
-  last_price_to_sell?: number;
-  margin_percent?: number;
-  initial_quantity: number;
-  current_quantity: number;
-  min_quantity: number;
-  supplier_id?: string;
-  supplier?: { id: string; name: string };
-  store_id?: string;
-  amount_paid?: number;
-  shelving_location?: string;
-  shelving_line?: number;
-  is_active: boolean;
+  description?: string;
+  primary_image?: string;
+  margin: number;
+}
+
+interface Mark {
+  id: string;
+  name: string;
+}
+
+interface ConnectorType {
+  id: string;
+  name: string;
 }
 
 interface Supplier {
   id: string;
   name: string;
-  phone?: string;
-  email?: string;
-  address?: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-interface Store {
-  id: string;
-  name: string;
-  address?: string;
-}
-
-interface Shelving {
-  id: string;
-  name: string;
-  store_id?: string;
-  total_lines?: number;
-}
-
-// ================= TEXT TRANSLATIONS =================
-const getText = (key: string, language: string): string => {
-  const translations: Record<string, string> = {
-    // French
-    inventory_title_fr: '📦 Gestion d\'Inventaire',
-    add_product_fr: 'Ajouter Produit',
-    search_fr: '🔍 Rechercher...',
-    no_products_fr: '❌ Aucun produit trouvé',
-    product_name_fr: '📛 Nom du Produit',
-    barcode_fr: '🔲 Code Barre',
-    generate_barcode_fr: 'Générer',
-    brand_fr: '🏷️ Marque',
-    description_fr: '📝 Description',
-    category_fr: '🏷️ Catégorie',
-    supplier_fr: '🚚 Fournisseur',
-    store_fr: '🏪 Magasin',
-    shelving_fr: '📚 Étager',
-    line_fr: '📍 Ligne',
-    buying_price_fr: '💵 Prix Achat',
-    margin_percent_fr: '📈 Marge %',
-    selling_price_fr: '💰 Prix Vente',
-    initial_qty_fr: '📦 Qté Initiale',
-    current_qty_fr: '📊 Qté Actuelle',
-    min_qty_fr: '⚠️ Qté Min',
-    add_category_fr: 'Ajouter Catégorie',
-    add_supplier_fr: 'Ajouter Fournisseur',
-    add_store_fr: 'Ajouter Magasin',
-    add_shelving_fr: 'Ajouter Étager',
-    total_price_fr: '💵 Prix Total Calculé',
-    amount_paid_fr: '💳 Montant Payé',
-    remaining_fr: '🔄 Reste à Payer',
-    save_as_debt_fr: '💸 Enregistrer en Dette',
-    status_paid_fr: '✅ Payé',
-    status_debt_fr: '⚠️ En Dette',
-    save_fr: '💾 Enregistrer',
-    cancel_fr: 'Annuler',
-    delete_fr: 'Supprimer',
-    edit_fr: 'Modifier',
-    view_fr: 'Voir',
-    close_fr: 'Fermer',
-    confirm_delete_fr: 'Êtes-vous sûr de supprimer ce produit ?',
-    delete_warning_fr: 'Cette action ne peut pas être annulée',
-    delete_confirm_fr: 'Supprimer',
-    delete_cancel_fr: 'Annuler',
-    product_added_fr: '✅ Produit ajouté avec succès',
-    product_updated_fr: '✅ Produit mis à jour',
-    product_deleted_fr: '✅ Produit supprimé',
-    error_fr: '❌ Erreur',
-    loading_fr: '⏳ Chargement...',
-    ok_stock_fr: '✅ OK',
-    low_stock_fr: '⚠️ Bas',
-    out_of_stock_fr: '❌ Rupture',
-    filter_all_fr: 'Tous',
-    filter_low_fr: 'Bas',
-    filter_out_fr: 'Rupture',
-
-    // Arabic
-    inventory_title_ar: '📦 إدارة المخزون',
-    add_product_ar: 'إضافة منتج',
-    search_ar: '🔍 بحث...',
-    no_products_ar: '❌ لم يتم العثور على منتجات',
-    product_name_ar: '📛 اسم المنتج',
-    barcode_ar: '🔲 رمز المنتج',
-    generate_barcode_ar: 'إنشاء',
-    brand_ar: '🏷️ العلامة التجارية',
-    description_ar: '📝 الوصف',
-    category_ar: '🏷️ الفئة',
-    supplier_ar: '🚚 المورد',
-    store_ar: '🏪 المتجر',
-    shelving_ar: '📚 الرفوف',
-    line_ar: '📍 السطر',
-    buying_price_ar: '💵 سعر الشراء',
-    margin_percent_ar: '📈 نسبة الهامش',
-    selling_price_ar: '💰 سعر البيع',
-    initial_qty_ar: '📦 الكمية الأولية',
-    current_qty_ar: '📊 الكمية الحالية',
-    min_qty_ar: '⚠️ الحد الأدنى',
-    add_category_ar: 'إضافة فئة',
-    add_supplier_ar: 'إضافة مورد',
-    add_store_ar: 'إضافة متجر',
-    add_shelving_ar: 'إضافة رف',
-    total_price_ar: '💵 السعر الإجمالي',
-    amount_paid_ar: '💳 المبلغ المدفوع',
-    remaining_ar: '🔄 المبلغ المتبقي',
-    save_as_debt_ar: '💸 حفظ كدين',
-    status_paid_ar: '✅ مدفوع',
-    status_debt_ar: '⚠️ دين',
-    save_ar: '💾 حفظ',
-    cancel_ar: 'إلغاء',
-    delete_ar: 'حذف',
-    edit_ar: 'تعديل',
-    view_ar: 'عرض',
-    close_ar: 'إغلاق',
-    confirm_delete_ar: 'هل أنت متأكد من حذف هذا المنتج؟',
-    delete_warning_ar: 'لا يمكن التراجع عن هذا الإجراء',
-    delete_confirm_ar: 'حذف',
-    delete_cancel_ar: 'إلغاء',
-    product_added_ar: '✅ تمت إضافة المنتج بنجاح',
-    product_updated_ar: '✅ تم تحديث المنتج',
-    product_deleted_ar: '✅ تم حذف المنتج',
-    error_ar: '❌ خطأ',
-    loading_ar: '⏳ جاري التحميل...',
-    ok_stock_ar: '✅ جيد',
-    low_stock_ar: '⚠️ منخفض',
-    out_of_stock_ar: '❌ نفد',
-    filter_all_ar: 'الكل',
-    filter_low_ar: 'منخفض',
-    filter_out_ar: 'نفد',
-  };
-
-  const lang = language === 'ar' ? 'ar' : 'fr';
-  const suffixedKey = `${key}_${lang}`;
-  return translations[suffixedKey] || key;
-};
-
-// ================= MAIN COMPONENT =================
-export default function Inventory() {
+const Inventory = () => {
   const { language } = useLanguage();
-  const { toast } = useToast();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [chargers, setChargers] = useState<Charger[]>([]);
+  const [marks, setMarks] = useState<Mark[]>([]);
+  const [connectorTypes, setConnectorTypes] = useState<ConnectorType[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [stores, setStores] = useState<Store[]>([]);
-  const [shelvings, setShelvings] = useState<Shelving[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
-  const [filterStock, setFilterStock] = useState('all');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showProductDetails, setShowProductDetails] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [filterMark, setFilterMark] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
+  const [showAddMarkModal, setShowAddMarkModal] = useState(false);
+  const [showAddConnectorModal, setShowAddConnectorModal] = useState(false);
+  const [newMarkName, setNewMarkName] = useState('');
+  const [newConnectorName, setNewConnectorName] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [chargerToDelete, setChargerToDelete] = useState<string | null>(null);
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [editingChargerId, setEditingChargerId] = useState<string | null>(null);
+  const [chargerImages, setChargerImages] = useState<string[]>([]);
 
-  // ================= LOAD DATA =================
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    mark_id: '',
+    connector_type_id: '',
+    voltage: '',
+    wattage: '',
+    amperage: '',
+    model_number: '',
+    quantity_initial: '',
+    quantity_actual: '',
+    quantity_minimal: '',
+    purchase_price: '',
+    selling_price: '',
+    supplier_id: '',
+    amount_paid: '',
+    images: [] as File[],
+  });
+
+  // Load data
   useEffect(() => {
-    loadData();
+    loadChargers();
+    loadMarks();
+    loadConnectorTypes();
+    loadSuppliers();
   }, []);
 
-  const loadData = async () => {
+  // Auto-refresh charger data every 30 seconds when detail modal is open
+  useEffect(() => {
+    if (!selectedCharger) return;
+
+    const interval = setInterval(() => {
+      refreshChargerData(selectedCharger.id);
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [selectedCharger]);
+
+  const loadChargers = async () => {
     try {
       setLoading(true);
-      const [productsResponse, suppliersResponse, categoriesResponse, storesResponse, shelvingsResponse] =
-        await Promise.all([
-          supabase.from('products').select('*').eq('is_active', true),
-          supabase.from('suppliers').select('*').eq('is_active', true),
-          supabase.from('categories').select('*'),
-          supabase.from('stores').select('*').eq('is_active', true),
-          supabase.from('shelvings').select('*').eq('is_active', true),
-        ]);
+      // ✨ OPTIMIZED: Use single query with joins instead of N+1 queries
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          description,
+          voltage,
+          wattage,
+          amperage,
+          model_number,
+          quantity_actual,
+          quantity_minimal,
+          purchase_price,
+          selling_price,
+          mark_id,
+          connector_type_id,
+          primary_image,
+          marks(id, name),
+          connector_types(id, name)
+        `)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
-      if (productsResponse.error) throw productsResponse.error;
-      if (suppliersResponse.error) throw suppliersResponse.error;
-      if (categoriesResponse.error) throw categoriesResponse.error;
-      if (storesResponse.error) throw storesResponse.error;
-      if (shelvingsResponse.error) throw shelvingsResponse.error;
+      if (error) throw error;
 
-      setProducts(productsResponse.data || []);
-      setSuppliers(suppliersResponse.data || []);
-      setCategories(categoriesResponse.data || []);
-      setStores(storesResponse.data || []);
-      setShelvings(shelvingsResponse.data || []);
-    } catch (err: any) {
-      console.error('Error loading data:', err);
-      toast({
-        title: getText('error', language),
-        description: err.message || 'Failed to load data',
-        variant: 'destructive',
+      // Map data directly without additional queries
+      const enrichedChargers = (data || []).map((charger: any) => {
+        const margin =
+          ((charger.selling_price - charger.purchase_price) /
+            charger.purchase_price) *
+          100;
+
+        return {
+          id: charger.id,
+          name: charger.name,
+          description: charger.description,
+          voltage: charger.voltage,
+          wattage: charger.wattage,
+          amperage: charger.amperage,
+          model_number: charger.model_number,
+          quantity_actual: charger.quantity_actual,
+          quantity_minimal: charger.quantity_minimal,
+          purchase_price: charger.purchase_price,
+          selling_price: charger.selling_price,
+          mark_id: charger.mark_id,
+          connector_type_id: charger.connector_type_id,
+          primary_image: charger.primary_image,
+          mark: charger.marks,
+          connector_type: charger.connector_types,
+          margin: isNaN(margin) ? 0 : margin,
+        };
       });
+
+      setChargers(enrichedChargers);
+      
+      // If a charger is currently selected, update it with fresh data
+      if (selectedCharger) {
+        const updatedCharger = enrichedChargers.find(c => c.id === selectedCharger.id);
+        if (updatedCharger) {
+          setSelectedCharger(updatedCharger);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading chargers:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= HELPER FUNCTIONS =================
-  const generateRandomBarcode = (): string => {
-    return Math.floor(Math.random() * 10**12).toString().padStart(12, '0');
+  const loadMarks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('marks')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setMarks(data || []);
+    } catch (error) {
+      console.error('Error loading marks:', error);
+    }
   };
 
-  const calculateSellingPrice = (buyingPrice: number, marginPercent: number): number => {
-    return buyingPrice * (1 + marginPercent / 100);
+  const loadConnectorTypes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('connector_types')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setConnectorTypes(data || []);
+    } catch (error) {
+      console.error('Error loading connector types:', error);
+    }
   };
 
-  const calculateMarginPercent = (buyingPrice: number, sellingPrice: number): number => {
-    if (buyingPrice === 0) return 0;
-    return ((sellingPrice - buyingPrice) / buyingPrice) * 100;
+  const loadSuppliers = async () => {
+    try {
+      console.log('📦 Loading suppliers...');
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('❌ Error loading suppliers:', error);
+        setSuppliers([]);
+        return;
+      }
+      
+      console.log('✅ Suppliers loaded:', data);
+      setSuppliers(data || []);
+    } catch (error) {
+      console.error('❌ Exception loading suppliers:', error);
+      setSuppliers([]);
+    }
   };
 
-  const getStockStatus = (current: number, min: number) => {
-    if (current === 0) return 'out';
-    if (current < min) return 'low';
-    return 'ok';
+  // Refresh a single product (used when viewing details)
+  const refreshChargerData = async (chargerId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          description,
+          voltage,
+          wattage,
+          amperage,
+          model_number,
+          quantity_actual,
+          quantity_minimal,
+          purchase_price,
+          selling_price,
+          mark_id,
+          connector_type_id,
+          primary_image,
+          marks(id, name),
+          connector_types(id, name)
+        `)
+        .eq('id', chargerId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const margin =
+          ((data.selling_price - data.purchase_price) /
+            data.purchase_price) *
+          100;
+
+        const refreshedCharger: Charger = {
+          id: data.id,
+          name: data.name,
+          description: data.description,
+          voltage: data.voltage,
+          wattage: data.wattage,
+          amperage: data.amperage,
+          model_number: data.model_number,
+          quantity_actual: data.quantity_actual,
+          quantity_minimal: data.quantity_minimal,
+          purchase_price: data.purchase_price,
+          selling_price: data.selling_price,
+          mark_id: data.mark_id,
+          connector_type_id: data.connector_type_id,
+          primary_image: data.primary_image,
+          mark: data.marks ? (Array.isArray(data.marks) ? data.marks[0] : data.marks) : undefined,
+          connector_type: data.connector_types ? (Array.isArray(data.connector_types) ? data.connector_types[0] : data.connector_types) : undefined,
+          margin: isNaN(margin) ? 0 : margin,
+        };
+
+        // Update the selected charger if viewing it
+        if (selectedCharger?.id === chargerId) {
+          setSelectedCharger(refreshedCharger);
+        }
+
+        // Update in the chargers list
+        setChargers(prev => prev.map(c => c.id === chargerId ? refreshedCharger : c));
+      }
+    } catch (error) {
+      console.error('Error refreshing charger data:', error);
+    }
   };
 
-  const filteredProducts = products.filter((p) => {
+  const handleAddMark = async () => {
+    setShowAddMarkModal(true);
+  };
+
+  const handleAddConnectorType = async () => {
+    setShowAddConnectorModal(true);
+  };
+
+  const handleSaveNewMark = async () => {
+    if (!newMarkName.trim()) {
+      alert('Please enter a mark name');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('marks')
+        .insert([{ name: newMarkName, is_active: true }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      setMarks([...marks, data]);
+      setFormData({ ...formData, mark_id: data.id });
+      setNewMarkName('');
+      setShowAddMarkModal(false);
+    } catch (error) {
+      console.error('Error adding mark:', error);
+      alert('Error adding mark');
+    }
+  };
+
+  const handleSaveNewConnector = async () => {
+    if (!newConnectorName.trim()) {
+      alert('Please enter a connector type name');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('connector_types')
+        .insert([{ name: newConnectorName, is_active: true }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      setConnectorTypes([...connectorTypes, data]);
+      setFormData({ ...formData, connector_type_id: data.id });
+      setNewConnectorName('');
+      setShowAddConnectorModal(false);
+      alert('Connector type added successfully!');
+    } catch (error) {
+      console.error('Error adding connector type:', error);
+      alert('Error adding connector type');
+    }
+  };
+
+  const handleDeleteCharger = async (chargerId: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', chargerId);
+
+      if (error) throw error;
+      alert(language === 'en' ? 'Product deleted successfully!' : 'Produit supprimé avec succès!');
+      setSelectedCharger(null);
+      loadChargers();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert(language === 'en' ? 'Error deleting product' : 'Erreur lors de la suppression du produit');
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFormData({
+        ...formData,
+        images: Array.from(e.target.files),
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = formData.images.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      images: updatedImages,
+    });
+  };
+
+  const uploadImages = async (productId: string) => {
+    if (formData.images.length === 0) return null;
+
+    let primaryImageUrl: string | null = null;
+
+    try {
+      console.log(`🚀 Starting image upload for product ${productId}. Total images: ${formData.images.length}`);
+      
+      for (let i = 0; i < formData.images.length; i++) {
+        const file = formData.images[i];
+        
+        // Create unique filename with timestamp
+        const timestamp = Date.now();
+        const fileExtension = file.name.split('.').pop();
+        const fileName = `${productId}/${timestamp}-${i}.${fileExtension}`;
+        
+        console.log(`📸 Uploading image ${i + 1}/${formData.images.length}: ${fileName}`);
+        
+        // 1. Upload file to storage bucket 'chargers'
+        const { error: uploadError } = await supabase.storage
+          .from('chargers')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error(`❌ Upload failed for ${fileName}:`, uploadError);
+          throw new Error(`Failed to upload image ${i + 1}: ${uploadError.message}`);
+        }
+        
+        console.log(`✅ Image ${i + 1} uploaded to storage bucket`);
+
+        // 2. Get public URL for the uploaded file
+        const { data: publicUrlData } = supabase.storage
+          .from('chargers')
+          .getPublicUrl(fileName);
+        
+        const publicUrl = publicUrlData.publicUrl;
+        console.log(`🔗 Public URL: ${publicUrl}`);
+
+        // 3. Save first image URL as primary image
+        if (i === 0) {
+          primaryImageUrl = publicUrl;
+          console.log(`⭐ Primary image URL: ${primaryImageUrl}`);
+        }
+
+        // 4. Also save to product_images table for record keeping
+        const { error: dbError } = await supabase
+          .from('product_images')
+          .insert([
+            {
+              product_id: productId,
+              image_url: publicUrl,
+              file_path: fileName,
+              display_order: i,
+              is_primary: i === 0,
+              uploaded_by: (await supabase.auth.getUser()).data?.user?.id,
+            },
+          ]);
+
+        if (dbError) {
+          console.warn(`⚠️ Database save warning for image ${i + 1}:`, dbError);
+          // Continue anyway - image is in storage
+        } else {
+          console.log(`💾 Image ${i + 1} saved to product_images table`);
+        }
+      }
+      
+      console.log('✅ All images uploaded to bucket!');
+      return primaryImageUrl;
+    } catch (error) {
+      console.error('❌ Error uploading images:', error);
+      throw error;
+    }
+  };
+
+  const handleSaveCharger = async () => {
+    try {
+      if (!formData.name) {
+        alert('Product name is required');
+        return;
+      }
+
+      // Set quantity_actual equal to quantity_initial
+      const quantityActual = parseInt(formData.quantity_initial) || 0;
+
+      // If editing mode, update existing product
+      if (isEditingMode && editingChargerId) {
+        const { error } = await supabase
+          .from('products')
+          .update({
+            name: formData.name,
+            description: formData.description,
+            mark_id: formData.mark_id || null,
+            connector_type_id: formData.connector_type_id || null,
+            voltage: parseFloat(formData.voltage) || 0,
+            wattage: parseFloat(formData.wattage) || 0,
+            amperage: parseFloat(formData.amperage) || 0,
+            model_number: formData.model_number,
+            quantity_initial: parseInt(formData.quantity_initial) || 0,
+            quantity_actual: quantityActual,
+            quantity_minimal: parseInt(formData.quantity_minimal) || 0,
+            purchase_price: parseFloat(formData.purchase_price) || 0,
+            selling_price: parseFloat(formData.selling_price) || 0,
+          })
+          .eq('id', editingChargerId);
+
+        if (error) throw error;
+
+        alert(language === 'en' ? 'Product updated successfully!' : 'Produit mis à jour avec succès!');
+        setIsEditingMode(false);
+        setEditingChargerId(null);
+        setFormData({
+          name: '',
+          description: '',
+          mark_id: '',
+          connector_type_id: '',
+          voltage: '',
+          wattage: '',
+          amperage: '',
+          model_number: '',
+          quantity_initial: '',
+          quantity_actual: '',
+          quantity_minimal: '',
+          purchase_price: '',
+          selling_price: '',
+          supplier_id: '',
+          amount_paid: '',
+          images: [],
+        });
+        setShowAddModal(false);
+        loadChargers();
+        return;
+      }
+
+      // Otherwise, create new product
+      const { data, error } = await supabase
+        .from('products')
+        .insert([
+          {
+            name: formData.name,
+            description: formData.description,
+            mark_id: formData.mark_id || null,
+            connector_type_id: formData.connector_type_id || null,
+            voltage: parseFloat(formData.voltage) || 0,
+            wattage: parseFloat(formData.wattage) || 0,
+            amperage: parseFloat(formData.amperage) || 0,
+            model_number: formData.model_number,
+            quantity_initial: parseInt(formData.quantity_initial) || 0,
+            quantity_actual: quantityActual,
+            quantity_minimal: parseInt(formData.quantity_minimal) || 0,
+            purchase_price: parseFloat(formData.purchase_price) || 0,
+            selling_price: parseFloat(formData.selling_price) || 0,
+            supplier_id: formData.supplier_id || null,
+            amount_paid: parseFloat(formData.amount_paid) || 0,
+            is_active: true,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('Product created successfully:', data);
+
+      // Upload images if any are provided
+      if (formData.images.length > 0) {
+        try {
+          console.log(`Starting to upload ${formData.images.length} images...`);
+          const primaryImageUrl = await uploadImages(data.id);
+          console.log('✅ All images uploaded successfully!');
+
+          // Update product with primary image URL
+          if (primaryImageUrl) {
+            const { error: updateError } = await supabase
+              .from('products')
+              .update({ primary_image: primaryImageUrl })
+              .eq('id', data.id);
+
+            if (updateError) {
+              console.error('❌ Failed to update primary image:', updateError);
+            } else {
+              console.log('✅ Product updated with primary image URL:', primaryImageUrl);
+            }
+          }
+        } catch (imageError) {
+          console.error('❌ Image upload failed:', imageError);
+          // Product was saved, but images failed - show warning
+          alert(`Charger saved but image upload failed: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`);
+          setShowAddModal(false);
+          loadChargers();
+          return;
+        }
+      }
+
+      setFormData({
+        name: '',
+        description: '',
+        mark_id: '',
+        connector_type_id: '',
+        voltage: '',
+        wattage: '',
+        amperage: '',
+        model_number: '',
+        quantity_initial: '',
+        quantity_actual: '',
+        quantity_minimal: '',
+        purchase_price: '',
+        selling_price: '',
+        supplier_id: '',
+        amount_paid: '',
+        images: [],
+      });
+
+      setShowAddModal(false);
+      loadChargers();
+    } catch (error) {
+      console.error('Error saving charger:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Error saving charger: ${errorMessage}`);
+    }
+  };
+
+  const filteredChargers = chargers.filter((charger) => {
     const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.barcode && p.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
+      charger.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      charger.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      charger.mark?.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = filterCategory === 'all' || !filterCategory || p.category_id === filterCategory;
+    const matchesFilter = !filterMark || charger.mark?.name === filterMark;
 
-    let matchesStock = true;
-    const status = getStockStatus(p.current_quantity, p.min_quantity);
-    if (filterStock === 'low') matchesStock = status === 'low';
-    if (filterStock === 'out') matchesStock = status === 'out';
-
-    return matchesSearch && matchesCategory && matchesStock;
+    return matchesSearch && matchesFilter;
   });
 
-  // ================= RENDER =================
+  const lowStockChargers = chargers.filter(
+    (c) => c.quantity_actual <= c.quantity_minimal
+  ).length;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 p-6">
       {/* Header */}
@@ -345,12 +643,12 @@ export default function Inventory() {
         className="mb-8"
       >
         <h1 className="text-4xl font-bold text-slate-800 mb-2">
-          {getText('inventory_title', language)}
+          {language === 'en' ? '🔋 Charger Inventory' : '🔋 Gestion du Stock Chargeurs'}
         </h1>
         <p className="text-slate-600">
-          {language === 'ar'
-            ? 'إدارة المنتجات والمخزون بسهولة'
-            : 'Gérez vos produits et votre inventaire facilement'}
+          {language === 'en'
+            ? `📊 ${filteredChargers.length} products available • ⚠️ ${lowStockChargers} low stock alerts`
+            : `📊 ${filteredChargers.length} produits disponibles • ⚠️ ${lowStockChargers} alertes de rupture`}
         </p>
       </motion.div>
 
@@ -358,1610 +656,1148 @@ export default function Inventory() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4"
+        className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4"
       >
         <div className="relative">
           <Search className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
-          <Input
-            placeholder={getText('search', language)}
+          <input
+            type="text"
+            placeholder={
+              language === 'en'
+                ? '🔍 Search products...'
+                : '🔍 Rechercher les produits...'
+            }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 h-11 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-shadow"
           />
         </div>
 
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="h-11 rounded-xl border-slate-200">
-            <SelectValue placeholder={getText('category', language)} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{getText('filter_all', language)}</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <select
+          value={filterMark}
+          onChange={(e) => setFilterMark(e.target.value)}
+          className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white shadow-sm hover:shadow-md transition-shadow appearance-none"
+          style={{backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '16px 12px', paddingRight: '2.5rem'}}
+        >
+          <option value="">🏷️ {language === 'en' ? 'All Marks' : 'Toutes les Marques'}</option>
+          {marks.map((mark) => (
+            <option key={mark.id} value={mark.name}>
+              {mark.name}
+            </option>
+          ))}
+        </select>
 
-        <Select value={filterStock} onValueChange={setFilterStock}>
-          <SelectTrigger className="h-11 rounded-xl border-slate-200">
-            <SelectValue placeholder="Stock" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{getText('filter_all', language)}</SelectItem>
-            <SelectItem value="low">{getText('filter_low', language)}</SelectItem>
-            <SelectItem value="out">{getText('filter_out', language)}</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="col-span-1 md:col-span-1"></div>
 
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setViewMode('grid')}
-            className={`flex-1 h-11 rounded-xl ${
-              viewMode === 'grid'
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
-            }`}
-            title={language === 'ar' ? 'عرض الشبكة' : 'Vue Grille'}
-          >
-            <Grid className="w-5 h-5" />
-          </Button>
-          <Button
-            onClick={() => setViewMode('table')}
-            className={`flex-1 h-11 rounded-xl ${
-              viewMode === 'table'
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
-            }`}
-            title={language === 'ar' ? 'عرض الجدول' : 'Vue Tableau'}
-          >
-            <TableIcon className="w-5 h-5" />
-          </Button>
-        </div>
-
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="h-11 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all text-base font-semibold">
-              ➕ {getText('add_product', language)}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogDescription className="sr-only">Add or edit a product</DialogDescription>
-            <DialogHeader>
-              <DialogTitle>
-                {editingProduct
-                  ? language === 'ar'
-                    ? 'تعديل المنتج'
-                    : 'Modifier le Produit'
-                  : language === 'ar'
-                    ? 'إضافة منتج جديد'
-                    : 'Ajouter un Nouveau Produit'}
-              </DialogTitle>
-            </DialogHeader>
-            <ProductForm
-              product={editingProduct}
-              suppliers={suppliers}
-              categories={categories}
-              stores={stores}
-              shelvings={shelvings}
-              onSave={async (formData) => {
-                try {
-                  // Filter formData to only include valid database fields
-                  const validProductData = {
-                    name: formData.name,
-                    barcode: formData.barcode,
-                    brand: formData.brand,
-                    description: formData.description,
-                    category_id: formData.category_id,
-                    supplier_id: formData.supplier_id,
-                    buying_price: formData.buying_price,
-                    selling_price: formData.selling_price,
-                    last_price_to_sell: formData.last_price_to_sell,
-                    margin_percent: formData.margin_percent,
-                    initial_quantity: formData.initial_quantity,
-                    current_quantity: formData.current_quantity,
-                    min_quantity: formData.min_quantity,
-                    store_id: formData.store_id || null,
-                    amount_paid: formData.amount_paid || 0,
-                    shelving_location: formData.shelving_location || null,
-                    shelving_line: formData.shelving_line || null,
-                  };
-
-                  if (editingProduct) {
-                    await updateProduct(editingProduct.id, validProductData);
-                    toast({
-                      title: getText('product_updated', language),
-                      description: language === 'ar' ? 'تم تحديث المنتج' : 'Le produit a été mis à jour',
-                    });
-                  } else {
-                    // Create product without automatic invoice creation
-                    // Initial quantities are set directly in the product fields
-                    const createdProduct = await createProduct(validProductData);
-                    
-                    toast({
-                      title: getText('product_added', language),
-                      description: (language === 'ar'
-                        ? 'تمت إضافة المنتج بنجاح'
-                        : 'Le produit a été ajouté avec succès'),
-                    });
-                  }
-                  setDialogOpen(false);
-                  setEditingProduct(null);
-                  loadData();
-                } catch (err: any) {
-                  toast({
-                    title: getText('error', language),
-                    description: err.message,
-                    variant: 'destructive',
-                  });
-                }
-              }}
-              onAddSupplier={async (name) => {
-                try {
-                  const result = await createSupplier({
-                    name,
-                    email: '',
-                    phone: '',
-                  });
-                  setSuppliers([...suppliers, result.data[0]]);
-                } catch (err) {
-                  console.error('Error adding supplier:', err);
-                }
-              }}
-              onAddCategory={async (name, description) => {
-                try {
-                  const { data } = await supabase
-                    .from('categories')
-                    .insert([{ name, description }])
-                    .select();
-                  if (data) setCategories([...categories, data[0]]);
-                } catch (err) {
-                  console.error('Error adding category:', err);
-                }
-              }}
-              onAddStore={async (name) => {
-                try {
-                  const result = await createStore({
-                    name,
-                    address: '',
-                    phone: '',
-                    email: '',
-                  });
-                  setStores([...stores, result]);
-                } catch (err) {
-                  console.error('Error adding store:', err);
-                }
-              }}
-              onAddShelving={async (name, storeId) => {
-                try {
-                  const result = await createShelving({
-                    name,
-                    store_id: storeId,
-                    total_lines: 5,
-                  });
-                  setShelvings([...shelvings, result]);
-                } catch (err) {
-                  console.error('Error adding shelving:', err);
-                }
-              }}
-              language={language}
-              getText={getText}
-            />
-          </DialogContent>
-        </Dialog>
+        <Button
+          onClick={() => setShowAddModal(true)}
+          className="h-[46px] bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all text-base font-semibold"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          {language === 'en' ? '➕ Add Charger' : '➕ Ajouter'}
+        </Button>
       </motion.div>
 
-      {/* Products Grid or Table */}
+      {/* Chargers Grid */}
       {loading ? (
-        <div className="flex justify-center items-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-slate-600 mt-4">{language === 'en' ? 'Loading chargers...' : 'Chargement des chargeurs...'}</p>
         </div>
-      ) : filteredProducts.length === 0 ? (
+      ) : filteredChargers.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center py-12"
+          className="text-center py-16"
         >
-          <Package className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-          <p className="text-slate-500 text-lg">{getText('no_products', language)}</p>
-        </motion.div>
-      ) : viewMode === 'table' ? (
-        // TABLE VIEW
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="overflow-x-auto rounded-xl border border-slate-200 shadow-lg"
-        >
-          <table className="w-full bg-white">
-            <thead className="bg-gradient-to-r from-blue-50 to-emerald-50 border-b border-slate-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">📦 {language === 'ar' ? 'المنتج' : 'Produit'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">🏷️ {language === 'ar' ? 'العلامة' : 'Marque'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">📝 {language === 'ar' ? 'الوصف' : 'Description'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">💵 {language === 'ar' ? 'الشراء' : 'Achat'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">💰 {language === 'ar' ? 'البيع' : 'Vente'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">📊 {language === 'ar' ? 'الحالي' : 'Actuel'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">⏱️ {language === 'ar' ? 'آخر سعر البيع' : 'Dernier Prix Vente'}</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">⚙️</th>
-              </tr>
-            </thead>
-            <tbody>
-              <AnimatePresence>
-                {filteredProducts.map((product, idx) => {
-                  const status = getStockStatus(product.current_quantity, product.min_quantity);
-                  const statusColor =
-                    status === 'ok'
-                      ? 'bg-green-100 text-green-700'
-                      : status === 'low'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-red-100 text-red-700';
-                  const statusText =
-                    status === 'ok'
-                      ? getText('ok_stock', language)
-                      : status === 'low'
-                        ? getText('low_stock', language)
-                        : getText('out_of_stock', language);
-
-                  return (
-                    <motion.tr
-                      key={product.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className={`border-b border-slate-200 hover:bg-slate-50 transition-colors ${
-                        idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                      }`}
-                    >
-                      <td className="px-4 py-3 font-semibold text-slate-800 max-w-xs truncate">
-                        <div className="flex flex-col">
-                          <span>{product.name}</span>
-                          {product.barcode && (
-                            <span className="text-xs text-slate-500">🔲 {product.barcode}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-600 text-center">
-                        {product.brand || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-600 text-center">
-                        {product.description || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-center font-semibold text-blue-700">
-                        {product.buying_price.toFixed(2)} DZD
-                      </td>
-                      <td className="px-4 py-3 text-center font-semibold text-emerald-700">
-                        {product.selling_price.toFixed(2)} DZD
-                      </td>
-                      <td className="px-4 py-3 text-center font-bold text-purple-700">
-                        {product.current_quantity}
-                      </td>
-                      <td className="px-4 py-3 text-center font-semibold text-purple-700">
-                        {(product.last_price_to_sell || product.selling_price).toFixed(2)} DZD
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 hover:bg-slate-200"
-                            >
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedProduct(product);
-                                setShowProductDetails(true);
-                              }}
-                            >
-                              👁️ {language === 'ar' ? 'عرض التفاصيل' : 'Voir Détails'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setEditingProduct(product);
-                                setDialogOpen(true);
-                              }}
-                            >
-                              ✏️ {getText('edit', language)}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setDeleteDialog(product.id)}
-                              className="text-red-600 cursor-pointer"
-                            >
-                              🗑️ {getText('delete', language)}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </AnimatePresence>
-            </tbody>
-          </table>
+          <ImageIcon className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+          <p className="text-slate-500 text-lg">
+            {language === 'en' ? '❌ No chargers found' : '❌ Aucun chargeur trouvé'}
+          </p>
         </motion.div>
       ) : (
-        // GRID VIEW
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
         >
-          <AnimatePresence>
-            {filteredProducts.map((product) => {
-              const status = getStockStatus(product.current_quantity, product.min_quantity);
-              const statusColor =
-                status === 'ok'
-                  ? 'bg-green-100 text-green-700'
-                  : status === 'low'
-                    ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-red-100 text-red-700';
-              const statusText =
-                status === 'ok'
-                  ? getText('ok_stock', language)
-                  : status === 'low'
-                    ? getText('low_stock', language)
-                    : getText('out_of_stock', language);
-
-              return (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
-                  className="group"
-                >
-                  <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/80 backdrop-blur-sm">
-                    <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-emerald-50">
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg text-slate-800 truncate">
-                            {product.name}
-                          </CardTitle>
-                          {product.barcode && (
-                            <p className="text-sm text-slate-500 mt-1">
-                              <Barcode className="w-4 h-4 inline mr-1" />
-                              {product.barcode}
-                            </p>
-                          )}
-                        </div>
-                        <Badge className={statusColor}>{statusText}</Badge>
+          {filteredChargers.map((charger) => {
+            const lowStock = charger.quantity_actual <= charger.quantity_minimal;
+            const outOfStock = charger.quantity_actual === 0;
+            
+            return (
+              <motion.div
+                key={charger.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+                className="group"
+              >
+                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/80 backdrop-blur-sm overflow-hidden">
+                  {/* Image Section */}
+                  <div className="relative h-28 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden group">
+                    {charger.primary_image ? (
+                      <img
+                        src={charger.primary_image}
+                        alt={charger.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <ImageIcon className="w-12 h-12 text-slate-400" />
+                        <p className="text-xs text-slate-500">{language === 'en' ? 'No image' : 'Pas d\'image'}</p>
                       </div>
-                    </CardHeader>
+                    )}
 
-                    <CardContent className="pt-4">
-                      {/* Brand & Category */}
-                      {(product.brand || product.category?.name) && (
-                        <div className="mb-4 p-3 bg-slate-50 rounded-lg space-y-1">
-                          {product.brand && (
-                            <p className="text-sm text-slate-600">
-                              <span className="font-semibold">🏷️ Marque:</span> {product.brand}
-                            </p>
-                          )}
-                          {product.category?.name && (
-                            <p className="text-sm text-slate-600">
-                              <span className="font-semibold">📂 Catégorie:</span> {product.category.name}
-                            </p>
-                          )}
+                    {/* Stock Badge */}
+                    {outOfStock ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute top-2 right-2 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg"
+                      >
+                        <AlertCircle className="w-4 h-4" />
+                        Out of Stock
+                      </motion.div>
+                    ) : lowStock ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute top-2 right-2 bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg"
+                      >
+                        <AlertCircle className="w-4 h-4" />
+                        Low Stock
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="absolute top-2 right-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg"
+                      >
+                        ✅ In Stock
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Content Section */}
+                  <CardContent className="pt-4 pb-4">
+                    {/* Product Name */}
+                    <h3 className="text-base font-bold text-slate-800 mb-2 line-clamp-2">
+                      {charger.name}
+                    </h3>
+
+                    {/* Mark Badge */}
+                    {charger.mark && (
+                      <div className="mb-3 inline-block">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                          🏷️ {charger.mark.name}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Specs Grid */}
+                    <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg">
+                      <div className="text-center">
+                        <p className="text-xs text-slate-600 font-semibold">⚡ V</p>
+                        <p className="text-sm font-bold text-slate-800">{charger.voltage}V</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-slate-600 font-semibold">🔌 W</p>
+                        <p className="text-sm font-bold text-slate-800">{charger.wattage}W</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-slate-600 font-semibold">⚙️ A</p>
+                        <p className="text-sm font-bold text-slate-800">{charger.amperage}A</p>
+                      </div>
+                      {charger.connector_type && (
+                        <div className="text-center col-span-2">
+                          <p className="text-xs text-slate-600 font-semibold">🔗 {charger.connector_type.name}</p>
                         </div>
                       )}
+                    </div>
 
-                      {/* Pricing */}
-                      <div className="grid grid-cols-3 gap-2 mb-4">
-                        <div className="p-3 bg-blue-50 rounded-lg">
-                          <p className="text-xs text-blue-600 font-semibold">💵 Achat</p>
-                          <p className="text-lg font-bold text-blue-700">
-                            {product.buying_price.toFixed(2)} DZD
-                          </p>
-                        </div>
-                        <div className="p-3 bg-emerald-50 rounded-lg">
-                          <p className="text-xs text-emerald-600 font-semibold">💰 Vente</p>
-                          <p className="text-lg font-bold text-emerald-700">
-                            {product.selling_price.toFixed(2)} DZD
-                          </p>
-                        </div>
-                        <div className="p-3 bg-purple-50 rounded-lg">
-                          <p className="text-xs text-purple-600 font-semibold">⏱️ Derni.</p>
-                          <p className="text-lg font-bold text-purple-700">
-                            {(product.last_price_to_sell || product.selling_price).toFixed(2)} DZD
-                          </p>
-                        </div>
+                    {/* Stock & Pricing */}
+                    <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+                      <div className="p-2 bg-purple-50 rounded-lg">
+                        <p className="text-xs text-purple-600 font-bold">📦</p>
+                        <p className="text-base font-bold text-purple-700">{charger.quantity_actual}</p>
                       </div>
-
-                      {/* Stock Progress with Alert Animation */}
-                      <div className="mb-4">
-                        <div className="flex justify-between text-xs text-slate-600 mb-2">
-                          <span>📊 Stock: {product.current_quantity} / {product.initial_quantity}</span>
-                          <span className="font-semibold">
-                            {product.min_quantity > 0 ? `Min: ${product.min_quantity}` : ''}
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{
-                              width: `${Math.min(
-                                (product.current_quantity / product.initial_quantity) * 100,
-                                100
-                              )}%`,
-                            }}
-                            transition={{ duration: 1, ease: 'easeOut' }}
-                            className={`h-2 rounded-full ${
-                              status === 'ok'
-                                ? 'bg-gradient-to-r from-green-400 to-green-600'
-                                : status === 'low'
-                                  ? 'bg-gradient-to-r from-yellow-400 to-yellow-600'
-                                  : 'bg-gradient-to-r from-red-400 to-red-600'
-                            }`}
-                          />
-                        </div>
-                        {/* Alert Animation for Low/Out of Stock */}
-                        {status !== 'ok' && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.4, delay: 0.3 }}
-                            className={`mt-2 p-2 rounded-lg text-center text-xs font-bold ${
-                              status === 'low'
-                                ? 'bg-yellow-100 text-yellow-800 border border-yellow-300'
-                                : 'bg-red-100 text-red-800 border border-red-300'
-                            }`}
-                          >
-                            <motion.span
-                              animate={{ opacity: [1, 0.6, 1] }}
-                              transition={{ duration: 1.5, repeat: Infinity }}
-                            >
-                              {status === 'low' ? '⚠️ STOCK BAS' : '🔴 RUPTURE DE STOCK'}
-                            </motion.span>
-                          </motion.div>
-                        )}
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-bold">💵</p>
+                        <p className="text-sm font-bold text-blue-700">{charger.purchase_price.toFixed(0)}</p>
                       </div>
-
-                      {/* Location */}
-                      {(product.shelving_location || product.supplier?.name) && (
-                        <div className="mb-4 p-3 bg-purple-50 rounded-lg text-sm space-y-1">
-                          {product.shelving_location && (
-                            <p className="text-purple-700">
-                              📚 {product.shelving_location}
-                              {product.shelving_line && ` - Ligne ${product.shelving_line}`}
-                            </p>
-                          )}
-                          {product.supplier?.name && (
-                            <p className="text-purple-700">
-                              🚚 {product.supplier.name}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Store */}
-                      {product.store_id && (
-                        <div className="mb-4 p-3 bg-orange-50 rounded-lg text-sm">
-                          <p className="text-orange-700">
-                            🏪 Magasin: {stores.find(s => s.id === product.store_id)?.name || 'N/A'}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex flex-col gap-2 pt-3 border-t border-slate-200">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-sm rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold"
-                          onClick={() => {
-                            setSelectedProduct(product);
-                            setShowProductDetails(true);
-                          }}
-                        >
-                          👁️ {language === 'ar' ? 'عرض التفاصيل' : 'Voir Détails'}
-                        </Button>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 text-xs rounded-lg"
-                            onClick={() => {
-                              setEditingProduct(product);
-                              setDialogOpen(true);
-                            }}
-                          >
-                            ✏️ {getText('edit', language)}
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="flex-1 text-xs rounded-lg"
-                            onClick={() => setDeleteDialog(product.id)}
-                          >
-                            🗑️ {getText('delete', language)}
-                          </Button>
-                        </div>
+                      <div className="p-2 bg-emerald-50 rounded-lg">
+                        <p className="text-xs text-emerald-600 font-bold">💰</p>
+                        <p className="text-sm font-bold text-emerald-700">{charger.selling_price.toFixed(0)}</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                    </div>
+
+                    {/* Margin */}
+                    <div className="mb-3 p-2 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg text-center">
+                      <p className="text-xs text-orange-600 font-bold">📈 {charger.margin.toFixed(1)}%</p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-1 pt-2 border-t border-slate-200">
+                      <button
+                        onClick={() => {
+                          // Refresh charger data and then show details
+                          refreshChargerData(charger.id);
+                          setSelectedCharger(charger);
+                          // Fetch all images for this charger
+                          supabase
+                            .from('product_images')
+                            .select('image_url')
+                            .eq('product_id', charger.id)
+                            .order('display_order', { ascending: true })
+                            .then(({ data }) => {
+                              if (data) {
+                                setChargerImages(data.map(img => img.image_url));
+                              }
+                            });
+                        }}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center"
+                        title={language === 'en' ? 'View details' : 'Voir les détails'}
+                      >
+                        👁️
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditingMode(true);
+                          setEditingChargerId(charger.id);
+                          setFormData({
+                            name: charger.name,
+                            description: charger.description || '',
+                            mark_id: charger.mark_id || '',
+                            connector_type_id: charger.connector_type_id || '',
+                            voltage: charger.voltage.toString(),
+                            wattage: charger.wattage.toString(),
+                            amperage: charger.amperage.toString(),
+                            model_number: charger.model_number || '',
+                            quantity_initial: charger.quantity_actual.toString(),
+                            quantity_actual: charger.quantity_actual.toString(),
+                            quantity_minimal: charger.quantity_minimal.toString(),
+                            purchase_price: charger.purchase_price.toString(),
+                            selling_price: charger.selling_price.toString(),
+                            supplier_id: '',
+                            amount_paid: '',
+                            images: [],
+                          });
+                          setShowAddModal(true);
+                        }}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center"
+                        title={language === 'en' ? 'Edit' : 'Modifier'}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => {
+                          setChargerToDelete(charger.id);
+                          setShowDeleteConfirm(true);
+                        }}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center"
+                        title={language === 'en' ? 'Delete' : 'Supprimer'}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </motion.div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteDialog} onOpenChange={(open) => !open && setDeleteDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {language === 'ar' ? 'حذف المنتج' : 'Supprimer le Produit'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {language === 'ar'
-                ? 'هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.'
-                : 'Êtes-vous sûr de supprimer ce produit ? Cette action ne peut pas être annulée.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{getText('cancel', language)}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                try {
-                  if (deleteDialog) {
-                    await deleteProduct(deleteDialog);
-                    toast({
-                      title: getText('product_deleted', language),
-                    });
-                    setDeleteDialog(null);
-                    loadData();
-                  }
-                } catch (err: any) {
-                  toast({
-                    title: getText('error', language),
-                    description: err.message,
-                    variant: 'destructive',
-                  });
-                }
-              }}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {getText('delete', language)}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Product Details Modal */}
-      <Dialog open={showProductDetails} onOpenChange={setShowProductDetails}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedProduct?.name}</DialogTitle>
-          </DialogHeader>
-          {selectedProduct && (
-            <div className="space-y-4">
-              {/* Barcode */}
-              {selectedProduct.barcode && (
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-600 font-semibold">📦 Barcode</p>
-                  <p className="text-lg font-bold text-slate-800">{selectedProduct.barcode}</p>
-                </div>
-              )}
-
-              {/* Brand & Description */}
-              <div className="grid grid-cols-2 gap-3">
-                {selectedProduct.brand && (
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-600 font-semibold">🏷️ Marque</p>
-                    <p className="text-sm font-semibold text-slate-800">{selectedProduct.brand}</p>
-                  </div>
-                )}
-                {selectedProduct.category?.name && (
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-600 font-semibold">📂 Catégorie</p>
-                    <p className="text-sm font-semibold text-slate-800">{selectedProduct.category.name}</p>
-                  </div>
-                )}
-              </div>
-
-              {selectedProduct.description && (
-                <div className="p-3 bg-slate-50 rounded-lg">
-                  <p className="text-xs text-slate-600 font-semibold">📝 Description</p>
-                  <p className="text-sm text-slate-700">{selectedProduct.description}</p>
-                </div>
-              )}
-
-              {/* Pricing Section */}
-              <div className="border-t pt-4">
-                <h4 className="font-bold text-slate-800 mb-3">💰 Prix & Marge</h4>
-                <div className="grid grid-cols-4 gap-3">
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <p className="text-xs text-blue-600 font-semibold">💵 Achat</p>
-                    <p className="text-lg font-bold text-blue-700">{selectedProduct.buying_price.toFixed(2)} DZD</p>
-                  </div>
-                  <div className="p-3 bg-emerald-50 rounded-lg">
-                    <p className="text-xs text-emerald-600 font-semibold">💰 Vente</p>
-                    <p className="text-lg font-bold text-emerald-700">{selectedProduct.selling_price.toFixed(2)} DZD</p>
-                  </div>
-                  <div className="p-3 bg-purple-50 rounded-lg">
-                    <p className="text-xs text-purple-600 font-semibold">⏱️ Derni.</p>
-                    <p className="text-lg font-bold text-purple-700">{(selectedProduct.last_price_to_sell || selectedProduct.selling_price).toFixed(2)} DZD</p>
-                  </div>
-                  {selectedProduct.margin_percent !== undefined && (
-                    <div className="p-3 bg-orange-50 rounded-lg">
-                      <p className="text-xs text-orange-600 font-semibold">📈 Marge</p>
-                      <p className="text-lg font-bold text-orange-700">{selectedProduct.margin_percent.toFixed(2)}%</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Stock Section */}
-              <div className="border-t pt-4">
-                <h4 className="font-bold text-slate-800 mb-3">📊 Stock</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-600 font-semibold">Initiale</p>
-                    <p className="text-lg font-bold text-slate-800">{selectedProduct.initial_quantity}</p>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-600 font-semibold">Actuelle</p>
-                    <p className="text-lg font-bold text-slate-800">{selectedProduct.current_quantity}</p>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-600 font-semibold">Minimum</p>
-                    <p className="text-lg font-bold text-slate-800">{selectedProduct.min_quantity}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Location Section */}
-              <div className="border-t pt-4">
-                <h4 className="font-bold text-slate-800 mb-3">📍 Localisation</h4>
-                {selectedProduct.supplier?.name && (
-                  <div className="p-3 bg-slate-50 rounded-lg mb-2">
-                    <p className="text-xs text-slate-600 font-semibold">🚚 Fournisseur</p>
-                    <p className="text-sm text-slate-800">{selectedProduct.supplier.name}</p>
-                  </div>
-                )}
-                {selectedProduct.shelving_location && (
-                  <div className="p-3 bg-slate-50 rounded-lg mb-2">
-                    <p className="text-xs text-slate-600 font-semibold">📚 Étager</p>
-                    <p className="text-sm text-slate-800">
-                      {selectedProduct.shelving_location}
-                      {selectedProduct.shelving_line && ` - Ligne ${selectedProduct.shelving_line}`}
-                    </p>
-                  </div>
-                )}
-                {selectedProduct.store_id && (
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-600 font-semibold">🏪 Magasin</p>
-                    <p className="text-sm text-slate-800">{stores.find(s => s.id === selectedProduct.store_id)?.name || 'N/A'}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ================= PRODUCT FORM COMPONENT =================
-interface ProductFormProps {
-  product: Product | null;
-  suppliers: Supplier[];
-  categories: Category[];
-  stores: Store[];
-  shelvings: Shelving[];
-  onSave: (data: any) => void;
-  onAddSupplier: (name: string) => void;
-  onAddCategory: (name: string, description: string) => void;
-  onAddStore: (name: string) => void;
-  onAddShelving: (name: string, storeId: string) => void;
-  language: string;
-  getText: (key: string, language: string) => string;
-}
-
-function ProductForm({
-  product,
-  suppliers,
-  categories,
-  stores,
-  shelvings,
-  onSave,
-  onAddSupplier,
-  onAddCategory,
-  onAddStore,
-  onAddShelving,
-  language,
-  getText,
-}: ProductFormProps) {
-  const [formData, setFormData] = useState({
-    name: product?.name || '',
-    barcode: product?.barcode || '',
-    brand: product?.brand || '',
-    description: product?.description || '',
-    category_id: product?.category_id || '',
-    supplier_id: product?.supplier_id || '',
-    buying_price: product?.buying_price || 0,
-    margin_percent: product?.margin_percent || 0,
-    selling_price: product?.selling_price || 0,
-    last_price_to_sell: product?.last_price_to_sell || 0,
-    initial_quantity: product?.initial_quantity || 0,
-    current_quantity: product?.current_quantity || 0,
-    min_quantity: product?.min_quantity || 0,
-    store_id: product?.store_id || '',
-    amount_paid: product?.amount_paid || 0,
-    shelving_location: product?.shelving_location || '',
-    shelving_line: product?.shelving_line || 1,
-  });
-
-  const [totalPrice, setTotalPrice] = useState(
-    product ? product.buying_price * product.initial_quantity : 0
-  );
-  const [remaining, setRemaining] = useState(totalPrice);
-  const [showAddSupplier, setShowAddSupplier] = useState(false);
-  const [showAddCategory, setShowAddCategory] = useState(false);
-  const [showAddStore, setShowAddStore] = useState(false);
-  const [showAddShelving, setShowAddShelving] = useState(false);
-
-  const [newSupplierName, setNewSupplierName] = useState('');
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryDesc, setNewCategoryDesc] = useState('');
-  const [newStoreName, setNewStoreName] = useState('');
-  const [newShelvingName, setNewShelvingName] = useState('');
-  const [shelvingLines, setShelvingLines] = useState(5);
-
-  // Delete confirmation states
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'category' | 'store' | 'shelving'; id: string; name: string } | null>(null);
-
-  // Update calculations when prices change
-  useEffect(() => {
-    const total = formData.buying_price * formData.initial_quantity;
-    setTotalPrice(total);
-    setRemaining(Math.max(0, total - (formData.amount_paid || 0)));
-  }, [formData.buying_price, formData.initial_quantity, formData.amount_paid]);
-
-  const handlePriceChange = (type: 'buying' | 'margin' | 'selling', value: number) => {
-    if (type === 'buying') {
-      setFormData({
-        ...formData,
-        buying_price: value,
-      });
-    } else if (type === 'margin') {
-      const calculatedSelling = calculateSellingPrice(formData.buying_price, value);
-      setFormData({
-        ...formData,
-        margin_percent: value,
-        selling_price: calculatedSelling,
-      });
-    } else if (type === 'selling') {
-      const calculatedMargin = calculateMarginPercent(formData.buying_price, value);
-      setFormData({
-        ...formData,
-        selling_price: value,
-        margin_percent: calculatedMargin,
-      });
-    }
-  };
-
-  const calculateSellingPrice = (buying: number, margin: number): number => {
-    return buying * (1 + margin / 100);
-  };
-
-  const calculateMarginPercent = (buying: number, selling: number): number => {
-    if (buying === 0) return 0;
-    return ((selling - buying) / buying) * 100;
-  };
-
-  return (
-    <div className="space-y-6 py-4">
-      {/* 📦 Product Information Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
-      >
-        <h3 className="text-lg font-bold text-blue-900 mb-4">📦 {language === 'ar' ? 'معلومات المنتج' : 'Informations Produit'}</h3>
-        <div className="space-y-4">
-          {/* Product Name with Barcode Generator */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label className="text-sm font-semibold text-blue-900">{getText('product_name', language)}</Label>
-              <Input
-                placeholder={language === 'ar' ? 'أدخل الاسم' : 'Entrez le nom'}
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 rounded-lg border-blue-300 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold text-blue-900">{getText('barcode', language)}</Label>
-              <div className="flex gap-2 mt-1">
-                <Input
-                  placeholder="BRC-XXXXX"
-                  value={formData.barcode}
-                  onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                  className="rounded-lg border-blue-300 focus:border-blue-500 flex-1"
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-                  onClick={() => {
-                    const randomBarcode = generateRandomBarcode();
-                    setFormData({ ...formData, barcode: randomBarcode });
-                  }}
-                >
-                  <Barcode className="w-4 h-4 mr-1" />
-                  {getText('generate_barcode', language)}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Brand & Description */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label className="text-sm font-semibold text-blue-900">{getText('brand', language)}</Label>
-              <Input
-                placeholder={language === 'ar' ? 'أدخل العلامة التجارية' : 'Entrez la marque'}
-                value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                className="mt-1 rounded-lg border-blue-300 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold text-blue-900">{getText('description', language)}</Label>
-              <Input
-                placeholder={language === 'ar' ? 'أدخل الوصف' : 'Entrez la description'}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 rounded-lg border-blue-300 focus:border-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* 💵 Pricing Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200"
-      >
-        <h3 className="text-lg font-bold text-emerald-900 mb-4">💵 {language === 'ar' ? 'التسعير' : 'Tarification'}</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Buying Price */}
-            <div>
-              <Label className="text-sm font-semibold text-emerald-900">{getText('buying_price', language)}</Label>
-              <Input
-                type="number"
-                placeholder="0"
-                value={formData.buying_price || ''}
-                onChange={(e) => handlePriceChange('buying', parseFloat(e.target.value) || 0)}
-                className="mt-1 rounded-lg border-emerald-300 focus:border-emerald-500"
-              />
-            </div>
-
-            {/* Margin Percent */}
-            <div>
-              <Label className="text-sm font-semibold text-emerald-900">{getText('margin_percent', language)}</Label>
-              <Input
-                type="number"
-                placeholder="0"
-                value={formData.margin_percent || ''}
-                onChange={(e) => handlePriceChange('margin', parseFloat(e.target.value) || 0)}
-                className="mt-1 rounded-lg border-emerald-300 focus:border-emerald-500"
-              />
-            </div>
-
-            {/* Selling Price */}
-            <div>
-              <Label className="text-sm font-semibold text-emerald-900">{getText('selling_price', language)}</Label>
-              <Input
-                type="number"
-                placeholder="0"
-                value={formData.selling_price || ''}
-                onChange={(e) => handlePriceChange('selling', parseFloat(e.target.value) || 0)}
-                className="mt-1 rounded-lg border-emerald-300 focus:border-emerald-500"
-              />
-            </div>
-
-            {/* Last Price to Sell - Purple Highlighted */}
-            <div className="p-3 border-2 border-purple-200 rounded-lg bg-purple-50">
-              <Label className="text-sm font-semibold text-purple-900">
-                {language === 'ar' ? '⏱️ آخر سعر بيع' : '⏱️ Dernier Prix Vente'}
-              </Label>
-              <Input
-                type="number"
-                placeholder="0"
-                value={formData.last_price_to_sell || ''}
-                onChange={(e) => setFormData({ ...formData, last_price_to_sell: parseFloat(e.target.value) || 0 })}
-                className="mt-1 rounded-lg border-purple-300 focus:border-purple-500 bg-white"
-              />
-              <p className="text-xs text-purple-600 mt-2">
-                {language === 'ar' ? 'آخر سعر بيع للمنتج' : 'Dernier prix de vente du produit'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* 📊 Quantities Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200"
-      >
-        <h3 className="text-lg font-bold text-yellow-900 mb-4">📊 {language === 'ar' ? 'الكميات' : 'Quantités'}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label className="text-sm font-semibold text-yellow-900">{getText('initial_qty', language)}</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={formData.initial_quantity || ''}
-              onChange={(e) => {
-                const qty = parseFloat(e.target.value) || 0;
-                setFormData({
-                  ...formData,
-                  initial_quantity: qty,
-                  current_quantity: qty,
-                });
-              }}
-              className="mt-1 rounded-lg border-yellow-300 focus:border-yellow-500"
-            />
-          </div>
-          <div>
-            <Label className="text-sm font-semibold text-yellow-900">{getText('current_qty', language)}</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={formData.current_quantity || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, current_quantity: parseFloat(e.target.value) || 0 })
-              }
-              className="mt-1 rounded-lg border-yellow-300 focus:border-yellow-500"
-            />
-          </div>
-          <div>
-            <Label className="text-sm font-semibold text-yellow-900">{getText('min_qty', language)}</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={formData.min_quantity || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, min_quantity: parseFloat(e.target.value) || 0 })
-              }
-              className="mt-1 rounded-lg border-yellow-300 focus:border-yellow-500"
-            />
-          </div>
-        </div>
-      </motion.div>
-
-      {/* 🏷️ Category & Supplier Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200"
-      >
-        <h3 className="text-lg font-bold text-purple-900 mb-4">🏷️ {language === 'ar' ? 'الفئة والمورد' : 'Catégorie et Fournisseur'}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Category */}
-          <div>
-            <Label className="text-sm font-semibold text-purple-900">{getText('category', language)}</Label>
-            <div className="space-y-2">
-              <div className="flex gap-2 mt-1">
-                <Select value={formData.category_id} onValueChange={(val) => setFormData({ ...formData, category_id: val })}>
-                  <SelectTrigger className="rounded-lg border-purple-300">
-                    <SelectValue placeholder={getText('category', language)} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg px-2"
-                  onClick={() => setShowAddCategory(true)}
-                  title={language === 'ar' ? 'إضافة فئة' : 'Ajouter Catégorie'}
-                >
-                  ➕
-                </Button>
-              </div>
-              {formData.category_id && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="destructive"
-                  className="h-8 w-8 p-0 flex items-center justify-center"
-                  onClick={() => {
-                    const selectedCategory = categories.find(c => c.id === formData.category_id);
-                    if (selectedCategory) {
-                      setDeleteConfirm({ type: 'category', id: formData.category_id, name: selectedCategory.name });
-                    }
-                  }}
-                  title={language === 'ar' ? 'حذف الفئة' : 'Supprimer Catégorie'}
-                >
-                  🗑️
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Supplier */}
-          <div>
-            <Label className="text-sm font-semibold text-purple-900">{getText('supplier', language)}</Label>
-            <div className="flex gap-2 mt-1">
-              <Select value={formData.supplier_id} onValueChange={(val) => setFormData({ ...formData, supplier_id: val })}>
-                <SelectTrigger className="rounded-lg border-purple-300">
-                  <SelectValue placeholder={getText('supplier', language)} />
-                </SelectTrigger>
-                <SelectContent>
-                  {suppliers.map((sup) => (
-                    <SelectItem key={sup.id} value={sup.id}>
-                      {sup.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                size="sm"
-                className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg px-2"
-                onClick={() => setShowAddSupplier(true)}
-                title={language === 'ar' ? 'إضافة مورد' : 'Ajouter Fournisseur'}
-              >
-                ➕
-              </Button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* 🏪 Store & Shelving Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200"
-      >
-        <h3 className="text-lg font-bold text-orange-900 mb-4">🏪 {language === 'ar' ? 'المتجر والرفوف' : 'Magasin et Étagers'}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Store */}
-          <div>
-            <Label className="text-sm font-semibold text-orange-900">{getText('store', language)}</Label>
-            <div className="space-y-2">
-              <div className="flex gap-2 mt-1">
-                <Select value={formData.store_id} onValueChange={(val) => setFormData({ ...formData, store_id: val })}>
-                  <SelectTrigger className="rounded-lg border-orange-300">
-                    <SelectValue placeholder={getText('store', language)} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stores.map((store) => (
-                      <SelectItem key={store.id} value={store.id}>
-                        {store.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg px-2"
-                  onClick={() => setShowAddStore(true)}
-                  title={language === 'ar' ? 'إضافة متجر' : 'Ajouter Magasin'}
-                >
-                  ➕
-                </Button>
-              </div>
-              {formData.store_id && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="destructive"
-                  className="h-8 w-8 p-0 flex items-center justify-center"
-                  onClick={() => {
-                    const selectedStore = stores.find(s => s.id === formData.store_id);
-                    if (selectedStore) {
-                      setDeleteConfirm({ type: 'store', id: formData.store_id, name: selectedStore.name });
-                    }
-                  }}
-                  title={language === 'ar' ? 'حذف المتجر' : 'Supprimer Magasin'}
-                >
-                  🗑️
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Shelving */}
-          <div>
-            <Label className="text-sm font-semibold text-orange-900">{getText('shelving', language)}</Label>
-            <div className="space-y-2">
-              <div className="flex gap-2 mt-1">
-              <Select
-                value={formData.shelving_location}
-                onValueChange={(val) => setFormData({ ...formData, shelving_location: val })}
-              >
-                <SelectTrigger className="rounded-lg border-orange-300">
-                  <SelectValue placeholder={getText('shelving', language)} />
-                </SelectTrigger>
-                <SelectContent>
-                  {shelvings && shelvings.length > 0 ? (
-                    shelvings
-                      .filter((s) => {
-                        // Show all shelvings if no store selected, or if store matches
-                        if (!formData.store_id) return true;
-                        if (!s.store_id) return true; // Show shelvings without store_id
-                        return s.store_id === formData.store_id;
-                      })
-                      .map((shelving) => (
-                        <SelectItem key={shelving.id} value={shelving.name}>
-                          {shelving.name}
-                        </SelectItem>
-                      ))
-                  ) : (
-                    <SelectItem value="" disabled>
-                      {language === 'ar' ? 'لا توجد رفوف متاحة' : 'Aucun étager disponible'}
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                size="sm"
-                className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg px-2"
-                onClick={() => setShowAddShelving(true)}
-                title={language === 'ar' ? 'إضافة رف' : 'Ajouter Étager'}
-              >
-                ➕
-              </Button>
-              </div>
-              {formData.shelving_location && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="destructive"
-                  className="h-8 w-8 p-0 flex items-center justify-center"
-                  onClick={() => {
-                    const selectedShelving = shelvings.find(s => s.name === formData.shelving_location);
-                    if (selectedShelving) {
-                      setDeleteConfirm({ type: 'shelving', id: selectedShelving.id, name: selectedShelving.name });
-                    }
-                  }}
-                  title={language === 'ar' ? 'حذف الرف' : 'Supprimer Étager'}
-                >
-                  🗑️
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Line Number */}
-        {formData.shelving_location && (
-          <div className="mt-4">
-            <Label className="text-sm font-semibold text-orange-900">{getText('line', language)}</Label>
-            <Input
-              type="number"
-              placeholder="1"
-              value={formData.shelving_line || 1}
-              onChange={(e) =>
-                setFormData({ ...formData, shelving_line: parseFloat(e.target.value) || 1 })
-              }
-              className="mt-1 rounded-lg border-orange-300 focus:border-orange-500"
-              min="1"
-            />
-          </div>
-        )}
-      </motion.div>
-
-      {/* Delete Confirmation Dialog for Form Items */}
-      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {deleteConfirm?.type === 'category' && (language === 'ar' ? 'حذف الفئة' : 'Supprimer la Catégorie')}
-              {deleteConfirm?.type === 'store' && (language === 'ar' ? 'حذف المتجر' : 'Supprimer le Magasin')}
-              {deleteConfirm?.type === 'shelving' && (language === 'ar' ? 'حذف الرف' : 'Supprimer l\'Étager')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {language === 'ar'
-                ? `هل أنت متأكد من رغبتك في حذف "${deleteConfirm?.name}"؟ لا يمكن التراجع عن هذا الإجراء.`
-                : `Êtes-vous sûr de supprimer "${deleteConfirm?.name}" ? Cette action ne peut pas être annulée.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{language === 'ar' ? 'إلغاء' : 'Annuler'}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                try {
-                  if (deleteConfirm) {
-                    if (deleteConfirm.type === 'category') {
-                      await deleteCategory(deleteConfirm.id);
-                      setFormData({ ...formData, category_id: '' });
-                    } else if (deleteConfirm.type === 'store') {
-                      await deleteStore(deleteConfirm.id);
-                      setFormData({ ...formData, store_id: '' });
-                    } else if (deleteConfirm.type === 'shelving') {
-                      await deleteShelving(deleteConfirm.id);
-                      setFormData({ ...formData, shelving_location: '', shelving_line: 1 });
-                    }
-                    setDeleteConfirm(null);
-                  }
-                } catch (err: any) {
-                  console.error('Delete error:', err);
-                }
-              }}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {language === 'ar' ? 'حذف' : 'Supprimer'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* 💸 Payment Summary Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="p-4 bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl border border-rose-200"
-      >
-        <h3 className="text-lg font-bold text-rose-900 mb-4">💸 {language === 'ar' ? 'ملخص الدفع' : 'Résumé du Paiement'}</h3>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center p-3 bg-white rounded-lg">
-            <span className="font-semibold text-rose-900">{getText('total_price', language)}</span>
-            <span className="text-xl font-bold text-rose-700">{totalPrice.toFixed(2)} DZD</span>
-          </div>
-          <div>
-            <Label className="text-sm font-semibold text-rose-900">{getText('amount_paid', language)}</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={formData.amount_paid || ''}
-              onChange={(e) => setFormData({ ...formData, amount_paid: parseFloat(e.target.value) || 0 })}
-              className="mt-1 rounded-lg border-rose-300 focus:border-rose-500"
-            />
-          </div>
-          <div className="flex justify-between items-center p-3 bg-white rounded-lg">
-            <span className="font-semibold text-rose-900">{getText('remaining', language)}</span>
-            <span className={`text-xl font-bold ${remaining > 0 ? 'text-orange-600' : 'text-green-600'}`}>
-              {remaining.toFixed(2)} DZD
-            </span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Dialogs for Adding Items */}
-      {showAddSupplier && (
-        <AddSupplierDialog
-          isOpen={showAddSupplier}
-          onClose={() => setShowAddSupplier(false)}
-          onAdd={(name) => {
-            onAddSupplier(name);
-            setNewSupplierName('');
-            setShowAddSupplier(false);
-          }}
-          language={language}
-          getText={getText}
-          newName={newSupplierName}
-          setNewName={setNewSupplierName}
-        />
-      )}
-
-      {showAddCategory && (
-        <AddCategoryDialog
-          isOpen={showAddCategory}
-          onClose={() => setShowAddCategory(false)}
-          onAdd={(name, desc) => {
-            onAddCategory(name, desc);
-            setNewCategoryName('');
-            setNewCategoryDesc('');
-            setShowAddCategory(false);
-          }}
-          language={language}
-          getText={getText}
-          newName={newCategoryName}
-          setNewName={setNewCategoryName}
-          newDesc={newCategoryDesc}
-          setNewDesc={setNewCategoryDesc}
-        />
-      )}
-
-      {showAddStore && (
-        <AddStoreDialog
-          isOpen={showAddStore}
-          onClose={() => setShowAddStore(false)}
-          onAdd={(name) => {
-            onAddStore(name);
-            setNewStoreName('');
-            setShowAddStore(false);
-          }}
-          language={language}
-          getText={getText}
-          newName={newStoreName}
-          setNewName={setNewStoreName}
-        />
-      )}
-
-      {showAddShelving && (
-        <AddShelvingDialog
-          isOpen={showAddShelving}
-          onClose={() => setShowAddShelving(false)}
-          onAdd={(name, storeId) => {
-            onAddShelving(name, storeId);
-            setNewShelvingName('');
-            setShowAddShelving(false);
-          }}
-          language={language}
-          getText={getText}
-          newName={newShelvingName}
-          setNewName={setNewShelvingName}
-          stores={stores}
-        />
-      )}
-
-      {/* Action Buttons */}
-      <div className="flex gap-3 pt-4 border-t border-slate-200">
-        <Button
-          onClick={() => onSave({
-            ...formData,
-            // Note: amount_paid and remaining_debt are handled separately in invoice tracking
-            // They should not be sent to products table
-          })}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-lg h-11"
-        >
-          {getText('save', language)}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function generateRandomBarcode(): string {
-  return Math.floor(Math.random() * 10**12).toString().padStart(12, '0');
-}
-
-// ================= DIALOG COMPONENTS =================
-function AddSupplierDialog({
-  isOpen,
-  onClose,
-  onAdd,
-  language,
-  getText,
-  newName,
-  setNewName,
-}: any) {
-  if (!isOpen) return null;
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogDescription className="sr-only">Add a new supplier</DialogDescription>
-        <DialogHeader>
-          <DialogTitle>{getText('add_supplier', language)}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <Input
-            placeholder={language === 'ar' ? 'اسم المورد' : 'Nom du fournisseur'}
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className="rounded-lg"
-          />
-          <Button
-            onClick={() => newName && onAdd(newName)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+      {/* Add Charger Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           >
-            {getText('save', language)}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+            <div className="sticky top-0 p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-emerald-50 flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-slate-900">
+                {isEditingMode 
+                  ? (language === 'en' ? '✏️ Edit Charger' : '✏️ Modifier Chargeur')
+                  : (language === 'en' ? '➕ Add New Charger' : '➕ Ajouter Nouveau Chargeur')}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowAddModal(false);
+                  setIsEditingMode(false);
+                  setEditingChargerId(null);
+                  setFormData({
+                    name: '',
+                    description: '',
+                    mark_id: '',
+                    connector_type_id: '',
+                    voltage: '',
+                    wattage: '',
+                    amperage: '',
+                    model_number: '',
+                    quantity_initial: '',
+                    quantity_actual: '',
+                    quantity_minimal: '',
+                    purchase_price: '',
+                    selling_price: '',
+                    supplier_id: '',
+                    amount_paid: '',
+                    images: [] as File[],
+                  });
+                }}
+                className="text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-lg p-2 transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-function AddCategoryDialog({
-  isOpen,
-  onClose,
-  onAdd,
-  language,
-  getText,
-  newName,
-  setNewName,
-  newDesc,
-  setNewDesc,
-  categories,
-  onDelete,
-}: any) {
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+            <div className="p-6 space-y-6">
+              {/* Images Upload Section - FIRST */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0 }}
+                className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200"
+              >
+                <h3 className="text-lg font-bold text-cyan-900 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'}</h3>
+                
+                {/* Current Image Preview (when editing) */}
+                {isEditingMode && editingChargerId && chargers.find(c => c.id === editingChargerId)?.primary_image && (
+                  <div className="mb-4 p-4 bg-white rounded-lg border border-cyan-300">
+                    <p className="text-xs font-semibold text-cyan-700 mb-2">📸 {language === 'en' ? 'Current Image' : 'Image Actuelle'}</p>
+                    <img
+                      src={chargers.find(c => c.id === editingChargerId)?.primary_image}
+                      alt="Current product image"
+                      className="w-full h-32 object-cover rounded-lg shadow-md"
+                    />
+                  </div>
+                )}
+                
+                {/* Upload Section */}
+                <div className="border-2 border-dashed border-cyan-300 rounded-lg p-6 text-center bg-white mb-4">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    id="imageInput"
+                    className="hidden"
+                  />
+                  <label htmlFor="imageInput" className="cursor-pointer block">
+                    <ImageIcon className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
+                    <p className="text-cyan-900 font-semibold">
+                      {formData.images.length > 0
+                        ? `✅ ${formData.images.length} ${language === 'en' ? 'image(s) selected' : 'image(s) sélectionnée(s)'}`
+                        : language === 'en'
+                        ? '📤 Click to select images'
+                        : '📤 Cliquez pour sélectionner des images'}
+                    </p>
+                  </label>
+                </div>
 
-  if (!isOpen) return null;
-  return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-h-96 overflow-y-auto">
-          <DialogDescription className="sr-only">Add a new category</DialogDescription>
-          <DialogHeader>
-            <DialogTitle>{getText('add_category', language)}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input
-              placeholder={language === 'ar' ? 'اسم الفئة' : 'Nom de la catégorie'}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="rounded-lg"
-            />
-            <Input
-              placeholder={language === 'ar' ? 'الوصف' : 'Description'}
-              value={newDesc}
-              onChange={(e) => setNewDesc(e.target.value)}
-              className="rounded-lg"
-            />
-            <Button
-              onClick={() => newName && onAdd(newName, newDesc)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-            >
-              {getText('save', language)}
-            </Button>
-            
-            {/* List of categories */}
-            {categories && categories.length > 0 && (
-              <div className="mt-6 border-t pt-4">
-                <h3 className="font-semibold mb-2">{language === 'ar' ? 'الفئات' : 'Catégories'}</h3>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
-                  {categories.map((cat: any) => (
-                    <div key={cat.id} className="flex items-center justify-between p-2 bg-slate-50 rounded hover:bg-slate-100">
-                      <span className="text-sm">{cat.name}</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setDeleteId(cat.id)}
-                        className="h-6 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                {/* Image Preview Section */}
+                {formData.images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {formData.images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg border border-cyan-300"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="bg-red-500 hover:bg-red-600 text-white text-xl rounded-full w-10 h-10 flex items-center justify-center transition-colors font-bold"
+                            title={language === 'en' ? 'Delete image' : 'Supprimer image'}
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                        <p className="text-xs text-cyan-700 mt-1 truncate">{image.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Product Info Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+              >
+                <h3 className="text-lg font-bold text-blue-900 mb-4">📦 {language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-blue-900">
+                      🏷️ {language === 'en' ? 'Product Name' : 'Nom du Produit'} *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={language === 'en' ? 'e.g., USB-C Charger' : 'Ex: Chargeur USB-C'}
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-blue-900">
+                      📝 {language === 'en' ? 'Description' : 'Description'}
+                    </label>
+                    <textarea
+                      placeholder={language === 'en' ? 'Optional details about the charger...' : 'Détails optionnels...'}
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({ ...formData, description: e.target.value })
+                      }
+                      rows={3}
+                      className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Mark & Connector Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200"
+              >
+                <h3 className="text-lg font-bold text-purple-900 mb-4">🏢 {language === 'en' ? 'Brand & Connector' : 'Marque & Connecteur'}</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-purple-900">
+                      🏷️ {language === 'en' ? 'Mark / Brand' : 'Marque'} *
+                    </label>
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.mark_id}
+                        onChange={(e) =>
+                          setFormData({ ...formData, mark_id: e.target.value })
+                        }
+                        className="flex-1 px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white"
                       >
-                        🗑️
+                        <option value="">{language === 'en' ? 'Select Mark' : 'Sélectionnez Marque'}</option>
+                        {marks.map((mark) => (
+                          <option key={mark.id} value={mark.id}>
+                            {mark.name}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        onClick={handleAddMark}
+                        variant="outline"
+                        className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
+                      >
+                        <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                  ))}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-purple-900">
+                      🔗 {language === 'en' ? 'Connector Type' : 'Type de Connecteur'} *
+                    </label>
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.connector_type_id}
+                        onChange={(e) =>
+                          setFormData({ ...formData, connector_type_id: e.target.value })
+                        }
+                        className="flex-1 px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white"
+                      >
+                        <option value="">{language === 'en' ? 'Select Type' : 'Sélectionnez Type'}</option>
+                        {connectorTypes.map((type) => (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        onClick={handleAddConnectorType}
+                        variant="outline"
+                        className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-indigo-900">
+                      🏢 {language === 'en' ? 'Supplier' : 'Fournisseur'}
+                    </label>
+                    <select
+                      value={formData.supplier_id}
+                      onChange={(e) =>
+                        setFormData({ ...formData, supplier_id: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                    >
+                      <option value="">{language === 'en' ? 'Select Supplier' : 'Sélectionnez Fournisseur'}</option>
+                      {suppliers.map((supplier) => (
+                        <option key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
+              </motion.div>
+
+              {/* Electrical Specs Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200"
+              >
+                <h3 className="text-lg font-bold text-yellow-900 mb-4">⚡ {language === 'en' ? 'Electrical Specs' : 'Spécifications Électriques'}</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-yellow-900">⚡ Voltage</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="5V"
+                      value={formData.voltage}
+                      onChange={(e) =>
+                        setFormData({ ...formData, voltage: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-yellow-900">🔌 Wattage</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="20W"
+                      value={formData.wattage}
+                      onChange={(e) =>
+                        setFormData({ ...formData, wattage: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-yellow-900">⚙️ Amperage</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="4A"
+                      value={formData.amperage}
+                      onChange={(e) =>
+                        setFormData({ ...formData, amperage: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold mb-2 text-yellow-900">🔢 {language === 'en' ? 'Model Number' : 'Numéro de Modèle'}</label>
+                  <input
+                    type="text"
+                    placeholder="Optional"
+                    value={formData.model_number}
+                    onChange={(e) =>
+                      setFormData({ ...formData, model_number: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Inventory Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200"
+              >
+                <h3 className="text-lg font-bold text-emerald-900 mb-4">📊 {language === 'en' ? 'Inventory' : 'Inventaire'}</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-emerald-900">📦 {language === 'en' ? 'Initial Qty' : 'Qté Initiale'} *</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.quantity_initial}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          quantity_initial: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-emerald-900">📊 {language === 'en' ? 'Current Qty' : 'Qté Actuelle'}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      disabled
+                      placeholder="Auto-filled from initial quantity"
+                      value={formData.quantity_initial}
+                      className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-gray-50 font-bold text-gray-600 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-emerald-700 mt-1">{language === 'en' ? 'Auto-filled from Initial Qty' : 'Rempli automatiquement à partir de Qté Initiale'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-emerald-900">⚠️ {language === 'en' ? 'Min Qty' : 'Qté Min'} *</label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="Alert level"
+                      value={formData.quantity_minimal}
+                      onChange={(e) =>
+                        setFormData({ ...formData, quantity_minimal: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-bold"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Pricing & Payment Section - LAST */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="p-4 bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl border border-rose-200"
+              >
+                <h3 className="text-lg font-bold text-rose-900 mb-4">💳 {language === 'en' ? 'Payment' : 'Paiement'}</h3>
+                
+                {/* Tarification Calculation */}
+                <div className="mb-4 p-3 bg-white rounded-lg border border-rose-200">
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-rose-700 font-semibold">{language === 'en' ? 'Unit Price' : 'Prix Unitaire'}</p>
+                      <p className="text-lg font-bold text-rose-900">{parseFloat(formData.purchase_price || '0').toFixed(2)} DA</p>
+                    </div>
+                    <div>
+                      <p className="text-rose-700 font-semibold">{language === 'en' ? 'Quantity' : 'Quantité'}</p>
+                      <p className="text-lg font-bold text-rose-900">{formData.quantity_initial || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-rose-700 font-semibold">{language === 'en' ? 'Total Cost' : 'Coût Total'}</p>
+                      <p className="text-lg font-bold text-rose-900">{(parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))).toFixed(2)} DA</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Tracking */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-rose-900">💵 {language === 'en' ? 'Unit Price' : 'Prix Unitaire'} *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={formData.purchase_price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, purchase_price: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-rose-900">💰 {language === 'en' ? 'Amount Paid' : 'Montant Payé'}</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={formData.amount_paid}
+                      onChange={(e) =>
+                        setFormData({ ...formData, amount_paid: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* Rest/Balance Calculation */}
+                <div className="mt-4 p-3 rounded-lg" style={{
+                  backgroundColor: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
+                    ? '#FEE2E2'
+                    : '#DBEAFE',
+                  borderColor: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
+                    ? '#FCA5A5'
+                    : '#93C5FD',
+                  borderWidth: '2px'
+                }}>
+                  <p className="text-sm font-semibold mb-2" style={{
+                    color: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
+                      ? '#991B1B'
+                      : '#1E40AF'
+                  }}>
+                    📊 {language === 'en' ? 'Remaining Balance' : 'Solde Restant'}
+                  </p>
+                  <p style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    color: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
+                      ? '#DC2626'
+                      : '#2563EB'
+                  }}>
+                    {((parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0')).toFixed(2)} DA
+                  </p>
+                </div>
+
+                {/* Selling Price */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold mb-2 text-rose-900">🏷️ {language === 'en' ? 'Selling Price' : 'Prix de Vente'} *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={formData.selling_price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, selling_price: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white font-bold"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
+                <Button
+                  onClick={handleSaveCharger}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-lg h-12 font-bold text-base"
+                >
+                  {isEditingMode 
+                    ? (language === 'en' ? '💾 Update' : '💾 Mettre à Jour')
+                    : (language === 'en' ? '💾 Save Charger' : '💾 Enregistrer')}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setIsEditingMode(false);
+                    setFormData({
+                      name: '',
+                      description: '',
+                      mark_id: '',
+                      connector_type_id: '',
+                      voltage: '',
+                      wattage: '',
+                      amperage: '',
+                      model_number: '',
+                      quantity_initial: '',
+                      quantity_actual: '',
+                      quantity_minimal: '',
+                      purchase_price: '',
+                      selling_price: '',
+                      supplier_id: '',
+                      amount_paid: '',
+                      images: [],
+                    });
+                  }}
+                  variant="outline"
+                  className="flex-1 rounded-lg h-12 font-bold text-base"
+                >
+                  ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
+                </Button>
               </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{language === 'ar' ? 'حذف الفئة' : 'Supprimer la catégorie'}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {language === 'ar' ? 'هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.' : 'Êtes-vous sûr? Cette action ne peut pas être annulée.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{language === 'ar' ? 'إلغاء' : 'Annuler'}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (deleteId) onDelete('category', deleteId);
-                setDeleteId(null);
-              }}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {language === 'ar' ? 'حذف' : 'Supprimer'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-}
-
-function AddStoreDialog({
-  isOpen,
-  onClose,
-  onAdd,
-  language,
-  getText,
-  newName,
-  setNewName,
-}: any) {
-  if (!isOpen) return null;
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogDescription className="sr-only">Add a new store</DialogDescription>
-        <DialogHeader>
-          <DialogTitle>{getText('add_store', language)}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <Input
-            placeholder={language === 'ar' ? 'اسم المتجر' : 'Nom du magasin'}
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className="rounded-lg"
-          />
-          <Button
-            onClick={() => newName && onAdd(newName)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-          >
-            {getText('save', language)}
-          </Button>
+            </div>
+          </motion.div>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+      )}
 
-function AddShelvingDialog({
-  isOpen,
-  onClose,
-  onAdd,
-  language,
-  getText,
-  newName,
-  setNewName,
-  stores,
-}: any) {
-  const [selectedStoreId, setSelectedStoreId] = useState(stores[0]?.id || '');
-  const [shelvingLines, setShelvingLines] = useState(5);
-
-  if (!isOpen) return null;
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogDescription className="sr-only">Add a new shelving</DialogDescription>
-        <DialogHeader>
-          <DialogTitle>{getText('add_shelving', language)}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <Select value={selectedStoreId} onValueChange={setSelectedStoreId}>
-            <SelectTrigger className="rounded-lg">
-              <SelectValue placeholder={getText('store', language)} />
-            </SelectTrigger>
-            <SelectContent>
-              {stores.map((store: Store) => (
-                <SelectItem key={store.id} value={store.id}>
-                  {store.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            placeholder={language === 'ar' ? 'اسم الرف' : 'Nom de l\'étager'}
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className="rounded-lg"
-          />
-          <Input
-            type="number"
-            placeholder={language === 'ar' ? 'عدد الصفوف' : 'Nombre de lignes'}
-            value={shelvingLines}
-            onChange={(e) => setShelvingLines(parseInt(e.target.value) || 5)}
-            className="rounded-lg"
-            min="1"
-          />
-          <Button
-            onClick={() => newName && onAdd(newName, selectedStoreId)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+      {/* Detail Modal */}
+      {selectedCharger && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           >
-            {getText('save', language)}
-          </Button>
+            {/* Header */}
+            <div className="sticky top-0 p-6 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-slate-900">
+                👁️ {selectedCharger.name}
+              </h2>
+              <button
+                onClick={() => setSelectedCharger(null)}
+                className="text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-lg p-2 transition text-2xl"
+              >
+                ❌
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Image Gallery Section */}
+              {(selectedCharger.primary_image || chargerImages.length > 0) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0 }}
+                  className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200"
+                >
+                  <h3 className="text-lg font-bold text-cyan-900 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'} ({chargerImages.length})</h3>
+                  {chargerImages.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {chargerImages.map((imageUrl, index) => (
+                        <div key={index} className="rounded-lg overflow-hidden border-2 border-cyan-300 shadow-md">
+                          <img
+                            src={imageUrl}
+                            alt={`${selectedCharger.name} - Image ${index + 1}`}
+                            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              console.warn(`Failed to load image: ${imageUrl}`);
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : selectedCharger.primary_image ? (
+                    <img
+                      src={selectedCharger.primary_image}
+                      alt={selectedCharger.name}
+                      className="w-full h-80 object-cover rounded-lg border-2 border-cyan-300"
+                      onError={(e) => {
+                        console.warn(`Failed to load image: ${selectedCharger.primary_image}`);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : null}
+                </motion.div>
+              )}
+
+              {/* Basic Info Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+              >
+                <h3 className="text-lg font-bold text-blue-900 mb-4">📦 {language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3 bg-white rounded-lg">
+                    <label className="block text-xs font-semibold text-blue-700 mb-1">🏷️ {language === 'en' ? 'Product Name' : 'Nom du Produit'}</label>
+                    <p className="text-blue-900 font-semibold">{selectedCharger.name}</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg">
+                    <label className="block text-xs font-semibold text-blue-700 mb-1">🎨 {language === 'en' ? 'Brand' : 'Marque'}</label>
+                    <p className="text-blue-900 font-semibold">{selectedCharger.mark?.name || '-'}</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg">
+                    <label className="block text-xs font-semibold text-blue-700 mb-1">🔗 {language === 'en' ? 'Connector Type' : 'Type de Connecteur'}</label>
+                    <p className="text-blue-900 font-semibold">{selectedCharger.connector_type?.name || '-'}</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg">
+                    <label className="block text-xs font-semibold text-blue-700 mb-1">🔢 {language === 'en' ? 'Model Number' : 'Numéro de Modèle'}</label>
+                    <p className="text-blue-900 font-semibold">{selectedCharger.model_number || '-'}</p>
+                  </div>
+                </div>
+
+                {selectedCharger.description && (
+                  <div className="mt-4 p-3 bg-white rounded-lg">
+                    <label className="block text-xs font-semibold text-blue-700 mb-1">📝 {language === 'en' ? 'Description' : 'Description'}</label>
+                    <p className="text-blue-900">{selectedCharger.description}</p>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Technical Specs Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="p-4 bg-gradient-to-br from-violet-50 to-violet-100 rounded-xl border border-violet-200"
+              >
+                <h3 className="text-lg font-bold text-violet-900 mb-4">⚡ {language === 'en' ? 'Technical Specifications' : 'Spécifications Techniques'}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-violet-700">⚡ Voltage</p>
+                    <p className="text-lg font-bold text-violet-900">{selectedCharger.voltage}V</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-violet-700">💡 Wattage</p>
+                    <p className="text-lg font-bold text-violet-900">{selectedCharger.wattage}W</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-violet-700">🔌 Amperage</p>
+                    <p className="text-lg font-bold text-violet-900">{selectedCharger.amperage}A</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-violet-700">📊 Margin</p>
+                    <p className="text-lg font-bold text-violet-900">{selectedCharger.margin.toFixed(1)}%</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Stock & Pricing Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200"
+              >
+                <h3 className="text-lg font-bold text-emerald-900 mb-4">💰 {language === 'en' ? 'Stock & Pricing' : 'Stock & Tarification'}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-emerald-700">📦 {language === 'en' ? 'Initial Stock' : 'Stock Initial'}</p>
+                    <p className="text-lg font-bold text-emerald-900">{selectedCharger.quantity_initial || selectedCharger.quantity_actual}</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-emerald-700">📊 {language === 'en' ? 'Current Stock' : 'Stock Actuel'}</p>
+                    <p className="text-lg font-bold text-emerald-900">{selectedCharger.quantity_actual}</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-emerald-700">⚠️ {language === 'en' ? 'Min Stock' : 'Stock Min'}</p>
+                    <p className="text-lg font-bold text-emerald-900">{selectedCharger.quantity_minimal}</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-emerald-700">💵 {language === 'en' ? 'Buy Price' : 'Prix Achat'}</p>
+                    <p className="text-lg font-bold text-emerald-900">{selectedCharger.purchase_price.toFixed(0)} DA</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-lg text-center">
+                    <p className="text-xs font-semibold text-emerald-700">💰 {language === 'en' ? 'Sell Price' : 'Prix Vente'}</p>
+                    <p className="text-lg font-bold text-emerald-900">{selectedCharger.selling_price.toFixed(0)} DA</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-4 border-t border-slate-300">
+                <button
+                  onClick={() => {
+                    setIsEditingMode(true);
+                    setFormData({
+                      name: selectedCharger.name,
+                      description: selectedCharger.description || '',
+                      mark_id: selectedCharger.mark?.id || selectedCharger.mark_id || '',
+                      connector_type_id: selectedCharger.connector_type?.id || selectedCharger.connector_type_id || '',
+                      voltage: selectedCharger.voltage.toString(),
+                      wattage: selectedCharger.wattage.toString(),
+                      amperage: selectedCharger.amperage.toString(),
+                      model_number: selectedCharger.model_number || '',
+                      quantity_initial: selectedCharger.quantity_actual.toString(),
+                      quantity_actual: selectedCharger.quantity_actual.toString(),
+                      quantity_minimal: selectedCharger.quantity_minimal.toString(),
+                      purchase_price: selectedCharger.purchase_price.toString(),
+                      selling_price: selectedCharger.selling_price.toString(),
+                      supplier_id: '',
+                      amount_paid: '',
+                      images: [],
+                    });
+                    setSelectedCharger(null);
+                    setShowAddModal(true);
+                  }}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 text-base"
+                >
+                  <Edit2 className="w-5 h-5" />
+                  {language === 'en' ? '✏️ Edit' : '✏️ Modifier'}
+                </button>
+                <button
+                  onClick={() => setSelectedCharger(null)}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-bold transition-colors"
+                >
+                  {language === 'en' ? 'Close' : 'Fermer'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+
+      {/* Add Mark Modal */}
+      {showAddMarkModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl max-w-md w-full shadow-2xl"
+          >
+            <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-2xl">
+              <h2 className="text-2xl font-bold text-purple-900">
+                🏷️ {language === 'en' ? 'Add New Mark' : 'Ajouter Nouvelle Marque'}
+              </h2>
+              <p className="text-purple-700 text-sm mt-1">
+                {language === 'en' ? 'Create a new charger brand/mark' : 'Créez une nouvelle marque de chargeur'}
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-purple-900">
+                  📝 {language === 'en' ? 'Mark Name' : 'Nom de la Marque'} *
+                </label>
+                <input
+                  type="text"
+                  placeholder={language === 'en' ? 'e.g., Apple, Samsung...' : 'Ex: Apple, Samsung...'}
+                  value={newMarkName}
+                  onChange={(e) => setNewMarkName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSaveNewMark()}
+                  className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white font-semibold"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
+                <button
+                  onClick={handleSaveNewMark}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
+                >
+                  💾 {language === 'en' ? 'Save Mark' : 'Enregistrer'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddMarkModal(false);
+                    setNewMarkName('');
+                  }}
+                  className="flex-1 border-2 border-purple-300 text-purple-700 hover:bg-purple-50 font-bold py-3 px-4 rounded-lg transition-all"
+                >
+                  ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Add Connector Type Modal */}
+      {showAddConnectorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl max-w-md w-full shadow-2xl"
+          >
+            <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-t-2xl">
+              <h2 className="text-2xl font-bold text-cyan-900">
+                🔗 {language === 'en' ? 'Add Connector Type' : 'Ajouter Type de Connecteur'}
+              </h2>
+              <p className="text-cyan-700 text-sm mt-1">
+                {language === 'en' ? 'Create a new connector type' : 'Créez un nouveau type de connecteur'}
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-cyan-900">
+                  📝 {language === 'en' ? 'Connector Name' : 'Nom du Connecteur'} *
+                </label>
+                <input
+                  type="text"
+                  placeholder={language === 'en' ? 'e.g., USB-C, Lightning...' : 'Ex: USB-C, Lightning...'}
+                  value={newConnectorName}
+                  onChange={(e) => setNewConnectorName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSaveNewConnector()}
+                  className="w-full px-4 py-3 border border-cyan-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent bg-white font-semibold"
+                  autoFocus
+                />
+              </div>
+
+              <div className="bg-cyan-50 p-3 rounded-lg">
+                <p className="text-xs text-cyan-700 font-semibold">
+                  💡 {language === 'en' ? 'Tip: Be specific (USB-C, Lightning, Micro USB, etc.)' : 'Conseil: Soyez spécifique (USB-C, Lightning, Micro USB, etc.)'}
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
+                <button
+                  onClick={handleSaveNewConnector}
+                  className="flex-1 bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
+                >
+                  💾 {language === 'en' ? 'Save Connector' : 'Enregistrer'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddConnectorModal(false);
+                    setNewConnectorName('');
+                  }}
+                  className="flex-1 border-2 border-cyan-300 text-cyan-700 hover:bg-cyan-50 font-bold py-3 px-4 rounded-lg transition-all"
+                >
+                  ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && chargerToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999] p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6"
+          >
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                ⚠️ {language === 'en' ? 'Confirm Delete' : 'Confirmer la Suppression'}
+              </h2>
+              <p className="text-gray-600 mb-4">
+                {language === 'en' 
+                  ? `Are you sure you want to delete "${
+                      chargers.find(c => c.id === chargerToDelete)?.name || ''
+                    }"? This action cannot be undone.`
+                  : `Êtes-vous sûr de vouloir supprimer "${
+                      chargers.find(c => c.id === chargerToDelete)?.name || ''
+                    }"? Cette action ne peut pas être annulée.`}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setChargerToDelete(null);
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                >
+                  {language === 'en' ? 'Cancel' : 'Annuler'}
+                </button>
+                <button
+                  onClick={() => {
+                    if (chargerToDelete) {
+                      handleDeleteCharger(chargerToDelete);
+                      setShowDeleteConfirm(false);
+                      setChargerToDelete(null);
+                    }
+                  }}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {language === 'en' ? 'Delete' : 'Supprimer'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </div>
   );
-}
+};
+
+export default Inventory;

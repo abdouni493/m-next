@@ -1,4 +1,4 @@
-# autoParts - Inventory Management System
+#  M-Next - Inventory Management System
 
 A modern, full-stack inventory management application built with React, Vite, TypeScript, and **Supabase backend**.
 
@@ -41,7 +41,7 @@ A modern, full-stack inventory management application built with React, Vite, Ty
 ```bash
 # 1. Clone the repository
 git clone <YOUR_GIT_URL>
-cd autoParts
+cd  M-Next
 
 # 2. Install dependencies
 npm install
@@ -79,7 +79,7 @@ npm run dev
 ## 🏗️ Project Structure
 
 ```
-autoParts/
+ M-Next/
 ├── src/
 │   ├── lib/
 │   │   ├── supabaseClient.ts ........... Supabase client & functions

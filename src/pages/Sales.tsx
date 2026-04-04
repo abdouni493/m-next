@@ -20,7 +20,9 @@ import {
   Download,
   Upload,
   Edit,
-  AlertCircle
+  AlertCircle,
+  MoreVertical,
+  Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,6 +51,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -95,6 +102,29 @@ const formatCurrencyLocal = (amount: number, language: string) =>
 
 const formatDate = (dateString: string, language: string) =>
   new Date(dateString).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-DZ');
+
+// Dropdown Menu Item Component
+function DropdownMenuItemComponent({ 
+  icon, 
+  label, 
+  onClick, 
+  className = '' 
+}: { 
+  icon: React.ReactNode; 
+  label: string; 
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 ${className}`}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+}
 
 // Edit Invoice Dialog Component - UPDATED WITH PAY IN FULL BUTTON
 function EditInvoiceDialog({ isOpen, onClose, invoice, onUpdate }: {
@@ -370,7 +400,7 @@ function PrintInvoiceDialog({ isOpen, onClose, invoice }: {
                     <div class="logo-circle-print">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.3 16.8 10 15 10s-3.7.3-4.5.6c-.8.2-1.5 1-1.5 1.9v3c0 .6.4 1 1 1h2"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M14 17H4V5l3-4h7l3 4v2"/><path d="M7 9h11"/></svg>
                     </div>
-                    <h1 class="store-name-print">AUTO PARTS KOUBA</h1>
+                    <h1 class="store-name-print">chargers  </h1>
                 </div>
                 <div class="invoice-meta-print">
                   <h2>${invoiceType} - #${invoice.id}</h2>
@@ -621,6 +651,141 @@ function ImportSalesDialog({ isOpen, onClose, onImport }: {
   );
 }
 
+// Invoice Details Dialog Component
+function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
+  isOpen: boolean;
+  onClose: () => void;
+  invoice: Invoice | null;
+  invoiceItems: any[];
+}) {
+  const { language } = useLanguage();
+
+  if (!invoice) return null;
+
+  const remainingDebt = invoice.total - invoice.amount_paid;
+  const isPaid = remainingDebt <= 0;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl flex items-center gap-3">
+            <span className="text-3xl">{isPaid ? '✅' : '⏳'}</span>
+            {language === 'ar' ? `تفاصيل الفاتورة رقم ${invoice.id}` : `Détails Facture #${invoice.id}`}
+          </DialogTitle>
+          <DialogDescription>
+            {language === 'ar' ? 'عرض شامل لجميع تفاصيل الفاتورة والمنتجات والدفوعات' : 'Vue complète de tous les détails de la facture, des produits et des paiements'}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Client Information */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="border-2 border-blue-300 dark:border-blue-700 rounded-lg p-6 bg-blue-50 dark:bg-blue-950/30">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-900 dark:text-blue-100">
+              <User className="h-5 w-5" />
+              {language === 'ar' ? '👤 معلومات العميل' : '👤 Informations Client'}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-semibold text-blue-700 dark:text-blue-300">{language === 'ar' ? 'اسم العميل' : 'Nom du Client'}</Label>
+                <p className="text-xl font-bold text-blue-900 dark:text-blue-100 mt-1">{invoice.clientName || (language === 'ar' ? 'العميل عابر' : 'Client de passage')}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-blue-700 dark:text-blue-300">{language === 'ar' ? 'تاريخ الفاتورة' : 'Date de Facture'}</Label>
+                <p className="text-xl font-bold text-blue-900 dark:text-blue-100 mt-1">{formatDate(invoice.created_at, language)}</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Products Section */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="border-2 border-orange-300 dark:border-orange-700 rounded-lg p-6 bg-orange-50 dark:bg-orange-950/30">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-orange-900 dark:text-orange-100">
+              <Package className="h-5 w-5" />
+              {language === 'ar' ? '📦 المنتجات / الأجهزة' : '📦 Produits / Chargeurs'}
+            </h3>
+            {invoiceItems.length === 0 ? (
+              <p className="text-sm text-orange-700 dark:text-orange-300">{language === 'ar' ? 'لا توجد منتجات' : 'Aucun produit'}</p>
+            ) : (
+              <div className="space-y-3">
+                {invoiceItems.map((item, idx) => (
+                  <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * idx }} className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'اسم المنتج' : 'Produit'}</Label>
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{item.product_name}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'الكمية' : 'Quantité'}</Label>
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{item.quantity} {language === 'ar' ? 'وحدة' : 'unités'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'السعر الواحد' : 'Prix Unitaire'}</Label>
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{formatCurrencyLocal(item.unit_price || item.selling_price || 0, language)}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'الإجمالي' : 'Total'}</Label>
+                        <p className="text-sm font-bold text-orange-600 dark:text-orange-400 mt-1">{formatCurrencyLocal(item.total_price || 0, language)}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+
+          {/* Payment Section */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="border-2 border-green-300 dark:border-green-700 rounded-lg p-6 bg-green-50 dark:bg-green-950/30">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-green-900 dark:text-green-100">
+              <DollarSign className="h-5 w-5" />
+              {language === 'ar' ? '💰 معلومات الدفع' : '💰 Informations de Paiement'}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border-l-4 border-green-600">
+                <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'المجموع' : 'Total'}</Label>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">{formatCurrencyLocal(invoice.total, language)}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border-l-4 border-blue-600">
+                <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'المدفوع' : 'Payé'}</Label>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">{formatCurrencyLocal(invoice.amount_paid, language)}</p>
+              </div>
+              <div className={`bg-white dark:bg-slate-800 rounded-lg p-4 border-l-4 ${remainingDebt > 0 ? 'border-red-600' : 'border-emerald-600'}`}>
+                <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{remainingDebt > 0 ? (language === 'ar' ? 'المتبقي' : 'Reste') : (language === 'ar' ? 'الباقي' : 'Monnaie')}</Label>
+                <p className={`text-2xl font-bold mt-2 ${remainingDebt > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>{formatCurrencyLocal(Math.abs(remainingDebt), language)}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">{language === 'ar' ? 'حالة الدفع' : 'Statut'}</span>
+              <Badge className={isPaid ? 'bg-emerald-600 text-white' : 'bg-orange-600 text-white'}>{isPaid ? (language === 'ar' ? '✅ مدفوعة' : '✅ Payée') : (language === 'ar' ? '⏳ دين' : '⏳ Dette')}</Badge>
+            </div>
+          </motion.div>
+
+          {/* Summary */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="border-2 border-purple-300 dark:border-purple-700 rounded-lg p-6 bg-purple-50 dark:bg-purple-950/30">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-purple-900 dark:text-purple-100">
+              <Receipt className="h-5 w-5" />
+              {language === 'ar' ? '📋 ملخص' : '📋 Résumé'}
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? 'المنتجات' : 'Produits'}</p>
+                <p className="text-xl font-bold text-purple-600 dark:text-purple-400 mt-1">{invoiceItems.length}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? 'الكمية' : 'Quantité'}</p>
+                <p className="text-xl font-bold text-purple-600 dark:text-purple-400 mt-1">{invoiceItems.reduce((sum, item) => sum + item.quantity, 0)}</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>{language === 'ar' ? '✕ إغلاق' : '✕ Fermer'}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // Main Sales Component - UPDATED WITH QUICK PAY IN FULL BUTTON
 export default function Sales() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -639,6 +804,8 @@ export default function Sales() {
   const [invoiceToDeleteId, setInvoiceToDeleteId] = useState<number | null>(null);
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [detailsInvoiceItems, setDetailsInvoiceItems] = useState<any[]>([]);
 
   // Fetch sales data from Supabase
   const fetchSalesData = async () => {
@@ -703,6 +870,27 @@ export default function Sales() {
   const handleOpenEditModal = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
     setIsEditModalOpen(true);
+  };
+
+  const handleOpenDetailsModal = async (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    try {
+      const { data, error } = await supabase
+        .from('invoice_items')
+        .select('*')
+        .eq('invoice_id', invoice.id);
+
+      if (error) throw error;
+      setDetailsInvoiceItems(data || []);
+      setIsDetailsModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching invoice items:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في تحميل التفاصيل' : 'Erreur lors du chargement',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handlePrintInvoice = async (invoiceId: number) => {
@@ -1056,25 +1244,25 @@ export default function Sales() {
         </CardHeader>
         <CardContent>
           {/* Invoices Table */}
-          <div className="rounded-md border">
+          <div className="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>{language === 'ar' ? 'رقم الفاتورة' : 'Numéro'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'العميل' : 'Client'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'المبلغ الإجمالي' : 'Montant Total'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'المبلغ المدفوع' : 'Montant Payé'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'المبلغ المتبقي' : 'Reste à Payer'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'الحالة' : 'Statut'}</TableHead>
-                  <TableHead>{language === 'ar' ? 'أنشأ بواسطة' : 'Créé par'}</TableHead>
-                  <TableHead className="text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                <TableRow className="bg-slate-100 dark:bg-slate-800">
+                  <TableHead className="font-bold">{language === 'ar' ? 'رقم الفاتورة' : 'Numéro'}</TableHead>
+                  <TableHead className="font-bold">{language === 'ar' ? 'العميل' : 'Client'}</TableHead>
+                  <TableHead className="font-bold">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                  <TableHead className="font-bold text-right">{language === 'ar' ? 'المبلغ الإجمالي' : 'Montant Total'}</TableHead>
+                  <TableHead className="font-bold text-right">{language === 'ar' ? 'المبلغ المدفوع' : 'Montant Payé'}</TableHead>
+                  <TableHead className="font-bold text-right">{language === 'ar' ? 'المبلغ المتبقي' : 'Reste à Payer'}</TableHead>
+                  <TableHead className="font-bold">{language === 'ar' ? 'الحالة' : 'Statut'}</TableHead>
+                  <TableHead className="font-bold text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {salesInvoices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                      <div className="text-4xl mb-3">📭</div>
                       {language === 'ar' ? 'لا توجد فواتير لعرضها.' : 'Aucune facture à afficher.'}
                     </TableCell>
                   </TableRow>
@@ -1084,74 +1272,82 @@ export default function Sales() {
                     const isPaid = remainingDebt <= 0;
                     
                     return (
-                      <TableRow key={invoice.id}>
-                        <TableCell className="font-medium">#{invoice.id}</TableCell>
-                        <TableCell>
+                      <TableRow key={invoice.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-200 dark:border-slate-700">
+                        <TableCell className="font-bold text-blue-600 dark:text-blue-400">#{invoice.id}</TableCell>
+                        <TableCell className="font-semibold">
                           {invoice.clientName || (language === 'ar' ? 'العميل عابر' : 'Client de passage')}
                         </TableCell>
-                        <TableCell>{formatDate(invoice.created_at, language)}</TableCell>
-                        <TableCell>{formatCurrencyLocal(invoice.total, language)}</TableCell>
-                        <TableCell>{formatCurrencyLocal(invoice.amount_paid, language)}</TableCell>
-                        <TableCell>
-                          <span className={remainingDebt > 0 ? 'text-red-600 font-medium' : 'text-green-600 font-medium'}>
-                            {formatCurrencyLocal(remainingDebt, language)}
+                        <TableCell className="text-sm text-slate-600 dark:text-slate-400">
+                          {formatDate(invoice.created_at, language)}
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-slate-900 dark:text-slate-100">
+                          {formatCurrencyLocal(invoice.total, language)}
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-green-600 dark:text-green-400">
+                          {formatCurrencyLocal(invoice.amount_paid, language)}
+                        </TableCell>
+                        <TableCell className="text-right font-bold">
+                          <span className={remainingDebt > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
+                            {formatCurrencyLocal(Math.abs(remainingDebt), language)}
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={isPaid ? 'default' : 'destructive'}>
+                          <Badge className={isPaid ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-orange-600 hover:bg-orange-700 text-white'}>
                             {isPaid 
-                              ? (language === 'ar' ? 'مدفوعة' : 'Payée') 
-                              : (language === 'ar' ? 'دين' : 'Dette')}
+                              ? (language === 'ar' ? '✅ مدفوعة' : '✅ Payée') 
+                              : (language === 'ar' ? '⏳ دين' : '⏳ Dette')}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {invoice.createdByType === 'admin' ? (
-                              <Crown className="h-4 w-4 text-yellow-600" />
-                            ) : (
-                              <User className="h-4 w-4 text-blue-600" />
-                            )}
-                            <span>{invoice.createdBy}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex justify-center gap-2">
-                            {/* QUICK PAY IN FULL BUTTON - Only show for invoices with debt */}
-                            {!isPaid && (
-                              <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => handleQuickPayInFull(invoice.id)}
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                              >
-                                <Check className="h-4 w-4" />
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
                               </Button>
-                            )}
-                            
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePrintInvoice(invoice.id)}
-                            >
-                              <Printer className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleOpenEditModal(invoice)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {!isEmployee && (
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => openDeleteConfirmation(invoice.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              {/* View Details */}
+                              <DropdownMenuItemComponent
+                                icon={<Eye className="h-4 w-4" />}
+                                label={language === 'ar' ? '👁️ عرض التفاصيل' : '👁️ Voir les détails'}
+                                onClick={() => handleOpenDetailsModal(invoice)}
+                              />
+                              
+                              {/* Edit Invoice */}
+                              <DropdownMenuItemComponent
+                                icon={<Edit className="h-4 w-4" />}
+                                label={language === 'ar' ? '✏️ تعديل' : '✏️ Modifier'}
+                                onClick={() => handleOpenEditModal(invoice)}
+                              />
+                              
+                              {/* Pay Debt (only for unpaid) */}
+                              {!isPaid && (
+                                <DropdownMenuItemComponent
+                                  icon={<Check className="h-4 w-4" />}
+                                  label={language === 'ar' ? '✅ دفع الدين' : '✅ Payer la dette'}
+                                  onClick={() => handleQuickPayInFull(invoice.id)}
+                                  className="text-green-600 dark:text-green-400"
+                                />
+                              )}
+                              
+                              {/* Print Invoice */}
+                              <DropdownMenuItemComponent
+                                icon={<Printer className="h-4 w-4" />}
+                                label={language === 'ar' ? '🖨️ طباعة' : '🖨️ Imprimer'}
+                                onClick={() => handlePrintInvoice(invoice.id)}
+                              />
+                              
+                              {/* Delete (admin only) */}
+                              {!isEmployee && (
+                                <DropdownMenuItemComponent
+                                  icon={<Trash2 className="h-4 w-4" />}
+                                  label={language === 'ar' ? '🗑️ حذف' : '🗑️ Supprimer'}
+                                  onClick={() => openDeleteConfirmation(invoice.id)}
+                                  className="text-red-600 dark:text-red-400"
+                                />
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     );
@@ -1188,6 +1384,13 @@ export default function Sales() {
         isOpen={isImportDialogOpen}
         onClose={() => setIsImportDialogOpen(false)}
         onImport={handleImportSales}
+      />
+
+      <InvoiceDetailsDialog
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        invoice={selectedInvoice}
+        invoiceItems={detailsInvoiceItems}
       />
     </div>
   );

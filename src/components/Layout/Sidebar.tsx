@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { getWebsiteSettingsREST } from '@/lib/supabaseClient';
+import { Globe } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,18 +15,37 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
 
-  const [storeName, setStoreName] = useState('Auto Parts');
-  const [storeDisplayName, setStoreDisplayName] = useState('Auto Parts');
-  const [storeLogoData, setStoreLogoData] = useState('');
+  const [storeName, setStoreName] = useState('Chargers');
+  const [storeDisplayName, setStoreDisplayName] = useState('Chargers');
+  const [storeLogoUrl, setStoreLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const localStoreName = localStorage.getItem('storeName');
-    const localDisplayName = localStorage.getItem('storeDisplayName');
-    const localLogoData = localStorage.getItem('storeLogoData');
+    const fetchSettings = async () => {
+      try {
+        const settings = await getWebsiteSettingsREST();
+        if (settings) {
+          if (settings.store_name) {
+            setStoreName(settings.store_name);
+            setStoreDisplayName(settings.store_name);
+          }
+          if (settings.logo_url) {
+            setStoreLogoUrl(settings.logo_url);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching website settings:', error);
+        // Fallback to defaults
+        const localStoreName = localStorage.getItem('storeName');
+        const localDisplayName = localStorage.getItem('storeDisplayName');
+        const localLogoData = localStorage.getItem('storeLogoData');
 
-    if (localStoreName) setStoreName(localStoreName);
-    if (localDisplayName) setStoreDisplayName(localDisplayName);
-    if (localLogoData) setStoreLogoData(localLogoData);
+        if (localStoreName) setStoreName(localStoreName);
+        if (localDisplayName) setStoreDisplayName(localDisplayName);
+        if (localLogoData) setStoreLogoUrl(localLogoData);
+      }
+    };
+
+    fetchSettings();
   }, []);
 
   const navigationItems = [
@@ -33,11 +54,12 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
     { title: 'Factures d\'Achat', href: '/purchase-invoices', emoji: '🚚' },
     { title: t('nav.sales'), href: '/sales', emoji: '🛒' },
     { title: t('nav.suppliers'), href: '/suppliers', emoji: '🏪' },
-    { title: t('nav.employees'), href: '/employees', emoji: '👥' },
-    { title: t('nav.reports'), href: '/reports', emoji: '📈' }
+    { title: t('nav.reports'), href: '/reports', emoji: '📈' },
+    { title: 'Commandes', href: '/commands', emoji: '📦' }
   ];
 
   const toolItems = [
+    { title: 'Gestion du Site', href: '/website', emoji: '🌐' },
     { title: t('nav.pos'), href: '/pos', emoji: '🧮' },
     { title: t('nav.barcodes'), href: '/barcodes', emoji: '📲' },
     { title: t('nav.settings'), href: '/settings', emoji: '⚙️' }
@@ -59,10 +81,12 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
       <div className="p-6 border-b border-blue-200 dark:border-slate-700 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-slate-800 dark:to-slate-700">
         <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg border border-white/50 bg-white flex items-center justify-center">
-            {storeLogoData ? (
-              <img src={storeLogoData} alt="Logo magasin" className="w-full h-full object-cover" />
+            {storeLogoUrl ? (
+              <img src={storeLogoUrl} alt="Logo magasin" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xl">🚗</div>
+              <div className="w-full h-full bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xl">
+                <Globe className="w-6 h-6" />
+              </div>
             )}
           </div>
           {isOpen && (

@@ -87,7 +87,7 @@ export function generateReceipt(invoiceData: any, format: '80mm' | 'A4' = '80mm'
     </head>
     <body>
       <div class="header">
-        <h2>AUTO PARTS KOUBA</h2>
+        <h2>chargers  </h2>
         <p>Reçu N° ${invoiceData.id}</p>
         <p>${new Date().toLocaleDateString('fr-FR')}</p>
       </div>

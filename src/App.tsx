@@ -17,6 +17,14 @@ import Barcodes from "./pages/Barcodes";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Website from "./pages/Website";
+import Commands from "./pages/Commands";
+import { WebsiteLayout } from "./components/Layout/WebsiteLayout";
+import WebsiteLanding from "./pages/WebsiteLanding";
+import WebsiteOffers from "./pages/WebsiteOffers";
+import WebsiteSpecialOffers from "./pages/WebsiteSpecialOffers";
+import WebsiteContacts from "./pages/WebsiteContacts";
+import WebsiteCart from "./pages/WebsiteCart";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import NotFound from "./pages/NotFound";
@@ -100,6 +108,17 @@ const AppContent = () => {
           <Route path="barcodes" element={<Barcodes />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="website" element={<Website />} />
+          <Route path="commands" element={<Commands />} />
+        </Route>
+
+        {/* PUBLIC WEBSITE ROUTES */}
+        <Route element={<WebsiteLayout />}>
+          <Route path="/website-shop" element={<WebsiteLanding />} />
+          <Route path="/website-shop/offers" element={<WebsiteOffers />} />
+          <Route path="/website-shop/special-offers" element={<WebsiteSpecialOffers />} />
+          <Route path="/website-shop/contacts" element={<WebsiteContacts />} />
+          <Route path="/website-shop/order" element={<WebsiteCart />} />
         </Route>
 
         {/* EMPLOYEE ROUTES */}

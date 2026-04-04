@@ -357,7 +357,7 @@
 ## 📋 FILE LOCATIONS
 
 ```
-c:\Users\Admin\Desktop\autoParts\
+c:\Users\Admin\Desktop\ M-Next\
 ├── src/
 │   ├── pages/
 │   │   └── Inventory.tsx ✅ (Complete rewrite - 850+ lines)

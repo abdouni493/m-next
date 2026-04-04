@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-This document provides a complete guide to the "Last Price to Sell" feature implementation for the AutoParts application, including database changes, UI updates, and deployment instructions.
+This document provides a complete guide to the "Last Price to Sell" feature implementation for the  M-Next application, including database changes, UI updates, and deployment instructions.
 
 ---
 

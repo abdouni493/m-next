@@ -1,4 +1,4 @@
-// Mock Data pour Auto Parts Kouba
+// Mock Data pour chargers  
 // Données de test pour la version de démonstration
 
 export interface User {
@@ -73,7 +73,7 @@ export const mockUsers: User[] = [
   {
     id: '1',
     name: '  Admin',
-    email: ' @autoparts-kouba.dz',
+    email: ' @ M-Next- .dz',
     role: 'admin',
     phone: '+212 6 12 34 56 78',
     address: 'Casablanca, Maroc',
@@ -82,7 +82,7 @@ export const mockUsers: User[] = [
   {
     id: '2',
     name: 'Fatima Bennani',
-    email: 'fatima@autoparts-kouba.dz',
+    email: 'fatima@ M-Next- .dz',
     role: 'employee',
     phone: '+212 6 98 76 54 32',
     address: 'Casablanca, Maroc',
@@ -92,7 +92,7 @@ export const mockUsers: User[] = [
   {
     id: '3',
     name: 'Omar Alami',
-    email: 'omar@autoparts-kouba.dz',
+    email: 'omar@ M-Next- .dz',
     role: 'employee',
     phone: '+212 6 11 22 33 44',
     address: 'Casablanca, Maroc',
@@ -105,10 +105,10 @@ export const mockUsers: User[] = [
 export const mockSuppliers: Supplier[] = [
   {
     id: '1',
-    name: 'AutoParts Maroc',
+    name: ' M-Next Maroc',
     contact: 'Hassan Tazi',
     phone: '+212 5 22 33 44 55',
-    email: 'contact@autoparts-maroc.ma',
+    email: 'contact@ M-Next-maroc.ma',
     address: 'Zone Industrielle Ain Sebaa',
     city: 'Casablanca'
   },
@@ -162,7 +162,7 @@ export const mockProducts: Product[] = [
     minStock: 10,
     barcode: '3165143327784',
     description: 'Filtre à huile haute qualité pour moteurs essence et diesel',
-    supplier: 'AutoParts Maroc',
+    supplier: ' M-Next Maroc',
     location: 'A1-R2-E3'
   },
   {
@@ -201,7 +201,7 @@ export const mockProducts: Product[] = [
     minStock: 8,
     barcode: '4016987119518',
     description: 'Batterie de démarrage haute capacité',
-    supplier: 'AutoParts Maroc',
+    supplier: ' M-Next Maroc',
     location: 'D1-R1-E2'
   },
   {
@@ -227,7 +227,7 @@ export const mockProducts: Product[] = [
     minStock: 15,
     barcode: '5412700123456',
     description: 'Liquide de refroidissement long terme',
-    supplier: 'AutoParts Maroc',
+    supplier: ' M-Next Maroc',
     location: 'A3-R1-E2'
   },
   {
@@ -266,7 +266,7 @@ export const mockProducts: Product[] = [
     minStock: 4,
     barcode: '0986494081',
     description: 'Ensemble complet de plaquettes avant et arrière',
-    supplier: 'AutoParts Maroc',
+    supplier: ' M-Next Maroc',
     location: 'B1-R1-E3'
   },
   {
@@ -554,7 +554,7 @@ export const mockReports = [
     date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
     generatedBy: mockUsers[1].name,
     summary: {
-      bestSupplier: 'AutoParts Maroc',
+      bestSupplier: ' M-Next Maroc',
       totalOrders: 45,
       onTimeDelivery: 94,
       defectRate: 0.5

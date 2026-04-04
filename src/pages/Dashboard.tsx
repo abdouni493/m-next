@@ -244,7 +244,7 @@ export default function Dashboard() {
   const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [storeName, setStoreName] = useState('Auto Parts');
+  const [storeName, setStoreName] = useState('chargers');
   const [storeDisplayName, setStoreDisplayName] = useState('');
 
   const fetchData = async () => {
@@ -252,11 +252,11 @@ export default function Dashboard() {
     setHasError(false);
     try {
       // Fetch data from Supabase
-      const [productsRes, suppliersRes, customersRes, employeesRes, invoicesRes] = await Promise.all([
+      const [productsRes, suppliersRes, customersRes, ordersRes, invoicesRes] = await Promise.all([
         supabase.from('products').select('*').eq('is_active', true),
         supabase.from('suppliers').select('*').eq('is_active', true),
         supabase.from('customers').select('*'),
-        supabase.from('employees').select('*').eq('is_active', true),
+        supabase.from('orders').select('*'),
         supabase.from('invoices').select('*')
       ]);
 
@@ -273,16 +273,24 @@ export default function Dashboard() {
       const saleInvoices = (invoicesRes.data || []).filter(inv => inv.type === 'sale' && inv.status === 'paid');
       const totalSales = saleInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
 
+      // Calculate order stats
+      const orders = ordersRes.data || [];
+      const pendingOrders = orders.filter(o => o.status === 'pending').length;
+      const acceptedOrders = orders.filter(o => o.status === 'accepted').length;
+      const finalizedOrders = orders.filter(o => o.status === 'finalized' || o.status === 'completed').length;
+
       // Create stats object
       const dashboardStats = {
         totalProducts: productsRes.data?.length || 0,
         lowStockItems: lowStockCount,
         completedSales: saleInvoices.length,
-        pendingPurchases: (invoicesRes.data || []).filter(inv => inv.type === 'purchase' && inv.status === 'pending').length,
-        totalEmployees: employeesRes.data?.length || 0,
         totalSuppliers: suppliersRes.data?.length || 0,
         totalCustomers: customersRes.data?.length || 0,
-        totalSales: totalSales
+        totalSales: totalSales,
+        pendingOrders: pendingOrders,
+        acceptedOrders: acceptedOrders,
+        finalizedOrders: finalizedOrders,
+        totalOrders: orders.length
       };
 
       setStats(dashboardStats);
@@ -357,10 +365,10 @@ export default function Dashboard() {
       color: "text-purple-500"
     },
     {
-      title: "Gérer Employés",
-      description: "Gérer les comptes et les accès des employés.",
-      icon: Briefcase,
-      href: "/employees",
+      title: "Gestion des Commandes",
+      description: "Gérer les commandes en attente.",
+      icon: ShoppingCart,
+      href: "/commands",
       color: "text-yellow-500"
     }
   ];
@@ -368,41 +376,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 space-y-8 py-8 px-4 md:px-6 lg:px-8">
       {/* Modern Header with Premium Design */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 blur-3xl" />
-        <div className="relative rounded-3xl backdrop-blur-xl border border-white/20 dark:border-white/10 p-8 shadow-2xl">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-            <div>
-              <h1 className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500">
-                🏭 {storeDisplayName || storeName}
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mt-2">
-                Système de gestion complet • <span className="font-semibold text-blue-600">{user?.name || user?.username || 'Admin'}</span>
-              </p>
-              {storeName && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  🏪 Magasin: <span className="font-semibold text-slate-700 dark:text-slate-300">{storeName}</span>
-                </p>
-              )}
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                ⏰ {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
-            </div>
-            <Button 
-              onClick={fetchData}
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-full shadow-lg px-8 py-3 font-bold gap-2 h-auto text-base"
-            >
-              <RefreshCw className="h-5 w-5" />
-              Actualiser
-            </Button>
-          </div>
-        </div>
-      </motion.div>
-
+      
       {/* Error Message */}
       {hasError && (
         <motion.div 
@@ -497,32 +471,34 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Secondary Stats Section */}
+      {/* Secondary Stats Section - Order Statistics */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
-          title="👨‍💼 Employés"
-          value={stats?.totalEmployees || 0}
-          subtitle="Équipe active"
-          icon={Briefcase}
-          bgGradient="bg-gradient-to-br from-indigo-500 to-purple-600"
-        />
-        <StatCard
           title="⏳ Commandes En Attente"
-          value={stats?.pendingPurchases || 0}
+          value={stats?.pendingOrders || 0}
           subtitle="À traiter"
-          change={stats?.pendingPurchases ? 'Action requise' : 'À jour'}
-          changeType="decrease"
+          change={stats?.pendingOrders ? `${stats.pendingOrders} action requise` : 'À jour'}
+          changeType={stats?.pendingOrders ? 'decrease' : 'increase'}
           icon={Clock}
           bgGradient="bg-gradient-to-br from-amber-500 to-orange-600"
         />
         <StatCard
-          title="✅ Disponibilité Inventaire"
-          value={`${Math.max(0, Math.round(((stats?.totalProducts || 0) - (stats?.lowStockItems || 0)) / (stats?.totalProducts || 1) * 100))}%`}
-          subtitle="Produits en stock suffisant"
-          change={stats?.lowStockItems ? 'Amélioration nécessaire' : 'Excellent'}
-          changeType={stats?.lowStockItems ? 'decrease' : 'increase'}
+          title="✅ Commandes Acceptées"
+          value={stats?.acceptedOrders || 0}
+          subtitle="En cours de traitement"
+          change={stats?.acceptedOrders ? `${stats.acceptedOrders} en cours` : 'Aucune'}
+          changeType="increase"
           icon={CheckCircle2}
-          bgGradient="bg-gradient-to-br from-lime-500 to-green-600"
+          bgGradient="bg-gradient-to-br from-blue-500 to-cyan-600"
+        />
+        <StatCard
+          title="🎉 Commandes Finalisées"
+          value={stats?.finalizedOrders || 0}
+          subtitle="Complétées avec succès"
+          change={stats?.finalizedOrders ? `+${Math.round((stats.finalizedOrders / (stats.totalOrders || 1)) * 100)}% du total` : 'Aucune'}
+          changeType="increase"
+          icon={ShoppingCart}
+          bgGradient="bg-gradient-to-br from-emerald-500 to-green-600"
         />
       </section>
 

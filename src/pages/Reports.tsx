@@ -37,7 +37,6 @@ interface ReportStats {
   netProfit: number;
   productsCount: number;
   suppliersCount: number;
-  employeesCount: number;
   lowStockCount: number;
   salesCount: number;
   purchasesCount: number;
@@ -69,14 +68,6 @@ interface Supplier {
   id: string;
   name: string;
   contact_person: string;
-  phone: string;
-}
-
-interface Employee {
-  id: string;
-  name: string;
-  position: string;
-  email: string;
   phone: string;
 }
 
@@ -141,7 +132,6 @@ export default function Reports() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [reportGenerated, setReportGenerated] = useState(false);
@@ -164,7 +154,6 @@ export default function Reports() {
       purchases: { ar: 'فواتير الشراء', fr: 'Factures d\'Achat' },
       sales: { ar: 'المبيعات', fr: 'Ventes' },
       suppliers: { ar: 'الموردين', fr: 'Fournisseurs' },
-      employees: { ar: 'الموظفين', fr: 'Employés' },
       payments: { ar: 'المدفوعات', fr: 'Paiements' },
       loading: { ar: 'جارٍ التحميل...', fr: 'Chargement...' },
       noData: { ar: 'لم يتم العثور على بيانات', fr: 'Aucune donnée trouvée' },
@@ -173,7 +162,6 @@ export default function Reports() {
       supplier: { ar: 'المورد', fr: 'Fournisseur' },
       quantity: { ar: 'الكمية', fr: 'Quantité' },
       price: { ar: 'السعر', fr: 'Prix' },
-      employee: { ar: 'الموظف', fr: 'Employé' },
       amount: { ar: 'المبلغ', fr: 'Montant' },
       date: { ar: 'التاريخ', fr: 'Date' },
       status: { ar: 'الحالة', fr: 'Statut' },
@@ -224,14 +212,6 @@ export default function Reports() {
 
       if (suppliersError) throw suppliersError;
 
-      // Fetch employees
-      const { data: employeesData, error: employeesError } = await supabase
-        .from('employees')
-        .select('*')
-        .eq('is_active', true);
-
-      if (employeesError) throw employeesError;
-
       // Fetch payments
       const { data: paymentsData, error: paymentsError } = await supabase
         .from('payments')
@@ -252,7 +232,6 @@ export default function Reports() {
       setInvoices(filteredInvoices);
       setProducts(productsData || []);
       setSuppliers(suppliersData || []);
-      setEmployees(employeesData || []);
       setPayments((paymentsData || []).filter(p => {
         const payDate = p.date?.split('T')[0];
         return payDate && payDate >= startDate && payDate <= endDate;
@@ -264,7 +243,6 @@ export default function Reports() {
         netProfit: totalSales - totalPurchases,
         productsCount: (productsData || []).length,
         suppliersCount: (suppliersData || []).length,
-        employeesCount: (employeesData || []).length,
         lowStockCount,
         salesCount: saleInvoices.length,
         purchasesCount: purchaseInvoices.length,
@@ -466,7 +444,6 @@ export default function Reports() {
                     <StatBox icon="💵" label={language === 'ar' ? 'مبيعات' : 'Ventes'} value={reportData.salesCount.toString()} color="green" subtext={`${reportData.salesCount} ${language === 'ar' ? 'معاملة' : 'opérations'}`} />
                     <StatBox icon="🛍️" label={language === 'ar' ? 'مشتريات' : 'Achats'} value={reportData.purchasesCount.toString()} color="orange" subtext={`${reportData.purchasesCount} ${language === 'ar' ? 'فاتورة' : 'factures'}`} />
                     <StatBox icon="📦" label={language === 'ar' ? 'منتجات' : 'Produits'} value={reportData.productsCount.toString()} color="blue" subtext={language === 'ar' ? 'في المخزون' : 'en stock'} />
-                    <StatBox icon="👥" label={language === 'ar' ? 'موظفين' : 'Employés'} value={reportData.employeesCount.toString()} color="purple" subtext={language === 'ar' ? 'نشطون' : 'actifs'} />
                   </div>
                 </ReportSection>
 
@@ -712,114 +689,6 @@ export default function Reports() {
                       <p className="text-muted-foreground mt-3">{getText('noData')}</p>
                     </div>
                   )}
-                </ReportSection>
-
-                {/* 6. Employees & Payments Section */}
-                <ReportSection icon="👥" title={getText('employees')} delay={0.7}>
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl border-2 border-purple-200 dark:border-purple-700">
-                        <p className="text-sm text-purple-600 dark:text-purple-300 mb-2">👥 {language === 'ar' ? 'عدد الموظفين' : 'Nombre employés'}</p>
-                        <p className="text-4xl font-bold text-purple-700 dark:text-purple-200">{reportData.employeesCount}</p>
-                      </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-xl border-2 border-indigo-200 dark:border-indigo-700">
-                        <p className="text-sm text-indigo-600 dark:text-indigo-300 mb-2">💳 {language === 'ar' ? 'إجمالي المدفوعات' : 'Total paiements'}</p>
-                        <p className="text-3xl font-bold text-indigo-700 dark:text-indigo-200">{formatCurrency(payments.reduce((sum, p) => sum + (p.amount || 0), 0))}</p>
-                      </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-violet-50 dark:bg-violet-900/20 p-6 rounded-xl border-2 border-violet-200 dark:border-violet-700">
-                        <p className="text-sm text-violet-600 dark:text-violet-300 mb-2">📊 {language === 'ar' ? 'المتوسط لكل موظف' : 'Moyenne par employé'}</p>
-                        <p className="text-3xl font-bold text-violet-700 dark:text-violet-200">{formatCurrency((payments.reduce((sum, p) => sum + (p.amount || 0), 0)) / (reportData.employeesCount || 1))}</p>
-                      </motion.div>
-                    </div>
-
-                    {/* Employees Table */}
-                    {employees.length > 0 ? (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-slate-100 dark:bg-slate-700">
-                              <TableHead className="font-bold">👤 {getText('employee')}</TableHead>
-                              <TableHead className="font-bold">💼 {language === 'ar' ? 'المنصب' : 'Position'}</TableHead>
-                              <TableHead className="font-bold">📧 {language === 'ar' ? 'البريد' : 'Email'}</TableHead>
-                              <TableHead className="font-bold">☎️ {language === 'ar' ? 'الهاتف' : 'Téléphone'}</TableHead>
-                              <TableHead className="font-bold">💰 {language === 'ar' ? 'إجمالي المدفوع' : 'Total payé'}</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {employees.map((emp, idx) => {
-                              const empPayments = payments.filter(p => p.employee_id === emp.id);
-                              const totalPaid = empPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-                              return (
-                                <motion.tr
-                                  key={emp.id}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ delay: idx * 0.05 }}
-                                  className="border-b hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                                >
-                                  <TableCell className="font-bold text-slate-900 dark:text-slate-100">{emp.name}</TableCell>
-                                  <TableCell className="text-slate-600 dark:text-slate-300">{emp.position}</TableCell>
-                                  <TableCell className="text-slate-600 dark:text-slate-300 text-sm">{emp.email}</TableCell>
-                                  <TableCell className="text-slate-600 dark:text-slate-300">{emp.phone}</TableCell>
-                                  <TableCell className="font-bold text-purple-600 dark:text-purple-400">{formatCurrency(totalPaid)}</TableCell>
-                                </motion.tr>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                        <p className="text-2xl">📭</p>
-                        <p className="text-muted-foreground mt-3">{getText('noData')}</p>
-                      </div>
-                    )}
-
-                    {/* Payments Details */}
-                    {payments.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-8 rounded-2xl border-2 border-purple-200 dark:border-purple-700"
-                      >
-                        <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-6 flex items-center gap-3">
-                          <span>💳</span>
-                          {language === 'ar' ? 'سجل المدفوعات' : 'Historique des Paiements'}
-                        </h3>
-                        <div className="overflow-x-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-purple-100 dark:bg-purple-900/50">
-                                <TableHead className="font-bold">👤 {getText('employee')}</TableHead>
-                                <TableHead className="font-bold">💰 {getText('amount')}</TableHead>
-                                <TableHead className="font-bold">📅 {getText('date')}</TableHead>
-                                <TableHead className="font-bold">📝 {language === 'ar' ? 'الوصف' : 'Description'}</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {payments.map((payment, idx) => {
-                                const employee = employees.find(e => e.id === payment.employee_id);
-                                return (
-                                  <motion.tr
-                                    key={payment.id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className="border-b hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
-                                  >
-                                    <TableCell className="font-bold text-slate-900 dark:text-slate-100">{employee?.name || '-'}</TableCell>
-                                    <TableCell className="font-bold text-purple-600 dark:text-purple-400">{formatCurrency(payment.amount)}</TableCell>
-                                    <TableCell className="text-slate-600 dark:text-slate-300">{formatDate(payment.date)}</TableCell>
-                                    <TableCell className="text-slate-600 dark:text-slate-300">{payment.description || '-'}</TableCell>
-                                  </motion.tr>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
                 </ReportSection>
               </div>
             </>

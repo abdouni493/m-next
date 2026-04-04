@@ -67,11 +67,13 @@ export default function Settings() {
 
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const [storeSettings, setStoreSettings] = useState({
-    id: '',
-    name: '',
-    display_name: '',
-    logo_data: ''
+  // Store branding from website_settings
+  const [websiteSettings, setWebsiteSettings] = useState({
+    store_name: 'Chargers',
+    logo_url: '',
+    logo_data: '',
+    slogan: '',
+    description: ''
   });
 
   const [stores, setStores] = useState<{id: string; name: string; display_name?: string; logo_data?: string}[]>([]);
@@ -82,34 +84,33 @@ export default function Settings() {
     fetchSystemInfo();
     fetchBackupHistory();
     fetchUserInfo();
-    fetchStoreSettings();
+    fetchWebsiteSettings();
   }, []);
 
-  const fetchStoreSettings = async () => {
+  const fetchWebsiteSettings = async () => {
     try {
-      const data = await getStores();
-      setStores(data || []);
+      const { data, error } = await supabase
+        .from('website_settings')
+        .select('*')
+        .single();
 
-      if (data && data.length > 0) {
-        const selected = data[0];
-        setStoreSettings({
-          id: selected.id,
-          name: selected.name,
-          display_name: selected.display_name || selected.name,
-          logo_data: selected.logo_data || ''
+      if (error) {
+        console.warn('Could not fetch website settings:', error);
+        setFetchError('website_settings not available');
+        return;
+      }
+
+      if (data) {
+        setWebsiteSettings({
+          store_name: data.store_name || 'Chargers',
+          logo_url: data.logo_url || '',
+          logo_data: data.logo_data || '',
+          slogan: data.slogan || '',
+          description: data.description || ''
         });
       }
-      setFetchError(null);
     } catch (err) {
-      console.error('Failed to fetch store settings:', err);
-      setFetchError('Impossible de récupérer la liste des magasins. Utilisation des paramètres locaux.');
-      const localName = localStorage.getItem('storeName') || 'Auto Parts';
-      setStoreSettings(prev => ({
-        ...prev,
-        name: localName,
-        display_name: localStorage.getItem('storeDisplayName') || localName,
-        logo_data: localStorage.getItem('storeLogoData') || ''
-      }));
+      console.error('Error fetching website settings:', err);
     }
   };
 
@@ -317,66 +318,69 @@ export default function Settings() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
-      setStoreSettings(prev => ({ ...prev, logo_data: base64 }));
+      setWebsiteSettings(prev => ({ ...prev, logo_data: base64 }));
     };
     reader.readAsDataURL(file);
   };
 
-  const handleStoreUpdate = async () => {
-    if (!storeSettings.id) {
-      toast({
-        title: 'Erreur',
-        description: 'Aucun magasin sélectionné',
-        variant: 'destructive'
-      });
-      return;
-    }
-
+  const handleWebsiteSettingsUpdate = async () => {
     try {
-      // Try to update with display_name and logo_data first
-      const { error } = await supabase
-        .from('stores')
-        .update({
-          name: storeSettings.name,
-          display_name: storeSettings.display_name,
-          logo_data: storeSettings.logo_data
-        })
-        .eq('id', storeSettings.id);
+      // Check if website_settings exists
+      const { data: existing, error: checkError } = await supabase
+        .from('website_settings')
+        .select('id')
+        .single();
 
-      if (error) {
-        // If columns don't exist, try updating just the name
-        console.warn('Display name/logo columns not found, updating name only:', error);
-        const { error: fallbackError } = await supabase
-          .from('stores')
-          .update({
-            name: storeSettings.name
-          })
-          .eq('id', storeSettings.id);
-
-        if (fallbackError) throw fallbackError;
-
-        toast({
-          title: 'Magasin partiellement mis à jour',
-          description: 'Nom mis à jour. Pour logo/affichage personnalisé, exécutez ADD_STORE_DISPLAY_LOGO.sql',
-          variant: 'default'
-        });
-      } else {
-        toast({
-          title: 'Magasin mis à jour',
-          description: 'Nom et logo du magasin sauvegardés.',
-        });
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
       }
 
-      localStorage.setItem('storeName', storeSettings.name);
-      localStorage.setItem('storeDisplayName', storeSettings.display_name || storeSettings.name);
-      localStorage.setItem('storeLogoData', storeSettings.logo_data || '');
+      if (existing) {
+        // Update existing
+        const { error } = await supabase
+          .from('website_settings')
+          .update({
+            store_name: websiteSettings.store_name,
+            logo_url: websiteSettings.logo_url,
+            logo_data: websiteSettings.logo_data,
+            slogan: websiteSettings.slogan,
+            description: websiteSettings.description,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
 
-      await fetchStoreSettings();
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase
+          .from('website_settings')
+          .insert({
+            store_name: websiteSettings.store_name,
+            logo_url: websiteSettings.logo_url,
+            logo_data: websiteSettings.logo_data,
+            slogan: websiteSettings.slogan,
+            description: websiteSettings.description
+          });
+
+        if (error) throw error;
+      }
+
+      // Update localStorage
+      localStorage.setItem('storeName', websiteSettings.store_name);
+      localStorage.setItem('storeLogoData', websiteSettings.logo_data);
+
+      toast({
+        title: 'Succès',
+        description: 'Les paramètres du magasin ont été mise à jour.',
+      });
+
+      // Reload page to reflect changes
+      setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
-      console.error('Store update failed:', err);
+      console.error('Error updating website settings:', err);
       toast({
         title: 'Erreur',
-        description: 'Impossible de mettre à jour le magasin.',
+        description: 'Impossible de mettre à jour les paramètres.',
         variant: 'destructive'
       });
     }
@@ -642,7 +646,7 @@ export default function Settings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div className="space-y-2">
                     <Label htmlFor="username" className="text-sm font-semibold text-slate-700">
-                      🏷️ {language === 'ar' ? 'اسم المستخدم' : 'Nom d\'utilisateur'}
+                      👤 {language === 'ar' ? 'اسم المستخدم' : 'Nom d\'utilisateur'}
                     </Label>
                     <Input
                       id="username"
@@ -660,158 +664,90 @@ export default function Settings() {
                       id="email"
                       type="email"
                       value={settings.email}
-                      readOnly
-                      className="h-12 bg-slate-50 border-slate-200 rounded-xl cursor-not-allowed"
+                      onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
+                      className="h-12 bg-white border-slate-200 rounded-xl hover:border-blue-300 focus:border-blue-500 transition-colors"
+                      placeholder={language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Entrez votre email'}
                     />
-                    <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                      🔒 {language === 'ar'
-                        ? 'البريد الإلكتروني مُدار بواسطة Supabase Auth'
-                        : 'L\'email est géré par Supabase Auth'}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  onClick={handleAccountUpdate}
-                  className="h-12 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold"
-                >
-                  💾 {language === 'ar' ? 'حفظ المعلومات' : 'Sauvegarder les informations'}
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Store Branding */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-100">
-                <CardTitle className="flex items-center gap-3 text-slate-800">
-                  🏪 {language === 'ar' ? 'إعدادات المتجر' : 'Configuration du Magasin'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="storeSelect" className="text-sm font-semibold text-slate-700">
-                      🏬 {language === 'ar' ? 'المتجر النشط' : 'Magasin actif'}
-                    </Label>
-                    <Select
-                      id="storeSelect"
-                      value={storeSettings.id || undefined}
-                      onValueChange={(value) => {
-                        const selectedStore = stores.find(store => store.id === value);
-                        if (selectedStore) {
-                          setStoreSettings({
-                            id: selectedStore.id,
-                            name: selectedStore.name,
-                            display_name: selectedStore.display_name || selectedStore.name,
-                            logo_data: selectedStore.logo_data || ''
-                          });
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl hover:border-indigo-300 focus:border-indigo-500 transition-colors">
-                        <SelectValue placeholder={language === 'ar' ? 'اختر متجر' : 'Sélectionner un magasin'} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        {stores.length === 0 ? (
-                          <SelectItem value="__no_store__" disabled>
-                            {language === 'ar' ? 'لا توجد متاجر' : 'Aucun magasin'}
-                          </SelectItem>
-                        ) : (
-                          stores.map((store) => (
-                            <SelectItem key={store.id} value={store.id}>
-                              {store.name}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="storeName" className="text-sm font-semibold text-slate-700">
-                      🏷️ {language === 'ar' ? 'اسم المتجر' : 'Nom du magasin'}
-                    </Label>
-                    <Input
-                      id="storeName"
-                      value={storeSettings.name}
-                      onChange={(e) => setStoreSettings(prev => ({ ...prev, name: e.target.value }))}
-                      className="h-12 bg-white border-slate-200 rounded-xl hover:border-indigo-300 focus:border-indigo-500 transition-colors"
-                      placeholder={language === 'ar' ? 'أدخل اسم المتجر' : 'Entrez le nom du magasin'}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="displayName" className="text-sm font-semibold text-slate-700">
-                      ✨ {language === 'ar' ? 'الاسم المعروض' : 'Nom d\'affichage'}
-                    </Label>
-                    <Input
-                      id="displayName"
-                      value={storeSettings.display_name}
-                      onChange={(e) => setStoreSettings(prev => ({ ...prev, display_name: e.target.value }))}
-                      className="h-12 bg-white border-slate-200 rounded-xl hover:border-indigo-300 focus:border-indigo-500 transition-colors"
-                      placeholder={language === 'ar' ? 'أدخل الاسم المعروض' : 'Entrez le nom d\'affichage'}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="logoData" className="text-sm font-semibold text-slate-700">
-                      🖼️ {language === 'ar' ? 'شعار المتجر' : 'Logo du magasin'}
-                    </Label>
-                    <Input
-                      id="logoData"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="h-12 bg-white border-slate-200 rounded-xl hover:border-indigo-300 focus:border-indigo-500 transition-colors cursor-pointer file:bg-indigo-50 file:text-indigo-700 file:border-0 file:rounded-lg file:px-3 file:py-1 file:mr-3 file:font-semibold"
-                    />
-                    <p className="text-xs text-slate-500 mt-2">
-                      📎 {language === 'ar'
-                        ? 'التنسيقات المدعومة: JPG, PNG, GIF. الحد الأقصى: 2 ميجابايت'
-                        : 'Formats acceptés: JPG, PNG, GIF. Taille max: 2MB'}
-                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl mb-6">
-                  {storeSettings.logo_data ? (
-                    <motion.img
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      src={storeSettings.logo_data}
-                      alt="Logo du magasin"
-                      className="w-20 h-20 rounded-xl object-cover shadow-md border-2 border-white"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl bg-indigo-100 flex items-center justify-center text-3xl border-2 border-dashed border-indigo-300">
-                      📷
+                {/* Store Logo and Name from website_settings */}
+                <div className="space-y-4 mb-6">
+                  <Label className="text-sm font-semibold text-slate-700 block">
+                    🏪 {language === 'ar' ? 'شعار وإعدادات المتجر' : 'Logo et Paramètres du Magasin'}
+                  </Label>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="storeName" className="text-sm font-semibold text-slate-700">
+                        🏷️ {language === 'ar' ? 'اسم المتجر' : 'Nom du Magasin'}
+                      </Label>
+                      <Input
+                        id="storeName"
+                        value={websiteSettings.store_name}
+                        onChange={(e) => setWebsiteSettings(prev => ({ ...prev, store_name: e.target.value }))}
+                        className="h-12 bg-white border-slate-200 rounded-xl hover:border-blue-300 focus:border-blue-500 transition-colors"
+                        placeholder={language === 'ar' ? 'أدخل اسم المتجر' : 'Entrez le nom du magasin'}
+                      />
                     </div>
-                  )}
-                  <div className="space-y-1">
-                    <p className="font-bold text-lg text-slate-800">
-                      {storeSettings.display_name || (language === 'ar' ? 'لم يتم اختيار متجر' : 'Aucun magasin sélectionné')}
-                    </p>
-                    <p className="text-sm text-slate-600">
-                      🆔 {language === 'ar' ? 'المعرف' : 'Identifiant'}: {storeSettings.id || 'N/A'}
-                    </p>
-                    {storeSettings.logo_data && (
-                      <p className="text-sm text-emerald-600 font-semibold flex items-center gap-1">
-                        ✅ {language === 'ar' ? 'تم تحميل الشعار' : 'Logo chargé'}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="storeLogoFile" className="text-sm font-semibold text-slate-700">
+                        🖼️ {language === 'ar' ? 'شعار المتجر' : 'Logo du Magasin'}
+                      </Label>
+                      <Input
+                        id="storeLogoFile"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="h-12 bg-white border-slate-200 rounded-xl hover:border-blue-300 focus:border-blue-500 transition-colors cursor-pointer file:bg-blue-50 file:text-blue-700 file:border-0 file:rounded-lg file:px-3 file:py-1 file:mr-3 file:font-semibold"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        📎 {language === 'ar' ? 'JPG, PNG, GIF. Max: 2MB' : 'JPG, PNG, GIF. Max: 2MB'}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Store Logo Preview */}
+                  <div className="flex items-center gap-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
+                    {websiteSettings.logo_data ? (
+                      <motion.img
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        src={websiteSettings.logo_data}
+                        alt="Store Logo"
+                        className="w-20 h-20 rounded-xl object-cover shadow-md border-2 border-white"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-3xl border-2 border-white shadow-md">
+                        🏪
+                      </div>
                     )}
+                    <div className="space-y-1 flex-1">
+                      <p className="font-bold text-lg text-slate-800">
+                        {websiteSettings.store_name || (language === 'ar' ? 'متجر' : 'Magasin')}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {language === 'ar' ? 'معلومات المتجر الرسمية' : 'Informations officielles du magasin'}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleStoreUpdate}
-                  className="h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold w-full"
-                >
-                  💾 {language === 'ar' ? 'تحديث المتجر' : 'Mettre à jour le magasin'}
-                </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button
+                    onClick={handleAccountUpdate}
+                    className="h-12 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold"
+                  >
+                    💾 {language === 'ar' ? 'حفظ بيانات الحساب' : 'Sauvegarder le Compte'}
+                  </Button>
+                  <Button
+                    onClick={handleWebsiteSettingsUpdate}
+                    className="h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold"
+                  >
+                    💾 {language === 'ar' ? 'حفظ إعدادات المتجر' : 'Sauvegarder le Magasin'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -1077,7 +1013,7 @@ export default function Settings() {
                     </div>
                     <div>
                       <h2 className="text-3xl font-bold text-slate-800 mb-2">
-                        🚀 Auto Parts Kouba
+                        🚀 chargers  
                       </h2>
                       <p className="text-slate-600 text-lg">
                         {language === 'ar' ? 'نظام إدارة تجاري شامل' : 'Système de Gestion Commercial'}

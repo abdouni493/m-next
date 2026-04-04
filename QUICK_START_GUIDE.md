@@ -14,7 +14,7 @@
 
 ### 2. Start Development Server (1 min)
 ```bash
-cd c:\Users\Admin\Desktop\autoParts
+cd c:\Users\Admin\Desktop\ M-Next
 npm start
 ```
 

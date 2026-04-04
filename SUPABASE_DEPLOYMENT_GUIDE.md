@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This guide walks through deploying the autoParts application with Supabase backend integration. The application now includes:
+This guide walks through deploying the  M-Next application with Supabase backend integration. The application now includes:
 - User authentication with Supabase Auth
 - Auto-admin role assignment on signup
 - Complete PostgreSQL database schema

@@ -1,9 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://zpbgthdmzgelzilipunw.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwYmd0aGRtemdlbHppbGlwdW53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDE2MzQsImV4cCI6MjA4OTExNzYzNH0.SiQznsDGUOtqhzcOOlb8xccvmbpgGRmRFaHp4n9Qc58';
+// NEW DATABASE CONNECTION
+// Update these in .env.local with your NEW Supabase project credentials
+// Old database (pzzngzaljrfrbteclexi) is NO LONGER USED
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+
+// Validate environment variables
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('❌ CRITICAL: Missing Supabase credentials in environment variables!');
+  console.error('📋 Please create .env.local with:');
+  console.error('   VITE_SUPABASE_URL=https://your-project.supabase.co');
+  console.error('   VITE_SUPABASE_ANON_KEY=eyJ...');
+  console.error('📖 See .env.local.example for more details');
+  throw new Error('Supabase credentials not configured!');
+}
+
+// Use service role key if available for unrestricted access, otherwise use anon key
+const authKey = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
+const isUsingServiceRole = !!SUPABASE_SERVICE_ROLE_KEY;
+
+export const supabase = createClient(SUPABASE_URL, authKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'chargeur-app',
+    },
+  },
+  db: {
+    schema: 'public',
+  },
+});
+
+// Log which key is being used
+console.log(`🔑 Supabase initialized with ${isUsingServiceRole ? 'SERVICE ROLE KEY' : 'ANON KEY'}`);
 
 // ========== USER MANAGEMENT ==========
 
@@ -390,7 +426,7 @@ export const getPaymentsThisMonth = async () => {
 export const getStores = async () => {
   const { data, error } = await supabase
     .from('stores')
-    .select('id, name, display_name, logo_data, address, phone, email, city, country, is_active, created_by, created_at, updated_at')
+    .select('id, name, display_name, logo_data, address, phone, email, city, country, is_active, created_at, updated_at')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
@@ -693,5 +729,1080 @@ export const getSystemInfo = async () => {
       uptime: 'N/A',
       networkStatus: 'disconnected'
     };
+  }
+};
+
+// ========== WEBSITE MANAGEMENT ==========
+
+// Website Settings
+export const getWebsiteSettings = async () => {
+  try {
+    const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/website_settings?select=*&limit=1`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('REST API error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    return data && Array.isArray(data) && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error('Error fetching website settings via REST:', error);
+    return null;
+  }
+};
+
+export const updateWebsiteSettings = async (updates: any) => {
+  const { data, error } = await supabase
+    .from('website_settings')
+    .update(updates)
+    .eq('id', '00000000-0000-0000-0000-000000000001')
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Offers
+export const getOffers = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('offers')
+      .select(`
+        *,
+        products!offers_product_id_fkey(
+          voltage,
+          wattage,
+          amperage,
+          mark:mark_id(name),
+          connector:connector_type_id(name)
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Supabase error:', error);
+      // Return empty array instead of throwing - allows UI to handle gracefully
+      return [];
+    }
+    
+    // Transform data to include specs at top level
+    return data?.map((offer: any) => ({
+      ...offer,
+      voltage: offer.products?.voltage || offer.voltage,
+      wattage: offer.products?.wattage || offer.wattage,
+      amperage: offer.products?.amperage || offer.amperage,
+      connection_type: offer.products?.connector?.name || offer.connection_type,
+      product_mark: offer.product_mark || offer.products?.mark?.name
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching offers:', error);
+    return [];
+  }
+};
+
+export const getVisibleOffers = async () => {
+  const { data, error } = await supabase
+    .from('visible_offers')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+export const createOffer = async (offer: any) => {
+  const user = await supabase.auth.getUser();
+  const { data, error } = await supabase
+    .from('offers')
+    .insert([{ ...offer, created_by: user.data.user?.id || null }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const updateOffer = async (id: string, updates: any) => {
+  const { data, error } = await supabase
+    .from('offers')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const deleteOffer = async (id: string) => {
+  const { error } = await supabase
+    .from('offers')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+// Special Offers
+export const getSpecialOffers = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('special_offers')
+      .select(`
+        *,
+        products!special_offers_product_id_fkey(
+          voltage,
+          wattage,
+          amperage,
+          mark:mark_id(name),
+          connector:connector_type_id(name)
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Supabase error:', error);
+      // Return empty array instead of throwing
+      return [];
+    }
+    
+    // Transform data to include specs at top level
+    return data?.map((offer: any) => ({
+      ...offer,
+      voltage: offer.products?.voltage || offer.voltage,
+      wattage: offer.products?.wattage || offer.wattage,
+      amperage: offer.products?.amperage || offer.amperage,
+      connection_type: offer.products?.connector?.name || offer.connection_type,
+      product_mark: offer.product_mark || offer.products?.mark?.name,
+      offer_price: offer.special_price || offer.offer_price
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching special offers:', error);
+    return [];
+  }
+};
+
+export const getVisibleSpecialOffers = async () => {
+  const { data, error } = await supabase
+    .from('visible_special_offers')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+export const createSpecialOffer = async (specialOffer: any) => {
+  const user = await supabase.auth.getUser();
+  const { data, error } = await supabase
+    .from('special_offers')
+    .insert([{ ...specialOffer, created_by: user.data.user?.id || null }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const updateSpecialOffer = async (id: string, updates: any) => {
+  const { data, error } = await supabase
+    .from('special_offers')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const deleteSpecialOffer = async (id: string) => {
+  const { error } = await supabase
+    .from('special_offers')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+// ==================== ORDERS/COMMANDS FUNCTIONS ====================
+
+// Get all orders via REST API
+export const getOrders = async () => {
+  try {
+    const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/orders?select=*&order=created_at.desc`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('REST API error fetching orders:', response.status, error);
+      return [];
+    }
+
+    const data = await response.json();
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching orders via REST:', error);
+    return [];
+  }
+};
+
+// Get single order with items via REST API
+export const getOrderById = async (id: string) => {
+  try {
+    const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+    
+    // Fetch order
+    const orderRes = await fetch(
+      `${SUPABASE_REST_URL}/orders?id=eq.${id}&select=*`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!orderRes.ok) {
+      console.error('Failed to fetch order:', orderRes.status);
+      throw new Error('Order not found');
+    }
+    
+    const orders = await orderRes.json();
+    if (!orders || orders.length === 0) {
+      throw new Error('Order not found');
+    }
+
+    const order = orders[0];
+
+    // Fetch order items with product details
+    const itemsRes = await fetch(
+      `${SUPABASE_REST_URL}/order_items?order_id=eq.${id}&select=*`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!itemsRes.ok) {
+      console.error('Failed to fetch order items:', itemsRes.status);
+      throw new Error('Failed to fetch order items');
+    }
+    
+    const items = await itemsRes.json();
+
+    // Fetch product data for each item (including images)
+    const itemsWithDetails = await Promise.all(
+      (items || []).map(async (item: any) => {
+        try {
+          const productRes = await fetch(
+            `${SUPABASE_REST_URL}/products?id=eq.${item.product_id}&select=id,name,description,primary_image,voltage,wattage,amperage,connector_type_id,mark_id`,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+              },
+            }
+          );
+
+          if (productRes.ok) {
+            const products = await productRes.json();
+            if (products && products.length > 0) {
+              const product = products[0];
+              return {
+                ...item,
+                product_name: item.product_name || product.name,
+                product_image: item.product_image || product.primary_image,
+                product_description: item.product_description || product.description,
+                voltage: item.voltage || product.voltage,
+                wattage: item.wattage || product.wattage,
+                amperage: item.amperage || product.amperage,
+                connector_type_id: item.connector_type_id || product.connector_type_id,
+                mark_id: item.mark_id || product.mark_id,
+              };
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching product details:', error);
+        }
+        return item;
+      })
+    );
+
+    return { ...order, items: itemsWithDetails };
+  } catch (error) {
+    console.error('Error fetching order by ID:', error);
+    throw error;
+  }
+};
+
+// Create new order via REST API
+export const createOrder = async (orderData: any) => {
+  try {
+    const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+    
+    // Extract items from orderData if present
+    const { items, ...order } = orderData;
+
+    // Create the order
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/orders`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(order)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('REST API error creating order:', response.status, error);
+      throw new Error(`Failed to create order: ${error.message || response.statusText}`);
+    }
+
+    const createdOrder = await response.json();
+    const orderId = (Array.isArray(createdOrder) ? createdOrder[0] : createdOrder).id;
+
+    // If items provided, add them to the order
+    if (items && items.length > 0) {
+      const orderItems = items.map((item: any) => ({
+        order_id: orderId,
+        product_id: item.product_id,
+        product_name: item.product_name,
+        product_image: item.product_image,
+        product_mark: item.product_mark,
+        product_description: item.product_description,
+        quantity: item.quantity,
+        price_per_unit: item.price_per_unit,
+        line_total: item.quantity * item.price_per_unit,
+        from_offer: item.from_offer || false,
+        offer_id: item.offer_id || null,
+      }));
+
+      const itemsRes = await fetch(
+        `${SUPABASE_REST_URL}/order_items`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(orderItems)
+        }
+      );
+
+      if (!itemsRes.ok) {
+        const error = await itemsRes.json();
+        console.error('Error adding order items:', error);
+        // Continue - order was created even if items failed
+      }
+    }
+
+    return Array.isArray(createdOrder) ? createdOrder[0] : createdOrder;
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw error;
+  }
+};
+
+// Update order
+export const updateOrder = async (id: string, updates: any) => {
+  const { data, error } = await supabase
+    .from('orders')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Delete order
+export const deleteOrder = async (id: string) => {
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+// Confirm order (pending -> confirmed)
+export const confirmOrder = async (id: string) => {
+  try {
+    console.log('📝 Confirming order:', id);
+    
+    // Try updating with Supabase client first
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
+        status: 'confirmed'
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.warn('⚠️ Supabase client error, trying with timestamp:', error.message);
+      
+      // If that fails, it might be an RLS issue, so let's retry with explicit values
+      const now = new Date().toISOString();
+      const { data: data2, error: error2 } = await supabase
+        .from('orders')
+        .update({
+          status: 'confirmed',
+          updated_at: now
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error2) {
+        console.error('❌ Error confirming order:', error2);
+        throw error2;
+      }
+      
+      console.log('✅ Order confirmed:', data2.id);
+      return data2;
+    }
+
+    console.log('✅ Order confirmed:', data.id);
+    return data;
+  } catch (error) {
+    console.error('❌ Error confirming order:', error);
+    throw error;
+  }
+};
+
+// Start delivery (confirmed -> on_delivery)
+export const startOrderDelivery = async (id: string) => {
+  try {
+    console.log('📦 Starting delivery for order:', id);
+    
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
+        status: 'on_delivery',
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Error starting delivery:', error);
+      throw error;
+    }
+
+    console.log('✅ Delivery started for order:', data.id);
+    return data;
+  } catch (error) {
+    console.error('❌ Error starting delivery:', error);
+    throw error;
+  }
+};
+
+// Finalize order (on_delivery -> delivered)
+// Also deducts inventory from products
+export const finalizeOrder = async (id: string) => {
+  try {
+    console.log('Starting finalize order for:', id);
+
+    // STEP 1: Get order items to deduct inventory
+    const { data: items, error: itemsError } = await supabase
+      .from('order_items')
+      .select('product_id, quantity')
+      .eq('order_id', id);
+
+    if (itemsError) {
+      console.error('Error fetching order items:', itemsError);
+      throw itemsError;
+    }
+
+    console.log('Order items to deduct:', items?.length || 0);
+
+    // STEP 2: Deduct inventory for each product
+    if (items && items.length > 0) {
+      for (const item of items) {
+        try {
+          // Get current inventory
+          const { data: product, error: getError } = await supabase
+            .from('products')
+            .select('quantity_actual')
+            .eq('id', item.product_id)
+            .single();
+
+          if (getError) {
+            console.warn(`⚠️ Product ${item.product_id} not found`);
+            continue;
+          }
+
+          if (product && product.quantity_actual !== undefined) {
+            const currentQty = product.quantity_actual;
+            const newQty = Math.max(0, currentQty - item.quantity); // Don't go below 0
+
+            console.log(`Deducting inventory for product ${item.product_id}: ${currentQty} → ${newQty}`);
+
+            const { error: updateError } = await supabase
+              .from('products')
+              .update({ quantity_actual: newQty })
+              .eq('id', item.product_id);
+
+            if (updateError) {
+              console.warn(`⚠️ Error updating product inventory:`, updateError);
+              // Continue - don't fail the entire order if one product fails
+            }
+          }
+        } catch (itemError) {
+          console.warn(`⚠️ Error processing item:`, itemError);
+        }
+      }
+    }
+
+    // STEP 3: Update order status to delivered
+    console.log('Updating order status to delivered...');
+    
+    const now = new Date().toISOString();
+    const { data: updatedOrder, error: updateError } = await supabase
+      .from('orders')
+      .update({
+        status: 'delivered',
+        updated_at: now
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('❌ Error updating order status:', updateError);
+      throw updateError;
+    }
+
+    console.log('✅ Order delivered:', updatedOrder.id);
+
+    console.log('✅ Order finalized successfully!');
+    return updatedOrder;
+  } catch (error) {
+    console.error('❌ Error finalizing order:', error);
+    throw error;
+  }
+};
+
+// Cancel order
+export const cancelOrder = async (id: string, reason?: string) => {
+  try {
+    console.log('❌ Cancelling order:', id);
+    
+    const now = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
+        status: 'cancelled',
+        cancelled_at: now,
+        updated_at: now,
+        notes: reason ? `Cancelled: ${reason}` : 'Cancelled by user'
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Error cancelling order:', error);
+      throw error;
+    }
+
+    console.log('✅ Order cancelled:', data.id);
+    return data;
+  } catch (error) {
+    console.error('❌ Error cancelling order:', error);
+    throw error;
+  }
+};
+
+
+// Add item to order
+export const addOrderItem = async (orderItem: any) => {
+  const { data, error } = await supabase
+    .from('order_items')
+    .insert([orderItem])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Update order item
+export const updateOrderItem = async (id: string, updates: any) => {
+  const { data, error } = await supabase
+    .from('order_items')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Delete order item
+export const deleteOrderItem = async (id: string) => {
+  const { error } = await supabase
+    .from('order_items')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+// ==================== SHOPPING CART FUNCTIONS ====================
+
+// Get or create cart
+export const getOrCreateCart = async (sessionId: string) => {
+  // Check if cart exists
+  const { data: existingCart, error: fetchError } = await supabase
+    .from('shopping_carts')
+    .select('*')
+    .eq('session_id', sessionId)
+    .single();
+
+  if (!fetchError && existingCart) {
+    return existingCart;
+  }
+
+  // Create new cart
+  const { data: newCart, error: createError } = await supabase
+    .from('shopping_carts')
+    .insert([{ session_id: sessionId }])
+    .select()
+    .single();
+
+  if (createError) throw createError;
+  return newCart;
+};
+
+// Get cart items
+export const getCartItems = async (cartId: string) => {
+  const { data, error } = await supabase
+    .from('cart_items')
+    .select('*')
+    .eq('cart_id', cartId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+// Add item to cart
+export const addToCart = async (cartItem: any) => {
+  // Check if item already exists
+  const { data: existing } = await supabase
+    .from('cart_items')
+    .select('*')
+    .eq('cart_id', cartItem.cart_id)
+    .eq('product_id', cartItem.product_id)
+    .single();
+
+  if (existing) {
+    // Update quantity
+    return updateCartItem(existing.id, {
+      quantity: existing.quantity + (cartItem.quantity || 1)
+    });
+  }
+
+  // Add new item
+  const { data, error } = await supabase
+    .from('cart_items')
+    .insert([cartItem])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Update cart item quantity
+export const updateCartItem = async (id: string, updates: any) => {
+  const { data, error } = await supabase
+    .from('cart_items')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Remove item from cart
+export const removeFromCart = async (id: string) => {
+  const { error } = await supabase
+    .from('cart_items')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+// Clear cart
+export const clearCart = async (cartId: string) => {
+  const { error } = await supabase
+    .from('cart_items')
+    .delete()
+    .eq('cart_id', cartId);
+
+  if (error) throw error;
+};
+
+// ========== DIRECT REST API CALLS (Bypasses Auth Issues) ==========
+// These bypass the Supabase client and use direct REST API calls
+// Useful when JWT/RLS is blocking the Supabase client
+
+const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+
+export const getOffersREST = async () => {
+  try {
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/offers?select=*,products!offers_product_id_fkey(voltage,wattage,amperage,mark:mark_id(name),connector:connector_type_id(name))&order=created_at.desc`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('REST API error:', response.status, response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data?.map((offer: any) => ({
+      ...offer,
+      voltage: offer.products?.voltage || offer.voltage,
+      wattage: offer.products?.wattage || offer.wattage,
+      amperage: offer.products?.amperage || offer.amperage,
+      connection_type: offer.products?.connector?.name || offer.connection_type,
+      product_mark: offer.product_mark || offer.products?.mark?.name
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching offers via REST:', error);
+    return [];
+  }
+};
+
+export const getSpecialOffersREST = async () => {
+  try {
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/special_offers?select=*,products!special_offers_product_id_fkey(voltage,wattage,amperage,mark:mark_id(name),connector:connector_type_id(name))&order=created_at.desc`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('REST API error:', response.status, response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data?.map((offer: any) => ({
+      ...offer,
+      voltage: offer.products?.voltage || offer.voltage,
+      wattage: offer.products?.wattage || offer.wattage,
+      amperage: offer.products?.amperage || offer.amperage,
+      connection_type: offer.products?.connector?.name || offer.connection_type,
+      product_mark: offer.product_mark || offer.products?.mark?.name,
+      offer_price: offer.special_price || offer.offer_price
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching special offers via REST:', error);
+    return [];
+  }
+};
+
+export const getWebsiteSettingsREST = async () => {
+  try {
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/website_settings?select=*&limit=1`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('REST API error:', response.status, response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error('Error fetching website settings via REST:', error);
+    return null;
+  }
+};
+
+// Get order by ID with product images via REST API
+// Get order by ID with items using proper Supabase relationship
+export const getOrderByIdREST = async (id: string) => {
+  try {
+    console.log(`🔍 Fetching order ${id} with items...`);
+    
+    // Use Supabase client to fetch order with nested order_items
+    const { data: orderData, error: orderError } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          id,
+          order_id,
+          product_id,
+          product_name,
+          product_image,
+          product_mark,
+          product_description,
+          quantity,
+          price_per_unit,
+          line_total,
+          from_offer,
+          offer_id,
+          created_at
+        )
+      `)
+      .eq('id', id)
+      .single();
+
+    if (orderError) {
+      console.error('❌ Error fetching order with items:', orderError);
+      throw orderError;
+    }
+
+    if (!orderData) {
+      console.error('❌ Order not found:', id);
+      throw new Error('Order not found');
+    }
+
+    const itemsCount = orderData.order_items?.length || 0;
+    console.log(`✅ Order ${id} has ${itemsCount} item(s)`);
+    console.log('📋 Full order with items:', orderData);
+
+    // Ensure order_items is always an array
+    return {
+      ...orderData,
+      order_items: orderData.order_items || [],
+      items: orderData.order_items || [] // For backward compatibility
+    };
+  } catch (error) {
+    console.error('❌ Error fetching order via Supabase:', error);
+    throw error;
+  }
+};
+
+// Get cart with totals
+export const getCartWithTotals = async (cartId: string) => {
+  const items = await getCartItems(cartId);
+  const totalPrice = items.reduce((sum, item) => sum + (item.price_per_unit * item.quantity), 0);
+  
+  return {
+    items,
+    totalPrice,
+    itemCount: items.reduce((sum, item) => sum + item.quantity, 0)
+  };
+};
+
+// Convert cart to order
+export const convertCartToOrder = async (cartId: string, orderData: any) => {
+  const cartItems = await getCartItems(cartId);
+
+  // Create order
+  const order = await createOrder(orderData);
+
+  // Add items to order
+  for (const item of cartItems) {
+    await addOrderItem({
+      order_id: order.id,
+      product_id: item.product_id,
+      product_name: item.product_name,
+      product_image: item.product_image,
+      product_mark: item.product_mark,
+      quantity: item.quantity,
+      price_per_unit: item.price_per_unit,
+      line_total: item.price_per_unit * item.quantity,
+      from_offer: item.from_offer,
+      offer_id: item.offer_id
+    });
+  }
+
+  // Clear cart
+  await clearCart(cartId);
+
+  return order;
+};
+
+// Create order via REST API (bypassing Supabase client)
+export const createOrderREST = async (orderData: any, cartItems?: any[]) => {
+  let orderId: string | null = null;
+  try {
+    console.log('📝 Creating order with data:', orderData);
+    console.log('🛒 Cart items to add:', cartItems);
+    
+    const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+    
+    // Step 1: Create the order
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/orders`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(orderData)
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('❌ REST API error creating order:', response.status, error);
+      throw new Error(`Failed to create order: ${error.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const order = data && Array.isArray(data) ? data[0] : data;
+    orderId = order.id;
+    console.log('✅ Order created with ID:', order.id);
+
+    // Step 2: Insert cart items into order_items table
+    if (cartItems && cartItems.length > 0) {
+      console.log(`📦 Inserting ${cartItems.length} items into order_items...`);
+      
+      const orderItemsData = cartItems.map(item => {
+        const pricePerUnit = item.price || 0;
+        const quantity = item.quantity || 1;
+        return {
+          order_id: order.id,
+          product_id: item.product_id,
+          product_name: item.name || item.product_name,
+          quantity: quantity,
+          price_per_unit: pricePerUnit,
+          line_total: pricePerUnit * quantity,
+          product_image: item.image || item.product_image,
+          product_mark: item.product_mark,
+          product_description: item.product_description,
+          from_offer: item.from_offer || false,
+          offer_id: item.offer_id || null
+        };
+      });
+
+      const itemsResponse = await fetch(
+        `${SUPABASE_REST_URL}/order_items`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(orderItemsData)
+        }
+      );
+
+      if (!itemsResponse.ok) {
+        const itemError = await itemsResponse.json();
+        console.error('❌ Error inserting order items:', itemsResponse.status, itemError);
+        throw new Error(`Failed to insert order items: ${itemError.message || itemsResponse.statusText}`);
+      }
+
+      const insertedItems = await itemsResponse.json();
+      console.log(`✅ Successfully inserted ${insertedItems.length || orderItemsData.length} items`);
+    } else {
+      console.warn('⚠️ No cart items provided for order');
+    }
+
+    return order;
+  } catch (error) {
+    // Rollback: delete the order if items insertion failed
+    if (orderId) {
+      console.log(`🔄 Rolling back - deleting order ${orderId} due to error...`);
+      try {
+        const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+        await fetch(
+          `${SUPABASE_REST_URL}/orders?id=eq.${orderId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY
+            }
+          }
+        );
+        console.log(`✅ Order ${orderId} rolled back`);
+      } catch (rollbackError) {
+        console.error('❌ Rollback failed:', rollbackError);
+      }
+    }
+    console.error('❌ Error creating order via REST:', error);
+    throw error;
+  }
+};
+
+// Delete order (for rollback on item insert failure)
+export const deleteOrderRollback = async (orderId: string) => {
+  try {
+    console.log(`🔄 Rolling back - deleting order ${orderId}...`);
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', orderId);
+
+    if (error) {
+      console.error(`❌ Error deleting order during rollback:`, error);
+      throw error;
+    }
+    console.log(`✅ Order ${orderId} deleted successfully`);
+  } catch (error) {
+    console.error('❌ Rollback failed:', error);
+    throw error;
   }
 };

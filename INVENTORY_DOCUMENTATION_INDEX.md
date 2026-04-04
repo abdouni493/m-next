@@ -119,7 +119,7 @@ The database trigger was preventing manual edits to "⏱️ Dernier Prix Vente".
 ## 📂 File Organization
 
 ```
-autoParts/
+ M-Next/
 ├── src/pages/
 │   ├── Inventory.tsx          ← Modified (columns fixed)
 │   └── POS.tsx                ← Modified (columns fixed)

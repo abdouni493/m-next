@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Lock,
   Eye,
   EyeOff,
   Mail,
+  Globe
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { signIn, signUp } from "@/lib/supabaseClient";
+import { signIn, signUp, getWebsiteSettingsREST } from "@/lib/supabaseClient";
 
 interface LoginProps {
   onLogin: (user: any) => void;
@@ -23,6 +24,8 @@ export default function Login({ onLogin }: LoginProps) {
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [storeName, setStoreName] = useState('Chargers');
+  const [storeLogoUrl, setStoreLogoUrl] = useState<string | null>(null);
   
   const [loginCredentials, setLoginCredentials] = useState({
     email: "",
@@ -39,6 +42,27 @@ export default function Login({ onLogin }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await getWebsiteSettingsREST();
+        if (settings) {
+          if (settings.store_name) {
+            setStoreName(settings.store_name);
+          }
+          if (settings.logo_url) {
+            setStoreLogoUrl(settings.logo_url);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching website settings:', error);
+        const localStoreName = localStorage.getItem('storeName');
+        if (localStoreName) setStoreName(localStoreName);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   // ===== LOGIN HANDLER =====
   const handleLogin = async (e: React.FormEvent) => {
@@ -176,15 +200,25 @@ export default function Login({ onLogin }: LoginProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        {/* Logo & Header */}
+        {/* Logo & Header with Store Logo in Circle */}
         <motion.div
-          className="text-center space-y-3"
+          className="text-center space-y-4"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <div className="text-5xl">🚗</div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">autoParts</h1>
+          <div className="flex justify-center">
+            <div className="w-24 h-24 rounded-full overflow-hidden shadow-2xl border-4 border-blue-500 bg-white flex items-center justify-center">
+              {storeLogoUrl ? (
+                <img src={storeLogoUrl} alt="Store Logo" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-emerald-600 flex items-center justify-center text-white">
+                  <Globe className="w-12 h-12" />
+                </div>
+              )}
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">{storeName}</h1>
           <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
             {mode === 'login' ? '🔐 Connexion' : '📝 Nouvel Compte'}
           </p>
@@ -402,9 +436,16 @@ export default function Login({ onLogin }: LoginProps) {
           transition={{ delay: 0.4 }}
           className="p-4 bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-950/30 dark:to-emerald-950/30 rounded-lg text-sm border border-blue-200 dark:border-blue-800"
         >
-          <p className="text-gray-700 dark:text-gray-300">
+          <p className="text-gray-700 dark:text-gray-300 mb-3">
             🔒 <strong>Sécurisé:</strong> Authentification Supabase avec chiffrement end-to-end
           </p>
+          <Button 
+            type="button"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
+            onClick={() => navigate('/website-shop')}
+          >
+            🌐 Visiter le Magasin
+          </Button>
         </motion.div>
       </motion.div>
     </div>

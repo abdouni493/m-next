@@ -1,4 +1,4 @@
-# 🚗 AutoParts - Mock Data Configuration
+# 🚗  M-Next - Mock Data Configuration
 
 ## ✅ Database Connection Removed
 
@@ -21,14 +21,14 @@ The application has been converted from SQLite database to **local mock data onl
 - **Huile Moteur 5W-40** (€55.00) - Stock: 50
 
 ### Suppliers (5 companies)
-1. **AutoParts Maroc** - Casablanca (Hassan Tazi)
+1. ** M-Next Maroc** - Casablanca (Hassan Tazi)
 2. **Pièces Express** - Rabat (Khalid Benmoussa)
 3. **Motor Supply Co** - Marrakech (Youssef Regragui)
 4. **Garage Equipment Supplies** - Casablanca (Layla Bennani)
 5. **Tech Auto Solutions** - Marrakech (Ahmed Khalid)
 
 ### Employees (3 staff)
-1. **Admin** - Admin - Kouba
+1. **Admin** - Admin -  
 2. **Fatima Bennani** - Employee - Casablanca (€4,500/month)
 3. **Omar Alami** - Employee - Casablanca (€4,200/month)
 

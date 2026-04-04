@@ -1,6 +1,6 @@
 # 🎯 Supabase Integration - Start Here
 
-Welcome to the autoParts application with Supabase integration! This document will guide you through everything you need to get started.
+Welcome to the  M-Next application with Supabase integration! This document will guide you through everything you need to get started.
 
 ---
 

@@ -1,10 +1,10 @@
 // vite.config.ts
-import { defineConfig } from "file:///C:/Users/Youssef%20Abdouni/Desktop/autoParts/node_modules/vite/dist/node/index.js";
-import react from "file:///C:/Users/Youssef%20Abdouni/Desktop/autoParts/node_modules/@vitejs/plugin-react-swc/index.js";
+import { defineConfig } from "file:///C:/Users/Youssef%20Abdouni/Desktop/ M-Next/node_modules/vite/dist/node/index.js";
+import react from "file:///C:/Users/Youssef%20Abdouni/Desktop/ M-Next/node_modules/@vitejs/plugin-react-swc/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import { componentTagger } from "file:///C:/Users/Youssef%20Abdouni/Desktop/autoParts/node_modules/lovable-tagger/dist/index.js";
-var __vite_injected_original_import_meta_url = "file:///C:/Users/Youssef%20Abdouni/Desktop/autoParts/vite.config.ts";
+import { componentTagger } from "file:///C:/Users/Youssef%20Abdouni/Desktop/ M-Next/node_modules/lovable-tagger/dist/index.js";
+var __vite_injected_original_import_meta_url = "file:///C:/Users/Youssef%20Abdouni/Desktop/ M-Next/vite.config.ts";
 var __filename = fileURLToPath(__vite_injected_original_import_meta_url);
 var __dirname = path.dirname(__filename);
 var vite_config_default = defineConfig(({ mode }) => ({

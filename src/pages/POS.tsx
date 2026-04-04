@@ -64,17 +64,24 @@ interface Product {
   brand: string;
   category: string;
   description?: string;
-  buying_price: number;
+  purchase_price: number;
   selling_price: number;
   last_price_to_sell?: number;
   margin_percent: number;
-  initial_quantity: number;
-  current_quantity: number;
-  min_quantity: number;
+  quantity_initial: number;
+  quantity_actual: number;
+  quantity_minimal: number;
   supplier: string;
   store_id: string;
   created_at: string;
   updated_at: string;
+  primary_image?: string;
+  voltage?: number;
+  wattage?: number;
+  amperage?: number;
+  model_number?: string;
+  mark?: { id: string; name: string };
+  connector_type?: { id: string; name: string };
 }
 
 interface Store {
@@ -189,12 +196,12 @@ export default function POS() {
       const formattedData = data.map((p: any) => ({
         ...p,
         id: p.id || '',
-        buying_price: p.buying_price || 0,
+        purchase_price: p.purchase_price || 0,
         selling_price: p.selling_price || 0,
         margin_percent: p.margin_percent || 0,
-        current_quantity: p.current_quantity || 0,
-        initial_quantity: p.initial_quantity || 0,
-        min_quantity: p.min_quantity || 0,
+        quantity_actual: p.quantity_actual || 0,
+        quantity_initial: p.quantity_initial || 0,
+        quantity_minimal: p.quantity_minimal || 0,
         description: p.description || '',
         last_price_to_sell: typeof p.last_price_to_sell === 'number' ? p.last_price_to_sell : (parseFloat(p.last_price_to_sell) || 0),
         store_id: p.store_id || ''
@@ -290,7 +297,7 @@ export default function POS() {
   const addToCart = (product: Product) => {
     const existingItem = cart.find(item => item.product.id === product.id);
     
-    if (product.current_quantity <= 0) {
+    if (product.quantity_actual <= 0) {
       toast({
         title: language === 'ar' ? 'تحذير' : 'Attention',
         description: language === 'ar' ? 'المنتج غير متوفر في المخزون.' : 'Ce produit est en rupture de stock.',
@@ -300,10 +307,10 @@ export default function POS() {
     }
 
     if (existingItem) {
-      if (existingItem.quantity + 1 > product.current_quantity) {
+      if (existingItem.quantity + 1 > product.quantity_actual) {
         toast({
           title: language === 'ar' ? 'تحذير' : 'Attention',
-          description: language === 'ar' ? `لا يوجد ما يكفي من ${product.name} في المخزون. الكمية المتوفرة: ${product.current_quantity}.` : `Pas assez de ${product.name} en stock. Quantité disponible: ${product.current_quantity}.`,
+          description: language === 'ar' ? `لا يوجد ما يكفي من ${product.name} في المخزون. الكمية المتوفرة: ${product.quantity_actual}.` : `Pas assez de ${product.name} en stock. Quantité disponible: ${product.quantity_actual}.`,
           variant: 'destructive'
         });
         return;
@@ -338,7 +345,7 @@ export default function POS() {
       return;
     }
 
-    if (newQuantity > productInStock.current_quantity) {
+    if (newQuantity > productInStock.quantity_actual) {
       toast({
         title: language === 'ar' ? 'تحذير' : 'Attention',
         description: language === 'ar' ? `لا يوجد ما يكفي من ${productInStock.name} في المخزون.` : `Pas assez de ${productInStock.name} en stock.`,
@@ -403,9 +410,9 @@ export default function POS() {
         invoice_id: createdInvoice.id,
         product_id: product.id,
         product_name: product.name,
-        quantity,
-        unit_price: product.selling_price,
-        total_price: total
+        quantity: parseInt(quantity.toString()),
+        unit_price: parseFloat(product.selling_price.toString()),
+        total_price: parseFloat(total.toString())
       }));
 
       const { error: itemsError } = await supabase
@@ -413,6 +420,23 @@ export default function POS() {
         .insert(items);
 
       if (itemsError) throw itemsError;
+
+      // Deduct quantities from product storage
+      for (const item of cart) {
+        const newQuantity = (item.product.quantity_on_hand || 0) - item.quantity;
+        const newAvailable = (item.product.quantity_available || 0) - item.quantity;
+        const { error: updateError } = await supabase
+          .from('products')
+          .update({ 
+            quantity_on_hand: Math.max(0, newQuantity),
+            quantity_available: Math.max(0, newAvailable)
+          })
+          .eq('id', item.product.id);
+
+        if (updateError) {
+          console.warn(`Warning: Could not update inventory for product ${item.product.id}:`, updateError);
+        }
+      }
 
       const fetchedInvoice: SaleInvoice = {
         id: createdInvoice.id,
@@ -476,20 +500,28 @@ export default function POS() {
                 <thead>
                   <tr>
                     <th>${language === 'ar' ? 'المنتج' : 'Produit'}</th>
+                    <th>${language === 'ar' ? 'المواصفات' : 'Spécifications'}</th>
                     <th>${language === 'ar' ? 'الكمية' : 'Qté'}</th>
                     <th>${language === 'ar' ? 'السعر' : 'Prix'}</th>
                     <th>${language === 'ar' ? 'الإجمالي' : 'Total'}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${lastSaleInvoice.items.map(item => `
+                  ${lastSaleInvoice.items.map(item => {
+                    const specs = [];
+                    if (item.voltage) specs.push(item.voltage + 'V');
+                    if (item.wattage) specs.push(item.wattage + 'W');
+                    if (item.amperage) specs.push(item.amperage + 'A');
+                    const specsStr = specs.length > 0 ? specs.join(' | ') : '-';
+                    return `
                     <tr>
                       <td>${item.product_name}</td>
+                      <td>${specsStr}</td>
                       <td>${item.quantity}</td>
-                      <td>${formatCurrencyLocal(item.selling_price, language)}</td>
-                      <td>${formatCurrencyLocal(item.total, language)}</td>
+                      <td>${formatCurrencyLocal(item.unit_price, language)}</td>
+                      <td>${formatCurrencyLocal(item.total_price, language)}</td>
                     </tr>
-                  `).join('')}
+                  `}).join('')}
                 </tbody>
               </table>
               <p class="total">${language === 'ar' ? 'المبلغ الإجمالي' : 'Total'}: ${formatCurrencyLocal(lastSaleInvoice.total, language)}</p>
@@ -523,48 +555,12 @@ export default function POS() {
               {language === 'ar' ? 'إدارة المبيعات والفواتير' : 'Gestion des ventes et factures'}
             </p>
           </div>
-          
-          {/* Store Selection */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 min-w-72 border-2 border-transparent hover:border-blue-400 transition-all"
-          >
-            <Label className="flex items-center gap-2 mb-3 font-bold text-lg text-slate-700 dark:text-slate-300">
-              <Store className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              {language === 'ar' ? 'اختر المتجر' : 'Sélectionner le magasin'}
-            </Label>
-            <Select value={selectedStore} onValueChange={setSelectedStore}>
-              <SelectTrigger className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 border-2 border-blue-300 dark:border-blue-600 hover:border-blue-500 rounded-xl h-12 text-base font-semibold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {stores.map((store) => (
-                  <SelectItem key={store.id} value={store.id} className="text-base">
-                    🏪 {store.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="mt-3 flex items-center gap-2">
-              <input
-                id="pin-store"
-                type="checkbox"
-                checked={isStorePinned}
-                onChange={(e) => setIsStorePinned(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="pin-store" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                {language === 'ar' ? 'تثبيت اختيار المتجر' : 'Épingler le magasin'}
-              </label>
-            </div>
-          </motion.div>
         </motion.div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Products Panel */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {/* Search Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -617,7 +613,7 @@ export default function POS() {
               <Card className="bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-slate-700 border-2 border-purple-200 dark:border-purple-700 shadow-xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-xl text-purple-600 dark:text-purple-400 flex items-center gap-2">
-                    📦 {language === 'ar' ? `المنتجات (${filteredProducts.length})` : `Produits (${filteredProducts.length})`}
+                    �️ {language === 'ar' ? `الشواحن (${filteredProducts.length})` : `Chargeurs (${filteredProducts.length})`}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -629,99 +625,123 @@ export default function POS() {
                     >
                       <p className="text-5xl mb-4">📭</p>
                       <p className="text-slate-600 dark:text-slate-400 text-lg font-semibold">
-                        {language === 'ar' ? 'لم يتم العثور على منتجات' : 'Aucun produit trouvé'}
+                        {language === 'ar' ? 'لم يتم العثور على شواحن' : 'Aucun chargeur trouvé'}
                       </p>
                       <p className="text-slate-500 dark:text-slate-500 text-sm mt-2">
                         {language === 'ar' ? 'جرب البحث بكلمة أخرى' : 'Essayez une autre recherche'}
                       </p>
                     </motion.div>
                   ) : (
-                    <div className="max-h-[650px] overflow-y-auto rounded-lg border border-purple-200 dark:border-purple-700">
-                      <table className="w-full bg-white dark:bg-slate-700">
-                        <thead className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-slate-700 dark:to-slate-600 border-b border-purple-200 dark:border-purple-700 sticky top-0">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">📦 {language === 'ar' ? 'المنتج' : 'Produit'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">🏷️ {language === 'ar' ? 'العلامة' : 'Marque'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">📝 {language === 'ar' ? 'الوصف' : 'Description'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">💰 {language === 'ar' ? 'البيع' : 'Vente'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">📊 {language === 'ar' ? 'الحالي' : 'Actuel'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">⏱️ {language === 'ar' ? 'آخر سعر البيع' : 'Dernier Prix Vente'}</th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">⚙️</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <AnimatePresence>
-                            {filteredProducts.map((product, idx) => {
-                              const isLowStock = product.current_quantity < product.min_quantity;
-                              return (
-                                <motion.tr
-                                  key={product.id}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  exit={{ opacity: 0 }}
-                                  className={`border-b border-purple-100 dark:border-slate-600 hover:bg-purple-50 dark:hover:bg-slate-600 transition-colors cursor-pointer ${
-                                    idx % 2 === 0 ? 'bg-white dark:bg-slate-750' : 'bg-purple-50/30 dark:bg-slate-700/30'
-                                  }`}
-                                  onClick={() => addToCart(product)}
-                                >
-                                  <td className="px-4 py-3 font-semibold text-slate-800 dark:text-white max-w-xs">
-                                    <div className="flex flex-col">
-                                      <span className="truncate">{product.name}</span>
-                                      {product.barcode && (
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">📍 {product.barcode}</span>
-                                      )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <AnimatePresence>
+                        {filteredProducts.map((product, idx) => {
+                          const isLowStock = product.quantity_actual < product.quantity_minimal;
+                          return (
+                            <motion.div
+                              key={product.id}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ delay: idx * 0.05 }}
+                              whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)' }}
+                              onClick={() => addToCart(product)}
+                              className="cursor-pointer"
+                            >
+                              <div className={`h-full rounded-xl border-2 overflow-hidden bg-white dark:bg-slate-700 transition-all ${
+                                isLowStock 
+                                  ? 'border-red-300 dark:border-red-700' 
+                                  : 'border-purple-200 dark:border-purple-700 hover:border-purple-400 dark:hover:border-purple-500'
+                              }`}>
+                                {/* Image */}
+                                <div className="relative bg-gradient-to-br from-purple-100 to-blue-100 dark:from-slate-600 dark:to-slate-500 h-40 overflow-hidden flex items-center justify-center">
+                                  {product.primary_image ? (
+                                    <img
+                                      src={product.primary_image}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/default-product.png';
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="text-center">
+                                      <Package className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+                                      <p className="text-xs text-slate-500">{language === 'ar' ? 'بدون صورة' : 'Pas d\'image'}</p>
                                     </div>
-                                  </td>
-                                  <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-center">
-                                    {product.brand || '-'}
-                                  </td>
-                                  <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 text-center">
-                                    {product.description || '-'}
-                                  </td>
-                                  <td className="px-4 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400">
-                                    {formatCurrencyLocal(product.selling_price, language)}
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
+                                  )}
+                                  
+                                  {/* Stock Badge */}
+                                  <div className="absolute top-2 right-2">
                                     <Badge 
                                       className={`${
                                         isLowStock
-                                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                          : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                          ? 'bg-red-500 text-white'
+                                          : 'bg-green-500 text-white'
                                       }`}
                                     >
-                                      {product.current_quantity}
+                                      {product.quantity_actual}
                                     </Badge>
-                                  </td>
-                                  <td className="px-4 py-3 text-center text-sm font-semibold text-purple-700 dark:text-purple-400">
-                                    {formatCurrencyLocal(product.last_price_to_sell || product.selling_price, language)}
-                                  </td>
-                                  <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className="h-8 w-8 p-0 hover:bg-purple-200 dark:hover:bg-slate-600"
-                                        >
-                                          <MoreVertical className="w-4 h-4" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuItem
-                                          onClick={() => addToCart(product)}
-                                          className="cursor-pointer"
-                                        >
-                                          ➕ {language === 'ar' ? 'إضافة للسلة' : 'Ajouter au Panier'}
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </td>
-                                </motion.tr>
-                              );
-                            })}
-                          </AnimatePresence>
-                        </tbody>
-                      </table>
+                                  </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-3 space-y-2">
+                                  <div>
+                                    <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">{product.name}</h3>
+                                    {product.mark && (
+                                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                                        {product.mark.name}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  {/* Charger Details */}
+                                  <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                                    {product.voltage && (
+                                      <div className="flex items-center gap-1">
+                                        <span>⚡</span>
+                                        <span>{product.voltage}V</span>
+                                      </div>
+                                    )}
+                                    {product.wattage && (
+                                      <div className="flex items-center gap-1">
+                                        <span>🔌</span>
+                                        <span>{product.wattage}W</span>
+                                      </div>
+                                    )}
+                                    {product.amperage && (
+                                      <div className="flex items-center gap-1">
+                                        <span>⚙️</span>
+                                        <span>{product.amperage}A</span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Price */}
+                                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-600">
+                                    <div>
+                                      <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'ar' ? 'السعر' : 'Prix'}</p>
+                                      <p className="font-bold text-green-600 dark:text-green-400">
+                                        {formatCurrencyLocal(product.selling_price, language)}
+                                      </p>
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        addToCart(product);
+                                      }}
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
                     </div>
                   )}
                 </CardContent>

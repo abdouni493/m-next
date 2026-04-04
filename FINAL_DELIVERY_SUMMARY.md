@@ -170,7 +170,7 @@
 ## 🗂️ DIRECTORY STRUCTURE
 
 ```
-autoParts/
+ M-Next/
 ├── src/
 │   ├── pages/
 │   │   ├── Inventory.tsx ✅ MODIFIED

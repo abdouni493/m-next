@@ -194,7 +194,7 @@
 ### Development Files
 
 ```
-c:\Users\Admin\Desktop\autoParts\
+c:\Users\Admin\Desktop\ M-Next\
 ├── src/
 │   ├── lib/
 │   │   └── supabaseClient.ts ..................... Supabase client & functions

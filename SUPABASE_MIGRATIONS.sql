@@ -1,5 +1,5 @@
 -- ===================================================================
--- SUPABASE SQL MIGRATIONS FOR AUTO PARTS
+-- SUPABASE SQL MIGRATIONS FOR chargers
 -- Project URL: https://zpbgthdmzgelzilipunw.supabase.co
 -- ===================================================================
 
@@ -146,11 +146,36 @@ ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Everyone can read products" ON products;
 DROP POLICY IF EXISTS "Only admins can modify products" ON products;
 
-CREATE POLICY "Everyone can read products" ON products
-  FOR SELECT USING (TRUE);
+-- SELECT Policy: Everyone can read all products
+CREATE POLICY "products_select_all" ON products
+  FOR SELECT USING (true);
 
-CREATE POLICY "Only admins can modify products" ON products
-  FOR ALL USING ((auth.jwt() ->> 'user_role') = 'admin');
+-- INSERT Policy: Allow authenticated users to insert products
+CREATE POLICY "products_insert_authenticated" ON products
+  FOR INSERT 
+  WITH CHECK (auth.role() = 'authenticated');
+
+-- UPDATE Policy: Allow authenticated users who are admin to update
+CREATE POLICY "products_update_admin" ON products
+  FOR UPDATE 
+  USING (
+    auth.role() = 'authenticated' AND 
+    EXISTS (
+      SELECT 1 FROM users 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- DELETE Policy: Allow authenticated users who are admin to delete
+CREATE POLICY "products_delete_admin" ON products
+  FOR DELETE 
+  USING (
+    auth.role() = 'authenticated' AND 
+    EXISTS (
+      SELECT 1 FROM users 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
 
 CREATE INDEX idx_products_barcode ON products(barcode);
 CREATE INDEX idx_products_category ON products(category_id);

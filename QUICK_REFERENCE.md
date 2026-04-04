@@ -113,7 +113,7 @@ Purchase Invoice Form
 ### For End Users:
 
 ```
-1. Open AutoParts App
+1. Open  M-Next App
    ↓
 2. Go to "Factures d'Achat" (Purchase Invoices)
    ↓

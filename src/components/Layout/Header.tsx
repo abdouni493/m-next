@@ -7,7 +7,8 @@ import {
   Sun,
   User,
   LogOut,
-  Settings
+  Settings,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,8 +20,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';   // ✅ import AuthContext
-import { useNavigate } from 'react-router-dom';     // ✅ for redirect
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { getWebsiteSettingsREST } from '@/lib/supabaseClient';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -33,15 +35,33 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
     return document.documentElement.classList.contains('dark');
   });
   const [searchQuery, setSearchQuery] = useState('');
-  const [storeDisplayName, setStoreDisplayName] = useState('Auto Parts');
-  const [storeLogoData, setStoreLogoData] = useState('');
+  const [storeDisplayName, setStoreDisplayName] = useState('chargers');
+  const [storeLogoUrl, setStoreLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedName = localStorage.getItem('storeDisplayName');
-    const savedLogo = localStorage.getItem('storeLogoData');
+    const fetchSettings = async () => {
+      try {
+        const settings = await getWebsiteSettingsREST();
+        if (settings) {
+          if (settings.store_name) {
+            setStoreDisplayName(settings.store_name);
+          }
+          if (settings.logo_url) {
+            setStoreLogoUrl(settings.logo_url);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching website settings:', error);
+        // Fallback to localStorage
+        const savedName = localStorage.getItem('storeDisplayName');
+        const savedLogo = localStorage.getItem('storeLogoData');
 
-    if (savedName) setStoreDisplayName(savedName);
-    if (savedLogo) setStoreLogoData(savedLogo);
+        if (savedName) setStoreDisplayName(savedName);
+        if (savedLogo) setStoreLogoUrl(savedLogo);
+      }
+    };
+
+    fetchSettings();
   }, []);
 
   const { logout, user } = useAuth();          // ✅ get logout and user from context
@@ -81,10 +101,12 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
           </Button>
 
           <div className="hidden sm:flex items-center gap-2">
-            {storeLogoData ? (
-              <img src={storeLogoData} alt="Logo magasin" className="w-8 h-8 rounded-sm object-cover border" />
+            {storeLogoUrl ? (
+              <img src={storeLogoUrl} alt="Logo magasin" className="w-8 h-8 rounded-sm object-cover border" />
             ) : (
-              <div className="w-8 h-8 rounded-sm bg-blue-200 flex items-center justify-center">🚗</div>
+              <div className="w-8 h-8 rounded-sm bg-blue-200 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-blue-600" />
+              </div>
             )}
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{storeDisplayName}</span>
           </div>

@@ -2,7 +2,7 @@
 
 ## Summary of Changes
 
-This document outlines all the improvements made to the Point of Sale (POS) interface in the AutoParts application.
+This document outlines all the improvements made to the Point of Sale (POS) interface in the  M-Next application.
 
 ---
 

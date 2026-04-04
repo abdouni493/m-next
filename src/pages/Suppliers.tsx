@@ -1,159 +1,57 @@
-'use client';
-
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Plus,
   Search,
+  Edit2,
+  Trash2,
   Phone,
   MapPin,
-  Edit,
-  Trash2,
-  History,
-  AlertTriangle,
+  Mail,
   X,
-  Building2,
+  History,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import {
-  supabase,
-  getSuppliers,
-  createSupplier,
-  updateSupplier,
-  deleteSupplier,
-} from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Supplier {
   id: string;
   name: string;
-  phone?: string;
+  contact_person?: string;
   email?: string;
+  phone?: string;
   address?: string;
-  current_debt?: number;
-  last_payment_date?: string;
-  total_purchases?: number;
-  is_active?: boolean;
+  city?: string;
+  country?: string;
+  tax_id?: string;
+  bank_account?: string;
+  is_active: boolean;
+  created_at: string;
 }
 
-interface Purchase {
-  id: string;
-  date: string;
-  amount: number;
-  description: string;
-  status: string;
-}
-
-const getText = (key: string, language: string): string => {
-  const translations: Record<string, string> = {
-    suppliers_title_fr: '🚚 Gestion des Fournisseurs',
-    suppliers_title_ar: '🚚 إدارة الموردين',
-    add_supplier_fr: '➕ Ajouter Fournisseur',
-    add_supplier_ar: '➕ إضافة مورد',
-    search_fr: '🔍 Rechercher...',
-    search_ar: '🔍 بحث...',
-    no_suppliers_fr: '❌ Aucun fournisseur trouvé',
-    no_suppliers_ar: '❌ لم يتم العثور على موردين',
-    full_name_fr: '📛 Nom Complet',
-    full_name_ar: '📛 الاسم الكامل',
-    phone_fr: '☎️ Numéro de Téléphone',
-    phone_ar: '☎️ رقم الهاتف',
-    address_fr: '📍 Adresse',
-    address_ar: '📍 العنوان',
-    total_purchases_fr: '💰 Achats Totaux',
-    total_purchases_ar: '💰 إجمالي المشتريات',
-    current_debt_fr: '💸 Dettes Actuelles',
-    current_debt_ar: '💸 الديون الحالية',
-    last_payment_fr: '📅 Dernier Paiement',
-    last_payment_ar: '📅 آخر دفعة',
-    edit_fr: '✏️ Modifier',
-    edit_ar: '✏️ تعديل',
-    delete_fr: '🗑️ Supprimer',
-    delete_ar: '🗑️ حذف',
-    history_fr: '📜 Historique',
-    history_ar: '📜 السجل',
-    save_fr: '💾 Enregistrer',
-    save_ar: '💾 حفظ',
-    cancel_fr: 'Annuler',
-    cancel_ar: 'إلغاء',
-    confirm_delete_fr: 'Êtes-vous sûr de supprimer ce fournisseur ?',
-    confirm_delete_ar: 'هل أنت متأكد من حذف هذا المورد؟',
-    delete_warning_fr: 'Cette action ne peut pas être annulée',
-    delete_warning_ar: 'لا يمكن التراجع عن هذا الإجراء',
-    supplier_added_fr: '✅ Fournisseur ajouté',
-    supplier_added_ar: '✅ تمت إضافة المورد',
-    supplier_updated_fr: '✅ Fournisseur mis à jour',
-    supplier_updated_ar: '✅ تم تحديث المورد',
-    supplier_deleted_fr: '✅ Fournisseur supprimé',
-    supplier_deleted_ar: '✅ تم حذف المورد',
-    error_fr: '❌ Erreur',
-    error_ar: '❌ خطأ',
-    loading_fr: '⏳ Chargement...',
-    loading_ar: '⏳ جاري التحميل...',
-    close_fr: 'Fermer',
-    close_ar: 'إغلاق',
-    enter_name_fr: 'Entrez le nom complet',
-    enter_name_ar: 'أدخل الاسم الكامل',
-    enter_phone_fr: 'Entrez le numéro de téléphone',
-    enter_phone_ar: 'أدخل رقم الهاتف',
-    enter_address_fr: 'Entrez l\'adresse',
-    enter_address_ar: 'أدخل العنوان',
-    purchase_date_fr: '📅 Date Achat',
-    purchase_date_ar: '📅 تاريخ الشراء',
-    purchase_amount_fr: '💵 Montant',
-    purchase_amount_ar: '💵 المبلغ',
-    purchase_desc_fr: '📝 Description',
-    purchase_desc_ar: '📝 الوصف',
-    total_debts_fr: '💸 Total Dettes',
-    total_debts_ar: '💸 إجمالي الديون',
-  };
-
-  const lang = language === 'ar' ? 'ar' : 'fr';
-  const suffixedKey = `${key}_${lang}`;
-  return translations[suffixedKey] || key;
-};
-
-export default function Suppliers() {
+const SuppliersPage = () => {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<string | null>(null);
-  const [selectedSupplierHistory, setSelectedSupplierHistory] = useState<Supplier | null>(null);
-  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
+    contact_person: '',
+    email: '',
     phone: '',
     address: '',
+    city: '',
+    country: '',
+    tax_id: '',
+    bank_account: '',
   });
 
+  // Load suppliers
   useEffect(() => {
     loadSuppliers();
   }, []);
@@ -161,97 +59,115 @@ export default function Suppliers() {
   const loadSuppliers = async () => {
     try {
       setLoading(true);
+      console.log('📦 Loading suppliers from database...');
       const { data, error } = await supabase
         .from('suppliers')
         .select('*')
         .eq('is_active', true)
-        .order('name');
+        .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error loading suppliers:', error);
+        setSuppliers([]);
+        return;
+      }
+      
+      console.log('✅ Suppliers loaded successfully:', data);
       setSuppliers(data || []);
-    } catch (err: any) {
-      toast({
-        title: getText('error', language),
-        description: err.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      console.error('❌ Exception loading suppliers:', error);
+      setSuppliers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddSupplier = () => {
+  const handleOpenAddModal = () => {
+    setFormData({
+      name: '',
+      contact_person: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      country: '',
+      tax_id: '',
+      bank_account: '',
+    });
     setEditingSupplier(null);
-    setFormData({ name: '', phone: '', address: '' });
-    setDialogOpen(true);
+    setShowAddModal(true);
   };
 
-  const handleEditSupplier = (supplier: Supplier) => {
-    setEditingSupplier(supplier);
+  const handleOpenHistoryModal = (supplier: Supplier) => {
+    // TODO: Show purchase history for this supplier
+    console.log('Show history for:', supplier.name);
+  };
+
+  const handleOpenEditModal = (supplier: Supplier) => {
     setFormData({
       name: supplier.name,
+      contact_person: supplier.contact_person || '',
+      email: supplier.email || '',
       phone: supplier.phone || '',
       address: supplier.address || '',
+      city: supplier.city || '',
+      country: supplier.country || '',
+      tax_id: supplier.tax_id || '',
+      bank_account: supplier.bank_account || '',
     });
-    setDialogOpen(true);
+    setEditingSupplier(supplier);
+    setShowAddModal(true);
   };
 
   const handleSaveSupplier = async () => {
-    if (!formData.name.trim()) {
-      toast({
-        title: getText('error', language),
-        description: getText('enter_name', language),
-        variant: 'destructive',
-      });
-      return;
-    }
-
     try {
+      if (!formData.name) {
+        alert(language === 'en' ? 'Supplier name is required' : 'Le nom du fournisseur est requis');
+        return;
+      }
+      if (!formData.phone) {
+        alert(language === 'en' ? 'Phone number is required' : 'Le numéro de téléphone est requis');
+        return;
+      }
+      if (!formData.address) {
+        alert(language === 'en' ? 'Address is required' : 'L\'adresse est requise');
+        return;
+      }
+
+      const supplierData = {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+      };
+
       if (editingSupplier) {
+        // Update
         const { error } = await supabase
           .from('suppliers')
-          .update({
-            name: formData.name,
-            phone: formData.phone,
-            address: formData.address,
-          })
+          .update(supplierData)
           .eq('id', editingSupplier.id);
 
         if (error) throw error;
-        toast({
-          title: getText('supplier_updated', language),
-          variant: 'default',
-        });
       } else {
-        const { error } = await supabase.from('suppliers').insert([
-          {
-            name: formData.name,
-            phone: formData.phone,
-            address: formData.address,
-            is_active: true,
-            current_debt: 0,
-            total_purchases: 0,
-          },
-        ]);
+        // Insert
+        const { error } = await supabase
+          .from('suppliers')
+          .insert([{ ...supplierData, is_active: true }]);
 
         if (error) throw error;
-        toast({
-          title: getText('supplier_added', language),
-          variant: 'default',
-        });
       }
-      setDialogOpen(false);
-      await loadSuppliers();
-    } catch (err: any) {
-      toast({
-        title: getText('error', language),
-        description: err.message,
-        variant: 'destructive',
-      });
+
+      setShowAddModal(false);
+      loadSuppliers();
+    } catch (error) {
+      console.error('Error saving supplier:', error);
+      alert(language === 'en' ? 'Error saving supplier' : 'Erreur lors de l\'enregistrement');
     }
   };
 
   const handleDeleteSupplier = async (id: string) => {
+    if (!confirm(language === 'en' ? 'Are you sure?' : 'Êtes-vous sûr?')) return;
+
     try {
       const { error } = await supabase
         .from('suppliers')
@@ -259,320 +175,303 @@ export default function Suppliers() {
         .eq('id', id);
 
       if (error) throw error;
-      toast({
-        title: getText('supplier_deleted', language),
-        variant: 'default',
-      });
-      setDeleteDialog(null);
-      await loadSuppliers();
-    } catch (err: any) {
-      toast({
-        title: getText('error', language),
-        description: err.message,
-        variant: 'destructive',
-      });
+      loadSuppliers();
+      alert(
+        language === 'en'
+          ? 'Supplier deleted successfully!'
+          : 'Fournisseur supprimé avec succès!'
+      );
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
+      alert(language === 'en' ? 'Error deleting supplier' : 'Erreur lors de la suppression');
     }
   };
 
-  const handleShowHistory = (supplier: Supplier) => {
-    setSelectedSupplierHistory(supplier);
-    setHistoryDialogOpen(true);
-  };
-
-  const filteredSuppliers = suppliers.filter(
-    (s) =>
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.phone && s.phone.includes(searchTerm)) ||
-      (s.address && s.address.toLowerCase().includes(searchTerm))
+  const filteredSuppliers = suppliers.filter((supplier) =>
+    supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    supplier.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    supplier.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-8 flex justify-between items-center"
       >
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
-            {getText('suppliers_title', language)}
+        <div>
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2">
+            🏭 {language === 'en' ? 'Suppliers Management' : 'Gestion des Fournisseurs'}
           </h1>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={handleAddSupplier}
-                className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all h-11"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                {getText('add_supplier', language)}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogDescription className="sr-only">
-                {editingSupplier ? 'Edit supplier' : 'Add new supplier'}
-              </DialogDescription>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingSupplier ? getText('edit_fr', language) : getText('add_supplier', language)}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-sm font-semibold">{getText('full_name', language)}</Label>
-                  <Input
-                    placeholder={getText('enter_name', language)}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="mt-1 rounded-lg"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-semibold">{getText('phone', language)}</Label>
-                  <Input
-                    placeholder={getText('enter_phone', language)}
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="mt-1 rounded-lg"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-semibold">{getText('address', language)}</Label>
-                  <Input
-                    placeholder={getText('enter_address', language)}
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="mt-1 rounded-lg"
-                  />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    onClick={handleSaveSupplier}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-lg h-11"
-                  >
-                    {getText('save', language)}
-                  </Button>
-                  <Button
-                    onClick={() => setDialogOpen(false)}
-                    variant="outline"
-                    className="flex-1 rounded-lg h-11"
-                  >
-                    {getText('cancel', language)}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <p className="text-slate-600">
+            {language === 'en'
+              ? `📊 ${suppliers.length} suppliers in your network`
+              : `📊 ${suppliers.length} fournisseurs dans votre réseau`}
+          </p>
         </div>
+        <Button
+          onClick={handleOpenAddModal}
+          className="h-[46px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all text-base font-semibold"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          ➕ {language === 'en' ? 'Add Supplier' : 'Ajouter Fournisseur'}
+        </Button>
       </motion.div>
 
       {/* Search */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="mb-8"
       >
         <div className="relative">
-          <Search className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
-          <Input
-            placeholder={getText('search', language)}
+          <Search className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder={
+              language === 'en'
+                ? '🔍 Search by name, phone, city...'
+                : '🔍 Rechercher par nom, téléphone, ville...'
+            }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 h-11 rounded-xl border-slate-200 shadow-sm"
+            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-shadow"
           />
         </div>
       </motion.div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-center">
-            <div className="inline-block w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
-            <p className="mt-4 text-slate-600">{getText('loading', language)}</p>
-          </div>
+      {/* Suppliers List */}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         </div>
-      )}
-
-      {/* Suppliers Grid */}
-      {!loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence>
-            {filteredSuppliers.length > 0 ? (
-              filteredSuppliers.map((supplier) => (
-                <motion.div
-                  key={supplier.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                >
-                  <Card className="h-full hover:shadow-lg transition-shadow border-0 bg-gradient-to-br from-white to-slate-50">
-                    <CardHeader className="pb-3 bg-gradient-to-r from-blue-50 to-emerald-50">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg text-slate-900">
-                            {supplier.name}
-                          </CardTitle>
-                          <div className="flex gap-2 mt-2">
-                            <Badge className="bg-blue-100 text-blue-700">
-                              🏢 Active
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditSupplier(supplier)}
-                            className="h-8 w-8 p-0 hover:bg-blue-100"
-                          >
-                            <Edit className="w-4 h-4 text-blue-600" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setDeleteDialog(supplier.id)}
-                            className="h-8 w-8 p-0 hover:bg-red-100"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3 pt-4">
-                      {supplier.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm text-slate-700">{supplier.phone}</span>
-                        </div>
-                      )}
-                      {supplier.address && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-emerald-600" />
-                          <span className="text-sm text-slate-700">{supplier.address}</span>
-                        </div>
-                      )}
-
-                      <div className="bg-gradient-to-r from-blue-50 to-emerald-50 p-3 rounded-lg space-y-2 mt-4">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">
-                            {getText('total_purchases', language)}
-                          </span>
-                          <span className="font-semibold text-emerald-700">
-                            {(supplier.total_purchases || 0).toFixed(2)} DZD
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">
-                            {getText('current_debt', language)}
-                          </span>
-                          <span className="font-semibold text-red-600">
-                            {(supplier.current_debt || 0).toFixed(2)} DZD
-                          </span>
-                        </div>
-                        {supplier.last_payment_date && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-slate-600">
-                              {getText('last_payment', language)}
-                            </span>
-                            <span className="text-sm text-slate-700">
-                              {new Date(supplier.last_payment_date).toLocaleDateString()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <Button
-                        onClick={() => handleShowHistory(supplier)}
-                        variant="outline"
-                        className="w-full rounded-lg mt-4 border-slate-300"
-                      >
-                        <History className="w-4 h-4 mr-2" />
-                        {getText('history', language)}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full text-center py-12"
-              >
-                <Building2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500 text-lg">{getText('no_suppliers', language)}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-              {getText('confirm_delete', language)}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {getText('delete_warning', language)}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-lg">
-              {getText('cancel', language)}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteDialog && handleDeleteSupplier(deleteDialog)}
-              className="bg-red-600 hover:bg-red-700 rounded-lg"
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {filteredSuppliers.map((supplier, index) => (
+            <motion.div
+              key={supplier.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}
+              className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200 hover:border-blue-200 transition-all"
             >
-              {getText('delete', language)}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Purchase History Dialog */}
-      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogDescription className="sr-only">Supplier purchase history</DialogDescription>
-          <DialogHeader>
-            <DialogTitle>
-              📜 {getText('history', language)} - {selectedSupplierHistory?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            <div className="bg-gradient-to-r from-blue-50 to-emerald-50 p-4 rounded-lg space-y-2">
-              <div className="flex justify-between">
-                <span className="font-semibold text-slate-700">
-                  {getText('total_purchases', language)}
-                </span>
-                <span className="font-bold text-emerald-700">
-                  {(selectedSupplierHistory?.total_purchases || 0).toFixed(2)} DZD
-                </span>
+              {/* Header with color-coded top */}
+              <div className="mb-4 pb-4 border-b-2 border-gradient-to-r from-blue-200 to-indigo-200">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      🏭 {supplier.name}
+                    </h3>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleOpenHistoryModal(supplier)}
+                      title={language === 'en' ? 'Purchase History' : 'Historique d\'Achats'}
+                      className="p-2.5 text-amber-600 hover:bg-amber-50 rounded-lg hover:shadow-md transition-all"
+                    >
+                      <span className="text-lg">📊</span>
+                    </button>
+                    <button
+                      onClick={() => handleOpenEditModal(supplier)}
+                      title={language === 'en' ? 'Edit' : 'Modifier'}
+                      className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg hover:shadow-md transition-all"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSupplier(supplier.id)}
+                      title={language === 'en' ? 'Delete' : 'Supprimer'}
+                      className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg hover:shadow-md transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="font-semibold text-slate-700">
-                  {getText('total_debts', language)}
-                </span>
-                <span className="font-bold text-red-600">
-                  {(selectedSupplierHistory?.current_debt || 0).toFixed(2)} DZD
-                </span>
+
+              {/* Contact Info with colored sections */}
+              <div className="space-y-3">
+                {supplier.phone && (
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-100 flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-green-600" />
+                    <div className="flex-1">
+                      <p className="text-xs text-green-600 font-semibold uppercase">{language === 'en' ? 'Phone' : 'Téléphone'}</p>
+                      <a href={`tel:${supplier.phone}`} className="text-green-900 font-semibold hover:text-green-700">
+                        {supplier.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {supplier.address && (
+                  <div className="p-3 bg-red-50 rounded-lg border border-red-100 flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-red-600 mt-1" />
+                    <div className="flex-1">
+                      <p className="text-xs text-red-600 font-semibold uppercase">{language === 'en' ? 'Address' : 'Adresse'}</p>
+                      <p className="text-red-900 font-semibold text-sm">
+                        {supplier.address}
+                        {supplier.city && ` · ${supplier.city}`}
+                        {supplier.country && ` · ${supplier.country}`}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {supplier.email && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-blue-600" />
+                    <div className="flex-1">
+                      <p className="text-xs text-blue-600 font-semibold uppercase">Email</p>
+                      <a href={`mailto:${supplier.email}`} className="text-blue-900 font-semibold hover:text-blue-700 text-sm truncate">
+                        {supplier.email}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer action */}
+              <button
+                onClick={() => handleOpenEditModal(supplier)}
+                className="mt-4 w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <span>✏️</span>
+                {language === 'en' ? 'Edit Supplier' : 'Modifier'}
+              </button>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Empty State */}
+      {!loading && filteredSuppliers.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-600">
+            {language === 'en'
+              ? 'No suppliers found. Create your first supplier!'
+              : 'Aucun fournisseur trouvé. Créez votre premier fournisseur!'}
+          </p>
+        </div>
+      )}
+
+      {/* Add/Edit Modal - Simplified */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          >
+            <div className="sticky top-0 p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-slate-900">
+                {editingSupplier
+                  ? '✏️ ' + (language === 'en' ? 'Edit Supplier' : 'Modifier Fournisseur')
+                  : '➕ ' + (language === 'en' ? 'Add New Supplier' : 'Ajouter Nouveau Fournisseur')}
+              </h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-lg p-2 transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Full Name Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+              >
+                <h3 className="text-lg font-bold text-blue-900 mb-4">🏭 {language === 'en' ? 'Supplier Name' : 'Nom du Fournisseur'}</h3>
+                <input
+                  type="text"
+                  placeholder={language === 'en' ? 'e.g., Tech Supplies Inc.' : 'Ex: Tech Supplies Inc.'}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-semibold text-lg"
+                />
+              </motion.div>
+
+              {/* Phone Number Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
+              >
+                <h3 className="text-lg font-bold text-green-900 mb-4">📞 {language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'}</h3>
+                <input
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full px-4 py-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white font-semibold text-lg"
+                />
+              </motion.div>
+
+              {/* Address Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200"
+              >
+                <h3 className="text-lg font-bold text-red-900 mb-4">📍 {language === 'en' ? 'Address' : 'Adresse'}</h3>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-red-900">{language === 'en' ? 'Address' : 'Adresse'}</label>
+                  <input
+                    type="text"
+                    placeholder={language === 'en' ? 'Street address' : 'Adresse'}
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full px-4 py-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-semibold text-lg"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Optional Fields */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200"
+              >
+                <p className="text-sm text-gray-600 italic">
+                  ✅ {language === 'en' ? 'All required information provided' : 'Toutes les informations requises fournies'}
+                </p>
+              </motion.div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
+                <Button
+                  onClick={handleSaveSupplier}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg h-12 font-bold text-base"
+                >
+                  💾 {language === 'en' ? 'Save Supplier' : 'Enregistrer'}
+                </Button>
+                <Button
+                  onClick={() => setShowAddModal(false)}
+                  variant="outline"
+                  className="flex-1 rounded-lg h-12 font-bold text-base"
+                >
+                  ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
+                </Button>
               </div>
             </div>
-            <p className="text-sm text-slate-600 text-center py-8">
-              📊 {language === 'ar' ? 'سجل الشراء قريبًا' : 'Historique des achats à venir'}
-            </p>
-          </div>
-          <Button
-            onClick={() => setHistoryDialogOpen(false)}
-            className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg"
-          >
-            {getText('close', language)}
-          </Button>
-        </DialogContent>
-      </Dialog>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default SuppliersPage;

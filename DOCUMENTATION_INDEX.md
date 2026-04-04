@@ -1,4 +1,4 @@
-# 📚 AutoParts System - Complete Documentation Index
+# 📚  M-Next System - Complete Documentation Index
 
 **Last Updated:** January 2025  
 **Project Status:** ✅ COMPLETE & PRODUCTION READY  
@@ -145,21 +145,21 @@ Status: ✅ Currently Running
 
 ### Option 1: Development Server (Recommended)
 ```bash
-cd c:\Users\Admin\Desktop\autoParts
+cd c:\Users\Admin\Desktop\ M-Next
 npm run dev
 # Visit http://localhost:8081/
 ```
 
 ### Option 2: Build for Production
 ```bash
-cd c:\Users\Admin\Desktop\autoParts
+cd c:\Users\Admin\Desktop\ M-Next
 npm run build
 # Output in dist/ folder
 ```
 
 ### Option 3: Preview Build
 ```bash
-cd c:\Users\Admin\Desktop\autoParts
+cd c:\Users\Admin\Desktop\ M-Next
 npm run preview
 # Visit http://localhost:4173/
 ```
