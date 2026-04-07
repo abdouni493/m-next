@@ -278,6 +278,17 @@ export default function WebsiteLanding() {
               {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}
               <Flame className="ml-2 h-5 w-5" />
             </Button>
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: '0 15px 35px rgba(168, 85, 247, 0.4)' }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg px-8 py-6 rounded-lg shadow-lg transition-all"
+              onClick={() => (window.location.href = '/website-shop/packages')}
+            >
+              <span className="flex items-center gap-2">
+                {language === 'ar' ? '📦 حزم مميزة' : '📦 Packs Spéciaux'}
+                <Flame className="h-5 w-5" />
+              </span>
+            </motion.button>
           </motion.div>
         </div>
       </motion.section>
