@@ -13,16 +13,19 @@ import Suppliers from "./pages/Suppliers";
 import Employees from "./pages/Employees";
 import Reports from "./pages/Reports";
 import POS from "./pages/POS";
+import Caisse from "./pages/Caisse";
 import Barcodes from "./pages/Barcodes";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import Website from "./pages/Website";
+import Website_Enhanced from "./pages/Website_Enhanced";
 import Commands from "./pages/Commands";
+import Clients from "./pages/Clients";
 import { WebsiteLayout } from "./components/Layout/WebsiteLayout";
 import WebsiteLanding from "./pages/WebsiteLanding";
 import WebsiteOffers from "./pages/WebsiteOffers";
 import WebsiteSpecialOffers from "./pages/WebsiteSpecialOffers";
+import WebsitePackages from "./pages/WebsitePackages";
 import WebsiteContacts from "./pages/WebsiteContacts";
 import WebsiteCart from "./pages/WebsiteCart";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -87,6 +90,19 @@ const AppContent = () => {
         {/* LOGIN ROUTE */}
         <Route path="/login" element={<Login onLogin={login} />} />
 
+        {/* WEBSITE SHOP - PUBLIC ROUTE (FIRST) */}
+        <Route element={<WebsiteLayout />}>
+          <Route path="/website-shop" element={<WebsiteLanding />} />
+          <Route path="/website-shop/offers" element={<WebsiteOffers />} />
+          <Route path="/website-shop/special-offers" element={<WebsiteSpecialOffers />} />
+          <Route path="/website-shop/packages" element={<WebsitePackages />} />
+          <Route path="/website-shop/contacts" element={<WebsiteContacts />} />
+          <Route path="/website-shop/order" element={<WebsiteCart />} />
+        </Route>
+
+        {/* DEFAULT ROUTE - REDIRECT TO WEBSITE SHOP */}
+        <Route path="/" element={<Navigate to="/website-shop" replace />} />
+
         {/* ADMIN ROUTES */}
         <Route
           path="/*"
@@ -98,6 +114,7 @@ const AppContent = () => {
         >
           <Route index element={<Dashboard />} />
           <Route path="inventory" element={<Inventory />} />
+          <Route path="clients" element={<Clients />} />
           <Route path="facturedustock" element={<FactureDuStock />} />
           <Route path="purchase-invoices" element={<PurchaseInvoices />} />
           <Route path="sales" element={<Sales />} />
@@ -105,20 +122,12 @@ const AppContent = () => {
           <Route path="employees" element={<Employees />} />
           <Route path="reports" element={<Reports />} />
           <Route path="pos" element={<POS />} />
+          <Route path="caisse" element={<Caisse />} />
           <Route path="barcodes" element={<Barcodes />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="website" element={<Website />} />
+          <Route path="website" element={<Website_Enhanced />} />
           <Route path="commands" element={<Commands />} />
-        </Route>
-
-        {/* PUBLIC WEBSITE ROUTES */}
-        <Route element={<WebsiteLayout />}>
-          <Route path="/website-shop" element={<WebsiteLanding />} />
-          <Route path="/website-shop/offers" element={<WebsiteOffers />} />
-          <Route path="/website-shop/special-offers" element={<WebsiteSpecialOffers />} />
-          <Route path="/website-shop/contacts" element={<WebsiteContacts />} />
-          <Route path="/website-shop/order" element={<WebsiteCart />} />
         </Route>
 
         {/* EMPLOYEE ROUTES */}

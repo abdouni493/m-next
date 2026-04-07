@@ -139,6 +139,13 @@ export default function POS() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [clientName, setClientName] = useState('');
+  const [clientSearch, setClientSearch] = useState('');
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [filteredClients, setFilteredClients] = useState<any[]>([]);
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [clients, setClients] = useState<any[]>([]);
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({ name: '', phone: '', price_tier: 1, notes: '' });
   const [paymentDialog, setPaymentDialog] = useState(false);
   const [receivedAmount, setReceivedAmount] = useState(0);
   const [editableTotal, setEditableTotal] = useState(0);
@@ -217,9 +224,26 @@ export default function POS() {
     }
   };
 
+  // --- Fetch Clients from Supabase ---
+  const fetchClients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('id, name, phone, price_tier')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setClients(data || []);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    }
+  };
+
   useEffect(() => {
     fetchStores();
     fetchProducts();
+    fetchClients();
   }, []);
 
   // Persist selected store when pin is enabled
@@ -236,9 +260,9 @@ export default function POS() {
   // Search with store filtering
   useEffect(() => {
     const handler = setTimeout(() => {
-      const storeProducts = selectedStore 
-        ? products.filter(p => p.store_id === selectedStore)
-        : products;
+      // Show all products regardless of store (store filtering disabled)
+      // This allows POS to display products from all stores
+      const storeProducts = products;
 
       const isBarcode = /^\d+$/.test(searchQuery);
       if (isBarcode && searchQuery.length >= 8) {
@@ -265,7 +289,21 @@ export default function POS() {
       setFilteredProducts(results);
     }, 300);
     return () => clearTimeout(handler);
-  }, [searchQuery, products, selectedStore, language]);
+  }, [searchQuery, products, language]);
+
+  // Client search filtering
+  useEffect(() => {
+    if (clientSearch.trim() === '') {
+      setFilteredClients([]);
+      return;
+    }
+    
+    const filtered = clients.filter(client =>
+      client.name.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      client.phone.includes(clientSearch)
+    );
+    setFilteredClients(filtered);
+  }, [clientSearch, clients]);
 
   // Focus management
   useEffect(() => {
@@ -284,9 +322,9 @@ export default function POS() {
     }
   }, []);
 
-  // Calculations
-  const subtotal = cart.reduce((sum, item) => sum + (item.product.selling_price * item.quantity), 0);
-  const totalDiscount = cart.reduce((sum, item) => sum + (item.product.selling_price * item.quantity * item.discount / 100), 0);
+  // Calculations - Use cart item totals which already include client-based pricing
+  const subtotal = cart.reduce((sum, item) => sum + (item.total / (1 - (item.discount || 0) / 100)), 0);
+  const totalDiscount = cart.reduce((sum, item) => sum + ((item.total / (1 - (item.discount || 0) / 100)) * (item.discount || 0) / 100), 0);
   const globalDiscountAmount = globalDiscount.type === 'fixed' 
     ? globalDiscount.amount 
     : (subtotal - totalDiscount) * (globalDiscount.amount / 100);
@@ -306,6 +344,20 @@ export default function POS() {
       return;
     }
 
+    // Get price based on selected client's tier
+    let selectedPrice = product.selling_price;
+    if (selectedClient) {
+      if (selectedClient.price_tier === 2 && product.selling_price_2) {
+        selectedPrice = parseFloat(product.selling_price_2);
+      } else if (selectedClient.price_tier === 3 && product.selling_price_3) {
+        selectedPrice = parseFloat(product.selling_price_3);
+      } else if (selectedClient.price_tier === 1 && product.selling_price_1) {
+        selectedPrice = parseFloat(product.selling_price_1);
+      }
+    } else if (product.selling_price_1) {
+      selectedPrice = parseFloat(product.selling_price_1);
+    }
+
     if (existingItem) {
       if (existingItem.quantity + 1 > product.quantity_actual) {
         toast({
@@ -320,7 +372,7 @@ export default function POS() {
           ? { 
               ...item, 
               quantity: item.quantity + 1, 
-              total: (item.quantity + 1) * item.product.selling_price * (1 - item.discount / 100) 
+              total: (item.quantity + 1) * selectedPrice * (1 - item.discount / 100) 
             }
           : item
       ));
@@ -329,11 +381,104 @@ export default function POS() {
         product, 
         quantity: 1, 
         discount: 0,
-        total: product.selling_price 
+        total: selectedPrice
       }]);
     }
     
     if (searchInputRef.current) searchInputRef.current.focus();
+  };
+
+  // Handle client selection
+  const handleClientSelect = (client: any) => {
+    setSelectedClient(client);
+    setClientName(client.name);
+    setClientSearch('');
+    setShowClientDropdown(false);
+    
+    // Update cart product prices based on client's price tier
+    if (cart.length > 0) {
+      setCart(cart.map(item => {
+        // Calculate price based on tier: selling_price_1, selling_price_2, selling_price_3
+        let selectedPrice = item.product.selling_price;
+        
+        if (client.price_tier === 2 && item.product.selling_price_2) {
+          selectedPrice = parseFloat(item.product.selling_price_2);
+        } else if (client.price_tier === 3 && item.product.selling_price_3) {
+          selectedPrice = parseFloat(item.product.selling_price_3);
+        } else if (client.price_tier === 1 && item.product.selling_price_1) {
+          selectedPrice = parseFloat(item.product.selling_price_1);
+        }
+        
+        return {
+          ...item,
+          total: selectedPrice * item.quantity * (1 - item.discount / 100)
+        };
+      }));
+    }
+  };
+
+  const handleClearClient = () => {
+    setSelectedClient(null);
+    setClientName('');
+    setClientSearch('');
+    
+    // Reset cart prices to default selling_price
+    if (cart.length > 0) {
+      setCart(cart.map(item => ({
+        ...item,
+        total: item.product.selling_price * item.quantity * (1 - item.discount / 100)
+      })));
+    }
+  };
+
+  const handleAddNewClient = async () => {
+    if (!newClientForm.name.trim() || !newClientForm.phone.trim()) {
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: language === 'ar' ? 'الرجاء ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs requis',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .insert([
+          {
+            name: newClientForm.name.trim(),
+            phone: newClientForm.phone.trim(),
+            price_tier: newClientForm.price_tier,
+            notes: newClientForm.notes.trim() || null,
+            is_active: true,
+          },
+        ])
+        .select();
+
+      if (error) throw error;
+
+      // Add new client to list
+      if (data && data.length > 0) {
+        const newClient = data[0];
+        setClients([...clients, newClient]);
+        handleClientSelect(newClient);
+        setShowAddClientModal(false);
+        setNewClientForm({ name: '', phone: '', price_tier: 1, notes: '' });
+        
+        toast({
+          title: language === 'ar' ? 'نجاح' : 'Success',
+          description: language === 'ar' ? 'تم إضافة العميل بنجاح' : 'Client créé avec succès',
+          variant: 'default'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error creating client:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: error.message || (language === 'ar' ? 'فشل في إضافة العميل' : 'Erreur lors de la création du client'),
+        variant: 'destructive'
+      });
+    }
   };
 
   const updateQuantity = (productId: string, newQuantity: number) => {
@@ -382,10 +527,53 @@ export default function POS() {
 
   const completeSale = async () => {
     try {
+      let customerId: string | null = null;
+      const trimmedClientName = clientName.trim();
+
+      // Scenario 1: No client typed - use "Client de passage"
+      if (!trimmedClientName) {
+        // Do nothing, will save as "Client de passage"
+      } 
+      // Scenario 2: Client typed but might not exist
+      else {
+        // Check if client exists in database
+        const { data: existingClient } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('name', trimmedClientName)
+          .maybeSingle();
+
+        if (existingClient) {
+          // Client exists in database
+          customerId = existingClient.id;
+        } else {
+          // Client name typed but doesn't exist - create new client
+          const { data: newClient, error: createError } = await supabase
+            .from('customers')
+            .insert([{
+              name: trimmedClientName,
+              phone: '',
+              price_tier: 1,
+              notes: 'Created from POS sale',
+              is_active: true
+            }])
+            .select()
+            .single();
+
+          if (createError) {
+            console.warn('Could not create client:', createError);
+            // Continue anyway, will save with just the name
+          } else if (newClient) {
+            customerId = newClient.id;
+          }
+        }
+      }
+
       const invoiceData = {
         invoice_number: `SAL-${Date.now()}`,
         type: 'sale',
-        client_name: clientName.trim() || 'Client de passage',
+        customer_id: customerId,
+        client_name: trimmedClientName || 'Client de passage',
         subtotal: subtotal,
         tax_amount: 0,
         discount_amount: totalDiscount + globalDiscountAmount,
@@ -406,12 +594,12 @@ export default function POS() {
 
       if (invoiceError) throw invoiceError;
 
-      const items = cart.map(({ product, quantity, total }) => ({
+      const items = cart.map(({ product, quantity, total, discount }) => ({
         invoice_id: createdInvoice.id,
         product_id: product.id,
         product_name: product.name,
         quantity: parseInt(quantity.toString()),
-        unit_price: parseFloat(product.selling_price.toString()),
+        unit_price: parseFloat((total / (1 - (discount || 0) / 100)).toString()),
         total_price: parseFloat(total.toString())
       }));
 
@@ -421,15 +609,13 @@ export default function POS() {
 
       if (itemsError) throw itemsError;
 
-      // Deduct quantities from product storage
+      // Deduct quantities from products inventory (using quantity_actual field)
       for (const item of cart) {
-        const newQuantity = (item.product.quantity_on_hand || 0) - item.quantity;
-        const newAvailable = (item.product.quantity_available || 0) - item.quantity;
+        const newQuantity = Math.max(0, (item.product.quantity_actual || 0) - item.quantity);
         const { error: updateError } = await supabase
           .from('products')
           .update({ 
-            quantity_on_hand: Math.max(0, newQuantity),
-            quantity_available: Math.max(0, newAvailable)
+            quantity_actual: newQuantity
           })
           .eq('id', item.product.id);
 
@@ -441,7 +627,7 @@ export default function POS() {
       const fetchedInvoice: SaleInvoice = {
         id: createdInvoice.id,
         type: 'sale',
-        clientId: clientName,
+        clientId: customerId || 'passager',
         total: editableTotal,
         amount_paid: receivedAmount,
         created_at: new Date().toISOString(),
@@ -717,23 +903,37 @@ export default function POS() {
                                     )}
                                   </div>
 
-                                  {/* Price */}
-                                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-600">
-                                    <div>
-                                      <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'ar' ? 'السعر' : 'Prix'}</p>
-                                      <p className="font-bold text-green-600 dark:text-green-400">
-                                        {formatCurrencyLocal(product.selling_price, language)}
-                                      </p>
+                                  {/* Three-Tier Prices */}
+                                  <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-600">
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-2">
+                                        <p className="text-xs text-blue-600 dark:text-blue-300 font-bold">💙</p>
+                                        <p className="text-xs text-blue-700 dark:text-blue-400 font-bold">
+                                          {formatCurrencyLocal(parseFloat(product.selling_price_1 || product.selling_price || 0), language)}
+                                        </p>
+                                      </div>
+                                      <div className="bg-amber-50 dark:bg-amber-900/20 rounded p-2">
+                                        <p className="text-xs text-amber-600 dark:text-amber-300 font-bold">🟨</p>
+                                        <p className="text-xs text-amber-700 dark:text-amber-400 font-bold">
+                                          {formatCurrencyLocal(parseFloat(product.selling_price_2 || product.selling_price || 0), language)}
+                                        </p>
+                                      </div>
+                                      <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
+                                        <p className="text-xs text-green-600 dark:text-green-300 font-bold">📦</p>
+                                        <p className="text-xs text-green-700 dark:text-green-400 font-bold">
+                                          {formatCurrencyLocal(parseFloat(product.selling_price_3 || product.selling_price || 0), language)}
+                                        </p>
+                                      </div>
                                     </div>
                                     <Button
                                       size="sm"
-                                      className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg"
+                                      className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         addToCart(product);
                                       }}
                                     >
-                                      <Plus className="h-4 w-4" />
+                                      <Plus className="h-4 w-4 mr-1" /> {language === 'ar' ? 'إضافة' : 'Ajouter'}
                                     </Button>
                                   </div>
                                 </div>
@@ -773,15 +973,98 @@ export default function POS() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Client Name Input */}
-                  <div>
-                    <Label className="font-semibold text-slate-700 dark:text-slate-300">{language === 'ar' ? '👤 اسم العميل' : '👤 Nom du Client'}</Label>
-                    <Input
-                      type="text"
-                      placeholder={language === 'ar' ? 'اكتب اسم العميل (اختياري)' : 'Nom du client (optionnel)'}
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      className="mt-2 border-2 border-orange-200 dark:border-orange-700 focus:border-orange-400 dark:focus:border-orange-500"
-                    />
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                        👥 {language === 'en' ? 'Select Client' : 'Sélectionner Client'}
+                        {selectedClient && (
+                          <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full font-bold">
+                            ✅ {selectedClient.name}
+                          </span>
+                        )}
+                      </Label>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowAddClientModal(true)}
+                        className="h-7 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-xs"
+                      >
+                        <Plus className="w-3 h-3 mr-1" /> {language === 'en' ? 'New' : 'Nouveau'}
+                      </Button>
+                    </div>
+                    <div className="relative mt-2">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input
+                        type="text"
+                        placeholder={language === 'en' ? 'Type client name or phone...' : 'Taper nom ou téléphone...'}
+                        value={clientSearch}
+                        onChange={(e) => {
+                          setClientSearch(e.target.value);
+                          setShowClientDropdown(true);
+                        }}
+                        onFocus={() => setShowClientDropdown(true)}
+                        className="pl-10 border-2 border-cyan-200 dark:border-cyan-700 focus:border-cyan-400 dark:focus:border-cyan-500"
+                      />
+                    </div>
+                    
+                    {/* Client Dropdown */}
+                    {showClientDropdown && clientSearch && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border-2 border-cyan-200 dark:border-cyan-700 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto"
+                      >
+                        {filteredClients.length === 0 ? (
+                          <div className="p-3 text-center text-slate-500 dark:text-slate-400">
+                            {language === 'en' ? 'No clients found' : 'Aucun client trouvé'}
+                          </div>
+                        ) : (
+                          filteredClients.map((client) => (
+                            <motion.button
+                              key={client.id}
+                              onClick={() => handleClientSelect(client)}
+                              whileHover={{ x: 5 }}
+                              className="w-full text-left px-4 py-3 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 border-b border-slate-200 dark:border-slate-700 last:border-b-0 transition-colors"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold text-slate-900 dark:text-white">{client.name}</p>
+                                  <p className="text-xs text-slate-600 dark:text-slate-400">📞 {client.phone}</p>
+                                </div>
+                                <span className="text-xs font-bold px-2 py-1 rounded bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">
+                                  {client.price_tier === 1 && '💙 Normal'}
+                                  {client.price_tier === 2 && '🟨 Revendeur'}
+                                  {client.price_tier === 3 && '📦 Gros'}
+                                </span>
+                              </div>
+                            </motion.button>
+                          ))
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* Selected Client Info */}
+                    {selectedClient && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg border border-cyan-200 dark:border-cyan-700"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedClient.name}</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">📞 {selectedClient.phone}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleClearClient}
+                            className="text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20"
+                          >
+                            ✕
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
                   </div>
 
                   {/* Cart Items */}
@@ -934,6 +1217,169 @@ export default function POS() {
         </div>
       </div>
 
+      {/* Create New Client Modal */}
+      <AnimatePresence>
+        {showAddClientModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 backdrop-blur-sm"
+            onClick={() => setShowAddClientModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-850 dark:to-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-8 border border-slate-200 dark:border-slate-700"
+            >
+              <div className="flex justify-between items-start mb-8">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                  👤 {language === 'ar' ? 'إضافة عميل جديد' : 'Ajouter un Client'}
+                </h2>
+                <button
+                  onClick={() => setShowAddClientModal(false)}
+                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                {/* Full Name Field */}
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 }}
+                >
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    👤 {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'}
+                  </label>
+                  <Input
+                    value={newClientForm.name}
+                    onChange={(e) =>
+                      setNewClientForm({
+                        ...newClientForm,
+                        name: e.target.value,
+                      })
+                    }
+                    placeholder={language === 'ar' ? 'أدخل الاسم' : 'Entrez le nom'}
+                    className="mt-2 border-2 border-cyan-300 dark:border-cyan-700 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-0 h-11 text-base"
+                  />
+                </motion.div>
+
+                {/* Phone Field */}
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    📱 {language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
+                  </label>
+                  <Input
+                    value={newClientForm.phone}
+                    onChange={(e) =>
+                      setNewClientForm({
+                        ...newClientForm,
+                        phone: e.target.value,
+                      })
+                    }
+                    placeholder={language === 'ar' ? 'أدخل رقم الهاتف' : 'Entrez le téléphone'}
+                    className="mt-2 border-2 border-cyan-300 dark:border-cyan-700 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-0 h-11 text-base"
+                  />
+                </motion.div>
+
+                {/* Price Tier Selection */}
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 }}
+                >
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    💰 {language === 'ar' ? 'مستوى السعر' : 'Niveau de Prix'}
+                  </label>
+                  <div className="grid grid-cols-3 gap-3 mt-2">
+                    {[
+                      { tier: 1, emoji: '💙', label: language === 'ar' ? 'عادي' : 'Normal' },
+                      { tier: 2, emoji: '🟨', label: language === 'ar' ? 'موزع' : 'Revendeur' },
+                      { tier: 3, emoji: '📦', label: language === 'ar' ? 'جملة' : 'Gros' },
+                    ].map(({ tier, emoji, label }) => (
+                      <motion.button
+                        key={tier}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() =>
+                          setNewClientForm({
+                            ...newClientForm,
+                            price_tier: tier,
+                          })
+                        }
+                        className={`py-3 px-2 rounded-lg font-bold transition-all border-2 ${
+                          newClientForm.price_tier === tier
+                            ? tier === 1
+                              ? 'bg-blue-100 dark:bg-blue-900 border-blue-500 text-blue-700 dark:text-blue-300'
+                              : tier === 2
+                              ? 'bg-amber-100 dark:bg-amber-900 border-amber-500 text-amber-700 dark:text-amber-300'
+                              : 'bg-green-100 dark:bg-green-900 border-green-500 text-green-700 dark:text-green-300'
+                            : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        <div className="text-lg">{emoji}</div>
+                        <div className="text-xs">{label}</div>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Notes Field */}
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    📝 {language === 'ar' ? 'ملاحظات' : 'Notes'}
+                  </label>
+                  <textarea
+                    value={newClientForm.notes}
+                    onChange={(e) =>
+                      setNewClientForm({
+                        ...newClientForm,
+                        notes: e.target.value,
+                      })
+                    }
+                    placeholder={language === 'ar' ? 'أدخل ملاحظات اختيارية' : 'Entrez des notes optionnelles'}
+                    className="mt-2 border-2 border-cyan-300 dark:border-cyan-700 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-0 h-24 p-2 rounded-lg text-sm dark:bg-slate-800 dark:text-white"
+                  />
+                </motion.div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <Button
+                  onClick={() => {
+                    setShowAddClientModal(false);
+                    setNewClientForm({ name: '', phone: '', price_tier: 1, notes: '' });
+                  }}
+                  className="flex-1 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-600 border-0"
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Annuler'}
+                </Button>
+                <Button
+                  onClick={handleAddNewClient}
+                  className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-bold border-0 shadow-lg"
+                >
+                  ✚ {language === 'ar' ? 'إضافة' : 'Créer'}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Payment Dialog */}
       <Dialog open={paymentDialog} onOpenChange={setPaymentDialog}>
         <DialogContent className="max-w-md rounded-2xl">
@@ -941,6 +1387,19 @@ export default function POS() {
             <DialogTitle className="flex items-center gap-2 text-2xl">
               💵 {language === 'ar' ? 'إتمام الدفع' : 'Finaliser le Paiement'}
             </DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? 'أدخل المبلغ الذي تم استلامه لإتمام عملية البيع' : 'Entrez le montant reçu pour finaliser la vente'}
+            </DialogDescription>
+            {selectedClient && (
+              <div className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                {language === 'ar' ? 'العميل' : 'Client'}: <span className="font-bold text-slate-900 dark:text-white">{selectedClient.name}</span>
+                <br />
+                {language === 'ar' ? 'المستوى' : 'Tier'}: 
+                {selectedClient.price_tier === 1 && ' 💙 Normal'}
+                {selectedClient.price_tier === 2 && ' 🟨 Revendeur'}
+                {selectedClient.price_tier === 3 && ' 📦 Gros'}
+              </div>
+            )}
           </DialogHeader>
 
           <div className="space-y-4">
@@ -1025,6 +1484,9 @@ export default function POS() {
             <DialogTitle className="text-2xl flex items-center gap-2">
               🖨️ {language === 'ar' ? 'هل تريد طباعة الفاتورة؟' : 'Imprimer la facture?'}
             </DialogTitle>
+            <DialogDescription>
+              {language === 'ar' ? 'اختر ما إذا كنت تريد طباعة فاتورة البيع' : 'Choisissez si vous souhaitez imprimer la facture de vente'}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPrintConfirmationDialog(false)} className="h-11 font-semibold">

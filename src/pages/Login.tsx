@@ -93,7 +93,7 @@ export default function Login({ onLogin }: LoginProps) {
       
       // Small delay to ensure auth context updates
       setTimeout(() => {
-        navigate("/", { replace: true });
+        navigate("/website-shop", { replace: true });
       }, 500);
     } catch (err: any) {
       console.error("Login error:", err);
@@ -178,7 +178,7 @@ export default function Login({ onLogin }: LoginProps) {
       
       // Small delay to ensure auth context updates
       setTimeout(() => {
-        navigate("/", { replace: true });
+        navigate("/website-shop", { replace: true });
       }, 500);
     } catch (err: any) {
       console.error("Signup error:", err);
@@ -422,23 +422,19 @@ export default function Login({ onLogin }: LoginProps) {
                     setSignupCredentials({ username: "", email: "", password: "", confirmPassword: "" });
                   }}
                 >
-                  {mode === 'login' ? '📝 S\'inscrire' : '🔐 Se connecter'}
+                  {mode === 'login' ? '� Se connecter' : '🔐 Se connecter'}
                 </Button>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Info Box */}
+        {/* Visit Store Button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="p-4 bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-950/30 dark:to-emerald-950/30 rounded-lg text-sm border border-blue-200 dark:border-blue-800"
         >
-          <p className="text-gray-700 dark:text-gray-300 mb-3">
-            🔒 <strong>Sécurisé:</strong> Authentification Supabase avec chiffrement end-to-end
-          </p>
           <Button 
             type="button"
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"

@@ -218,7 +218,7 @@ export default function WebsiteOffers() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-all duration-300" />
                 
-                <div className="relative bg-white dark:bg-slate-800 border-2 border-blue-200 dark:border-blue-700 rounded-2xl p-8 h-full flex flex-col overflow-hidden">
+                <div className="relative bg-white dark:bg-slate-800 border-2 border-blue-200 dark:border-blue-700 rounded-2xl overflow-hidden h-full flex flex-col shadow-lg hover:shadow-2xl transition-all duration-300">
                   {/* Discount Badge */}
                   {offer.discount_percentage > 0 && (
                   <motion.div
@@ -233,14 +233,14 @@ export default function WebsiteOffers() {
                   </motion.div>
                   )}
 
-                  {/* Product Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                  {/* Product Image - Full Screen */}
+                  <div className="relative h-72 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center overflow-hidden w-full">
                     {offer.product_image ? (
                       <motion.img
                         src={offer.product_image}
                         alt={offer.product_name}
-                        className="max-w-full max-h-full object-contain"
-                        whileHover={{ scale: 1.1 }}
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.12 }}
                         transition={{ duration: 0.3 }}
                       />
                     ) : (
@@ -248,78 +248,80 @@ export default function WebsiteOffers() {
                         animate={{ rotate: [0, 10, -10, 0] }}
                         transition={{ duration: 3, repeat: Infinity }}
                       >
-                        <Zap className="h-16 w-16 text-slate-300" />
+                        <Zap className="h-20 w-20 text-slate-300" />
                       </motion.div>
                     )}
                   </div>
 
-                  {/* Brand - Always Show */}
-                  <Badge variant="outline" className="w-fit mb-2 text-xs font-bold border-blue-300 bg-blue-50 dark:bg-blue-900/30">
-                    🏷️ {offer.product_mark || 'Charger'}
-                  </Badge>
+                  {/* Content Area */}
+                  <div className="p-6 flex-1 flex flex-col">
+                    {/* Brand - Always Show */}
+                    <Badge variant="outline" className="w-fit mb-3 text-xs font-bold border-blue-300 bg-blue-50 dark:bg-blue-900/30">
+                      🏷️ {offer.product_mark || 'Charger'}
+                    </Badge>
 
-                  {/* Product Name */}
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-1 line-clamp-2">
-                    {offer.product_name}
-                  </h3>
+                    {/* Product Name */}
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white mb-2 line-clamp-2">
+                      {offer.product_name}
+                    </h3>
 
-                  {/* Description */}
-                  {offer.product_description && (
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 line-clamp-1 italic">
-                      📝 {offer.product_description}
-                    </p>
-                  )}
+                    {/* Description - Bold and Bigger */}
+                    {offer.product_description && (
+                      <p className="text-base font-bold text-slate-700 dark:text-slate-300 mb-3">
+                        📝 {offer.product_description}
+                      </p>
+                    )}
 
-                  {/* Specs Section Header */}
-                  <div className="mb-2">
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Spécifications Électriques'}</p>
-                  </div>
-
-                  {/* Specs Grid - Always Show */}
-                  <div className="grid grid-cols-2 gap-1.5 mb-3">
-                    <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-1.5 text-center border border-blue-200 dark:border-blue-700">
-                      <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
-                      <div className="text-xs font-bold text-blue-600 dark:text-blue-400">{offer.voltage ? `${offer.voltage}V` : 'N/A'}</div>
+                    {/* Specs Section Header */}
+                    <div className="mb-3">
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Spécifications Électriques'}</p>
                     </div>
-                    <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-1.5 text-center border border-yellow-200 dark:border-yellow-700">
-                      <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔌 {language === 'ar' ? 'القوة' : 'Wattage'}</div>
-                      <div className="text-xs font-bold text-yellow-600 dark:text-yellow-400">{offer.wattage ? `${offer.wattage}W` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-1.5 text-center border border-purple-200 dark:border-purple-700">
-                      <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚙️ {language === 'ar' ? 'التيار' : 'Amperage'}</div>
-                      <div className="text-xs font-bold text-purple-600 dark:text-purple-400">{offer.amperage ? `${offer.amperage}A` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-1.5 text-center border border-green-200 dark:border-green-700">
-                      <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔧 {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
-                      <div className="text-xs font-bold text-green-600 dark:text-green-400 truncate">{offer.connection_type || 'N/A'}</div>
-                    </div>
-                  </div>
 
-                  {/* Price - Only Real Price */}
-                  {(offer.offer_price !== undefined && offer.offer_price !== null) && (
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-2 mb-2 border-2 border-green-200 dark:border-green-700">
-                    <div className="flex items-baseline gap-2 justify-center">
-                      <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {offer.discount_percentage > 0 
-                          ? (offer.offer_price || 0).toFixed(2)
-                          : (offer.original_price || 0).toFixed(2)
+                    {/* Specs Grid - Always Show */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 text-center border border-blue-200 dark:border-blue-700">
+                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">{offer.voltage ? `${offer.voltage}V` : 'N/A'}</div>
+                      </div>
+                      <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-2 text-center border border-yellow-200 dark:border-yellow-700">
+                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔌 {language === 'ar' ? 'القوة' : 'Wattage'}</div>
+                        <div className="text-sm font-bold text-yellow-600 dark:text-yellow-400">{offer.wattage ? `${offer.wattage}W` : 'N/A'}</div>
+                      </div>
+                      <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-2 text-center border border-purple-200 dark:border-purple-700">
+                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚙️ {language === 'ar' ? 'التيار' : 'Amperage'}</div>
+                        <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{offer.amperage ? `${offer.amperage}A` : 'N/A'}</div>
+                      </div>
+                      <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-2 text-center border border-green-200 dark:border-green-700">
+                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔧 {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
+                        <div className="text-sm font-bold text-green-600 dark:text-green-400 truncate">{offer.connection_type || 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* Price - Only Real Price */}
+                    {(offer.offer_price !== undefined && offer.offer_price !== null) && (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-3 mb-3 border-2 border-green-200 dark:border-green-700">
+                      <div className="flex items-baseline gap-2 justify-center">
+                        <span className="text-3xl font-bold text-green-600 dark:text-green-400">
+                          {offer.discount_percentage > 0 
+                            ? (offer.offer_price || 0).toFixed(2)
+                            : (offer.original_price || 0).toFixed(2)
+                          }
+                        </span>
+                        <span className="text-base text-slate-600 dark:text-slate-400 font-semibold">
+                          {language === 'ar' ? 'دج' : 'DZD'}
+                        </span>
+                      </div>
+                      <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">
+                        {offer.discount_percentage > 0
+                          ? (language === 'ar' ? '✅ السعر النهائي' : '✅ Prix Final')
+                          : (language === 'ar' ? '💰 السعر' : '💰 Prix')
                         }
-                      </span>
-                      <span className="text-sm text-slate-600 dark:text-slate-400 font-semibold">
-                        {language === 'ar' ? 'دج' : 'DZD'}
-                      </span>
+                      </p>
                     </div>
-                    <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-semibold">
-                      {offer.discount_percentage > 0
-                        ? (language === 'ar' ? '✅ السعر النهائي' : '✅ Prix Final')
-                        : (language === 'ar' ? '💰 السعر' : '💰 Prix')
-                      }
-                    </p>
-                  </div>
-                  )}
+                    )}
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 mt-auto pt-4 min-h-12">
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-auto pt-3 min-h-12">
                     <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
                       <Button
                         onClick={() => handleAddToCart(offer)}
@@ -345,6 +347,7 @@ export default function WebsiteOffers() {
                         {language === 'ar' ? '🚀 طلب' : '🚀 Commande'}
                       </Button>
                     </motion.div>
+                    </div>
                   </div>
                 </div>
               </motion.div>

@@ -217,7 +217,7 @@ export default function WebsiteSpecialOffers() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-all duration-300" />
                 
-                <div className="relative bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700 rounded-2xl p-8 h-full flex flex-col overflow-hidden">
+                <div className="relative bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700 rounded-2xl overflow-hidden h-full flex flex-col shadow-lg hover:shadow-2xl transition-all duration-300">
                   {/* Premium Badge */}
                   <motion.div
                     initial={{ scale: 0, rotate: -45 }}
@@ -242,14 +242,14 @@ export default function WebsiteSpecialOffers() {
                     </Badge>
                   </motion.div>
 
-                  {/* Product Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                  {/* Product Image - Full Screen */}
+                  <div className="relative h-72 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 flex items-center justify-center overflow-hidden w-full">
                     {offer.product_image ? (
                       <motion.img
                         src={offer.product_image}
                         alt={offer.product_name}
-                        className="max-w-full max-h-full object-contain"
-                        whileHover={{ scale: 1.15 }}
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.12 }}
                         transition={{ duration: 0.3 }}
                       />
                     ) : (
@@ -257,84 +257,74 @@ export default function WebsiteSpecialOffers() {
                         animate={{ rotate: [0, 10, -10, 0], y: [0, -10, 0] }}
                         transition={{ duration: 3, repeat: Infinity }}
                       >
-                        <Crown className="h-16 w-16 text-slate-300" />
+                        <Crown className="h-20 w-20 text-slate-300" />
                       </motion.div>
                     )}
                   </div>
 
-                  {/* Brand - Always Show */}
-                  <Badge variant="outline" className="w-fit mb-2 text-xs font-bold border-red-300 bg-red-50 dark:bg-red-900/30">
-                    🏆 {offer.product_mark || 'Charger'}
-                  </Badge>
+                  {/* Content Area */}
+                  <div className="p-6 flex-1 flex flex-col">
+                    {/* Brand - Always Show */}
+                    <Badge variant="outline" className="w-fit mb-3 text-xs font-bold border-red-300 bg-red-50 dark:bg-red-900/30">
+                      🏆 {offer.product_mark || 'Charger'}
+                    </Badge>
 
-                  {/* Product Name */}
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-1 line-clamp-2">
-                    {offer.product_name}
-                  </h3>
+                    {/* Product Name */}
+                    <h3 className="font-bold text-base text-slate-900 dark:text-white mb-2 line-clamp-2">
+                      {offer.product_name}
+                    </h3>
 
-                  {/* Description */}
-                  {offer.product_description && (
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 line-clamp-1 italic">
-                      📝 {offer.product_description}
-                    </p>
-                  )}
+                    {/* Description - Bold and Bigger */}
+                    {offer.product_description && (
+                      <p className="text-base font-bold text-slate-700 dark:text-slate-300 mb-3">
+                        📝 {offer.product_description}
+                      </p>
+                    )}
 
-                  {/* Specs Section Header */}
-                  <div className="mb-2">
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Spécifications Électriques'}</p>
-                  </div>
-
-                  {/* Specs Grid - Always Show */}
-                  <div className="grid grid-cols-2 gap-1.5 mb-3">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/50 rounded-lg p-1.5 text-center border border-red-200 dark:border-red-700"
-                    >
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
-                      <div className="text-xs font-bold text-red-600 dark:text-red-400">{offer.voltage ? `${offer.voltage}V` : 'N/A'}</div>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-900/50 rounded-lg p-1.5 text-center border border-rose-200 dark:border-rose-700"
-                    >
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400">🔌 {language === 'ar' ? 'القوة' : 'Wattage'}</div>
-                      <div className="text-xs font-bold text-rose-600 dark:text-rose-400">{offer.wattage ? `${offer.wattage}W` : 'N/A'}</div>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-900/50 rounded-lg p-1.5 text-center border border-pink-200 dark:border-pink-700"
-                    >
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400">⚙️ {language === 'ar' ? 'التيار' : 'Amperage'}</div>
-                      <div className="text-xs font-bold text-pink-600 dark:text-pink-400">{offer.amperage ? `${offer.amperage}A` : 'N/A'}</div>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/50 rounded-lg p-1.5 text-center border border-orange-200 dark:border-orange-700"
-                    >
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400">🔧 {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
-                      <div className="text-xs font-bold text-orange-600 dark:text-orange-400 truncate">{offer.connection_type || 'N/A'}</div>
-                    </motion.div>
-                  </div>
-
-                  {/* Price - Only Real Price */}
-                  {(offer.offer_price !== undefined && offer.offer_price !== null) && (
-                  <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/30 dark:to-pink-900/30 rounded-xl p-2 mb-2 border-2 border-red-200 dark:border-red-700">
-                    <div className="flex items-baseline gap-2 justify-center">
-                      <span className="text-2xl font-bold text-red-600 dark:text-red-400">
-                        {(offer.offer_price || 0).toFixed(2)}
-                      </span>
-                      <span className="text-sm text-slate-600 dark:text-slate-400 font-semibold">
-                        {language === 'ar' ? 'دج' : 'DZD'}
-                      </span>
+                    {/* Specs Section Header */}
+                    <div className="mb-3">
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Spécifications Électriques'}</p>
                     </div>
-                    <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-semibold">
-                      {language === 'ar' ? '✅ السعر النهائي الحصري' : '✅ Prix Final Exclusif'}
-                    </p>
-                  </div>
-                  )}
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 mt-auto pt-4 min-h-12">
+                    {/* Specs Grid - Always Show */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/50 rounded-lg p-2 text-center border border-red-200 dark:border-red-700">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
+                        <div className="text-sm font-bold text-red-600 dark:text-red-400">{offer.voltage ? `${offer.voltage}V` : 'N/A'}</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-900/50 rounded-lg p-2 text-center border border-rose-200 dark:border-rose-700">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">🔌 {language === 'ar' ? 'القوة' : 'Wattage'}</div>
+                        <div className="text-sm font-bold text-rose-600 dark:text-rose-400">{offer.wattage ? `${offer.wattage}W` : 'N/A'}</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-900/50 rounded-lg p-2 text-center border border-pink-200 dark:border-pink-700">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">⚙️ {language === 'ar' ? 'التيار' : 'Amperage'}</div>
+                        <div className="text-sm font-bold text-pink-600 dark:text-pink-400">{offer.amperage ? `${offer.amperage}A` : 'N/A'}</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/50 rounded-lg p-2 text-center border border-orange-200 dark:border-orange-700">
+                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">🔧 {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
+                        <div className="text-sm font-bold text-orange-600 dark:text-orange-400 truncate">{offer.connection_type || 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* Price - Only Real Price */}
+                    {(offer.offer_price !== undefined && offer.offer_price !== null) && (
+                    <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/30 dark:to-pink-900/30 rounded-xl p-3 mb-3 border-2 border-red-200 dark:border-red-700">
+                      <div className="flex items-baseline gap-2 justify-center">
+                        <span className="text-3xl font-bold text-red-600 dark:text-red-400">
+                          {(offer.offer_price || 0).toFixed(2)}
+                        </span>
+                        <span className="text-base text-slate-600 dark:text-slate-400 font-semibold">
+                          {language === 'ar' ? 'دج' : 'DZD'}
+                        </span>
+                      </div>
+                      <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">
+                        {language === 'ar' ? '✅ السعر النهائي الحصري' : '✅ Prix Final Exclusif'}
+                      </p>
+                    </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-auto pt-3 min-h-12">
                     <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
                       <Button
                         onClick={() => handleAddToCart(offer)}
@@ -359,6 +349,7 @@ export default function WebsiteSpecialOffers() {
                         {language === 'ar' ? '🚀 طلب' : '🚀 Commande'}
                       </Button>
                     </motion.div>
+                    </div>
                   </div>
                 </div>
               </motion.div>

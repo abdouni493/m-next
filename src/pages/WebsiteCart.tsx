@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { createOrderREST } from '@/lib/supabaseClient';
-import { ArrowLeft, Trash2, ShoppingCart, Check, MapPin, User, Package } from 'lucide-react';
+import { createOrderREST, getVisibleDeliveryAgencies } from '@/lib/supabaseClient';
+import { ArrowLeft, Trash2, ShoppingCart, Check, MapPin, User, Package, Truck } from 'lucide-react';
 
 interface CartItem {
   id: string;
@@ -31,6 +31,18 @@ interface CartItem {
   connection_type?: string;
 }
 
+interface DeliveryAgency {
+  id: string;
+  name: string;
+  description?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  price_domicile: number;
+  price_bureau: number;
+  is_active: boolean;
+  is_visible: boolean;
+}
+
 // List of Algerian Wilayas
 const ALGERIAN_WILAYAS = [
   'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
@@ -45,6 +57,7 @@ export default function WebsiteCart() {
   const { language, isRTL } = useLanguage();
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [deliveryAgencies, setDeliveryAgencies] = useState<DeliveryAgency[]>([]);
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderDetails, setOrderDetails] = useState<any>(null);
@@ -55,13 +68,29 @@ export default function WebsiteCart() {
     client_phone: '',
     client_wilaya: '',
     client_address: '',
+    delivery_agency_id: '',
     delivery_type: 'domicile'
   });
 
-  // Load cart from localStorage
+  // Load cart and delivery agencies from database
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     setCartItems(cart);
+    
+    // Fetch delivery agencies
+    const fetchAgencies = async () => {
+      try {
+        const agencies = await getVisibleDeliveryAgencies();
+        setDeliveryAgencies(agencies || []);
+        if (agencies && agencies.length > 0) {
+          setFormData(prev => ({ ...prev, delivery_agency_id: agencies[0].id }));
+        }
+      } catch (error) {
+        console.error('Error fetching delivery agencies:', error);
+      }
+    };
+    
+    fetchAgencies();
   }, []);
 
   // Remove item from cart
@@ -82,8 +111,21 @@ export default function WebsiteCart() {
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
-  // Calculate totals
+  // Calculate totals with delivery
   const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  // Get selected delivery agency
+  const selectedAgency = deliveryAgencies.find(a => a.id === formData.delivery_agency_id);
+  
+  // Calculate delivery price based on type
+  const getDeliveryPrice = () => {
+    if (!selectedAgency) return 0;
+    return formData.delivery_type === 'bureau' ? selectedAgency.price_bureau : selectedAgency.price_domicile;
+  };
+  
+  const deliveryPrice = getDeliveryPrice();
+  const finalTotal = total + deliveryPrice;
+  
   const itemCount = cartItems.length;
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -115,7 +157,7 @@ export default function WebsiteCart() {
       return;
     }
 
-    if (!formData.client_name || !formData.client_phone || !formData.client_wilaya || !formData.client_address) {
+    if (!formData.client_name || !formData.client_phone || !formData.client_wilaya || !formData.client_address || !formData.delivery_agency_id) {
       alert(language === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -128,9 +170,11 @@ export default function WebsiteCart() {
         customer_phone: formData.client_phone,
         customer_wilaya: formData.client_wilaya,
         customer_address: formData.client_address,
+        delivery_agency_id: formData.delivery_agency_id,
         delivery_type: formData.delivery_type,
+        delivery_price: deliveryPrice,
         status: 'pending',
-        total_price: total
+        total_price: finalTotal
       };
 
       // Create the order using REST API with cart items
@@ -144,9 +188,13 @@ export default function WebsiteCart() {
         customer_phone: formData.client_phone,
         customer_wilaya: formData.client_wilaya,
         customer_address: formData.client_address,
+        delivery_agency_id: formData.delivery_agency_id,
+        delivery_agency_name: selectedAgency?.name || '',
         delivery_type: formData.delivery_type,
         items: cartItems,
-        total_price: total,
+        subtotal: total,
+        delivery_price: deliveryPrice,
+        total_price: finalTotal,
         created_at: new Date().toLocaleString(language === 'ar' ? 'ar-SA' : 'fr-FR')
       });
 
@@ -297,6 +345,39 @@ export default function WebsiteCart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-orange-200 dark:border-orange-700 p-6 shadow-lg space-y-4"
+          >
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Truck className="w-5 h-5 text-orange-600" />
+              {language === 'ar' ? '🚚 معلومات التسليم' : '🚚 Infos Livraison'}
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
+                  {language === 'ar' ? '🏢 وكالة التسليم' : '🏢 Agence'}
+                </p>
+                <p className="font-bold text-slate-900 dark:text-white">{orderDetails.delivery_agency_name}</p>
+              </div>
+              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
+                  {language === 'ar' ? '📦 نوع التسليم' : '📦 Type'}
+                </p>
+                <p className="font-bold text-slate-900 dark:text-white">
+                  {orderDetails.delivery_type === 'bureau' 
+                    ? (language === 'ar' ? '🏢 مكتب' : '🏢 Bureau')
+                    : (language === 'ar' ? '🏠 منزل' : '🏠 Domicile')
+                  }
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Pricing Summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
             className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 text-white shadow-lg"
           >
             <div className="space-y-3">
@@ -309,6 +390,14 @@ export default function WebsiteCart() {
                 <Badge className="bg-white text-green-600 font-bold">
                   {orderDetails.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0)}
                 </Badge>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-green-400">
+                <span className="font-semibold">{language === 'ar' ? 'المجموع (بدون توصيل):' : 'Sous-total:'}</span>
+                <span className="font-semibold">{orderDetails.subtotal.toFixed(2)} DZD</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-green-400">
+                <span className="font-semibold">{language === 'ar' ? 'رسوم التوصيل:' : 'Frais livraison:'}</span>
+                <span className="font-semibold text-orange-200">{orderDetails.delivery_price.toFixed(2)} DZD</span>
               </div>
               <div className="flex justify-between items-baseline gap-4 pt-2">
                 <span className="text-lg font-bold">{language === 'ar' ? 'المجموع النهائي:' : 'Total Final:'}</span>
@@ -606,12 +695,36 @@ export default function WebsiteCart() {
                   </div>
                 </div>
 
-                {/* Total */}
-                <div className="space-y-1 md:space-y-2">
-                  <p className="text-green-100 text-xs md:text-sm font-semibold">{language === 'ar' ? 'المجموع النهائي' : 'Total TTC'}</p>
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-3xl md:text-4xl font-bold">{total.toFixed(2)}</span>
-                    <span className="text-xl md:text-2xl font-bold text-green-50">{language === 'ar' ? 'دج' : 'DZD'}</span>
+                {/* Pricing Breakdown */}
+                <div className="space-y-2 md:space-y-3">
+                  {/* Subtotal */}
+                  <div className="flex justify-between items-center text-green-100 text-sm md:text-base">
+                    <span className="font-semibold">{language === 'ar' ? 'المنتجات:' : 'Sous-total:'}</span>
+                    <span className="font-bold">{total.toFixed(2)} {language === 'ar' ? 'دج' : 'DZD'}</span>
+                  </div>
+
+                  {/* Delivery Fee */}
+                  {deliveryAgencies.length > 0 && (
+                    <div className="flex justify-between items-center text-green-100 text-sm md:text-base">
+                      <span className="font-semibold">
+                        {language === 'ar' ? '🚚 التسليم:' : '🚚 Livraison:'}
+                      </span>
+                      <span className="font-bold">
+                        {getDeliveryPrice().toFixed(2)} {language === 'ar' ? 'دج' : 'DZD'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Divider */}
+                  <div className="my-2 md:my-3 border-t border-green-400" />
+
+                  {/* Total */}
+                  <div className="flex justify-between items-center text-green-50">
+                    <span className="text-base md:text-lg font-bold">{language === 'ar' ? 'المجموع النهائي:' : 'TOTAL:'}</span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl md:text-4xl font-bold">{finalTotal.toFixed(2)}</span>
+                      <span className="text-xl md:text-2xl font-bold">{language === 'ar' ? 'دج' : 'DZD'}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -686,6 +799,34 @@ export default function WebsiteCart() {
                       className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm"
                       required
                     />
+                  </div>
+
+                  {/* Delivery Agency Selection */}
+                  <div>
+                    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      <Truck className="w-3 h-3 md:w-4 md:h-4 inline mr-1" />
+                      {language === 'ar' ? '🏢 وكالة التسليم *' : '🏢 Agence de Livraison *'}
+                    </label>
+                    <Select value={formData.delivery_agency_id} onValueChange={(value) => setFormData(prev => ({ ...prev, delivery_agency_id: value }))}>
+                      <SelectTrigger className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm">
+                        <SelectValue placeholder={language === 'ar' ? 'اختر وكالة التسليم' : 'Choisir une agence'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {deliveryAgencies.map(agency => {
+                          const agencyPrice = formData.delivery_type === 'bureau' ? agency.price_bureau : agency.price_domicile;
+                          return (
+                            <SelectItem key={agency.id} value={agency.id}>
+                              <div className="flex items-center gap-2">
+                                <span>{agency.name}</span>
+                                <span className="text-xs text-slate-500">
+                                  ({formData.delivery_type === 'bureau' ? '🏢' : '🏠'} {agencyPrice.toFixed(2)} DZD)
+                                </span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Delivery Type */}

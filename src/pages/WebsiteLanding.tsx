@@ -58,6 +58,9 @@ export default function WebsiteLanding() {
   const [specialOffers, setSpecialOffers] = useState<SpecialOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [cartNotification, setCartNotification] = useState<string | null>(null);
+  const [allOffers, setAllOffers] = useState<Offer[]>([]);
+  const [availableBrands, setAvailableBrands] = useState<string[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,7 +77,29 @@ export default function WebsiteLanding() {
           store_name: 'Chargeur Store',
           slogan: 'Quality Chargers at Best Prices'
         });
-        setOffers((offersData || []).filter((o: any) => o.is_visible).slice(0, 3));
+        
+        // Get all visible offers
+        const visibleOffers = (offersData || []).filter((o: any) => o.is_visible);
+        setAllOffers(visibleOffers);
+        
+        // Debug: log all offers
+        console.log('📦 All visible offers:', visibleOffers);
+        console.log('📦 Total offers count:', visibleOffers.length);
+        
+        // Extract unique brands from ALL offers
+        const brands = Array.from(new Set(
+          visibleOffers
+            .map((o: any) => o.product_mark || o.products?.mark?.name)
+            .filter((mark: any) => mark && mark.trim() !== '')
+        )).sort() as string[];
+        
+        console.log('🏷️ Brands found:', brands);
+        console.log('🏷️ Total brands:', brands.length);
+        
+        setAvailableBrands(brands);
+        
+        // Show first 3 offers for initial load
+        setOffers(visibleOffers.slice(0, 3));
         setSpecialOffers((specialOffersData || []).filter((o: any) => o.is_visible).slice(0, 3));
       } catch (error) {
         console.error('Error fetching website data:', error);
@@ -90,6 +115,28 @@ export default function WebsiteLanding() {
 
     fetchData();
   }, []);
+
+  // Handle Brand Filter - Show ALL offers for selected brand (COMPLETE FIX)
+  const handleBrandClick = (brand: string | null) => {
+    setSelectedBrand(brand);
+    
+    if (brand === null) {
+      // Show all offers (up to first 3 for initial load)
+      setOffers(allOffers.slice(0, 3));
+    } else {
+      // Show ALL offers for the selected brand (NO LIMITS)
+      const filtered = allOffers.filter(o => {
+        const mark = o.product_mark || o.product_mark;
+        return mark === brand;
+      });
+      
+      // Debug: log what we found
+      console.log(`🏷️ Brand "${brand}" found ${filtered.length} offers:`, filtered);
+      
+      // Set ALL filtered offers - NO slice limit
+      setOffers(filtered.length > 0 ? filtered : []);
+    }
+  };
 
   // Handle Add to Cart
   const handleAddToCart = (offer: Offer | SpecialOffer) => {
@@ -253,14 +300,86 @@ export default function WebsiteLanding() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {offers.map((offer) => (
-              <motion.div
-                key={offer.id}
-                variants={itemVariants}
-                whileHover={{ y: -10 }}
-                className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-blue-100 dark:border-blue-700 flex flex-col"
-              >
+          {/* Brand Filter */}
+          {availableBrands.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-3"
+            >
+              <div className="flex flex-wrap justify-between items-center px-4 py-2">
+                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'تصفية حسب الماركة:' : 'Filtrer par Marque:'}
+                </h3>
+                {selectedBrand && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full"
+                  >
+                    {language === 'ar' ? `✅ ${offers.length} عروض` : `✅ ${offers.length} offres`}
+                  </motion.div>
+                )}
+              </div>
+              
+              <div className="flex flex-wrap justify-center gap-3 py-4 px-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-2xl border-2 border-blue-200 dark:border-blue-700">
+                {/* All Brands Button */}
+                <motion.button
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleBrandClick(null)}
+                  className={`px-4 py-2 rounded-full font-bold text-sm transition-all duration-200 ${
+                    selectedBrand === null
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-blue-200 dark:border-blue-700 hover:border-blue-400'
+                  }`}
+                >
+                  {language === 'ar' ? '⭐ الكل' : '⭐ Tous'}
+                </motion.button>
+
+                {/* Individual Brand Buttons */}
+                {availableBrands.map((brand, index) => (
+                  <motion.button
+                    key={brand}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 + 0.1 }}
+                    onClick={() => handleBrandClick(brand)}
+                    className={`px-4 py-2 rounded-full font-bold text-sm transition-all duration-200 ${
+                      selectedBrand === brand
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-blue-200 dark:border-blue-700 hover:border-blue-400'
+                    }`}
+                  >
+                    🏷️ {brand}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Offers Grid - WITH COMPLETE REDESIGN */}
+          <motion.div
+            key={`offers-grid-${selectedBrand || 'all'}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="w-full"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {offers && offers.length > 0 ? (
+                offers.map((offer, idx) => (
+                  <motion.div
+                    key={`${offer.id}-${idx}`}
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.4 }}
+                    whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
+                    className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-blue-100 dark:border-blue-700 flex flex-col h-full"
+                  >
                 {/* Badge */}
                 <div className="px-4 pt-4 flex justify-between items-center">
                   {offer.discount_percentage > 0 && (
@@ -271,13 +390,13 @@ export default function WebsiteLanding() {
                 </div>
 
                 {/* Product Image */}
-                <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 mx-4 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 mx-4 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
                   {offer.product_image ? (
                     <motion.img
                       src={offer.product_image}
                       alt={offer.product_name}
-                      className="max-w-full max-h-full object-contain"
-                      whileHover={{ scale: 1.1 }}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.12 }}
                     />
                   ) : (
                     <Zap className="h-16 w-16 text-slate-300" />
@@ -296,7 +415,7 @@ export default function WebsiteLanding() {
 
                 {/* Description */}
                 {offer.product_description && (
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mx-4 mb-2 line-clamp-1 italic">
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mx-4 mb-2">
                     📝 {offer.product_description}
                   </p>
                 )}
@@ -363,8 +482,42 @@ export default function WebsiteLanding() {
                   </motion.div>
                 </div>
               </motion.div>
-            ))}
-          </div>
+                ))
+              ) : (
+                // No Results Message - FULL WIDTH, CENTERED
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  className="col-span-1 md:col-span-2 lg:col-span-3 py-24 text-center space-y-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-2xl border-2 border-dashed border-blue-300 dark:border-blue-600"
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-7xl"
+                  >
+                    🔍
+                  </motion.div>
+                  <h3 className="text-3xl font-bold text-slate-900 dark:text-white">
+                    {language === 'ar' ? 'لا توجد عروض' : 'Aucune Offre'}
+                  </h3>
+                  <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+                    {language === 'ar' 
+                      ? `للأسف، لم نجد أي عروض لماركة "${selectedBrand}". حاول اختيار ماركة أخرى أو عرض جميع العروض المتاحة.`
+                      : `Désolé, aucune offre trouvée pour la marque "${selectedBrand}". Essayez de sélectionner une autre marque ou consultez toutes les offres disponibles.`}
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => handleBrandClick(null)}
+                    className="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg"
+                  >
+                    {language === 'ar' ? '⭐ عرض جميع العروض' : '⭐ Voir Toutes les Offres'}
+                  </motion.button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
 
           <div className="text-center">
             <Button
@@ -413,13 +566,13 @@ export default function WebsiteLanding() {
                 </div>
 
                 {/* Product Image */}
-                <div className="relative h-32 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 mx-4 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 mx-4 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
                   {offer.product_image ? (
                     <motion.img
                       src={offer.product_image}
                       alt={offer.product_name}
-                      className="max-w-full max-h-full object-contain"
-                      whileHover={{ scale: 1.1 }}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.12 }}
                     />
                   ) : (
                     <Flame className="h-16 w-16 text-slate-300" />
@@ -438,7 +591,7 @@ export default function WebsiteLanding() {
 
                 {/* Description */}
                 {offer.product_description && (
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mx-4 mb-2 line-clamp-1 italic">
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mx-4 mb-2">
                     📝 {offer.product_description}
                   </p>
                 )}

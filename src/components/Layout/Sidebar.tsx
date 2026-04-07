@@ -51,6 +51,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
   const navigationItems = [
     { title: t('nav.dashboard'), href: '/', emoji: '📊' },
     { title: t('nav.inventory'), href: '/inventory', emoji: '📦' },
+    { title: 'Clients', href: '/clients', emoji: '👥' },
     { title: 'Factures d\'Achat', href: '/purchase-invoices', emoji: '🚚' },
     { title: t('nav.sales'), href: '/sales', emoji: '🛒' },
     { title: t('nav.suppliers'), href: '/suppliers', emoji: '🏪' },
@@ -61,6 +62,7 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
   const toolItems = [
     { title: 'Gestion du Site', href: '/website', emoji: '🌐' },
     { title: t('nav.pos'), href: '/pos', emoji: '🧮' },
+    { title: 'Caisse', href: '/caisse', emoji: '💰' },
     { title: t('nav.barcodes'), href: '/barcodes', emoji: '📲' },
     { title: t('nav.settings'), href: '/settings', emoji: '⚙️' }
   ];

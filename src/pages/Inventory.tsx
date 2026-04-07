@@ -87,6 +87,9 @@ const Inventory = () => {
     quantity_minimal: '',
     purchase_price: '',
     selling_price: '',
+    selling_price_1: '',
+    selling_price_2: '',
+    selling_price_3: '',
     supplier_id: '',
     amount_paid: '',
     images: [] as File[],
@@ -499,13 +502,15 @@ const Inventory = () => {
             quantity_actual: quantityActual,
             quantity_minimal: parseInt(formData.quantity_minimal) || 0,
             purchase_price: parseFloat(formData.purchase_price) || 0,
-            selling_price: parseFloat(formData.selling_price) || 0,
+            selling_price: parseFloat(formData.selling_price_1) || 0,
+            selling_price_1: parseFloat(formData.selling_price_1) || 0,
+            selling_price_2: parseFloat(formData.selling_price_2) || 0,
+            selling_price_3: parseFloat(formData.selling_price_3) || 0,
           })
           .eq('id', editingChargerId);
 
         if (error) throw error;
 
-        alert(language === 'en' ? 'Product updated successfully!' : 'Produit mis à jour avec succès!');
         setIsEditingMode(false);
         setEditingChargerId(null);
         setFormData({
@@ -522,6 +527,9 @@ const Inventory = () => {
           quantity_minimal: '',
           purchase_price: '',
           selling_price: '',
+          selling_price_1: '',
+          selling_price_2: '',
+          selling_price_3: '',
           supplier_id: '',
           amount_paid: '',
           images: [],
@@ -548,7 +556,10 @@ const Inventory = () => {
             quantity_actual: quantityActual,
             quantity_minimal: parseInt(formData.quantity_minimal) || 0,
             purchase_price: parseFloat(formData.purchase_price) || 0,
-            selling_price: parseFloat(formData.selling_price) || 0,
+            selling_price: parseFloat(formData.selling_price_1) || 0,
+            selling_price_1: parseFloat(formData.selling_price_1) || 0,
+            selling_price_2: parseFloat(formData.selling_price_2) || 0,
+            selling_price_3: parseFloat(formData.selling_price_3) || 0,
             supplier_id: formData.supplier_id || null,
             amount_paid: parseFloat(formData.amount_paid) || 0,
             is_active: true,
@@ -605,6 +616,9 @@ const Inventory = () => {
         quantity_minimal: '',
         purchase_price: '',
         selling_price: '',
+        selling_price_1: '',
+        selling_price_2: '',
+        selling_price_3: '',
         supplier_id: '',
         amount_paid: '',
         images: [],
@@ -832,11 +846,6 @@ const Inventory = () => {
                       </div>
                     </div>
 
-                    {/* Margin */}
-                    <div className="mb-3 p-2 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg text-center">
-                      <p className="text-xs text-orange-600 font-bold">📈 {charger.margin.toFixed(1)}%</p>
-                    </div>
-
                     {/* Action Buttons */}
                     <div className="flex gap-1 pt-2 border-t border-slate-200">
                       <button
@@ -879,6 +888,9 @@ const Inventory = () => {
                             quantity_minimal: charger.quantity_minimal.toString(),
                             purchase_price: charger.purchase_price.toString(),
                             selling_price: charger.selling_price.toString(),
+                            selling_price_1: charger.selling_price.toString(),
+                            selling_price_2: charger.selling_price.toString(),
+                            selling_price_3: charger.selling_price.toString(),
                             supplier_id: '',
                             amount_paid: '',
                             images: [],
@@ -942,6 +954,9 @@ const Inventory = () => {
                     quantity_minimal: '',
                     purchase_price: '',
                     selling_price: '',
+                    selling_price_1: '',
+                    selling_price_2: '',
+                    selling_price_3: '',
                     supplier_id: '',
                     amount_paid: '',
                     images: [] as File[],
@@ -1122,6 +1137,16 @@ const Inventory = () => {
                           </option>
                         ))}
                       </select>
+                      {formData.connector_type_id && (
+                        <Button
+                          onClick={() => setFormData({ ...formData, connector_type_id: '' })}
+                          variant="outline"
+                          className="px-3 border-red-300 text-red-600 hover:bg-red-100"
+                          title={language === 'en' ? 'Clear selection' : 'Effacer la sélection'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                       <Button
                         onClick={handleAddConnectorType}
                         variant="outline"
@@ -1356,20 +1381,66 @@ const Inventory = () => {
                   </p>
                 </div>
 
-                {/* Selling Price */}
+                {/* Selling Prices - Three Tier System */}
                 <div className="mt-4">
-                  <label className="block text-sm font-semibold mb-2 text-rose-900">🏷️ {language === 'en' ? 'Selling Price' : 'Prix de Vente'} *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={formData.selling_price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, selling_price: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white font-bold"
-                  />
+                  <div className="mb-3">
+                    <h4 className="text-base font-bold text-rose-900 mb-4">🏷️ {language === 'en' ? 'Selling Prices (Three-Tier)' : 'Prix de Vente (Trois Niveaux)'}</h4>
+                    <p className="text-xs text-rose-700 mb-3">{language === 'en' ? 'Set different prices for different customer types' : 'Définissez des prix différents pour les différents types de clients'}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Price 1 - Normal */}
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <label className="block text-xs font-semibold mb-2 text-blue-900">💰 {language === 'en' ? 'Normal Price' : 'Prix Normal'} *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={formData.selling_price_1}
+                        onChange={(e) => {
+                          setFormData({ 
+                            ...formData, 
+                            selling_price_1: e.target.value,
+                            selling_price: e.target.value // Keep in sync for backward compatibility
+                          })
+                        }}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-bold text-sm"
+                      />
+                    </div>
+
+                    {/* Price 2 - Revendeur (Reseller) */}
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <label className="block text-xs font-semibold mb-2 text-amber-900">🔄 {language === 'en' ? 'Revendeur Price' : 'Prix Revendeur'}</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={formData.selling_price_2}
+                        onChange={(e) =>
+                          setFormData({ ...formData, selling_price_2: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white font-bold text-sm"
+                      />
+                    </div>
+
+                    {/* Price 3 - Gros (Wholesale) */}
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <label className="block text-xs font-semibold mb-2 text-green-900">📦 {language === 'en' ? 'Wholesale Price' : 'Prix Gros'}</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={formData.selling_price_3}
+                        onChange={(e) =>
+                          setFormData({ ...formData, selling_price_3: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white font-bold text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </motion.div>
 
@@ -1401,6 +1472,9 @@ const Inventory = () => {
                       quantity_minimal: '',
                       purchase_price: '',
                       selling_price: '',
+                      selling_price_1: '',
+                      selling_price_2: '',
+                      selling_price_3: '',
                       supplier_id: '',
                       amount_paid: '',
                       images: [],
@@ -1603,6 +1677,9 @@ const Inventory = () => {
                       quantity_minimal: selectedCharger.quantity_minimal.toString(),
                       purchase_price: selectedCharger.purchase_price.toString(),
                       selling_price: selectedCharger.selling_price.toString(),
+                      selling_price_1: selectedCharger.selling_price.toString(),
+                      selling_price_2: '0',
+                      selling_price_3: '0',
                       supplier_id: '',
                       amount_paid: '',
                       images: [],

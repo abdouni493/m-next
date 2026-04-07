@@ -1806,3 +1806,312 @@ export const deleteOrderRollback = async (orderId: string) => {
     throw error;
   }
 };
+
+// ========== PACKAGES MANAGEMENT ==========
+
+// Get all packages
+export const getPackages = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('packages')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching packages:', error);
+    throw error;
+  }
+};
+
+// Get visible packages for website
+export const getVisiblePackagesREST = async () => {
+  try {
+    const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/visible_packages`,
+      {
+        method: 'GET',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching visible packages:', error);
+    throw error;
+  }
+};
+
+// Get all package items
+export const getPackageItems = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('package_items')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching package items:', error);
+    throw error;
+  }
+};
+
+// Get package details with items
+export const getPackageDetails = async (packageId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('package_items')
+      .select('*')
+      .eq('package_id', packageId);
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching package details:', error);
+    throw error;
+  }
+};
+
+// Create package
+export const createPackage = async (packageData: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('packages')
+      .insert([packageData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating package:', error);
+    throw error;
+  }
+};
+
+// Update package
+export const updatePackage = async (id: string, updates: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('packages')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating package:', error);
+    throw error;
+  }
+};
+
+// Delete package
+export const deletePackage = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('packages')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error deleting package:', error);
+    throw error;
+  }
+};
+
+// Add product to package
+export const addProductToPackage = async (packageId: string, product: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('package_items')
+      .insert([{
+        package_id: packageId,
+        product_id: product.id,
+        product_name: product.name,
+        product_image: product.primary_image,
+        product_mark: product.mark?.name,
+        product_voltage: product.voltage,
+        product_amperage: product.amperage,
+        product_wattage: product.wattage,
+        quantity: 1,
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error adding product to package:', error);
+    throw error;
+  }
+};
+
+// Remove product from package
+export const removeProductFromPackage = async (itemId: string) => {
+  try {
+    const { error } = await supabase
+      .from('package_items')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error removing product from package:', error);
+    throw error;
+  }
+};
+
+// Update package item quantity
+export const updatePackageItemQuantity = async (itemId: string, quantity: number) => {
+  try {
+    const { data, error } = await supabase
+      .from('package_items')
+      .update({ quantity })
+      .eq('id', itemId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating package item quantity:', error);
+    throw error;
+  }
+};
+
+// ========== ENHANCED SPECIAL OFFERS - PRICE VISIBILITY ==========
+
+// Update special offer with price visibility
+export const updateSpecialOfferVisibility = async (id: string, showPrice: boolean, description: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('special_offers')
+      .update({
+        show_price: showPrice,
+        description: description,
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating special offer visibility:', error);
+    throw error;
+  }
+};
+
+// ========== DELIVERY AGENCIES MANAGEMENT ==========
+
+// Get all delivery agencies
+export const getDeliveryAgencies = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agencies')
+      .select('*')
+      .eq('is_active', true)
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching delivery agencies:', error);
+    throw error;
+  }
+};
+
+// Get visible delivery agencies for customers
+export const getVisibleDeliveryAgencies = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agencies_with_prices')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching visible delivery agencies:', error);
+    throw error;
+  }
+};
+
+// Create delivery agency
+export const createDeliveryAgency = async (agencyData: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agencies')
+      .insert([agencyData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating delivery agency:', error);
+    throw error;
+  }
+};
+
+// Update delivery agency
+export const updateDeliveryAgency = async (id: string, updates: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agencies')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating delivery agency:', error);
+    throw error;
+  }
+};
+
+// Delete delivery agency
+export const deleteDeliveryAgency = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('delivery_agencies')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error deleting delivery agency:', error);
+    throw error;
+  }
+};
+
+// Toggle delivery agency visibility
+export const toggleDeliveryAgencyVisibility = async (id: string, isVisible: boolean) => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agencies')
+      .update({ is_visible: !isVisible })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error toggling delivery agency visibility:', error);
+    throw error;
+  }
+};
