@@ -84,6 +84,7 @@ export const WebsiteLayout = () => {
     { label: language === 'ar' ? 'الرئيسية' : 'Accueil', href: '/website-shop' },
     { label: language === 'ar' ? 'العروض' : 'Offres', href: '/website-shop/offers' },
     { label: language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales', href: '/website-shop/special-offers' },
+    { label: language === 'ar' ? '📦 حزم' : '📦 Packs', href: '/website-shop/packages' },
     { label: language === 'ar' ? 'جهات الاتصال' : 'Contacts', href: '/website-shop/contacts' },
     { label: language === 'ar' ? '📦 طلب' : '📦 Commande', href: '/website-shop/order' },
   ];
