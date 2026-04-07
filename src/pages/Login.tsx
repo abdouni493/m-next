@@ -93,7 +93,7 @@ export default function Login({ onLogin }: LoginProps) {
       
       // Small delay to ensure auth context updates
       setTimeout(() => {
-        navigate("/website-shop", { replace: true });
+        navigate("/dashboard", { replace: true });
       }, 500);
     } catch (err: any) {
       console.error("Login error:", err);
@@ -178,7 +178,7 @@ export default function Login({ onLogin }: LoginProps) {
       
       // Small delay to ensure auth context updates
       setTimeout(() => {
-        navigate("/website-shop", { replace: true });
+        navigate("/dashboard", { replace: true });
       }, 500);
     } catch (err: any) {
       console.error("Signup error:", err);
@@ -429,7 +429,7 @@ export default function Login({ onLogin }: LoginProps) {
           </Card>
         </motion.div>
 
-        {/* Visit Store Button */}
+        {/* Visit Dashboard Button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -438,9 +438,9 @@ export default function Login({ onLogin }: LoginProps) {
           <Button 
             type="button"
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
-            onClick={() => navigate('/website-shop')}
+            onClick={() => navigate('/dashboard')}
           >
-            🌐 Visiter le Magasin
+            📊 Accéder au Tableau de Bord
           </Button>
         </motion.div>
       </motion.div>
