@@ -2089,6 +2089,45 @@ export const getVisibleDeliveryAgencies = async () => {
   }
 };
 
+// Get delivery agencies available for a specific wilaya
+export const getDeliveryAgenciesForWilaya = async (wilayaName: string) => {
+  try {
+    const { data: agencies, error: agenciesError } = await supabase
+      .from('delivery_agencies')
+      .select('id, name, logo_url, contact_phone, contact_email')
+      .eq('is_active', true)
+      .eq('is_visible', true)
+      .order('name', { ascending: true });
+
+    if (agenciesError) throw agenciesError;
+
+    // Filter agencies that have prices for this wilaya
+    const agenciesWithPrices = [];
+    
+    for (const agency of agencies || []) {
+      const { data: wilayaPrice, error: priceError } = await supabase
+        .from('delivery_agency_wilaya_prices')
+        .select('*')
+        .eq('agency_id', agency.id)
+        .eq('wilaya_name', wilayaName)
+        .eq('is_active', true)
+        .single();
+
+      if (!priceError && wilayaPrice) {
+        agenciesWithPrices.push({
+          ...agency,
+          wilaya_price: wilayaPrice,
+        });
+      }
+    }
+
+    return agenciesWithPrices;
+  } catch (error) {
+    console.error('Error fetching delivery agencies for wilaya:', error);
+    throw error;
+  }
+};
+
 // Create delivery agency
 export const createDeliveryAgency = async (agencyData: any) => {
   try {
