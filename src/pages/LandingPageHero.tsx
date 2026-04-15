@@ -301,7 +301,7 @@ export default function LandingPageComponent() {
               variants={buttonVariants}
               whileHover="hover"
               whileTap="tap"
-              onClick={() => navigate('/website')}
+              onClick={() => navigate('/website-shop')}
               className="px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/50 transition-all duration-300"
             >
               Shop Now
@@ -311,7 +311,7 @@ export default function LandingPageComponent() {
               variants={buttonVariants}
               whileHover="hover"
               whileTap="tap"
-              onClick={() => navigate('/website/offers')}
+              onClick={() => navigate('/website-shop/offers')}
               className="px-8 sm:px-10 py-3 sm:py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-300"
             >
               View Offers

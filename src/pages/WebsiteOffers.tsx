@@ -12,8 +12,8 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { getAllProductsREST } from '@/lib/supabaseClient';
-import { Search, Zap, ShoppingCart } from 'lucide-react';
+import { getAllProductsREST, getProductImages, getMarks } from '@/lib/supabaseClient';
+import { Search, Zap, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -31,6 +31,22 @@ interface Product {
   brand_logo?: string;
 }
 
+interface ProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  file_path: string;
+  display_order: number;
+  is_primary: boolean;
+}
+
+interface Mark {
+  id: string;
+  name: string;
+  logo_url?: string;
+  description?: string;
+}
+
 export default function WebsiteOffers() {
   const { language, isRTL } = useLanguage();
   const { isAuthenticated } = useAuth();
@@ -43,23 +59,32 @@ export default function WebsiteOffers() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [cartNotification, setCartNotification] = useState<string | null>(null);
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imagesLoading, setImagesLoading] = useState(false);
+  const [marks, setMarks] = useState<Mark[]>([]);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await getAllProductsREST();
-        const visibleProducts = data.filter((p: any) => p.is_active);
+        // Fetch products
+        const productsData = await getAllProductsREST();
+        const visibleProducts = productsData.filter((p: any) => p.is_active);
         setProducts(visibleProducts);
         setFilteredProducts(visibleProducts);
+
+        // Fetch marks/brands
+        const marksData = await getMarks();
+        setMarks(marksData);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
 
   const handleSearch = (query: string) => {
@@ -137,6 +162,30 @@ export default function WebsiteOffers() {
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product);
     setShowDetails(true);
+    setCurrentImageIndex(0);
+    loadProductImages(product.id);
+  };
+
+  const loadProductImages = async (productId: string) => {
+    setImagesLoading(true);
+    try {
+      const images = await getProductImages(productId);
+      setProductImages(images);
+      setCurrentImageIndex(0);
+    } catch (error) {
+      console.error('Error loading product images:', error);
+      setProductImages([]);
+    } finally {
+      setImagesLoading(false);
+    }
+  };
+
+  const goToPreviousImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1));
+  };
+
+  const goToNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === productImages.length - 1 ? 0 : prev + 1));
   };
 
   const containerVariants = {
@@ -210,8 +259,8 @@ export default function WebsiteOffers() {
           </p>
         </div>
 
-        {/* Brand Pills */}
-        <div className="flex flex-wrap gap-3 justify-center px-4">
+        {/* Brand Pills with Logos */}
+        <div className="flex flex-wrap gap-4 justify-center px-4 py-4">
           {/* Reset Filter Button */}
           <motion.button
             whileHover={{ scale: 1.08 }}
@@ -220,29 +269,42 @@ export default function WebsiteOffers() {
               setSelectedBrand('');
               applyFilters(searchQuery, '');
             }}
-            className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${
+            className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
               selectedBrand === ''
-                ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
+                ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg scale-105'
                 : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
             }`}
           >
-            {language === 'ar' ? '✨ الكل' : '✨ Tous'}
+            <span className="text-2xl">✨</span>
+            <span className="text-xs">{language === 'ar' ? 'الكل' : 'Tous'}</span>
           </motion.button>
 
-          {/* Individual Brand Buttons */}
-          {getAllBrands().map((brand) => (
+          {/* Brand Buttons with Logos */}
+          {marks.map((mark) => (
             <motion.button
-              key={brand}
+              key={mark.id}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92 }}
-              onClick={() => handleBrandFilter(brand)}
-              className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${
-                selectedBrand === brand
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+              onClick={() => handleBrandFilter(mark.name)}
+              className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                selectedBrand === mark.name
+                  ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg scale-105'
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 hover:shadow-md'
               }`}
             >
-              {brand}
+              {mark.logo_url && (
+                <div className={`h-8 w-8 flex items-center justify-center rounded-lg ${selectedBrand === mark.name ? 'bg-white/20' : 'bg-slate-300 dark:bg-slate-600'}`}>
+                  <img
+                    src={mark.logo_url}
+                    alt={mark.name}
+                    className="h-full w-full object-contain p-1"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              <span className="text-xs line-clamp-1">{mark.name}</span>
             </motion.button>
           ))}
         </div>
@@ -439,12 +501,75 @@ export default function WebsiteOffers() {
               animate={{ opacity: 1, y: 0 }}
               className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6"
             >
-              {/* Image */}
+              {/* Image Gallery */}
               <motion.div
-                className="flex items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-900/30 dark:via-purple-900/30 dark:to-pink-900/30 rounded-2xl min-h-96 border-2 border-purple-200 dark:border-purple-700 p-4"
+                className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-900/30 dark:via-purple-900/30 dark:to-pink-900/30 rounded-2xl min-h-96 border-2 border-purple-200 dark:border-purple-700 p-4"
                 whileHover={{ scale: 1.02 }}
               >
-                {selectedProduct.primary_image ? (
+                {imagesLoading ? (
+                  <div className="text-center">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }} className="mb-4">
+                      <Zap className="h-12 w-12 text-purple-500 mx-auto" />
+                    </motion.div>
+                    <p className="text-slate-600 dark:text-slate-400">Loading images...</p>
+                  </div>
+                ) : productImages.length > 0 ? (
+                  <div className="w-full space-y-4">
+                    {/* Main Image */}
+                    <div className="relative bg-white dark:bg-slate-700 rounded-xl p-4 min-h-80 flex items-center justify-center">
+                      <img
+                        src={productImages[currentImageIndex].image_url}
+                        alt={`${selectedProduct?.name} - ${currentImageIndex + 1}`}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+
+                    {/* Image Counter & Navigation */}
+                    <div className="flex items-center justify-between gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={goToPreviousImage}
+                        className="p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-all shadow-md"
+                        disabled={productImages.length <= 1}
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </motion.button>
+
+                      <div className="flex-1 text-center">
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                          📸 {currentImageIndex + 1} / {productImages.length}
+                        </p>
+                        {productImages.length > 1 && (
+                          <div className="flex gap-1 justify-center mt-2 flex-wrap">
+                            {productImages.map((_, idx) => (
+                              <motion.button
+                                key={idx}
+                                onClick={() => setCurrentImageIndex(idx)}
+                                className={`h-2 rounded-full transition-all ${
+                                  idx === currentImageIndex
+                                    ? 'bg-purple-600 w-6'
+                                    : 'bg-purple-300 dark:bg-purple-700 w-2 hover:w-3'
+                                }`}
+                                whileHover={{ scale: 1.2 }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={goToNextImage}
+                        className="p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-all shadow-md"
+                        disabled={productImages.length <= 1}
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </motion.button>
+                    </div>
+                  </div>
+                ) : selectedProduct?.primary_image ? (
                   <img
                     src={selectedProduct.primary_image}
                     alt={selectedProduct.name}

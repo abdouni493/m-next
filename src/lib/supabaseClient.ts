@@ -177,6 +177,21 @@ export const deleteProduct = async (id: string) => {
   if (error) throw error;
 };
 
+// Get product images
+export const getProductImages = async (productId: string) => {
+  const { data, error } = await supabase
+    .from('product_images')
+    .select('*')
+    .eq('product_id', productId)
+    .order('display_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching product images:', error);
+    return [];
+  }
+  return data || [];
+};
+
 // ========== SUPPLIERS ==========
 
 export const getSuppliers = async () => {
@@ -263,6 +278,22 @@ export const deleteCategory = async (id: string) => {
     .eq('id', id);
 
   if (error) throw error;
+};
+
+// ========== MARKS/BRANDS ==========
+
+export const getMarks = async () => {
+  const { data, error } = await supabase
+    .from('marks')
+    .select('*')
+    .eq('is_active', true)
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching marks:', error);
+    return [];
+  }
+  return data || [];
 };
 
 // ========== INVOICES ==========
