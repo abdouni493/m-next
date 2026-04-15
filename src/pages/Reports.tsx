@@ -79,6 +79,16 @@ interface Payment {
   description: string;
 }
 
+interface CaisseTransaction {
+  id: string;
+  transaction_type: 'encaissement' | 'decaissement';
+  amount: number;
+  description: string;
+  transaction_date: string;
+  discount_applied?: number;
+  created_at: string;
+}
+
 // Helper Components
 const ReportSection = ({ icon, title, children, delay = 0 }: { icon: string; title: string; children: React.ReactNode; delay?: number }) => (
   <motion.div
@@ -135,6 +145,8 @@ export default function Reports() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [reportGenerated, setReportGenerated] = useState(false);
+  const [caisseTransactions, setCaisseTransactions] = useState<CaisseTransaction[]>([]);
+  const [showInventoryValuation, setShowInventoryValuation] = useState(false);
 
   const getText = (key: string) => {
     const texts: {[key: string]: {ar: string; fr: string}} = {
@@ -219,6 +231,19 @@ export default function Reports() {
 
       if (paymentsError) throw paymentsError;
 
+      // Fetch Caisse transactions
+      const { data: caisseData, error: caisseError } = await supabase
+        .from('caisse_transactions')
+        .select('*')
+        .eq('is_active', true);
+
+      if (caisseError) console.warn('Caisse data fetch warning:', caisseError);
+      
+      const filteredCaisse = (caisseData || []).filter(trans => {
+        const transDate = trans.transaction_date?.split('T')[0];
+        return transDate && transDate >= startDate && transDate <= endDate;
+      });
+
       // Calculate statistics
       const purchaseInvoices = filteredInvoices.filter(inv => inv.type === 'purchase');
       const saleInvoices = filteredInvoices.filter(inv => inv.type !== 'purchase');
@@ -232,6 +257,7 @@ export default function Reports() {
       setInvoices(filteredInvoices);
       setProducts(productsData || []);
       setSuppliers(suppliersData || []);
+      setCaisseTransactions(filteredCaisse);
       setPayments((paymentsData || []).filter(p => {
         const payDate = p.date?.split('T')[0];
         return payDate && payDate >= startDate && payDate <= endDate;
@@ -690,6 +716,146 @@ export default function Reports() {
                     </div>
                   )}
                 </ReportSection>
+
+                {/* 6. Inventory Valuation Section */}
+                <ReportSection icon="📊" title={language === 'ar' ? '💰 تقييم المخزون' : '💰 Valorisation du Stock'} delay={0.7}>
+                  <div className="space-y-6">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => setShowInventoryValuation(!showInventoryValuation)}
+                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all"
+                    >
+                      {showInventoryValuation ? '📉' : '📊'} {language === 'ar' ? (showInventoryValuation ? 'إخفاء التفاصيل' : 'عرض جميع المنتجات') : (showInventoryValuation ? 'Masquer les détails' : 'Afficher tous les produits')}
+                    </motion.button>
+
+                    {showInventoryValuation && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="overflow-x-auto"
+                      >
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-indigo-100 dark:bg-indigo-900/30">
+                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100">{language === 'ar' ? 'اسم المنتج' : 'Produit'}</TableHead>
+                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100">{language === 'ar' ? 'الماركة' : 'Marque'}</TableHead>
+                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100 text-center">{language === 'ar' ? 'الكمية الحالية' : 'Quantité'}</TableHead>
+                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100 text-right">{language === 'ar' ? 'سعر الوحدة' : 'Prix/Unité'}</TableHead>
+                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100 text-right">{language === 'ar' ? 'القيمة الإجمالية' : 'Valeur Total'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {products.map((product, idx) => {
+                              const quantity = product.current_quantity || 0;
+                              const price = product.buying_price || product.selling_price || 0;
+                              const totalValue = quantity * price;
+                              return (
+                                <motion.tr
+                                  key={product.id}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: idx * 0.02 }}
+                                  className="border-b hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                                >
+                                  <TableCell className="font-bold text-slate-900 dark:text-slate-100">{product.name}</TableCell>
+                                  <TableCell className="text-slate-600 dark:text-slate-400">{product.mark?.name || '-'}</TableCell>
+                                  <TableCell className="text-center">
+                                    <Badge className={quantity <= (product.min_quantity || 10) ? 'bg-red-600' : 'bg-green-600'}>
+                                      {quantity} {language === 'ar' ? 'وحدة' : 'unités'}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-right font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(price)}</TableCell>
+                                  <TableCell className="text-right font-bold text-purple-600 dark:text-purple-400 text-lg">{formatCurrency(totalValue)}</TableCell>
+                                </motion.tr>
+                              );
+                            })}
+                            <motion.tr
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: products.length * 0.02 }}
+                              className="bg-gradient-to-r from-indigo-200 to-purple-200 dark:from-indigo-900/50 dark:to-purple-900/50 font-bold text-lg border-t-2 border-indigo-400 dark:border-indigo-600"
+                            >
+                              <TableCell colSpan={4} className="text-right text-indigo-900 dark:text-indigo-100 py-4">
+                                {language === 'ar' ? '🎯 إجمالي قيمة المخزون:' : '🎯 Valeur Total du Stock:'}
+                              </TableCell>
+                              <TableCell className="text-right text-indigo-900 dark:text-indigo-100 py-4">
+                                {formatCurrency(
+                                  products.reduce((sum, p) => {
+                                    const qty = p.current_quantity || 0;
+                                    const price = p.buying_price || p.selling_price || 0;
+                                    return sum + (qty * price);
+                                  }, 0)
+                                )}
+                              </TableCell>
+                            </motion.tr>
+                          </TableBody>
+                        </Table>
+                      </motion.div>
+                    )}
+                  </div>
+                </ReportSection>
+
+                {/* 7. Cash Register (Caisse) Summary Section */}
+                {caisseTransactions.length > 0 && (
+                  <ReportSection icon="💳" title={language === 'ar' ? 'ملخص الصندوق' : 'Résumé Caisse'} delay={0.8}>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border-2 border-green-200 dark:border-green-700">
+                          <p className="text-sm text-green-600 dark:text-green-300 mb-2">💚 {language === 'ar' ? 'إجمالي الإيداعات' : 'Dépôts'}</p>
+                          <p className="text-3xl font-bold text-green-700 dark:text-green-200">
+                            {formatCurrency(caisseTransactions.filter(t => t.transaction_type === 'encaissement').reduce((sum, t) => sum + t.amount, 0))}
+                          </p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-red-50 dark:bg-red-900/20 p-6 rounded-xl border-2 border-red-200 dark:border-red-700">
+                          <p className="text-sm text-red-600 dark:text-red-300 mb-2">❤️ {language === 'ar' ? 'إجمالي السحوبات' : 'Retraits'}</p>
+                          <p className="text-3xl font-bold text-red-700 dark:text-red-200">
+                            {formatCurrency(caisseTransactions.filter(t => t.transaction_type === 'decaissement').reduce((sum, t) => sum + t.amount, 0))}
+                          </p>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border-2 border-blue-200 dark:border-blue-700">
+                          <p className="text-sm text-blue-600 dark:text-blue-300 mb-2">💰 {language === 'ar' ? 'الرصيد' : 'Solde'}</p>
+                          <p className="text-3xl font-bold text-blue-700 dark:text-blue-200">
+                            {formatCurrency(
+                              caisseTransactions.filter(t => t.transaction_type === 'encaissement').reduce((sum, t) => sum + t.amount, 0) -
+                              caisseTransactions.filter(t => t.transaction_type === 'decaissement').reduce((sum, t) => sum + t.amount, 0)
+                            )}
+                          </p>
+                        </motion.div>
+                      </div>
+
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-slate-100 dark:bg-slate-700">
+                            <TableHead className="font-bold">📝 {language === 'ar' ? 'النوع' : 'Type'}</TableHead>
+                            <TableHead className="font-bold">💰 {getText('amount')}</TableHead>
+                            <TableHead className="font-bold">📅 {getText('date')}</TableHead>
+                            <TableHead className="font-bold">📋 {language === 'ar' ? 'الوصف' : 'Description'}</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {caisseTransactions.map((trans, idx) => (
+                            <motion.tr
+                              key={trans.id}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: idx * 0.03 }}
+                              className="border-b hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                            >
+                              <TableCell className="font-bold">
+                                {trans.transaction_type === 'encaissement' ? '💚 Dépôt' : '❤️ Retrait'}
+                              </TableCell>
+                              <TableCell className={`font-bold ${trans.transaction_type === 'encaissement' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatCurrency(trans.amount)}
+                              </TableCell>
+                              <TableCell>{formatDate(trans.transaction_date)}</TableCell>
+                              <TableCell className="text-slate-600 dark:text-slate-400">{trans.description}</TableCell>
+                            </motion.tr>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </ReportSection>
+                )}
               </div>
             </>
           )}

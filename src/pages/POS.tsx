@@ -66,6 +66,9 @@ interface Product {
   description?: string;
   purchase_price: number;
   selling_price: number;
+  selling_price_1?: number;
+  selling_price_2?: number;
+  selling_price_3?: number;
   last_price_to_sell?: number;
   margin_percent: number;
   quantity_initial: number;
@@ -205,6 +208,9 @@ export default function POS() {
         id: p.id || '',
         purchase_price: p.purchase_price || 0,
         selling_price: p.selling_price || 0,
+        selling_price_1: p.selling_price_1 || p.selling_price || 0,
+        selling_price_2: p.selling_price_2 || p.selling_price || 0,
+        selling_price_3: p.selling_price_3 || p.selling_price || 0,
         margin_percent: p.margin_percent || 0,
         quantity_actual: p.quantity_actual || 0,
         quantity_initial: p.quantity_initial || 0,
@@ -321,6 +327,22 @@ export default function POS() {
       searchInputRef.current.focus();
     }
   }, []);
+  // Helper function to get the correct price based on client tier
+  const getPriceForClient = (product: Product, client: any | null): number => {
+    let selectedPrice = product.selling_price_1 || product.selling_price;
+    
+    if (client) {
+      if (client.price_tier === 2 && product.selling_price_2) {
+        selectedPrice = product.selling_price_2;
+      } else if (client.price_tier === 3 && product.selling_price_3) {
+        selectedPrice = product.selling_price_3;
+      } else if (client.price_tier === 1 && product.selling_price_1) {
+        selectedPrice = product.selling_price_1;
+      }
+    }
+    
+    return parseFloat(selectedPrice);
+  };
 
   // Calculations - Use cart item totals which already include client-based pricing
   const subtotal = cart.reduce((sum, item) => sum + (item.total / (1 - (item.discount || 0) / 100)), 0);
@@ -422,11 +444,11 @@ export default function POS() {
     setClientName('');
     setClientSearch('');
     
-    // Reset cart prices to default selling_price
+    // Reset cart prices to default selling_price_1 (tier 1 price)
     if (cart.length > 0) {
       setCart(cart.map(item => ({
         ...item,
-        total: item.product.selling_price * item.quantity * (1 - item.discount / 100)
+        total: (item.product.selling_price_1 || item.product.selling_price) * item.quantity * (1 - item.discount / 100)
       })));
     }
   };
@@ -499,19 +521,27 @@ export default function POS() {
       return;
     }
     
-    setCart(cart.map(item => 
-      item.product.id === productId 
-        ? { ...item, quantity: newQuantity, total: newQuantity * item.product.selling_price * (1 - item.discount / 100) }
-        : item
-    ));
+    setCart(cart.map(item => {
+      if (item.product.id === productId) {
+        // Get the correct price based on selected client
+        const unitPrice = getPriceForClient(item.product, selectedClient);
+        const total = newQuantity * unitPrice * (1 - item.discount / 100);
+        return { ...item, quantity: newQuantity, total };
+      }
+      return item;
+    }));
   };
 
   const updateDiscount = (productId: string, discount: number) => {
-    setCart(cart.map(item => 
-      item.product.id === productId 
-        ? { ...item, discount, total: item.quantity * item.product.selling_price * (1 - discount / 100) }
-        : item
-    ));
+    setCart(cart.map(item => {
+      if (item.product.id === productId) {
+        // Get the correct price based on selected client
+        const unitPrice = getPriceForClient(item.product, selectedClient);
+        const total = item.quantity * unitPrice * (1 - discount / 100);
+        return { ...item, discount, total };
+      }
+      return item;
+    }));
   };
 
   const removeFromCart = (productId: string) => {

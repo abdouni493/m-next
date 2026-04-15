@@ -68,9 +68,17 @@ const Inventory = () => {
   const [newConnectorName, setNewConnectorName] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [chargerToDelete, setChargerToDelete] = useState<string | null>(null);
+  const [newMarkImage, setNewMarkImage] = useState<File | null>(null);
+  const [brandImagePreview, setBrandImagePreview] = useState<string | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<string>('');
+  const [showBrandOptionsModal, setShowBrandOptionsModal] = useState(false);
+  const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
+  const [editingBrandName, setEditingBrandName] = useState('');
+  const [isEditingBrand, setIsEditingBrand] = useState(false);
   const [isEditingMode, setIsEditingMode] = useState(false);
   const [editingChargerId, setEditingChargerId] = useState<string | null>(null);
-  const [chargerImages, setChargerImages] = useState<string[]>([]);
+  const [chargerImages, setChargerImages] = useState<Array<{ id?: string; image_url: string; file_path?: string; display_order?: number; is_primary: boolean }>>([]);
+  const [primaryImageId, setPrimaryImageId] = useState<number | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -82,16 +90,11 @@ const Inventory = () => {
     wattage: '',
     amperage: '',
     model_number: '',
-    quantity_initial: '',
-    quantity_actual: '',
-    quantity_minimal: '',
     purchase_price: '',
     selling_price: '',
     selling_price_1: '',
     selling_price_2: '',
     selling_price_3: '',
-    supplier_id: '',
-    amount_paid: '',
     images: [] as File[],
   });
 
@@ -308,34 +311,204 @@ const Inventory = () => {
   };
 
   const handleAddMark = async () => {
+    setNewMarkName('');
+    setNewMarkImage(null);
+    setBrandImagePreview(null);
+    setIsEditingBrand(false);
+    setEditingBrandId(null);
     setShowAddMarkModal(true);
   };
 
+  const handleBrandImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setNewMarkImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBrandImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveBrandImage = () => {
+    setNewMarkImage(null);
+    setBrandImagePreview(null);
+  };
+
+  const handleEditBrand = (brandId: string, brandName: string) => {
+    setEditingBrandId(brandId);
+    setEditingBrandName(brandName);
+    setIsEditingBrand(true);
+    setNewMarkName(brandName);
+    setNewMarkImage(null);
+    
+    // Load existing brand image if it has one
+    const brand = marks.find(m => m.id === brandId);
+    console.log('🔍 Loading brand for edit:', { brandId, brandName, brand });
+    
+    if (brand) {
+      const logoUrl = (brand as any).logo_url;
+      console.log('📷 Brand logo_url field:', logoUrl);
+      
+      if (logoUrl && logoUrl.trim() !== '') {
+        console.log('✅ Setting brand image preview:', logoUrl);
+        // Verify the URL is valid by checking if it's a proper Supabase URL
+        if (logoUrl.includes('supabase') || logoUrl.startsWith('http')) {
+          setBrandImagePreview(logoUrl);
+        } else {
+          console.warn('⚠️ Invalid image URL format:', logoUrl);
+          setBrandImagePreview(null);
+        }
+      } else {
+        console.log('❌ No logo_url found for brand');
+        setBrandImagePreview(null);
+      }
+    } else {
+      console.warn('⚠️ Brand not found in marks array');
+      setBrandImagePreview(null);
+    }
+    
+    setShowBrandOptionsModal(false);
+    setShowAddMarkModal(true);
+  };
+
+  const handleDeleteBrand = async () => {
+    if (!selectedBrand) return;
+    if (!window.confirm(language === 'en' ? 'Are you sure you want to delete this brand?' : 'Êtes-vous sûr de vouloir supprimer cette marque?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('marks')
+        .delete()
+        .eq('id', selectedBrand);
+
+      if (error) throw error;
+      alert(language === 'en' ? 'Brand deleted successfully!' : 'Marque supprimée avec succès!');
+      setMarks(marks.filter((m) => m.id !== selectedBrand));
+      setSelectedBrand('');
+      setFormData({ ...formData, mark_id: '' });
+      setShowBrandOptionsModal(false);
+    } catch (error) {
+      console.error('Error deleting brand:', error);
+      alert(language === 'en' ? 'Error deleting brand' : 'Erreur lors de la suppression de la marque');
+    }
+  };
+
   const handleAddConnectorType = async () => {
+    setNewConnectorName('');
     setShowAddConnectorModal(true);
+  };
+
+  const handleDeleteConnector = async () => {
+    const connectorId = formData.connector_type_id;
+    if (!connectorId) return;
+    if (!window.confirm(language === 'en' ? 'Are you sure you want to delete this connector type?' : 'Êtes-vous sûr de vouloir supprimer ce type de connecteur?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('connector_types')
+        .delete()
+        .eq('id', connectorId);
+
+      if (error) throw error;
+      alert(language === 'en' ? 'Connector type deleted successfully!' : 'Type de connecteur supprimé avec succès!');
+      setConnectorTypes(connectorTypes.filter((c) => c.id !== connectorId));
+      setFormData({ ...formData, connector_type_id: '' });
+    } catch (error) {
+      console.error('Error deleting connector type:', error);
+      alert(language === 'en' ? 'Error deleting connector type' : 'Erreur lors de la suppression du type de connecteur');
+    }
   };
 
   const handleSaveNewMark = async () => {
     if (!newMarkName.trim()) {
-      alert('Please enter a mark name');
+      alert(language === 'en' ? 'Please enter a mark name' : 'Veuillez entrer le nom de la marque');
       return;
     }
 
     try {
-      const { data, error } = await supabase
-        .from('marks')
-        .insert([{ name: newMarkName, is_active: true }])
-        .select()
-        .single();
+      let logoPath = null;
+      let logoUrl = null;
 
-      if (error) throw error;
-      setMarks([...marks, data]);
-      setFormData({ ...formData, mark_id: data.id });
+      // Upload image if selected
+      if (newMarkImage) {
+        const fileName = `${Date.now()}-${newMarkImage.name}`;
+        const brandId = editingBrandId || 'temp';
+        const filePath = `marks/${brandId}/${fileName}`;
+
+        console.log('📤 Uploading brand image:', { filePath, fileSize: newMarkImage.size });
+
+        const { error: uploadError } = await supabase.storage
+          .from('chargers')
+          .upload(filePath, newMarkImage);
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrl } = supabase.storage
+          .from('chargers')
+          .getPublicUrl(filePath);
+
+        logoPath = filePath;
+        logoUrl = publicUrl.publicUrl;
+        
+        console.log('✅ Image uploaded successfully:', { logoPath, logoUrl });
+      }
+
+      if (isEditingBrand && editingBrandId) {
+        // Update existing brand
+        const updateData: any = { name: newMarkName };
+        if (logoPath) {
+          updateData.logo_file_path = logoPath;
+          updateData.logo_url = logoUrl;
+          updateData.is_logo_uploaded = true;
+          updateData.logo_uploaded_at = new Date().toISOString();
+        }
+
+        console.log('🔄 Updating brand:', { editingBrandId, updateData });
+
+        const { error } = await supabase
+          .from('marks')
+          .update(updateData)
+          .eq('id', editingBrandId);
+
+        if (error) throw error;
+        setMarks(marks.map((m) => (m.id === editingBrandId ? { ...m, ...updateData } : m)));
+          } else {
+        // Create new brand
+        const insertData = {
+          name: newMarkName,
+          is_active: true,
+          logo_file_path: logoPath,
+          logo_url: logoUrl,
+          is_logo_uploaded: !!logoPath,
+          logo_uploaded_at: logoPath ? new Date().toISOString() : null,
+        };
+
+        console.log('➕ Creating new brand:', insertData);
+
+        const { data, error } = await supabase
+          .from('marks')
+          .insert([insertData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        console.log('✅ Brand created successfully:', data);
+        setMarks([...marks, data]);
+        setFormData({ ...formData, mark_id: data.id });
+      }
+
       setNewMarkName('');
+      setNewMarkImage(null);
+      setBrandImagePreview(null);
+      setIsEditingBrand(false);
+      setEditingBrandId(null);
       setShowAddMarkModal(false);
     } catch (error) {
-      console.error('Error adding mark:', error);
-      alert('Error adding mark');
+      console.error('❌ Error saving mark:', error);
+      alert(language === 'en' ? 'Error saving mark' : 'Erreur lors de l\'enregistrement de la marque');
     }
   };
 
@@ -408,6 +581,7 @@ const Inventory = () => {
       
       for (let i = 0; i < formData.images.length; i++) {
         const file = formData.images[i];
+        const isPrimary = i === primaryImageId || (primaryImageId === null && i === 0);
         
         // Create unique filename with timestamp
         const timestamp = Date.now();
@@ -439,8 +613,8 @@ const Inventory = () => {
         const publicUrl = publicUrlData.publicUrl;
         console.log(`🔗 Public URL: ${publicUrl}`);
 
-        // 3. Save first image URL as primary image
-        if (i === 0) {
+        // 3. Save primary image URL if this is the primary
+        if (isPrimary) {
           primaryImageUrl = publicUrl;
           console.log(`⭐ Primary image URL: ${primaryImageUrl}`);
         }
@@ -454,7 +628,7 @@ const Inventory = () => {
               image_url: publicUrl,
               file_path: fileName,
               display_order: i,
-              is_primary: i === 0,
+              is_primary: isPrimary,
               uploaded_by: (await supabase.auth.getUser()).data?.user?.id,
             },
           ]);
@@ -482,37 +656,84 @@ const Inventory = () => {
         return;
       }
 
-      // Set quantity_actual equal to quantity_initial
-      const quantityActual = parseInt(formData.quantity_initial) || 0;
-
       // If editing mode, update existing product
       if (isEditingMode && editingChargerId) {
+        let primaryImageUrl: string | null = null;
+
+        // Update existing images' primary status if primaryImageId changed
+        if (chargerImages.length > 0 && primaryImageId !== null) {
+          try {
+            console.log(`🔄 Updating primary image status for existing images...`);
+            // Set all existing images to not primary first
+            for (let i = 0; i < chargerImages.length; i++) {
+              const { error: updateError } = await supabase
+                .from('product_images')
+                .update({ is_primary: i === primaryImageId })
+                .eq('id', chargerImages[i].id);
+              
+              if (updateError) {
+                console.warn(`⚠️ Warning updating image ${i}:`, updateError);
+              }
+            }
+            // Set the primary image URL from the selected existing image
+            if (primaryImageId < chargerImages.length) {
+              primaryImageUrl = chargerImages[primaryImageId].image_url;
+              console.log(`⭐ Updated primary image to index ${primaryImageId}: ${primaryImageUrl}`);
+            }
+          } catch (error) {
+            console.error('❌ Error updating existing image primary status:', error);
+          }
+        }
+
+        // Upload new images if any are provided
+        if (formData.images.length > 0) {
+          try {
+            console.log(`Starting to upload ${formData.images.length} new images during edit...`);
+            const newPrimaryImageUrl = await uploadImages(editingChargerId);
+            if (newPrimaryImageUrl) {
+              primaryImageUrl = newPrimaryImageUrl;
+            }
+            console.log('✅ All new images uploaded successfully!');
+          } catch (imageError) {
+            console.error('❌ Image upload failed:', imageError);
+            alert(`Image upload failed: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`);
+            return;
+          }
+        }
+
+        // Update product basic info
+        let updateData: any = {
+          name: formData.name,
+          description: formData.description,
+          mark_id: formData.mark_id || null,
+          connector_type_id: formData.connector_type_id || null,
+          voltage: parseFloat(formData.voltage) || 0,
+          wattage: parseFloat(formData.wattage) || 0,
+          amperage: parseFloat(formData.amperage) || 0,
+          model_number: formData.model_number,
+          purchase_price: parseFloat(formData.purchase_price) || 0,
+          selling_price: parseFloat(formData.selling_price_1) || 0,
+          selling_price_1: parseFloat(formData.selling_price_1) || 0,
+          selling_price_2: parseFloat(formData.selling_price_2) || 0,
+          selling_price_3: parseFloat(formData.selling_price_3) || 0,
+        };
+
+        // If primary image was determined, update it
+        if (primaryImageUrl) {
+          updateData.primary_image = primaryImageUrl;
+        }
+
         const { error } = await supabase
           .from('products')
-          .update({
-            name: formData.name,
-            description: formData.description,
-            mark_id: formData.mark_id || null,
-            connector_type_id: formData.connector_type_id || null,
-            voltage: parseFloat(formData.voltage) || 0,
-            wattage: parseFloat(formData.wattage) || 0,
-            amperage: parseFloat(formData.amperage) || 0,
-            model_number: formData.model_number,
-            quantity_initial: parseInt(formData.quantity_initial) || 0,
-            quantity_actual: quantityActual,
-            quantity_minimal: parseInt(formData.quantity_minimal) || 0,
-            purchase_price: parseFloat(formData.purchase_price) || 0,
-            selling_price: parseFloat(formData.selling_price_1) || 0,
-            selling_price_1: parseFloat(formData.selling_price_1) || 0,
-            selling_price_2: parseFloat(formData.selling_price_2) || 0,
-            selling_price_3: parseFloat(formData.selling_price_3) || 0,
-          })
+          .update(updateData)
           .eq('id', editingChargerId);
 
         if (error) throw error;
 
         setIsEditingMode(false);
         setEditingChargerId(null);
+        setChargerImages([]);
+        setPrimaryImageId(null);
         setFormData({
           name: '',
           description: '',
@@ -522,16 +743,11 @@ const Inventory = () => {
           wattage: '',
           amperage: '',
           model_number: '',
-          quantity_initial: '',
-          quantity_actual: '',
-          quantity_minimal: '',
           purchase_price: '',
           selling_price: '',
           selling_price_1: '',
           selling_price_2: '',
           selling_price_3: '',
-          supplier_id: '',
-          amount_paid: '',
           images: [],
         });
         setShowAddModal(false);
@@ -552,16 +768,14 @@ const Inventory = () => {
             wattage: parseFloat(formData.wattage) || 0,
             amperage: parseFloat(formData.amperage) || 0,
             model_number: formData.model_number,
-            quantity_initial: parseInt(formData.quantity_initial) || 0,
-            quantity_actual: quantityActual,
-            quantity_minimal: parseInt(formData.quantity_minimal) || 0,
+            quantity_initial: 0,
+            quantity_actual: 0,
+            quantity_minimal: 0,
             purchase_price: parseFloat(formData.purchase_price) || 0,
             selling_price: parseFloat(formData.selling_price_1) || 0,
             selling_price_1: parseFloat(formData.selling_price_1) || 0,
             selling_price_2: parseFloat(formData.selling_price_2) || 0,
             selling_price_3: parseFloat(formData.selling_price_3) || 0,
-            supplier_id: formData.supplier_id || null,
-            amount_paid: parseFloat(formData.amount_paid) || 0,
             is_active: true,
           },
         ])
@@ -611,16 +825,11 @@ const Inventory = () => {
         wattage: '',
         amperage: '',
         model_number: '',
-        quantity_initial: '',
-        quantity_actual: '',
-        quantity_minimal: '',
         purchase_price: '',
         selling_price: '',
         selling_price_1: '',
         selling_price_2: '',
         selling_price_3: '',
-        supplier_id: '',
-        amount_paid: '',
         images: [],
       });
 
@@ -853,15 +1062,15 @@ const Inventory = () => {
                           // Refresh charger data and then show details
                           refreshChargerData(charger.id);
                           setSelectedCharger(charger);
-                          // Fetch all images for this charger
+                          // Fetch all images for this charger with full metadata
                           supabase
                             .from('product_images')
-                            .select('image_url')
+                            .select('id, image_url, file_path, display_order, is_primary')
                             .eq('product_id', charger.id)
                             .order('display_order', { ascending: true })
                             .then(({ data }) => {
                               if (data) {
-                                setChargerImages(data.map(img => img.image_url));
+                                setChargerImages(data);
                               }
                             });
                         }}
@@ -871,7 +1080,7 @@ const Inventory = () => {
                         👁️
                       </button>
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           setIsEditingMode(true);
                           setEditingChargerId(charger.id);
                           setFormData({
@@ -883,18 +1092,32 @@ const Inventory = () => {
                             wattage: charger.wattage.toString(),
                             amperage: charger.amperage.toString(),
                             model_number: charger.model_number || '',
-                            quantity_initial: charger.quantity_actual.toString(),
-                            quantity_actual: charger.quantity_actual.toString(),
-                            quantity_minimal: charger.quantity_minimal.toString(),
                             purchase_price: charger.purchase_price.toString(),
                             selling_price: charger.selling_price.toString(),
                             selling_price_1: charger.selling_price.toString(),
                             selling_price_2: charger.selling_price.toString(),
                             selling_price_3: charger.selling_price.toString(),
-                            supplier_id: '',
-                            amount_paid: '',
                             images: [],
                           });
+                          // Load existing images for this product
+                          const { data: existingImages } = await supabase
+                            .from('product_images')
+                            .select('id, image_url, file_path, display_order, is_primary')
+                            .eq('product_id', charger.id)
+                            .order('display_order', { ascending: true });
+                          if (existingImages && existingImages.length > 0) {
+                            setChargerImages(existingImages);
+                            // Find and set the primary image ID
+                            const primaryIdx = existingImages.findIndex(img => img.is_primary);
+                            if (primaryIdx !== -1) {
+                              setPrimaryImageId(primaryIdx);
+                            } else {
+                              setPrimaryImageId(0);
+                            }
+                          } else {
+                            setChargerImages([]);
+                            setPrimaryImageId(null);
+                          }
                           setShowAddModal(true);
                         }}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center"
@@ -949,16 +1172,11 @@ const Inventory = () => {
                     wattage: '',
                     amperage: '',
                     model_number: '',
-                    quantity_initial: '',
-                    quantity_actual: '',
-                    quantity_minimal: '',
                     purchase_price: '',
                     selling_price: '',
                     selling_price_1: '',
                     selling_price_2: '',
                     selling_price_3: '',
-                    supplier_id: '',
-                    amount_paid: '',
                     images: [] as File[],
                   });
                 }}
@@ -978,15 +1196,34 @@ const Inventory = () => {
               >
                 <h3 className="text-lg font-bold text-cyan-900 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'}</h3>
                 
-                {/* Current Image Preview (when editing) */}
-                {isEditingMode && editingChargerId && chargers.find(c => c.id === editingChargerId)?.primary_image && (
+                {/* Existing Images Gallery (when editing) */}
+                {isEditingMode && editingChargerId && chargerImages.length > 0 && (
                   <div className="mb-4 p-4 bg-white rounded-lg border border-cyan-300">
-                    <p className="text-xs font-semibold text-cyan-700 mb-2">📸 {language === 'en' ? 'Current Image' : 'Image Actuelle'}</p>
-                    <img
-                      src={chargers.find(c => c.id === editingChargerId)?.primary_image}
-                      alt="Current product image"
-                      className="w-full h-32 object-cover rounded-lg shadow-md"
-                    />
+                    <p className="text-xs font-semibold text-cyan-700 mb-3">📸 {language === 'en' ? 'Existing Images - Click to set as Primary' : 'Images Existantes - Cliquez pour définir comme principale'} ({chargerImages.length})</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {chargerImages.map((imageObj, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setPrimaryImageId(index)}
+                          className="relative group rounded-lg overflow-hidden border-4 shadow-md transition-all hover:shadow-lg hover:scale-105 cursor-pointer"
+                          style={{borderColor: index === primaryImageId || (primaryImageId === null && index === 0) ? '#06b6d4' : '#cbd5e1'}}
+                          title={language === 'en' ? 'Click to set as primary image' : 'Cliquez pour définir comme image principale'}
+                        >
+                          {(index === primaryImageId || (primaryImageId === null && index === 0)) && <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold z-10">⭐ PRIMARY</div>}
+                          <img
+                            src={imageObj.image_url}
+                            alt={`Existing image ${index + 1}`}
+                            className="w-full h-24 object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                          {(index === primaryImageId || (primaryImageId === null && index === 0)) && (
+                            <div className="absolute inset-0 bg-cyan-400 bg-opacity-20 border-2 border-cyan-400 rounded-lg flex items-center justify-center">
+                              <div className="text-4xl">✓</div>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
                 
@@ -1004,37 +1241,61 @@ const Inventory = () => {
                     <ImageIcon className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
                     <p className="text-cyan-900 font-semibold">
                       {formData.images.length > 0
-                        ? `✅ ${formData.images.length} ${language === 'en' ? 'image(s) selected' : 'image(s) sélectionnée(s)'}`
+                        ? `✅ ${formData.images.length} ${language === 'en' ? 'new image(s) selected' : 'nouvelle(s) image(s) sélectionnée(s)'}`
                         : language === 'en'
                         ? '📤 Click to select images'
                         : '📤 Cliquez pour sélectionner des images'}
+                    </p>
+                    <p className="text-xs text-cyan-700 mt-2">
+                      {isEditingMode ? (language === 'en' ? 'Add more images to existing ones' : 'Ajoutez plus d\'images aux existantes') : (language === 'en' ? 'Select one or more images' : 'Sélectionnez une ou plusieurs images')}
                     </p>
                   </label>
                 </div>
 
                 {/* Image Preview Section */}
                 {formData.images.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {formData.images.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg border border-cyan-300"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(index)}
-                            className="bg-red-500 hover:bg-red-600 text-white text-xl rounded-full w-10 h-10 flex items-center justify-center transition-colors font-bold"
-                            title={language === 'en' ? 'Delete image' : 'Supprimer image'}
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                        <p className="text-xs text-cyan-700 mt-1 truncate">{image.name}</p>
-                      </div>
-                    ))}
+                  <div>
+                    <p className="text-xs font-semibold text-cyan-700 mb-3">🎯 {language === 'en' ? 'New Images - Select which one is primary' : 'Nouvelles Images - Sélectionnez laquelle est principale'}</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {formData.images.map((image, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setPrimaryImageId(index)}
+                          className="relative group rounded-lg overflow-hidden border-4 transition-all hover:shadow-lg hover:scale-105 cursor-pointer"
+                          style={{borderColor: index === primaryImageId || (primaryImageId === null && index === 0) ? '#06b6d4' : '#cbd5e1'}}
+                          title={language === 'en' ? 'Click to set as primary image' : 'Cliquez pour définir comme image principale'}
+                        >
+                          <img
+                            src={URL.createObjectURL(image)}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-24 object-cover transition-transform duration-300"
+                          />
+                          {(index === primaryImageId || (primaryImageId === null && index === 0)) && (
+                            <>
+                              <div className="absolute inset-0 bg-cyan-400 bg-opacity-20 border-2 border-cyan-400 rounded-lg flex items-center justify-center">
+                                <div className="text-4xl">✓</div>
+                              </div>
+                              <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold z-10">⭐ PRIMARY</div>
+                            </>
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-40 group-hover:bg-opacity-60 transition-all duration-200 flex items-center justify-center">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveImage(index);
+                              }}
+                              className="bg-red-500 hover:bg-red-600 text-white text-xl rounded-full w-10 h-10 flex items-center justify-center transition-colors font-bold"
+                              title={language === 'en' ? 'Delete image' : 'Supprimer image'}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                          <p className="absolute inset-0 text-xs text-white/80 flex items-start justify-start p-2 bg-gradient-to-br from-black/50 to-transparent rounded-lg pointer-events-none truncate">{image.name}</p>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -1080,15 +1341,19 @@ const Inventory = () => {
                 </div>
               </motion.div>
 
-              {/* Mark & Connector Section */}
+              {/* Mark & Connector Section - Mobile Optimized */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200"
               >
-                <h3 className="text-lg font-bold text-purple-900 mb-4">🏢 {language === 'en' ? 'Brand & Connector' : 'Marque & Connecteur'}</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <h3 className="text-lg font-bold text-purple-900 mb-5">🏢 {language === 'en' ? 'Brand & Connector' : 'Marque & Connecteur'}</h3>
+                
+                {/* Streamlined Grid: 1 column on mobile, 2 columns on tablet+ */}
+                <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
+                  
+                  {/* Brand / Mark Field */}
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-purple-900">
                       🏷️ {language === 'en' ? 'Mark / Brand' : 'Marque'} *
@@ -1096,10 +1361,11 @@ const Inventory = () => {
                     <div className="flex gap-2">
                       <select
                         value={formData.mark_id}
-                        onChange={(e) =>
-                          setFormData({ ...formData, mark_id: e.target.value })
-                        }
-                        className="flex-1 px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white"
+                        onChange={(e) => {
+                          setFormData({ ...formData, mark_id: e.target.value });
+                          setSelectedBrand(e.target.value);
+                        }}
+                        className="flex-1 px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white text-sm"
                       >
                         <option value="">{language === 'en' ? 'Select Mark' : 'Sélectionnez Marque'}</option>
                         {marks.map((mark) => (
@@ -1108,16 +1374,41 @@ const Inventory = () => {
                           </option>
                         ))}
                       </select>
+                      {formData.mark_id && (
+                        <>
+                          <Button
+                            onClick={() => {
+                              const brand = marks.find((m) => m.id === formData.mark_id);
+                              if (brand) handleEditBrand(brand.id, brand.name);
+                            }}
+                            variant="outline"
+                            className="px-2.5 py-2 border-blue-300 text-blue-600 hover:bg-blue-100 flex-shrink-0"
+                            title={language === 'en' ? 'Edit brand' : 'Modifier la marque'}
+                          >
+                            ✏️
+                          </Button>
+                          <Button
+                            onClick={handleDeleteBrand}
+                            variant="outline"
+                            className="px-2.5 py-2 border-red-300 text-red-600 hover:bg-red-100 flex-shrink-0"
+                            title={language === 'en' ? 'Delete brand' : 'Supprimer la marque'}
+                          >
+                            🗑️
+                          </Button>
+                        </>
+                      )}
                       <Button
                         onClick={handleAddMark}
                         variant="outline"
-                        className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
+                        className="px-2.5 py-2 border-purple-300 text-purple-600 hover:bg-purple-100 flex-shrink-0"
+                        title={language === 'en' ? 'Add new brand' : 'Ajouter nouvelle marque'}
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
 
+                  {/* Connector Type Field */}
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-purple-900">
                       🔗 {language === 'en' ? 'Connector Type' : 'Type de Connecteur'} *
@@ -1128,7 +1419,7 @@ const Inventory = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, connector_type_id: e.target.value })
                         }
-                        className="flex-1 px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white"
+                        className="flex-1 px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white text-sm"
                       >
                         <option value="">{language === 'en' ? 'Select Type' : 'Sélectionnez Type'}</option>
                         {connectorTypes.map((type) => (
@@ -1138,43 +1429,34 @@ const Inventory = () => {
                         ))}
                       </select>
                       {formData.connector_type_id && (
-                        <Button
-                          onClick={() => setFormData({ ...formData, connector_type_id: '' })}
-                          variant="outline"
-                          className="px-3 border-red-300 text-red-600 hover:bg-red-100"
-                          title={language === 'en' ? 'Clear selection' : 'Effacer la sélection'}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <>
+                          <Button
+                            onClick={() => setFormData({ ...formData, connector_type_id: '' })}
+                            variant="outline"
+                            className="px-2.5 py-2 border-blue-300 text-blue-600 hover:bg-blue-100 flex-shrink-0"
+                            title={language === 'en' ? 'Clear selection' : 'Effacer la sélection'}
+                          >
+                            ✖️
+                          </Button>
+                          <Button
+                            onClick={handleDeleteConnector}
+                            variant="outline"
+                            className="px-2.5 py-2 border-red-300 text-red-600 hover:bg-red-100 flex-shrink-0"
+                            title={language === 'en' ? 'Delete connector type' : 'Supprimer le type de connecteur'}
+                          >
+                            🗑️
+                          </Button>
+                        </>
                       )}
                       <Button
                         onClick={handleAddConnectorType}
                         variant="outline"
-                        className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
+                        className="px-2.5 py-2 border-purple-300 text-purple-600 hover:bg-purple-100 flex-shrink-0"
+                        title={language === 'en' ? 'Add new connector' : 'Ajouter nouveau connecteur'}
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-indigo-900">
-                      🏢 {language === 'en' ? 'Supplier' : 'Fournisseur'}
-                    </label>
-                    <select
-                      value={formData.supplier_id}
-                      onChange={(e) =>
-                        setFormData({ ...formData, supplier_id: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
-                    >
-                      <option value="">{language === 'en' ? 'Select Supplier' : 'Sélectionnez Fournisseur'}</option>
-                      {suppliers.map((supplier) => (
-                        <option key={supplier.id} value={supplier.id}>
-                          {supplier.name}
-                        </option>
-                      ))}
-                    </select>
                   </div>
                 </div>
               </motion.div>
@@ -1242,204 +1524,68 @@ const Inventory = () => {
                 </div>
               </motion.div>
 
-              {/* Inventory Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200"
-              >
-                <h3 className="text-lg font-bold text-emerald-900 mb-4">📊 {language === 'en' ? 'Inventory' : 'Inventaire'}</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-emerald-900">📦 {language === 'en' ? 'Initial Qty' : 'Qté Initiale'} *</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.quantity_initial}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          quantity_initial: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-bold"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-emerald-900">📊 {language === 'en' ? 'Current Qty' : 'Qté Actuelle'}</label>
-                    <input
-                      type="number"
-                      min="0"
-                      disabled
-                      placeholder="Auto-filled from initial quantity"
-                      value={formData.quantity_initial}
-                      className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-gray-50 font-bold text-gray-600 cursor-not-allowed"
-                    />
-                    <p className="text-xs text-emerald-700 mt-1">{language === 'en' ? 'Auto-filled from Initial Qty' : 'Rempli automatiquement à partir de Qté Initiale'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-emerald-900">⚠️ {language === 'en' ? 'Min Qty' : 'Qté Min'} *</label>
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder="Alert level"
-                      value={formData.quantity_minimal}
-                      onChange={(e) =>
-                        setFormData({ ...formData, quantity_minimal: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-bold"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Pricing & Payment Section - LAST */}
+              {/* Pricing Section - Only Selling Prices */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
                 className="p-4 bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl border border-rose-200"
               >
-                <h3 className="text-lg font-bold text-rose-900 mb-4">💳 {language === 'en' ? 'Payment' : 'Paiement'}</h3>
+                <h3 className="text-lg font-bold text-rose-900 mb-4">💰 {language === 'en' ? 'Selling Prices' : 'Prix de Vente'}</h3>
+                <p className="text-sm text-rose-700 mb-4">{language === 'en' ? 'Set different prices for different customer types' : 'Définissez des prix différents pour les différents types de clients'}</p>
                 
-                {/* Tarification Calculation */}
-                <div className="mb-4 p-3 bg-white rounded-lg border border-rose-200">
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-rose-700 font-semibold">{language === 'en' ? 'Unit Price' : 'Prix Unitaire'}</p>
-                      <p className="text-lg font-bold text-rose-900">{parseFloat(formData.purchase_price || '0').toFixed(2)} DA</p>
-                    </div>
-                    <div>
-                      <p className="text-rose-700 font-semibold">{language === 'en' ? 'Quantity' : 'Quantité'}</p>
-                      <p className="text-lg font-bold text-rose-900">{formData.quantity_initial || 0}</p>
-                    </div>
-                    <div>
-                      <p className="text-rose-700 font-semibold">{language === 'en' ? 'Total Cost' : 'Coût Total'}</p>
-                      <p className="text-lg font-bold text-rose-900">{(parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))).toFixed(2)} DA</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Tracking */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-rose-900">💵 {language === 'en' ? 'Unit Price' : 'Prix Unitaire'} *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      value={formData.purchase_price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, purchase_price: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white font-bold"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-2 text-rose-900">💰 {language === 'en' ? 'Amount Paid' : 'Montant Payé'}</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      value={formData.amount_paid}
-                      onChange={(e) =>
-                        setFormData({ ...formData, amount_paid: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white font-bold"
-                    />
-                  </div>
-                </div>
-
-                {/* Rest/Balance Calculation */}
-                <div className="mt-4 p-3 rounded-lg" style={{
-                  backgroundColor: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
-                    ? '#FEE2E2'
-                    : '#DBEAFE',
-                  borderColor: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
-                    ? '#FCA5A5'
-                    : '#93C5FD',
-                  borderWidth: '2px'
-                }}>
-                  <p className="text-sm font-semibold mb-2" style={{
-                    color: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
-                      ? '#991B1B'
-                      : '#1E40AF'
-                  }}>
-                    📊 {language === 'en' ? 'Remaining Balance' : 'Solde Restant'}
-                  </p>
-                  <p style={{
-                    fontSize: '20px',
-                    fontWeight: 'bold',
-                    color: (parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0') > 0
-                      ? '#DC2626'
-                      : '#2563EB'
-                  }}>
-                    {((parseFloat(formData.purchase_price || '0') * (parseFloat(formData.quantity_initial || '0'))) - parseFloat(formData.amount_paid || '0')).toFixed(2)} DA
-                  </p>
-                </div>
-
                 {/* Selling Prices - Three Tier System */}
-                <div className="mt-4">
-                  <div className="mb-3">
-                    <h4 className="text-base font-bold text-rose-900 mb-4">🏷️ {language === 'en' ? 'Selling Prices (Three-Tier)' : 'Prix de Vente (Trois Niveaux)'}</h4>
-                    <p className="text-xs text-rose-700 mb-3">{language === 'en' ? 'Set different prices for different customer types' : 'Définissez des prix différents pour les différents types de clients'}</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Price 1 - Normal */}
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <label className="block text-xs font-semibold mb-2 text-blue-900">💰 {language === 'en' ? 'Normal Price' : 'Prix Normal'} *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={formData.selling_price_1}
+                      onChange={(e) => {
+                        setFormData({ 
+                          ...formData, 
+                          selling_price_1: e.target.value,
+                          selling_price: e.target.value // Keep in sync for backward compatibility
+                        })
+                      }}
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-bold text-sm"
+                    />
                   </div>
-                  
-                  <div className="grid grid-cols-3 gap-3">
-                    {/* Price 1 - Normal */}
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <label className="block text-xs font-semibold mb-2 text-blue-900">💰 {language === 'en' ? 'Normal Price' : 'Prix Normal'} *</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0.00"
-                        value={formData.selling_price_1}
-                        onChange={(e) => {
-                          setFormData({ 
-                            ...formData, 
-                            selling_price_1: e.target.value,
-                            selling_price: e.target.value // Keep in sync for backward compatibility
-                          })
-                        }}
-                        className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-bold text-sm"
-                      />
-                    </div>
 
-                    {/* Price 2 - Revendeur (Reseller) */}
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                      <label className="block text-xs font-semibold mb-2 text-amber-900">🔄 {language === 'en' ? 'Revendeur Price' : 'Prix Revendeur'}</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0.00"
-                        value={formData.selling_price_2}
-                        onChange={(e) =>
-                          setFormData({ ...formData, selling_price_2: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white font-bold text-sm"
-                      />
-                    </div>
+                  {/* Price 2 - Revendeur (Reseller) */}
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <label className="block text-xs font-semibold mb-2 text-amber-900">🔄 {language === 'en' ? 'Revendeur Price' : 'Prix Revendeur'}</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={formData.selling_price_2}
+                      onChange={(e) =>
+                        setFormData({ ...formData, selling_price_2: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white font-bold text-sm"
+                    />
+                  </div>
 
-                    {/* Price 3 - Gros (Wholesale) */}
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <label className="block text-xs font-semibold mb-2 text-green-900">📦 {language === 'en' ? 'Wholesale Price' : 'Prix Gros'}</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0.00"
-                        value={formData.selling_price_3}
-                        onChange={(e) =>
-                          setFormData({ ...formData, selling_price_3: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white font-bold text-sm"
-                      />
-                    </div>
+                  {/* Price 3 - Wholesale */}
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <label className="block text-xs font-semibold mb-2 text-emerald-900">📦 {language === 'en' ? 'Wholesale Price' : 'Prix Gros'}</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={formData.selling_price_3}
+                      onChange={(e) =>
+                        setFormData({ ...formData, selling_price_3: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-bold text-sm"
+                    />
                   </div>
                 </div>
               </motion.div>
@@ -1467,16 +1613,11 @@ const Inventory = () => {
                       wattage: '',
                       amperage: '',
                       model_number: '',
-                      quantity_initial: '',
-                      quantity_actual: '',
-                      quantity_minimal: '',
                       purchase_price: '',
                       selling_price: '',
                       selling_price_1: '',
                       selling_price_2: '',
                       selling_price_3: '',
-                      supplier_id: '',
-                      amount_paid: '',
                       images: [],
                     });
                   }}
@@ -1525,19 +1666,26 @@ const Inventory = () => {
                   <h3 className="text-lg font-bold text-cyan-900 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'} ({chargerImages.length})</h3>
                   {chargerImages.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      {chargerImages.map((imageUrl, index) => (
-                        <div key={index} className="rounded-lg overflow-hidden border-2 border-cyan-300 shadow-md">
-                          <img
-                            src={imageUrl}
-                            alt={`${selectedCharger.name} - Image ${index + 1}`}
-                            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              console.warn(`Failed to load image: ${imageUrl}`);
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      ))}
+                      {chargerImages.map((imageObj, index) => {
+                        // Handle both string URLs and objects
+                        const imageUrl = typeof imageObj === 'string' ? imageObj : imageObj.image_url;
+                        const isPrimary = typeof imageObj === 'object' ? imageObj.is_primary : false;
+                        
+                        return (
+                          <div key={index} className="rounded-lg overflow-hidden border-4 shadow-md relative" style={{borderColor: isPrimary ? '#06b6d4' : '#cbd5e1'}}>
+                            {isPrimary && <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold z-10">⭐ PRIMARY</div>}
+                            <img
+                              src={imageUrl}
+                              alt={`${selectedCharger.name} - Image ${index + 1}`}
+                              className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                console.warn(`Failed to load image: ${imageUrl}`);
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : selectedCharger.primary_image ? (
                     <img
@@ -1661,8 +1809,9 @@ const Inventory = () => {
               {/* Action Buttons */}
               <div className="flex gap-2 pt-4 border-t border-slate-300">
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     setIsEditingMode(true);
+                    setEditingChargerId(selectedCharger.id);
                     setFormData({
                       name: selectedCharger.name,
                       description: selectedCharger.description || '',
@@ -1672,18 +1821,32 @@ const Inventory = () => {
                       wattage: selectedCharger.wattage.toString(),
                       amperage: selectedCharger.amperage.toString(),
                       model_number: selectedCharger.model_number || '',
-                      quantity_initial: selectedCharger.quantity_actual.toString(),
-                      quantity_actual: selectedCharger.quantity_actual.toString(),
-                      quantity_minimal: selectedCharger.quantity_minimal.toString(),
                       purchase_price: selectedCharger.purchase_price.toString(),
                       selling_price: selectedCharger.selling_price.toString(),
                       selling_price_1: selectedCharger.selling_price.toString(),
                       selling_price_2: '0',
                       selling_price_3: '0',
-                      supplier_id: '',
-                      amount_paid: '',
                       images: [],
                     });
+                    // Load existing images for this product
+                    const { data: existingImages } = await supabase
+                      .from('product_images')
+                      .select('id, image_url, file_path, display_order, is_primary')
+                      .eq('product_id', selectedCharger.id)
+                      .order('display_order', { ascending: true });
+                    if (existingImages && existingImages.length > 0) {
+                      setChargerImages(existingImages);
+                      // Find and set the primary image ID
+                      const primaryIdx = existingImages.findIndex(img => img.is_primary);
+                      if (primaryIdx !== -1) {
+                        setPrimaryImageId(primaryIdx);
+                      } else {
+                        setPrimaryImageId(0);
+                      }
+                    } else {
+                      setChargerImages([]);
+                      setPrimaryImageId(null);
+                    }
                     setSelectedCharger(null);
                     setShowAddModal(true);
                   }}
@@ -1708,23 +1871,27 @@ const Inventory = () => {
       {showAddMarkModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl max-w-md w-full shadow-2xl"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-2xl max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-2xl">
-              <h2 className="text-2xl font-bold text-purple-900">
-                🏷️ {language === 'en' ? 'Add New Mark' : 'Ajouter Nouvelle Marque'}
+            {/* Header */}
+            <div className="p-6 border-b border-purple-200 bg-gradient-to-r from-purple-600 to-purple-700 rounded-t-2xl sticky top-0 z-10">
+              <h2 className="text-3xl font-bold text-white flex items-center gap-2">
+                🏷️ {language === 'en' ? (isEditingBrand ? 'Edit Brand' : 'Add New Brand') : (isEditingBrand ? 'Modifier Marque' : 'Ajouter Nouvelle Marque')}
               </h2>
-              <p className="text-purple-700 text-sm mt-1">
-                {language === 'en' ? 'Create a new charger brand/mark' : 'Créez une nouvelle marque de chargeur'}
+              <p className="text-purple-100 text-sm mt-2">
+                {language === 'en' ? 'Create or edit a charger brand with logo' : 'Créez ou modifiez une marque avec logo'}
               </p>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-5">
+              {/* Brand Name */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-purple-900">
-                  📝 {language === 'en' ? 'Mark Name' : 'Nom de la Marque'} *
+                <label className="block text-sm font-bold mb-3 text-gray-700 flex items-center gap-2">
+                  <span className="text-lg">📝</span>
+                  {language === 'en' ? 'Brand Name' : 'Nom de la Marque'} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1732,24 +1899,96 @@ const Inventory = () => {
                   value={newMarkName}
                   onChange={(e) => setNewMarkName(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSaveNewMark()}
-                  className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white font-semibold"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white font-semibold text-gray-800 transition-all"
                   autoFocus
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-slate-200">
+              {/* Brand Logo Upload */}
+              <div>
+                <label className="block text-sm font-bold mb-3 text-gray-700 flex items-center gap-2">
+                  <span className="text-lg">🖼️</span>
+                  {language === 'en' ? 'Brand Logo' : 'Logo de la Marque'} <span className="text-gray-400">({language === 'en' ? 'Optional' : 'Optionnel'})</span>
+                </label>
+                
+                {!brandImagePreview ? (
+                  <div 
+                    className="border-3 border-dashed border-purple-400 rounded-xl p-6 text-center bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 cursor-pointer transition-all duration-200 group"
+                    onClick={() => document.getElementById('brandImageInput')?.click()}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBrandImageSelect}
+                      className="hidden"
+                      id="brandImageInput"
+                    />
+                    <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">📤</div>
+                    <p className="text-purple-900 font-bold text-lg">
+                      {language === 'en' ? 'Click to upload logo' : 'Cliquez pour télécharger le logo'}
+                    </p>
+                    <p className="text-xs text-purple-700 mt-2 font-medium">PNG, JPG, WebP (Max 5MB)</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-6 flex items-center justify-center min-h-[140px] relative overflow-hidden">
+                      <img 
+                        src={brandImagePreview} 
+                        alt="Preview" 
+                        className="max-h-[120px] max-w-[120px] object-contain drop-shadow-lg hover:scale-105 transition-transform"
+                        crossOrigin="anonymous"
+                        onLoad={(e) => {
+                          console.log('✅ Image loaded successfully:', brandImagePreview);
+                          (e.target as HTMLImageElement).style.display = 'block';
+                        }}
+                        onError={(e) => {
+                          console.error('❌ Image failed to load:', brandImagePreview);
+                          console.error('Error details:', (e.target as HTMLImageElement).naturalWidth);
+                          // Show error message in the container
+                          const container = (e.target as HTMLImageElement).parentElement;
+                          if (container) {
+                            container.innerHTML = '<p class="text-red-600 font-semibold text-sm">⚠️ Unable to load image</p>';
+                          }
+                        }}
+                      />
+                      <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">✓</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => document.getElementById('brandImageInput')?.click()}
+                        className="flex-1 px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        🔄 {language === 'en' ? 'Change' : 'Changer'}
+                      </button>
+                      <button
+                        onClick={handleRemoveBrandImage}
+                        className="flex-1 px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        🗑️ {language === 'en' ? 'Remove' : 'Supprimer'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-6 border-t-2 border-gray-200">
                 <button
                   onClick={handleSaveNewMark}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 text-base"
                 >
-                  💾 {language === 'en' ? 'Save Mark' : 'Enregistrer'}
+                  💾 {language === 'en' ? (isEditingBrand ? 'Update' : 'Save') : (isEditingBrand ? 'Mettre à jour' : 'Enregistrer')}
                 </button>
                 <button
                   onClick={() => {
                     setShowAddMarkModal(false);
                     setNewMarkName('');
+                    setNewMarkImage(null);
+                    setBrandImagePreview(null);
+                    setIsEditingBrand(false);
+                    setEditingBrandId(null);
                   }}
-                  className="flex-1 border-2 border-purple-300 text-purple-700 hover:bg-purple-50 font-bold py-3 px-4 rounded-lg transition-all"
+                  className="flex-1 border-2 border-purple-300 text-purple-700 hover:bg-purple-50 font-bold py-3 px-4 rounded-lg transition-all active:scale-95"
                 >
                   ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
                 </button>

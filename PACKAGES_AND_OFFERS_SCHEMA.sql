@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS package_items (
   product_voltage VARCHAR(50),
   product_amperage VARCHAR(50),
   product_wattage VARCHAR(50),
+  custom_price DECIMAL(10, 2),
   created_at TIMESTAMP DEFAULT NOW()
 );
 

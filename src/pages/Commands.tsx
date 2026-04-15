@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +34,10 @@ import {
   Search,
   Plus,
   ArrowRight,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
 } from 'lucide-react';
 import {
   getOrders,
@@ -46,6 +50,12 @@ import {
   cancelOrder,
   updateOrderItem,
   deleteOrderItem,
+  getApprovedTestimonials,
+  getAllTestimonials,
+  getPendingTestimonials,
+  approveTestimonial,
+  rejectTestimonial,
+  deleteTestimonial,
 } from '@/lib/supabaseClient';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -85,6 +95,16 @@ interface OrderItem {
   connection_type?: string;
 }
 
+interface Testimonial {
+  id: string;
+  client_name: string;
+  opinion: string;
+  rating?: number;
+  created_at: string;
+  updated_at: string;
+  is_approved?: boolean;
+}
+
 export default function Commands() {
   const { toast } = useToast();
   const { language, isRTL } = useLanguage();
@@ -94,6 +114,16 @@ export default function Commands() {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingOrders, setLoadingOrders] = useState(true);
+  
+  // Testimonials State
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loadingTestimonials, setLoadingTestimonials] = useState(false);
+  const [showTestimonialsPanel, setShowTestimonialsPanel] = useState(false);
+
+  // Pending Testimonials State
+  const [pendingTestimonials, setPendingTestimonials] = useState<Testimonial[]>([]);
+  const [loadingPending, setLoadingPending] = useState(false);
+  const [showPendingTab, setShowPendingTab] = useState(false);
 
   // Modal States
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -166,8 +196,105 @@ export default function Commands() {
     }
   };
 
+  // Fetch testimonials
+  const fetchTestimonials = async () => {
+    setLoadingTestimonials(true);
+    try {
+      const data = await getApprovedTestimonials();
+      setTestimonials(data || []);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في جلب الآراء' : 'Impossible de charger les avis',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingTestimonials(false);
+    }
+  };
+
+  // Fetch pending testimonials for approval
+  const fetchPendingTestimonials = async () => {
+    setLoadingPending(true);
+    try {
+      const data = await getPendingTestimonials();
+      setPendingTestimonials(data || []);
+    } catch (error) {
+      console.error('Error fetching pending testimonials:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في جلب الآراء المعلقة' : 'Impossible de charger les avis en attente',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingPending(false);
+    }
+  };
+
+  // Approve testimonial
+  const handleApproveTestimonial = async (testimonialId: string) => {
+    try {
+      await approveTestimonial(testimonialId);
+      toast({
+        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        description: language === 'ar' ? 'تم الموافقة على الرأي' : 'Avis approuvé',
+      });
+      fetchPendingTestimonials();
+      fetchTestimonials();
+    } catch (error) {
+      console.error('Error approving testimonial:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في الموافقة' : 'Erreur lors de l\'approbation',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Reject testimonial
+  const handleRejectTestimonial = async (testimonialId: string) => {
+    try {
+      await rejectTestimonial(testimonialId);
+      toast({
+        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        description: language === 'ar' ? 'تم رفض الرأي' : 'Avis rejeté',
+      });
+      fetchPendingTestimonials();
+    } catch (error) {
+      console.error('Error rejecting testimonial:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في الرفض' : 'Erreur lors du rejet',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Delete testimonial
+  const handleDeleteTestimonial = async (testimonialId: string) => {
+    try {
+      await deleteTestimonial(testimonialId);
+      toast({
+        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        description: language === 'ar' ? 'تم حذف الرأي' : 'Avis supprimé',
+      });
+      fetchTestimonials();
+      fetchPendingTestimonials();
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في حذف الرأي' : 'Impossible de supprimer l\'avis',
+        variant: 'destructive',
+      });
+    }
+  };
+
   useEffect(() => {
     fetchAllOrders();
+    fetchTestimonials();
+    fetchPendingTestimonials();
   }, []);
 
   // Apply filters
@@ -422,24 +549,36 @@ export default function Commands() {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 flex items-center gap-3">
-            <Truck className="w-8 h-8" />
-            {language === 'ar' ? '📦 إدارة الطلبات' : '📦 Gestion des Commandes'}
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">
-            {language === 'ar' ? 'عرض وإدارة جميع الطلبات' : 'Afficher et gérer toutes les commandes'}
-          </p>
+    <div className="flex gap-6 p-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
+      {/* Main Content */}
+      <div className="flex-1 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 flex items-center gap-3">
+              <Truck className="w-8 h-8" />
+              {language === 'ar' ? '📦 إدارة الطلبات' : '📦 Gestion des Commandes'}
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">
+              {language === 'ar' ? 'عرض وإدارة جميع الطلبات' : 'Afficher et gérer toutes les commandes'}
+            </p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowTestimonialsPanel(!showTestimonialsPanel)}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg"
+          >
+            <MessageSquare className="w-5 h-5" />
+            {language === 'ar' ? '💬 الآراء' : '💬 Avis'}
+            {showTestimonialsPanel ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </motion.button>
         </div>
-      </div>
 
-      {/* Search and Filter Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Search */}
-        <div className="relative">
+        {/* Search and Filter Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Search */}
+          <div className="relative">
           <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
           <Input
             placeholder={language === 'ar' ? 'بحث عن طلب...' : 'Rechercher une commande...'}
@@ -888,5 +1027,239 @@ export default function Commands() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+
+    {/* ========== TESTIMONIALS SIDEBAR ========== */}
+    <AnimatePresence>
+      {showTestimonialsPanel && (
+        <motion.div
+          initial={{ opacity: 0, x: 300 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 300 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="w-full md:w-96 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-6 border-2 border-blue-200 dark:border-blue-700 shadow-2xl max-h-screen overflow-y-auto"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-purple-600" />
+              {language === 'ar' ? '💬 الآراء' : '💬 Avis Clients'}
+            </h2>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              onClick={() => setShowTestimonialsPanel(false)}
+              className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            >
+              <X className="w-5 h-5" />
+            </motion.button>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-4 border-b-2 border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => setShowPendingTab(false)}
+              className={`flex-1 pb-2 px-3 font-bold text-sm transition-all ${
+                !showPendingTab
+                  ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              ✅ {language === 'ar' ? 'موافق عليه' : 'Approuvés'} ({testimonials.length})
+            </button>
+            <button
+              onClick={() => setShowPendingTab(true)}
+              className={`flex-1 pb-2 px-3 font-bold text-sm transition-all ${
+                showPendingTab
+                  ? 'border-b-2 border-yellow-500 text-yellow-600 dark:text-yellow-400'
+                  : 'text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              ⏳ {language === 'ar' ? 'قيد المراجعة' : 'En attente'} ({pendingTestimonials.length})
+            </button>
+          </div>
+
+          {/* Approved Testimonials */}
+          {!showPendingTab && (
+            <div className="space-y-4">
+              {loadingTestimonials ? (
+                <div className="text-center py-8">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="inline-block"
+                  >
+                    <span className="text-3xl">⭐</span>
+                  </motion.div>
+                  <p className="text-slate-500 mt-2 text-sm">
+                    {language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}
+                  </p>
+                </div>
+              ) : testimonials.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-slate-500 text-sm">
+                    {language === 'ar' ? 'لا توجد آراء موافق عليها' : 'Aucun avis approuvé'}
+                  </p>
+                </div>
+              ) : (
+                testimonials.map((testimonial, index) => (
+                  <motion.div
+                    key={testimonial.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white dark:bg-slate-800 rounded-lg p-3 border-l-4 border-green-500 shadow-md hover:shadow-lg transition-all"
+                  >
+                    {/* Stars */}
+                    <div className="flex items-center gap-1 mb-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${
+                            i < (testimonial.rating || 5) ? 'text-lg' : 'text-lg opacity-30'
+                          }`}
+                        >
+                          ⭐
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Opinion */}
+                    <p className="text-sm text-slate-700 dark:text-slate-300 mb-2 line-clamp-3">
+                      "{testimonial.opinion}"
+                    </p>
+
+                    {/* Author and Date */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="text-xs font-bold text-slate-900 dark:text-white">
+                          {testimonial.client_name}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {new Date(testimonial.created_at).toLocaleDateString(
+                            language === 'ar' ? 'ar-DZ' : 'fr-FR'
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Delete Button */}
+                    <div className="flex gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleDeleteTestimonial(testimonial.id)}
+                        className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs"
+                        title={language === 'ar' ? 'حذف' : 'Supprimer'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Pending Testimonials */}
+          {showPendingTab && (
+            <div className="space-y-4">
+              {loadingPending ? (
+                <div className="text-center py-8">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="inline-block"
+                  >
+                    <span className="text-3xl">⏳</span>
+                  </motion.div>
+                  <p className="text-slate-500 mt-2 text-sm">
+                    {language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}
+                  </p>
+                </div>
+              ) : pendingTestimonials.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-slate-500 text-sm">
+                    {language === 'ar' ? 'لا توجد آراء قيد المراجعة' : 'Aucun avis en attente'}
+                  </p>
+                </div>
+              ) : (
+                pendingTestimonials.map((testimonial, index) => (
+                  <motion.div
+                    key={testimonial.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-yellow-50 dark:bg-slate-800 rounded-lg p-3 border-l-4 border-yellow-500 shadow-md hover:shadow-lg transition-all"
+                  >
+                    {/* Stars */}
+                    <div className="flex items-center gap-1 mb-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${
+                            i < (testimonial.rating || 5) ? 'text-lg' : 'text-lg opacity-30'
+                          }`}
+                        >
+                          ⭐
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Opinion */}
+                    <p className="text-sm text-slate-700 dark:text-slate-300 mb-3 line-clamp-3">
+                      "{testimonial.opinion}"
+                    </p>
+
+                    {/* Author and Date */}
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                        {testimonial.client_name}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {new Date(testimonial.created_at).toLocaleDateString(
+                          language === 'ar' ? 'ar-DZ' : 'fr-FR'
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        onClick={() => handleApproveTestimonial(testimonial.id)}
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-1 rounded text-xs flex items-center justify-center gap-1"
+                      >
+                        <Check className="w-3 h-3" />
+                        {language === 'ar' ? 'موافقة' : 'Approuver'}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        onClick={() => handleRejectTestimonial(testimonial.id)}
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-1 rounded text-xs flex items-center justify-center gap-1"
+                      >
+                        <X className="w-3 h-3" />
+                        {language === 'ar' ? 'رفض' : 'Rejeter'}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Refresh Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            onClick={() => {
+              fetchTestimonials();
+              fetchPendingTestimonials();
+            }}
+            disabled={loadingTestimonials || loadingPending}
+            className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:opacity-50 text-white font-bold py-2 rounded-lg transition-all"
+          >
+            🔄 {language === 'ar' ? 'تحديث' : 'Rafraîchir'}
+          </motion.button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
   );
 }

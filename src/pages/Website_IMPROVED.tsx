@@ -277,11 +277,11 @@ export default function Website() {
   };
 
   const copyOfferLink = (offer: Offer) => {
-    const link = `${window.location.origin}?offer=${offer.id}`;
+    const link = `${window.location.origin}/order?product_id=${offer.product_id}`;
     navigator.clipboard.writeText(link);
     toast({
       title: language === 'ar' ? '📋 تم النسخ' : '📋 Copié',
-      description: language === 'ar' ? 'تم نسخ الرابط' : 'Lien copié',
+      description: language === 'ar' ? 'تم نسخ الرابط - سيتم تحديد المنتج تلقائياً عند فتحه' : 'Lien copié - Le produit sera sélectionné automatiquement',
     });
   };
 
@@ -377,10 +377,11 @@ export default function Website() {
   };
 
   const copySpecialLink = (offer: SpecialOffer) => {
-    const link = `${window.location.origin}?special=${offer.id}`;
+    const link = `${window.location.origin}/order?product_id=${offer.product_id}`;
     navigator.clipboard.writeText(link);
     toast({
       title: language === 'ar' ? '📋 تم النسخ' : '📋 Copié',
+      description: language === 'ar' ? 'تم نسخ الرابط - سيتم تحديد المنتج تلقائياً عند فتحه' : 'Lien copié - Le produit sera sélectionné automatiquement',
     });
   };
 

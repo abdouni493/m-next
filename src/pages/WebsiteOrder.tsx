@@ -149,12 +149,15 @@ export default function WebsiteOrder() {
         setAllProducts(allOffers);
         setFilteredProducts(allOffers);
 
-        // If product_id in URL, select it
+        // If product_id in URL, select it and add to cart
         if (productId) {
           const found = allOffers.find(o => o.product_id === productId || o.id === productId);
           if (found) {
             setProduct(found);
             setShowProductSearch(false);
+            
+            // Automatically add to cart with quantity 1
+            addProductToCart(found, 1);
           }
         } else {
           // Show product search by default if no product selected
@@ -210,6 +213,48 @@ export default function WebsiteOrder() {
       ...prev,
       deliveryType: value,
     }));
+  };
+
+  const addProductToCart = (prod: Product, qty: number) => {
+    try {
+      // Get existing cart items from localStorage
+      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      
+      // Create cart item from product
+      const cartItem = {
+        id: prod.product_id || prod.id,
+        product_id: prod.product_id || prod.id,
+        product_name: prod.product_name,
+        product_image: prod.product_image,
+        product_mark: prod.product_mark,
+        price: prod.is_special ? prod.special_price : prod.offer_price,
+        original_price: prod.original_price,
+        quantity: qty,
+        discount_percentage: prod.discount_percentage,
+        product_description: prod.product_description,
+      };
+      
+      // Check if product already exists in cart
+      const existingIndex = existingCart.findIndex((item: any) => item.product_id === cartItem.product_id);
+      
+      if (existingIndex > -1) {
+        // Update quantity if product already in cart
+        existingCart[existingIndex].quantity += qty;
+      } else {
+        // Add new item to cart
+        existingCart.push(cartItem);
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(existingCart));
+      
+      // Dispatch event to update cart display
+      window.dispatchEvent(new Event('cartUpdated'));
+      
+      console.log('✅ Product added to cart:', cartItem);
+    } catch (error) {
+      console.error('❌ Error adding product to cart:', error);
+    }
   };
 
   const finalPrice = product ? (product.is_special ? product.special_price : product.offer_price) : 0;

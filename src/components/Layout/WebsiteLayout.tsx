@@ -81,49 +81,49 @@ export const WebsiteLayout = () => {
   }, []);
 
   const navItems = [
-    { label: language === 'ar' ? 'الرئيسية' : 'Accueil', href: '/website-shop' },
-    { label: language === 'ar' ? 'العروض' : 'Offres', href: '/website-shop/offers' },
-    { label: language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales', href: '/website-shop/special-offers' },
+    { label: language === 'ar' ? '🏠 الرئيسية' : '🏠 Accueil', href: '/website-shop' },
+    { label: language === 'ar' ? '🛍️ متجر' : '🛍️ Boutique', href: '/website-shop/offers' },
+    { label: language === 'ar' ? '🔥 عروض خاصة' : '🔥 Spéciales', href: '/website-shop/special-offers' },
     { label: language === 'ar' ? '📦 حزم' : '📦 Packs', href: '/website-shop/packages' },
-    { label: language === 'ar' ? 'جهات الاتصال' : 'Contacts', href: '/website-shop/contacts' },
-    { label: language === 'ar' ? '📦 طلب' : '📦 Commande', href: '/website-shop/order' },
+    { label: language === 'ar' ? '📞 جهات الاتصال' : '📞 Contacts', href: '/website-shop/contacts' },
+    { label: language === 'ar' ? '🛒 طلب' : '🛒 Commande', href: '/website-shop/order' },
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Navigation Bar */}
-      <nav className="sticky top-0 z-50 bg-white dark:bg-slate-800 border-b-2 border-blue-200 dark:border-blue-700 shadow-lg">
+      <nav className="sticky top-0 z-50 bg-gradient-to-r from-white to-blue-50 dark:from-slate-800 dark:to-slate-700 border-b-4 border-gradient-to-r from-blue-400 via-blue-500 to-purple-500 shadow-xl">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo and Store Name */}
             <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg border-2 border-blue-200 bg-white flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full overflow-hidden shadow-lg border-4 border-gradient-to-r from-blue-400 to-purple-500 bg-white flex items-center justify-center hover:scale-110 transition-transform duration-300">
                 {settings?.logo_url ? (
                   <img src={settings.logo_url} alt="Logo" className="w-full h-full object-cover" />
                 ) : (
-                  <Globe className="w-6 h-6 text-blue-600" />
+                  <span className="text-2xl">⚡</span>
                 )}
               </div>
               <div className={isRTL ? 'text-right' : ''}>
-                <h1 className="font-bold text-xl text-slate-900 dark:text-white">
+                <h1 className="font-black text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   {settings?.store_name || 'Charger Shop'}
                 </h1>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  {settings?.slogan || 'Best Chargers'}
+                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  ✨ {settings?.slogan || 'Best Chargers'}
                 </p>
               </div>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              {navItems.map((item) => (
+            <div className="hidden md:flex items-center gap-1">
+              {navItems.map((item, index) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className={`text-sm font-bold transition-all ${
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
                     location.pathname === item.href
-                      ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-blue-600'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600'
                   }`}
                 >
                   {item.label}
@@ -156,11 +156,11 @@ export const WebsiteLayout = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate('/website-shop/order')}
-                className="relative hover:bg-blue-100 dark:hover:bg-slate-700"
+                className="relative hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100 dark:hover:bg-slate-700 transition-all duration-300 text-blue-600"
               >
                 <ShoppingCart className="w-5 h-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold animate-pulse">
+                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-black animate-bounce shadow-lg">
                     {cartCount}
                   </span>
                 )}
@@ -204,12 +204,16 @@ export const WebsiteLayout = () => {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-4 pt-4 border-t-2 border-blue-200 dark:border-blue-700 space-y-2">
+            <div className="md:hidden mt-4 pt-4 border-t-2 border-blue-200 dark:border-blue-700 space-y-2 bg-gradient-to-b from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 rounded-lg p-2">
               {navItems.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="block px-4 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
+                  className={`block px-4 py-3 rounded-lg text-sm font-bold transition-all duration-300 ${
+                    location.pathname === item.href
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600'
+                  }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.label}
@@ -276,7 +280,7 @@ export const WebsiteLayout = () => {
               </h3>
               <ul className="space-y-2 text-blue-100">
                 <li><a href="/website-shop" className="hover:text-white transition">{language === 'ar' ? 'الرئيسية' : 'Accueil'}</a></li>
-                <li><a href="/website-shop/offers" className="hover:text-white transition">{language === 'ar' ? 'العروض' : 'Offres'}</a></li>
+                <li><a href="/website-shop/offers" className="hover:text-white transition">{language === 'ar' ? 'متجر' : 'Boutique'}</a></li>
                 <li><a href="/website-shop/contacts" className="hover:text-white transition">{language === 'ar' ? 'جهات الاتصال' : 'Contacts'}</a></li>
               </ul>
             </div>

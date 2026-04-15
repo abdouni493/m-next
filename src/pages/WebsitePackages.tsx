@@ -32,6 +32,7 @@ interface PackageItem {
   product_voltage?: string;
   product_amperage?: string;
   product_wattage?: string;
+  custom_price?: number;
 }
 
 const translations = {
@@ -355,17 +356,27 @@ export default function WebsitePackages() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: idx * 0.1 }}
-                          className="p-4 bg-slate-100 dark:bg-slate-700 rounded-xl border-2 border-slate-300 dark:border-slate-600"
+                          className="p-4 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-650 rounded-xl border-2 border-slate-300 dark:border-slate-600"
                         >
-                          <div className="flex gap-4">
+                          <div className="flex gap-4 items-start">
                             {item.product_image && (
-                              <img src={item.product_image} alt={item.product_name} className="h-20 w-20 object-cover rounded-lg" />
+                              <img src={item.product_image} alt={item.product_name} className="h-24 w-24 object-cover rounded-lg" />
                             )}
                             <div className="flex-1">
-                              <h5 className="font-bold text-slate-800 dark:text-white text-lg">{item.product_name}</h5>
-                              {item.product_mark && (
-                                <p className="text-sm text-slate-600 dark:text-slate-300 font-semibold">{item.product_mark}</p>
-                              )}
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <h5 className="font-bold text-slate-800 dark:text-white text-lg">{item.product_name}</h5>
+                                  {item.product_mark && (
+                                    <p className="text-sm text-slate-600 dark:text-slate-300 font-semibold">{item.product_mark}</p>
+                                  )}
+                                </div>
+                                <div className="bg-gradient-to-br from-emerald-400 to-green-500 dark:from-emerald-600 dark:to-green-700 rounded-lg px-3 py-2 ml-2">
+                                  <div className="text-center">
+                                    <p className="text-xs text-white font-semibold uppercase tracking-wide">Qty</p>
+                                    <p className="text-2xl font-bold text-white">{item.quantity || 1}</p>
+                                  </div>
+                                </div>
+                              </div>
 
                               {/* Specifications */}
                               <div className="flex flex-wrap gap-2 mt-2">
@@ -385,9 +396,6 @@ export default function WebsitePackages() {
                                   </Badge>
                                 )}
                               </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-slate-600 dark:text-slate-300">Qty: {item.quantity}</p>
                             </div>
                           </div>
                         </motion.div>

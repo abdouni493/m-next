@@ -750,14 +750,21 @@ export const getWebsiteSettings = async () => {
     );
 
     if (!response.ok) {
-      console.error('REST API error:', response.status);
+      console.error('❌ REST API error:', response.status, response.statusText);
       return null;
     }
 
     const data = await response.json();
+    console.log('📊 Website Settings Fetched:', {
+      dataLength: data?.length,
+      hasData: data && Array.isArray(data) && data.length > 0,
+      firstRecord: data?.[0],
+      imageUrl: data?.[0]?.landing_page_image_url,
+    });
+    
     return data && Array.isArray(data) && data.length > 0 ? data[0] : null;
   } catch (error) {
-    console.error('Error fetching website settings via REST:', error);
+    console.error('❌ Error fetching website settings via REST:', error);
     return null;
   }
 };
@@ -1493,40 +1500,7 @@ const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
 export const getOffersREST = async () => {
   try {
     const response = await fetch(
-      `${SUPABASE_REST_URL}/offers?select=*,products!offers_product_id_fkey(voltage,wattage,amperage,mark:mark_id(name),connector:connector_type_id(name))&order=created_at.desc`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      console.error('REST API error:', response.status, response.statusText);
-      return [];
-    }
-
-    const data = await response.json();
-    return data?.map((offer: any) => ({
-      ...offer,
-      voltage: offer.products?.voltage || offer.voltage,
-      wattage: offer.products?.wattage || offer.wattage,
-      amperage: offer.products?.amperage || offer.amperage,
-      connection_type: offer.products?.connector?.name || offer.connection_type,
-      product_mark: offer.product_mark || offer.products?.mark?.name
-    })) || [];
-  } catch (error) {
-    console.error('Error fetching offers via REST:', error);
-    return [];
-  }
-};
-
-export const getSpecialOffersREST = async () => {
-  try {
-    const response = await fetch(
-      `${SUPABASE_REST_URL}/special_offers?select=*,products!special_offers_product_id_fkey(voltage,wattage,amperage,mark:mark_id(name),connector:connector_type_id(name))&order=created_at.desc`,
+      `${SUPABASE_REST_URL}/offers?select=*,products!offers_product_id_fkey(voltage,wattage,amperage,mark:mark_id(name,logo_url),connector:connector_type_id(name))&order=created_at.desc`,
       {
         method: 'GET',
         headers: {
@@ -1549,7 +1523,42 @@ export const getSpecialOffersREST = async () => {
       amperage: offer.products?.amperage || offer.amperage,
       connection_type: offer.products?.connector?.name || offer.connection_type,
       product_mark: offer.product_mark || offer.products?.mark?.name,
-      offer_price: offer.special_price || offer.offer_price
+      brand_logo: offer.products?.mark?.logo_url
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching offers via REST:', error);
+    return [];
+  }
+};
+
+export const getSpecialOffersREST = async () => {
+  try {
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/special_offers?select=*,products!special_offers_product_id_fkey(voltage,wattage,amperage,mark:mark_id(name,logo_url),connector:connector_type_id(name))&order=created_at.desc`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('REST API error:', response.status, response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data?.map((offer: any) => ({
+      ...offer,
+      voltage: offer.products?.voltage || offer.voltage,
+      wattage: offer.products?.wattage || offer.wattage,
+      amperage: offer.products?.amperage || offer.amperage,
+      connection_type: offer.products?.connector?.name || offer.connection_type,
+      product_mark: offer.product_mark || offer.products?.mark?.name,
+      offer_price: offer.special_price || offer.offer_price,
+      brand_logo: offer.products?.mark?.logo_url
     })) || [];
   } catch (error) {
     console.error('Error fetching special offers via REST:', error);
@@ -1931,7 +1940,7 @@ export const deletePackage = async (id: string) => {
 };
 
 // Add product to package
-export const addProductToPackage = async (packageId: string, product: any) => {
+export const addProductToPackage = async (packageId: string, product: any, quantity: number = 1, customPrice: number = 0) => {
   try {
     const { data, error } = await supabase
       .from('package_items')
@@ -1944,7 +1953,8 @@ export const addProductToPackage = async (packageId: string, product: any) => {
         product_voltage: product.voltage,
         product_amperage: product.amperage,
         product_wattage: product.wattage,
-        quantity: 1,
+        quantity: quantity,
+        custom_price: customPrice > 0 ? customPrice : null,
       }])
       .select()
       .single();
@@ -2112,6 +2122,354 @@ export const toggleDeliveryAgencyVisibility = async (id: string, isVisible: bool
     return data;
   } catch (error) {
     console.error('Error toggling delivery agency visibility:', error);
+    throw error;
+  }
+};
+
+// ========== DELIVERY AGENCY WILAYA PRICING FUNCTIONS ==========
+
+// Get all wilaya prices for an agency
+export const getWilayaPrices = async (agencyId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agency_wilaya_prices')
+      .select('*')
+      .eq('agency_id', agencyId)
+      .eq('is_active', true)
+      .order('wilaya_name', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching wilaya prices:', error);
+    throw error;
+  }
+};
+
+// Get price for specific wilaya
+export const getWilayaPrice = async (agencyId: string, wilayaName: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agency_wilaya_prices')
+      .select('*')
+      .eq('agency_id', agencyId)
+      .eq('wilaya_name', wilayaName)
+      .eq('is_active', true)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
+    return data || null;
+  } catch (error) {
+    console.error('Error fetching wilaya price:', error);
+    throw error;
+  }
+};
+
+// Create or update wilaya price
+export const upsertWilayaPrice = async (agencyId: string, wilayaName: string, priceDomicile: number, priceBureau: number) => {
+  try {
+    const { data, error } = await supabase
+      .from('delivery_agency_wilaya_prices')
+      .upsert({
+        agency_id: agencyId,
+        wilaya_name: wilayaName,
+        price_domicile: priceDomicile,
+        price_bureau: priceBureau,
+        is_active: true,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'agency_id,wilaya_name'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error upserting wilaya price:', error);
+    throw error;
+  }
+};
+
+// Delete wilaya price
+export const deleteWilayaPrice = async (agencyId: string, wilayaName: string) => {
+  try {
+    const { error } = await supabase
+      .from('delivery_agency_wilaya_prices')
+      .delete()
+      .eq('agency_id', agencyId)
+      .eq('wilaya_name', wilayaName);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error deleting wilaya price:', error);
+    throw error;
+  }
+};
+
+// Get delivery price for customer (with wilaya fallback)
+export const getDeliveryPriceForWilaya = async (agencyId: string, wilayaName: string, deliveryType: 'bureau' | 'domicile') => {
+  try {
+    // Try to get wilaya-specific price first
+    const wilayaPrice = await getWilayaPrice(agencyId, wilayaName);
+    
+    if (wilayaPrice) {
+      return deliveryType === 'bureau' ? wilayaPrice.price_bureau : wilayaPrice.price_domicile;
+    }
+    
+    // Fallback to agency default price
+    const { data: agency, error } = await supabase
+      .from('delivery_agencies')
+      .select('price_domicile, price_bureau')
+      .eq('id', agencyId)
+      .single();
+
+    if (error) throw error;
+    
+    return deliveryType === 'bureau' ? agency.price_bureau : agency.price_domicile;
+  } catch (error) {
+    console.error('Error getting delivery price for wilaya:', error);
+    throw error;
+  }
+};
+
+// ========== CLIENT TESTIMONIALS ==========
+
+interface Testimonial {
+  id: string;
+  client_name: string;
+  opinion: string;
+  rating?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Get all approved testimonials for display
+export const getApprovedTestimonials = async (): Promise<Testimonial[]> => {
+  try {
+    console.log('🔍 Querying DB: ALL testimonials (testing)');
+    const { data, error } = await supabase
+      .from('client_testimonials')
+      .select('id, client_name, opinion, rating, created_at, updated_at, is_approved, is_active')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    console.log('📊 DB Response (all):', { data, error });
+    
+    // Filter for approved on client-side to debug
+    const approved = data?.filter(t => t.is_approved === true) || [];
+    console.log('✅ After filtering approved:', approved);
+    
+    if (error) throw error;
+    return approved;
+  } catch (error) {
+    console.error('❌ Error fetching testimonials:', error);
+    return [];
+  }
+};
+
+// Create a new testimonial
+export const createTestimonial = async (clientName: string, opinion: string, rating: number = 5, clientEmail?: string): Promise<Testimonial | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('client_testimonials')
+      .insert([
+        {
+          client_name: clientName.trim(),
+          opinion: opinion.trim(),
+          rating: Math.min(Math.max(rating, 1), 5), // Ensure rating is between 1-5
+          client_email: clientEmail?.trim() || null,
+          is_approved: false, // Require admin approval for new testimonials
+          is_active: true,
+        }
+      ])
+      .select('id, client_name, opinion, rating, created_at, updated_at')
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating testimonial:', error);
+    throw error;
+  }
+};
+
+// Get testimonials by client name (user's opinions)
+export const getTestimonialsByName = async (clientName: string): Promise<Testimonial[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('client_testimonials')
+      .select('id, client_name, opinion, rating, created_at, updated_at, is_approved')
+      .eq('client_name', clientName)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching user testimonials:', error);
+    return [];
+  }
+};
+
+// Update testimonial
+export const updateTestimonial = async (
+  testimonialId: string,
+  opinion: string,
+  rating: number
+): Promise<Testimonial | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('client_testimonials')
+      .update({
+        opinion: opinion.trim(),
+        rating: Math.min(Math.max(rating, 1), 5),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', testimonialId)
+      .select('id, client_name, opinion, rating, created_at, updated_at')
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating testimonial:', error);
+    throw error;
+  }
+};
+
+// Delete testimonial (soft delete)
+export const deleteTestimonial = async (testimonialId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('client_testimonials')
+      .update({ is_active: false })
+      .eq('id', testimonialId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error deleting testimonial:', error);
+    throw error;
+  }
+};
+// Get ALL testimonials (for admin) - both approved and pending
+export const getAllTestimonials = async (): Promise<Testimonial[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('client_testimonials')
+      .select('id, client_name, opinion, rating, created_at, updated_at, is_approved, is_active')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching all testimonials:', error);
+    return [];
+  }
+};
+
+// Get pending testimonials (for admin approval)
+export const getPendingTestimonials = async (): Promise<Testimonial[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('client_testimonials')
+      .select('id, client_name, opinion, rating, created_at, updated_at, is_approved')
+      .eq('is_approved', false)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching pending testimonials:', error);
+    return [];
+  }
+};
+
+// Approve a testimonial (admin function)
+export const approveTestimonial = async (testimonialId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('client_testimonials')
+      .update({ is_approved: true, updated_at: new Date().toISOString() })
+      .eq('id', testimonialId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error approving testimonial:', error);
+    throw error;
+  }
+};
+
+// Reject a testimonial (admin function)
+export const rejectTestimonial = async (testimonialId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('client_testimonials')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('id', testimonialId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error rejecting testimonial:', error);
+    throw error;
+  }
+};
+
+// ========== PRODUCTS (FOR WEBSITE BOUTIQUE) ==========
+
+export const getAllProductsREST = async () => {
+  try {
+    const response = await fetch(
+      `${SUPABASE_REST_URL}/products?select=*,marks(id,name,logo_url),connector_types(id,name)&is_active=eq.true&order=created_at.desc`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('REST API error:', response.status, response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data?.map((product: any) => ({
+      ...product,
+      product_name: product.name,
+      product_image: product.primary_image,
+      product_mark: product.marks?.name,
+      brand_logo: product.marks?.logo_url,
+      connection_type: product.connector_types?.name,
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching products via REST:', error);
+    return [];
+  }
+};
+
+// Toggle product visibility on website
+export const toggleProductVisibility = async (productId: string, isVisible: boolean) => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .update({ is_active: isVisible })
+      .eq('id', productId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error toggling product visibility:', error);
     throw error;
   }
 };

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -10,10 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { createOrderREST, getVisibleDeliveryAgencies } from '@/lib/supabaseClient';
-import { ArrowLeft, Trash2, ShoppingCart, Check, MapPin, User, Package, Truck } from 'lucide-react';
+import { createOrderREST, getVisibleDeliveryAgencies, getDeliveryPriceForWilaya, getTestimonialsByName, createTestimonial, updateTestimonial, deleteTestimonial } from '@/lib/supabaseClient';
+import { ArrowLeft, Trash2, ShoppingCart, Check, MapPin, User, Package, Truck, MessageSquare, Edit2, Plus, AlertCircle, X } from 'lucide-react';
 
 interface CartItem {
   id: string;
@@ -43,6 +53,16 @@ interface DeliveryAgency {
   is_visible: boolean;
 }
 
+interface Testimonial {
+  id: string;
+  client_name: string;
+  opinion: string;
+  rating?: number;
+  created_at: string;
+  updated_at: string;
+  is_approved?: boolean;
+}
+
 // List of Algerian Wilayas
 const ALGERIAN_WILAYAS = [
   'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
@@ -55,12 +75,24 @@ const ALGERIAN_WILAYAS = [
 
 export default function WebsiteCart() {
   const { language, isRTL } = useLanguage();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [deliveryAgencies, setDeliveryAgencies] = useState<DeliveryAgency[]>([]);
   const [loading, setLoading] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [deliveryPriceCache, setDeliveryPriceCache] = useState<Map<string, number>>(new Map());
+
+  // Testimonials state
+  const [userTestimonials, setUserTestimonials] = useState<Testimonial[]>([]);
+  const [showTestimonialsModal, setShowTestimonialsModal] = useState(false);
+  const [showTestimonialForm, setShowTestimonialForm] = useState(false);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [testimonialOpinion, setTestimonialOpinion] = useState('');
+  const [testimonialRating, setTestimonialRating] = useState(5);
+  const [loadingTestimonials, setLoadingTestimonials] = useState(false);
+  const [submittingTestimonial, setSubmittingTestimonial] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -111,19 +143,172 @@ export default function WebsiteCart() {
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
+  // ========== TESTIMONIALS HANDLERS ==========
+
+  // Load user testimonials
+  const loadUserTestimonials = async (clientName: string) => {
+    if (!clientName.trim()) return;
+    setLoadingTestimonials(true);
+    try {
+      const testimonials = await getTestimonialsByName(clientName);
+      setUserTestimonials(testimonials || []);
+    } catch (error) {
+      console.error('Error loading testimonials:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في تحميل آرائك' : 'Impossible de charger vos avis',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingTestimonials(false);
+    }
+  };
+
+  // Open testimonials modal
+  const handleOpenTestimonials = async () => {
+    if (formData.client_name.trim()) {
+      await loadUserTestimonials(formData.client_name);
+      setShowTestimonialsModal(true);
+    } else {
+      toast({
+        title: language === 'ar' ? 'تنبيه' : 'Attention',
+        description: language === 'ar' ? 'الرجاء إدخال اسمك أولاً' : 'Veuillez d\'abord entrer votre nom',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Submit testimonial (create or update)
+  const handleSubmitTestimonial = async () => {
+    if (!testimonialOpinion.trim()) {
+      toast({
+        title: language === 'ar' ? 'تنبيه' : 'Attention',
+        description: language === 'ar' ? 'الرجاء إدخال رأيك' : 'Veuillez entrer votre avis',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSubmittingTestimonial(true);
+    try {
+      if (editingTestimonial) {
+        // Update existing testimonial
+        await updateTestimonial(editingTestimonial.id, testimonialOpinion, testimonialRating);
+        toast({
+          title: language === 'ar' ? '✅ تم' : '✅ Succès',
+          description: language === 'ar' ? 'تم تحديث رأيك' : 'Votre avis a été mis à jour',
+        });
+      } else {
+        // Create new testimonial
+        await createTestimonial(formData.client_name, testimonialOpinion, testimonialRating);
+        toast({
+          title: language === 'ar' ? '✅ شكراً!' : '✅ Merci!',
+          description: language === 'ar' ? 'تم استقبال رأيك' : 'Votre avis a été enregistré',
+        });
+      }
+
+      // Reset form and reload testimonials
+      setTestimonialOpinion('');
+      setTestimonialRating(5);
+      setEditingTestimonial(null);
+      setShowTestimonialForm(false);
+      await loadUserTestimonials(formData.client_name);
+    } catch (error) {
+      console.error('Error submitting testimonial:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في إرسال الرأي' : 'Erreur lors de l\'envoi',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmittingTestimonial(false);
+    }
+  };
+
+  // Edit testimonial
+  const handleEditTestimonial = (testimonial: Testimonial) => {
+    setEditingTestimonial(testimonial);
+    setTestimonialOpinion(testimonial.opinion);
+    setTestimonialRating(testimonial.rating || 5);
+    setShowTestimonialForm(true);
+  };
+
+  // Delete testimonial
+  const handleDeleteTestimonial = async (testimonialId: string) => {
+    if (!confirm(language === 'ar' ? 'هل تريد حذف هذا الرأي؟' : 'Êtes-vous sûr?')) return;
+
+    try {
+      await deleteTestimonial(testimonialId);
+      toast({
+        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        description: language === 'ar' ? 'تم حذف رأيك' : 'Votre avis a été supprimé',
+      });
+      await loadUserTestimonials(formData.client_name);
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Erreur',
+        description: language === 'ar' ? 'فشل في حذف الرأي' : 'Erreur lors de la suppression',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Calculate totals with delivery
   const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   
   // Get selected delivery agency
   const selectedAgency = deliveryAgencies.find(a => a.id === formData.delivery_agency_id);
   
-  // Calculate delivery price based on type
-  const getDeliveryPrice = () => {
+  // Calculate delivery price with wilaya-specific pricing support
+  const getDeliveryPrice = async () => {
     if (!selectedAgency) return 0;
-    return formData.delivery_type === 'bureau' ? selectedAgency.price_bureau : selectedAgency.price_domicile;
+    
+    // Create cache key
+    const cacheKey = `${selectedAgency.id}-${formData.client_wilaya}-${formData.delivery_type}`;
+    
+    // Return from cache if available
+    if (deliveryPriceCache.has(cacheKey)) {
+      return deliveryPriceCache.get(cacheKey) || 0;
+    }
+    
+    try {
+      // Try to get wilaya-specific price
+      if (formData.client_wilaya) {
+        const wilayaPrice = await getDeliveryPriceForWilaya(
+          selectedAgency.id,
+          formData.client_wilaya,
+          formData.delivery_type as 'bureau' | 'domicile'
+        );
+        
+        // Cache the result
+        setDeliveryPriceCache(prev => new Map(prev).set(cacheKey, wilayaPrice));
+        return wilayaPrice;
+      }
+    } catch (error) {
+      console.error('Error fetching wilaya-specific price:', error);
+    }
+    
+    // Fallback to agency default price
+    const defaultPrice = formData.delivery_type === 'bureau' 
+      ? selectedAgency.price_bureau 
+      : selectedAgency.price_domicile;
+    
+    setDeliveryPriceCache(prev => new Map(prev).set(cacheKey, defaultPrice));
+    return defaultPrice;
   };
   
-  const deliveryPrice = getDeliveryPrice();
+  // Calculate delivery price (will be computed in async manner)
+  const [deliveryPrice, setDeliveryPrice] = useState(0);
+  
+  useEffect(() => {
+    const updatePrice = async () => {
+      const price = await getDeliveryPrice();
+      setDeliveryPrice(price);
+    };
+    updatePrice();
+  }, [selectedAgency?.id, formData.client_wilaya, formData.delivery_type]);
+  
   const finalTotal = total + deliveryPrice;
   
   const itemCount = cartItems.length;
@@ -710,7 +895,7 @@ export default function WebsiteCart() {
                         {language === 'ar' ? '🚚 التسليم:' : '🚚 Livraison:'}
                       </span>
                       <span className="font-bold">
-                        {getDeliveryPrice().toFixed(2)} {language === 'ar' ? 'دج' : 'DZD'}
+                        {deliveryPrice.toFixed(2)} {language === 'ar' ? 'دج' : 'DZD'}
                       </span>
                     </div>
                   )}
@@ -743,14 +928,30 @@ export default function WebsiteCart() {
                     <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                       {language === 'ar' ? '👤 الاسم الكامل *' : '👤 Nom complet *'}
                     </label>
-                    <Input
-                      name="client_name"
-                      placeholder={language === 'ar' ? 'أدخل اسمك' : 'Entrez votre nom'}
-                      value={formData.client_name}
-                      onChange={handleFormChange}
-                      className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm"
-                      required
-                    />
+                    <div className="flex gap-2 flex-wrap">
+                      <div className="flex-1 min-w-[200px]">
+                        <Input
+                          name="client_name"
+                          placeholder={language === 'ar' ? 'أدخل اسمك' : 'Entrez votre nom'}
+                          value={formData.client_name}
+                          onChange={handleFormChange}
+                          className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm"
+                          required
+                        />
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        type="button"
+                        onClick={handleOpenTestimonials}
+                        disabled={!formData.client_name.trim()}
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-3 md:px-4 py-2 rounded-lg flex items-center gap-1 md:gap-2 whitespace-nowrap text-xs md:text-sm h-10"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        <span className="hidden sm:inline">{language === 'ar' ? 'آرائي' : 'Mes avis'}</span>
+                        <span className="sm:hidden">💬</span>
+                      </motion.button>
+                    </div>
                   </div>
 
                   {/* Phone */}
@@ -909,6 +1110,197 @@ export default function WebsiteCart() {
           </div>
         )}
       </div>
+
+      {/* ========== TESTIMONIALS MODAL ========== */}
+      <Dialog open={showTestimonialsModal} onOpenChange={setShowTestimonialsModal}>
+        <DialogContent className="max-w-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-2 border-blue-300 dark:border-blue-700 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-purple-600" />
+              {language === 'ar' ? '💬 آرائي' : '💬 Mes avis'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'ar' 
+                ? `آرائك من ${formData.client_name} - يمكنك تعديل أو حذف أي رأي`
+                : `Vos avis de ${formData.client_name} - Modifier ou supprimer`
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Testimonials List */}
+          <div className="space-y-4 max-h-[400px] overflow-y-auto py-4">
+            {loadingTestimonials ? (
+              <div className="text-center py-8">
+                <p className="text-slate-500">{language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}</p>
+              </div>
+            ) : userTestimonials.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-slate-500 mb-4">
+                  {language === 'ar' ? 'لا توجد آراء حالياً' : 'Aucun avis pour le moment'}
+                </p>
+                <Button
+                  onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  {language === 'ar' ? 'إضافة رأي' : 'Ajouter un avis'}
+                </Button>
+              </div>
+            ) : (
+              userTestimonials.map((testimonial) => (
+                <motion.div
+                  key={testimonial.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 space-y-3"
+                >
+                  {/* Header with Stars and Status */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className={i < (testimonial.rating || 5) ? 'text-lg' : 'text-lg opacity-30'}>
+                            ⭐
+                          </span>
+                        ))}
+                      </div>
+                      {testimonial.is_approved && (
+                        <Badge className="bg-green-500 text-white text-xs">✅ {language === 'ar' ? 'موافق عليه' : 'Approuvé'}</Badge>
+                      )}
+                      {!testimonial.is_approved && (
+                        <Badge className="bg-yellow-500 text-white text-xs">⏳ {language === 'ar' ? 'قيد المراجعة' : 'En attente'}</Badge>
+                      )}
+                    </div>
+                    <span className="text-xs text-slate-500">
+                      {new Date(testimonial.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                    </span>
+                  </div>
+
+                  {/* Opinion Text */}
+                  <p className="text-slate-700 dark:text-slate-300 text-sm">"{testimonial.opinion}"</p>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      onClick={() => handleEditTestimonial(testimonial)}
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold h-9 text-sm rounded-lg flex items-center justify-center gap-1"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      {language === 'ar' ? 'تعديل' : 'Modifier'}
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteTestimonial(testimonial.id)}
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold h-9 text-sm rounded-lg flex items-center justify-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      {language === 'ar' ? 'حذف' : 'Supprimer'}
+                    </Button>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              onClick={() => setShowTestimonialsModal(false)}
+              className="bg-slate-500 hover:bg-slate-600 text-white font-bold"
+            >
+              {language === 'ar' ? 'إغلاق' : 'Fermer'}
+            </Button>
+            <Button
+              onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              {language === 'ar' ? 'رأي جديد' : 'Nouvel avis'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========== TESTIMONIAL FORM DIALOG ========== */}
+      <Dialog open={showTestimonialForm} onOpenChange={setShowTestimonialForm}>
+        <DialogContent className="max-w-md bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-2 border-blue-300 dark:border-blue-700 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-purple-600" />
+              {editingTestimonial 
+                ? (language === 'ar' ? '✏️ تعديل الرأي' : '✏️ Modifier l\'avis')
+                : (language === 'ar' ? '➕ رأي جديد' : '➕ Nouvel avis')
+              }
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Rating Selector */}
+            <div>
+              <Label className="font-bold mb-2 block">
+                ⭐ {language === 'ar' ? 'التقييم' : 'Note'}
+              </Label>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setTestimonialRating(star)}
+                    className="text-3xl transition-transform hover:scale-125"
+                  >
+                    {star <= testimonialRating ? '⭐' : '☆'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Opinion Text Area */}
+            <div>
+              <Label className="font-bold mb-2 block">
+                💬 {language === 'ar' ? 'رأيك' : 'Votre avis'}
+              </Label>
+              <textarea
+                value={testimonialOpinion}
+                onChange={(e) => setTestimonialOpinion(e.target.value)}
+                placeholder={language === 'ar' ? 'شارك رأيك هنا...' : 'Partagez votre avis ici...'}
+                className="w-full border-2 border-blue-300 dark:border-blue-600 rounded-lg p-3 dark:bg-slate-700 dark:text-white text-sm min-h-[100px] focus:border-blue-500 focus:outline-none"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                {testimonialOpinion.length} {language === 'ar' ? 'حرف' : 'caractères'}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              onClick={() => {
+                setShowTestimonialForm(false);
+                setEditingTestimonial(null);
+                setTestimonialOpinion('');
+                setTestimonialRating(5);
+              }}
+              disabled={submittingTestimonial}
+              className="bg-slate-500 hover:bg-slate-600 text-white font-bold"
+            >
+              {language === 'ar' ? 'إلغاء' : 'Annuler'}
+            </Button>
+            <Button
+              onClick={handleSubmitTestimonial}
+              disabled={submittingTestimonial || !testimonialOpinion.trim()}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold disabled:opacity-50 flex items-center gap-2"
+            >
+              {submittingTestimonial ? (
+                <>
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }} className="w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                  {language === 'ar' ? 'جاري...' : 'Envoi...'}
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  {language === 'ar' ? 'إرسال' : 'Envoyer'}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

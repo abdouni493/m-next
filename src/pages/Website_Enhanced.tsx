@@ -32,6 +32,8 @@ import {
   Download,
   Radio,
   Truck,
+  DollarSign,
+  MapIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,6 +76,9 @@ import {
   updateDeliveryAgency,
   deleteDeliveryAgency,
   toggleDeliveryAgencyVisibility,
+  getWilayaPrices,
+  upsertWilayaPrice,
+  deleteWilayaPrice,
 } from '@/lib/supabaseClient';
 
 interface Product {
@@ -140,6 +145,7 @@ interface PackageItem {
   product_voltage?: string;
   product_amperage?: string;
   product_wattage?: string;
+  custom_price?: number;
 }
 
 interface DeliveryAgency {
@@ -157,11 +163,33 @@ interface DeliveryAgency {
   updated_at?: string;
 }
 
+// ========== ALGERIAN WILAYAS LIST ==========
+const ALGERIAN_WILAYAS = [
+  'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
+  'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tiaret', 'Tizi Ouzou', 'Algiers', 'Djelfa',
+  'Jijel', 'Sétif', 'Saïda', 'Skikda', 'Sidi Bel Abbès', 'Annaba', 'Guelma', 'Constantine',
+  'Médéa', 'Mostaghanem', 'M\'Sila', 'Mascara', 'Ouargla', 'Oran', 'El Bayadh', 'Illizi',
+  'Bordj Bou Arréridj', 'El Tarf', 'Tindouf', 'Tissemsilt', 'El Oued', 'Khenchela', 'Souk Ahras',
+  'Tipaza', 'Mila', 'Aïn Defla', 'Naâma', 'Aïn Témouchent', 'Ghardaïa', 'Relizane', 'Beni Saf',
+  'Aïn Ousseltia', 'Béni Khellad', 'Boumerdès', 'Djanet', 'Draa Ben Stita', 'Grouz', 'In Guezzam',
+  'In Salah', 'Ouled Djellal', 'Tamanghasset', 'Tamanrasset City', 'Touggourt', 'Tassili'
+];
+
+interface WilayaPrice {
+  id?: string;
+  agency_id: string;
+  wilaya_name: string;
+  price_domicile: number;
+  price_bureau: number;
+  is_active?: boolean;
+}
+
 interface WebsiteSettings {
   store_name: string;
   slogan?: string;
   description?: string;
   logo_url?: string;
+  landing_page_image_url?: string;
   facebook_url?: string;
   instagram_url?: string;
   tiktok_url?: string;
@@ -174,8 +202,8 @@ interface WebsiteSettings {
 
 const translations = {
   en: {
-    tabs: { offers: 'Offers', special: 'Special Offers', packages: 'Packages', contacts: 'Contacts', settings: 'Settings' },
-    offers: { create: 'Create New Offer', search: 'Search products...', price: 'Offer Price', description: 'Description', create_btn: 'Create Offer' },
+    tabs: { offers: '🛍️ Boutique', special: 'Special Offers', packages: 'Packages', contacts: 'Contacts', settings: 'Settings' },
+    offers: { create: 'Manage Products', search: 'Search products...', price: 'Offer Price', description: 'Description', create_btn: 'Create Offer' },
     special: { 
       create: 'Create New Special Offer',
       show_price: 'Show Price',
@@ -202,8 +230,8 @@ const translations = {
     common: { save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', close: 'Close', view: 'View Details', success: 'Success', error: 'Error' },
   },
   fr: {
-    tabs: { offers: 'Offres', special: 'Offres Spéciales', packages: 'Paquets', contacts: 'Contacts', settings: 'Paramètres' },
-    offers: { create: 'Créer une nouvelle offre', search: 'Recherchez des produits...', price: 'Prix de l\'offre', description: 'Description', create_btn: 'Créer l\'offre' },
+    tabs: { offers: '🛍️ Boutique', special: 'Offres Spéciales', packages: 'Paquets', contacts: 'Contacts', settings: 'Paramètres' },
+    offers: { create: 'Gérer les Produits', search: 'Recherchez des produits...', price: 'Prix de l\'offre', description: 'Description', create_btn: 'Créer l\'offre' },
     special: {
       create: 'Créer une nouvelle offre spéciale',
       show_price: 'Afficher le prix',
@@ -230,8 +258,8 @@ const translations = {
     common: { save: 'Enregistrer', cancel: 'Annuler', delete: 'Supprimer', edit: 'Modifier', close: 'Fermer', view: 'Voir les détails', success: 'Succès', error: 'Erreur' },
   },
   ar: {
-    tabs: { offers: 'العروض', special: 'عروض خاصة', packages: 'الحزم', contacts: 'جهات الاتصال', settings: 'الإعدادات' },
-    offers: { create: 'إنشاء عرض جديد', search: 'ابحث عن المنتجات...', price: 'سعر العرض', description: 'الوصف', create_btn: 'إنشاء عرض' },
+    tabs: { offers: '🛍️ المتجر', special: 'عروض خاصة', packages: 'الحزم', contacts: 'جهات الاتصال', settings: 'الإعدادات' },
+    offers: { create: 'إدارة المنتجات', search: 'ابحث عن المنتجات...', price: 'سعر العرض', description: 'الوصف', create_btn: 'إنشاء عرض' },
     special: {
       create: 'إنشاء عرض خاص جديد',
       show_price: 'عرض السعر',
@@ -323,7 +351,9 @@ export default function Website_Enhanced() {
   const [packageName, setPackageName] = useState<string>('');
   const [packagePrice, setPackagePrice] = useState<string>('');
   const [packageDescription, setPackageDescription] = useState<string>('');
-  const [selectedProductsPackage, setSelectedProductsPackage] = useState<Product[]>([]);
+  const [packageImage, setPackageImage] = useState<File | null>(null);
+  const [packageImagePreview, setPackageImagePreview] = useState<string>('');
+  const [selectedProductsPackage, setSelectedProductsPackage] = useState<{product: Product; quantity: number; customPrice: string}[]>([]);
   const [showCreatePackageDialog, setShowCreatePackageDialog] = useState(false);
   const [showEditPackageDialog, setShowEditPackageDialog] = useState(false);
   const [showDeletePackageDialog, setShowDeletePackageDialog] = useState(false);
@@ -345,6 +375,17 @@ export default function Website_Enhanced() {
   const [selectedDeliveryDelete, setSelectedDeliveryDelete] = useState<string | null>(null);
   const [selectedPackageDetails, setSelectedPackageDetails] = useState<Package | null>(null);
 
+  // Wilaya Pricing Management
+  const [wilayaPricingAgencyId, setWilayaPricingAgencyId] = useState<string | null>(null);
+  const [wilayaPricingAgencyName, setWilayaPricingAgencyName] = useState<string>('');
+  const [wilayaPrices, setWilayaPrices] = useState<WilayaPrice[]>([]);
+  const [showWilayaPricingDialog, setShowWilayaPricingDialog] = useState(false);
+  const [selectedWilayaForEdit, setSelectedWilayaForEdit] = useState<string>('');
+  const [wilayaPriceDomicile, setWilayaPriceDomicile] = useState<string>('');
+  const [wilayaPriceBureau, setWilayaPriceBureau] = useState<string>('');
+  const [editingWilayaPriceId, setEditingWilayaPriceId] = useState<string | null>(null);
+  const [wilayaPricingSearchFilter, setWilayaPricingSearchFilter] = useState<string>('');
+
   // Website Settings
   const [settings, setSettings] = useState<WebsiteSettings>({
     store_name: '',
@@ -353,6 +394,14 @@ export default function Website_Enhanced() {
   });
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [websiteSettings, setWebsiteSettings] = useState<any>({
+    store_name: '',
+    slogan: '',
+    description: '',
+    logo_url: '',
+    landing_page_image_url: '',
+  });
+  const [landingPageImageFile, setLandingPageImageFile] = useState<File | null>(null);
 
   // Dialogs
   const [showOfferDetails, setShowOfferDetails] = useState(false);
@@ -382,6 +431,7 @@ export default function Website_Enhanced() {
       setPackageItems(packageItemsData);
       setDeliveryAgencies(deliveryData);
       setSettings(settingsData);
+      setWebsiteSettings(settingsData);
 
       if (settingsData?.logo_url) {
         setLogoPreview(settingsData.logo_url);
@@ -401,15 +451,172 @@ export default function Website_Enhanced() {
     fetchAllData();
   }, []);
 
+  // ========== WEBSITE SETTINGS HANDLERS ==========
+  const handleLogoUpload = async (file: File) => {
+    try {
+      if (!file) return;
+      
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to Supabase Storage
+      const fileName = `logo_${Date.now()}_${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('chargers')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('chargers')
+        .getPublicUrl(fileName);
+
+      setWebsiteSettings({
+        ...websiteSettings,
+        logo_url: publicUrlData.publicUrl,
+      });
+
+      toast({
+        title: t.common.success,
+        description: 'Logo uploaded successfully!',
+      });
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: t.common.error,
+        description: 'Failed to upload logo',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleLandingPageImageUpload = async (file: File) => {
+    try {
+      if (!file) return;
+      
+      setLandingPageImageFile(file);
+
+      // Upload to Supabase Storage
+      const fileName = `landing_bg_${Date.now()}_${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('chargers')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('chargers')
+        .getPublicUrl(fileName);
+
+      setWebsiteSettings({
+        ...websiteSettings,
+        landing_page_image_url: publicUrlData.publicUrl,
+      });
+
+      toast({
+        title: t.common.success,
+        description: 'Landing page background uploaded successfully!',
+      });
+    } catch (error) {
+      console.error('Error uploading landing page background:', error);
+      toast({
+        title: t.common.error,
+        description: 'Failed to upload landing page background',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSaveWebsiteSettings = async () => {
+    try {
+      if (!websiteSettings.store_name || !websiteSettings.description) {
+        toast({
+          title: t.common.error,
+          description: 'Please fill in all required fields',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const settingsToSave = {
+        store_name: websiteSettings.store_name,
+        slogan: websiteSettings.slogan || '',
+        description: websiteSettings.description,
+        logo_url: websiteSettings.logo_url || '',
+        landing_page_image_url: websiteSettings.landing_page_image_url || '',
+      };
+
+      // Update in database
+      const result = await updateWebsiteSettings(settingsToSave);
+      
+      if (result) {
+        setSettings(result);
+        setWebsiteSettings(result);
+        toast({
+          title: t.common.success,
+          description: 'Website settings saved successfully!',
+        });
+      }
+    } catch (error) {
+      console.error('Error saving website settings:', error);
+      toast({
+        title: t.common.error,
+        description: 'Failed to save settings',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Load website settings on mount
+  useEffect(() => {
+    if (settings.store_name) {
+      setWebsiteSettings(settings);
+    }
+  }, [settings]);
+
   // ========== PACKAGE FUNCTIONS ==========
   const handleSelectProductForPackage = (product: Product) => {
-    if (!selectedProductsPackage.find((p) => p.id === product.id)) {
-      setSelectedProductsPackage([...selectedProductsPackage, product]);
+    if (!selectedProductsPackage.find((p) => p.product.id === product.id)) {
+      setSelectedProductsPackage([...selectedProductsPackage, { product, quantity: 1, customPrice: product.selling_price.toString() }]);
     }
   };
 
   const handleRemoveProductFromPackage = (productId: string) => {
-    setSelectedProductsPackage(selectedProductsPackage.filter((p) => p.id !== productId));
+    setSelectedProductsPackage(selectedProductsPackage.filter((p) => p.product.id !== productId));
+  };
+
+  const handleUpdateProductQuantity = (productId: string, quantity: number) => {
+    setSelectedProductsPackage(
+      selectedProductsPackage.map((p) =>
+        p.product.id === productId ? { ...p, quantity: Math.max(1, quantity) } : p
+      )
+    );
+  };
+
+  const handleUpdateProductPrice = (productId: string, price: string) => {
+    setSelectedProductsPackage(
+      selectedProductsPackage.map((p) =>
+        p.product.id === productId ? { ...p, customPrice: price } : p
+      )
+    );
+  };
+
+  const handlePackageImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPackageImage(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPackageImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // ========== OFFER HANDLERS ==========
@@ -512,19 +719,41 @@ export default function Website_Enhanced() {
     }
 
     try {
+      let imageUrl = '';
+
+      // Upload package image if provided
+      if (packageImage) {
+        const timestamp = new Date().getTime();
+        const filePath = `packages/${timestamp}-${packageImage.name}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('chargers')
+          .upload(filePath, packageImage);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('chargers')
+          .getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+
       const newPackageData = {
         name: packageName,
         description: packageDescription,
         package_price: parseFloat(packagePrice),
+        image_url: imageUrl,
         is_visible: true,
         is_active: true,
       };
 
       const createdPackage = await createPackage(newPackageData);
 
-      // Add products to package
-      for (const product of selectedProductsPackage) {
-        await addProductToPackage(createdPackage.id, product);
+      // Add products to package with quantity and custom price
+      for (const item of selectedProductsPackage) {
+        const customPrice = item.customPrice ? parseFloat(item.customPrice) : item.product.selling_price;
+        await addProductToPackage(createdPackage.id, item.product, item.quantity, customPrice);
       }
 
       toast({
@@ -537,6 +766,8 @@ export default function Website_Enhanced() {
       setPackagePrice('');
       setPackageDescription('');
       setSelectedProductsPackage([]);
+      setPackageImage(null);
+      setPackageImagePreview('');
       setShowCreatePackageDialog(false);
       fetchAllData();
     } catch (error) {
@@ -577,10 +808,18 @@ export default function Website_Enhanced() {
     // Fetch package items for editing
     const items = packageItems.filter(item => item.package_id === pkg.id);
     const productsInPackage = items.map(item => ({
-      id: item.product_id,
-      name: item.product_name,
-      selling_price: 0,
-      mark: { name: item.product_mark },
+      product: {
+        id: item.product_id,
+        name: item.product_name || 'Unknown Product',
+        selling_price: 0,
+        mark: item.product_mark ? { name: item.product_mark } : null,
+        voltage: item.product_voltage,
+        amperage: item.product_amperage,
+        wattage: item.product_wattage,
+        primary_image: item.product_image,
+      },
+      quantity: item.quantity || 1,
+      customPrice: (item.custom_price || 0).toString(),
     } as any));
     setSelectedProductsPackage(productsInPackage);
     setShowEditPackageDialog(true);
@@ -611,8 +850,9 @@ export default function Website_Enhanced() {
       }
 
       // Add new products
-      for (const product of selectedProductsPackage) {
-        await addProductToPackage(editingPackage.id, product);
+      for (const item of selectedProductsPackage) {
+        const customPrice = item.customPrice ? parseFloat(item.customPrice) : item.product.selling_price;
+        await addProductToPackage(editingPackage.id, item.product, item.quantity, customPrice);
       }
 
       toast({
@@ -785,6 +1025,110 @@ export default function Website_Enhanced() {
     }
   };
 
+  // ========== WILAYA PRICING MANAGEMENT FUNCTIONS ==========
+  const handleOpenWilayaPricingDialog = async (agency: DeliveryAgency) => {
+    try {
+      setWilayaPricingAgencyId(agency.id);
+      setWilayaPricingAgencyName(agency.name);
+      
+      // Fetch existing wilaya prices
+      const prices = await getWilayaPrices(agency.id);
+      setWilayaPrices(prices);
+      setShowWilayaPricingDialog(true);
+      
+      // Reset form
+      setSelectedWilayaForEdit('');
+      setWilayaPriceDomicile('');
+      setWilayaPriceBureau('');
+      setEditingWilayaPriceId(null);
+      setWilayaPricingSearchFilter('');
+    } catch (error) {
+      console.error('Error opening wilaya pricing dialog:', error);
+      toast({
+        title: t.common.error,
+        description: 'Failed to load wilaya prices',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSaveWilayaPrice = async () => {
+    if (!wilayaPricingAgencyId || !selectedWilayaForEdit || !wilayaPriceDomicile || !wilayaPriceBureau) {
+      toast({
+        title: t.common.error,
+        description: 'Please fill all required fields',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await upsertWilayaPrice(
+        wilayaPricingAgencyId,
+        selectedWilayaForEdit,
+        parseFloat(wilayaPriceDomicile),
+        parseFloat(wilayaPriceBureau)
+      );
+
+      toast({
+        title: t.common.success,
+        description: `Prices for ${selectedWilayaForEdit} saved successfully`,
+      });
+
+      // Refresh list
+      const prices = await getWilayaPrices(wilayaPricingAgencyId);
+      setWilayaPrices(prices);
+
+      // Reset form
+      setSelectedWilayaForEdit('');
+      setWilayaPriceDomicile('');
+      setWilayaPriceBureau('');
+      setEditingWilayaPriceId(null);
+    } catch (error) {
+      console.error('Error saving wilaya price:', error);
+      toast({
+        title: t.common.error,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteWilayaPrice = async (wilayaName: string) => {
+    if (!wilayaPricingAgencyId) return;
+
+    try {
+      await deleteWilayaPrice(wilayaPricingAgencyId, wilayaName);
+
+      toast({
+        title: t.common.success,
+        description: `Pricing for ${wilayaName} deleted`,
+      });
+
+      // Refresh list
+      const prices = await getWilayaPrices(wilayaPricingAgencyId);
+      setWilayaPrices(prices);
+
+      // Reset form
+      setSelectedWilayaForEdit('');
+      setWilayaPriceDomicile('');
+      setWilayaPriceBureau('');
+      setEditingWilayaPriceId(null);
+    } catch (error) {
+      console.error('Error deleting wilaya price:', error);
+      toast({
+        title: t.common.error,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleEditWilayaPrice = (price: WilayaPrice) => {
+    setSelectedWilayaForEdit(price.wilaya_name);
+    setWilayaPriceDomicile(price.price_domicile.toString());
+    setWilayaPriceBureau(price.price_bureau.toString());
+    setEditingWilayaPriceId(price.id || null);
+  };
+
   // ========== SPECIAL OFFER PRICE VISIBILITY FUNCTION ==========
   const handleCreateSpecialOfferWithPriceToggle = async () => {
     if (!selectedProductSpecial && !editingSpecialOffer) return;
@@ -943,7 +1287,7 @@ export default function Website_Enhanced() {
 
         {/* Content */}
         <AnimatePresence mode="wait">
-          {/* OFFERS TAB */}
+          {/* BOUTIQUE TAB - PRODUCTS MANAGEMENT */}
           {activeTab === 'offers' && (
             <motion.div
               key="offers"
@@ -952,256 +1296,119 @@ export default function Website_Enhanced() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-6"
             >
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                onClick={() => {
-                  setShowCreateOfferDialog(true);
-                  setEditingOffer(null);
-                  setSelectedProductOffer(null);
-                  setOfferPrice('');
-                  setOfferDescription('');
-                  setSearchQuery('');
-                }}
-                className="w-full bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-500 hover:from-emerald-600 hover:via-teal-700 hover:to-cyan-600 text-white px-8 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-xl"
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="w-full bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 hover:from-blue-600 hover:via-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-xl"
               >
-                <Plus className="h-6 w-6" />
-                <Sparkles className="h-6 w-6" />
-                ✨ {language === 'ar' ? 'عرض جديد' : language === 'fr' ? 'Nouvelle Offre' : 'New Offer'}
-              </motion.button>
+                <ShoppingBag className="h-6 w-6" />
+                🛍️ {language === 'ar' ? 'جميع منتجات المتجر' : language === 'fr' ? 'Tous les Produits de la Boutique' : 'All Store Products'}
+              </motion.div>
 
-              {offers.length === 0 ? (
+              {products.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border-2 border-dashed border-emerald-300 dark:border-emerald-700"
+                  className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border-2 border-dashed border-blue-300 dark:border-blue-700"
                 >
-                  <ShoppingBag className="h-20 w-20 mx-auto mb-4 text-emerald-400" />
+                  <PackageIcon className="h-20 w-20 mx-auto mb-4 text-blue-400" />
                   <p className="text-2xl text-slate-600 dark:text-slate-400 font-bold">
-                    {language === 'ar' ? '🛍️ لا توجد عروض' : language === 'fr' ? '🛍️ Aucune offre' : '🛍️ No offers yet'}
+                    {language === 'ar' ? 'لا توجد منتجات' : language === 'fr' ? 'Aucun produit' : 'No products'}
                   </p>
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {offers.map((offer) => (
+                  {products.map((product) => (
                     <motion.div
-                      key={offer.id}
+                      key={product.id}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       whileHover={{ y: -10 }}
-                      className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-emerald-200 dark:border-emerald-700 overflow-hidden shadow-xl hover:shadow-2xl transition-all"
+                      className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-blue-200 dark:border-blue-700 overflow-hidden shadow-xl hover:shadow-2xl transition-all"
                     >
-                      {/* Image */}
-                      <div className="relative h-40 bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900/30 dark:to-cyan-900/30 overflow-hidden flex items-center justify-center">
-                        {offer.product_image ? (
+                      <div className="relative h-40 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 overflow-hidden flex items-center justify-center">
+                        {product.primary_image ? (
                           <img
-                            src={offer.product_image}
-                            alt={offer.product_name}
+                            src={product.primary_image}
+                            alt={product.name}
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <ShoppingBag className="h-16 w-16 text-slate-400" />
-                        )}
-                        {offer.discount_percentage > 0 && (
-                          <Badge className="absolute top-3 right-3 bg-red-500 text-white text-lg px-3 py-1">
-                            🔥 -{offer.discount_percentage}%
-                          </Badge>
+                          <PackageIcon className="h-16 w-16 text-slate-400" />
                         )}
                       </div>
 
-                      {/* Content */}
                       <div className="p-5 space-y-4">
                         <div>
-                          <h3 className="font-bold text-lg text-slate-900 dark:text-white">{offer.product_name}</h3>
-                          {offer.product_mark && (
-                            <p className="text-sm text-emerald-600 dark:text-emerald-400">🏷️ {offer.product_mark}</p>
+                          <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-2">{product.name}</h3>
+                          {product.mark && (
+                            <p className="text-sm text-blue-600 dark:text-blue-400">🏷️ {product.mark.name}</p>
                           )}
                         </div>
+                        
+                        {(product.voltage || product.wattage || product.amperage) && (
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            {product.voltage && (
+                              <div className="bg-blue-50 dark:bg-blue-900/30 rounded p-2 text-center">
+                                <span className="font-bold text-blue-600 dark:text-blue-400">⚡ {product.voltage}V</span>
+                              </div>
+                            )}
+                            {product.wattage && (
+                              <div className="bg-purple-50 dark:bg-purple-900/30 rounded p-2 text-center">
+                                <span className="font-bold text-purple-600 dark:text-purple-400">🔌 {product.wattage}W</span>
+                              </div>
+                            )}
+                            {product.amperage && (
+                              <div className="bg-pink-50 dark:bg-pink-900/30 rounded p-2 text-center">
+                                <span className="font-bold text-pink-600 dark:text-pink-400">⚙️ {product.amperage}A</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 p-3 rounded-xl">
-                          <span className="text-2xl font-bold text-green-600">💰 {offer.offer_price?.toFixed(2) || 0} DZD</span>
+                          <span className="text-2xl font-bold text-green-600">💰 {product.selling_price?.toFixed(2) || 0} DZD</span>
                         </div>
+
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
+                          <motion.button
+                            whileHover={{ scale: 1.08 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={() => {
-                              setEditingOffer(offer);
-                              setOfferPrice(offer.offer_price?.toString() || '');
-                              setShowCreateOfferDialog(true);
+                              const boutiquUrl = window.location.origin + '/website-shop/offers#product-' + product.id;
+                              navigator.clipboard.writeText(boutiquUrl);
+                              alert(language === 'ar' ? '✅ تم نسخ الرابط' : language === 'fr' ? '✅ Lien copié' : '✅ Link copied');
                             }}
-                            className="flex-1 bg-blue-500 hover:bg-blue-600"
+                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
                           >
-                            ✏️
-                          </Button>
-                          <Button
-                            size="sm"
+                            <Copy className="h-4 w-4" />
+                            {language === 'ar' ? 'نسخ' : 'Copy'}
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.08 }}
+                            whileTap={{ scale: 0.92 }}
+                            onClick={() => window.open('/website-shop/offers', '_blank')}
+                            className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
+                          >
+                            <Eye className="h-4 w-4" />
+                            {language === 'ar' ? 'عرض' : 'View'}
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.08 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={() => {
-                              setSelectedOfferDelete(offer.id);
-                              setShowDeleteOfferDialog(true);
+                              alert(language === 'ar' ? 'تحديث المنتج يتم من صفحة المخزون' : language === 'fr' ? 'Mise a jour du produit a partir de la page d\'inventaire' : 'Update product from Inventory page');
                             }}
-                            className="flex-1 bg-red-500 hover:bg-red-600"
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
                           >
-                            🗑️
-                          </Button>
+                            <Edit2 className="h-4 w-4" />
+                            {language === 'ar' ? 'تحديث' : 'Edit'}
+                          </motion.button>
                         </div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
               )}
-
-              {/* Create/Edit Offer Dialog */}
-              <Dialog open={showCreateOfferDialog} onOpenChange={setShowCreateOfferDialog}>
-                <DialogContent className="max-w-2xl bg-gradient-to-br from-white to-emerald-50 dark:from-slate-800 dark:to-slate-900 border-2 border-emerald-300 dark:border-emerald-600 rounded-3xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-3xl flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-black">
-                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                        ✨
-                      </motion.div>
-                      {editingOffer ? `✏️ ${language === 'ar' ? 'تعديل العرض' : language === 'fr' ? 'Modifier l\'Offre' : 'Edit Offer'}` : `🎉 ${language === 'ar' ? 'عرض جديد' : language === 'fr' ? 'Créer une nouvelle offre' : 'Create New Offer'}`}
-                    </DialogTitle>
-                    <DialogDescription className="hidden">
-                      {language === 'ar' ? 'إنشاء أو تعديل عرض على منتج' : language === 'fr' ? 'Créer ou modifier une offre' : 'Create or edit an offer'}
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <div className="space-y-4 sm:space-y-6 py-4 sm:py-6 max-h-[70vh] overflow-y-auto">
-                    {/* Step 1: Product Selection */}
-                    <div className="bg-emerald-100 dark:bg-emerald-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-emerald-300 dark:border-emerald-700">
-                      <h3 className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300 mb-3 sm:mb-4">🔍 {language === 'ar' ? 'اختر المنتج' : language === 'fr' ? 'Sélectionner le Produit' : 'Select Product'}</h3>
-                      
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            📝 {language === 'ar' ? 'ابحث عن المنتج' : language === 'fr' ? 'Rechercher' : 'Search Product'}
-                          </Label>
-                          <Input
-                            type="text"
-                            placeholder={language === 'ar' ? 'ابحث عن المنتج...' : language === 'fr' ? 'Recherchez des produits...' : 'Search products...'}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-emerald-300 dark:border-emerald-600 rounded-lg sm:rounded-xl"
-                          />
-                        </div>
-
-                        {/* Product Search Results */}
-                        {searchQuery && (
-                          <div className="max-h-48 overflow-y-auto border-2 border-emerald-300 dark:border-emerald-600 rounded-xl p-2 sm:p-3 space-y-2 bg-white dark:bg-slate-700">
-                            {products
-                              .filter((p) => !editingOffer || p.id !== editingOffer.product_id)
-                              .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.mark?.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                              .map((product) => (
-                                <motion.button
-                                  key={product.id}
-                                  onClick={() => {
-                                    setSelectedProductOffer(product);
-                                    setOfferPrice(product.selling_price.toString());
-                                    setSearchQuery('');
-                                  }}
-                                  whileHover={{ x: 5 }}
-                                  className="w-full text-left p-2 sm:p-3 rounded-lg bg-gradient-to-r from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 hover:from-emerald-200 hover:to-cyan-200 dark:hover:from-emerald-800 dark:hover:to-cyan-800 transition-colors border-l-4 border-emerald-500"
-                                >
-                                  <div className="font-bold text-xs sm:text-sm text-emerald-900 dark:text-emerald-100">📦 {product.name}</div>
-                                  <div className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-300">{product.mark?.name} • 💰 {product.selling_price} DZD</div>
-                                </motion.button>
-                              ))}
-                            {products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-                              <div className="p-3 text-center text-slate-500 dark:text-slate-400 text-sm">
-                                {language === 'ar' ? '❌ لم يتم العثور على منتجات' : language === 'fr' ? '❌ Aucun produit trouvé' : '❌ No products found'}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {selectedProductOffer && (
-                          <div className="p-3 sm:p-4 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-xl border-2 border-emerald-300 dark:border-emerald-600 animate-pulse">
-                            <p className="font-bold text-xs sm:text-sm text-emerald-900 dark:text-emerald-100">
-                              ✅ {selectedProductOffer.name} <span className="block text-emerald-700 dark:text-emerald-300">{selectedProductOffer.mark?.name}</span>
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Step 2: Price & Description */}
-                    {selectedProductOffer && (
-                      <div className="bg-blue-100 dark:bg-blue-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-blue-300 dark:border-blue-700">
-                        <h3 className="text-lg sm:text-xl font-black text-blue-700 dark:text-blue-300 mb-3 sm:mb-4">💰 {language === 'ar' ? 'السعر والوصف' : language === 'fr' ? 'Prix et Description' : 'Price & Description'}</h3>
-                        
-                        <div className="space-y-3 sm:space-y-4">
-                          {/* Original Price */}
-                          <div className="p-3 bg-slate-100 dark:bg-slate-700 rounded-lg border-2 border-slate-300 dark:border-slate-600">
-                            <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold mb-1">📊 {language === 'ar' ? 'السعر الأصلي' : language === 'fr' ? 'Prix Original' : 'Original Price'}</div>
-                            <div className="text-lg sm:text-2xl font-black text-slate-800 dark:text-white line-through opacity-75">{selectedProductOffer.selling_price.toFixed(2)} DZD</div>
-                          </div>
-
-                          {/* Offer Price */}
-                          <div className="space-y-2">
-                            <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                              🔥 {language === 'ar' ? 'سعر العرض' : language === 'fr' ? 'Prix de l\'Offre' : 'Offer Price'}
-                            </Label>
-                            <Input
-                              type="number"
-                              value={offerPrice}
-                              onChange={(e) => setOfferPrice(e.target.value)}
-                              placeholder="0.00"
-                              className="h-10 sm:h-12 text-sm sm:text-base border-2 border-blue-300 dark:border-blue-600 rounded-lg sm:rounded-xl"
-                            />
-                            {offerPrice && (
-                              <div className="text-xs sm:text-sm text-green-600 dark:text-green-400 font-bold">
-                                💵 {language === 'ar' ? 'توفير:' : language === 'fr' ? 'Économie:' : 'Save:'} {(selectedProductOffer.selling_price - parseFloat(offerPrice)).toFixed(2)} DZD ({Math.round(((selectedProductOffer.selling_price - parseFloat(offerPrice)) / selectedProductOffer.selling_price) * 100)}%)
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Offer Description */}
-                          <div className="space-y-2">
-                            <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                              📝 {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
-                            </Label>
-                            <Input
-                              value={offerDescription}
-                              onChange={(e) => setOfferDescription(e.target.value)}
-                              placeholder={language === 'ar' ? 'وصف العرض' : language === 'fr' ? 'Description de l\'offre' : 'Offer description'}
-                              className="h-10 sm:h-12 text-sm sm:text-base border-2 border-blue-300 dark:border-blue-600 rounded-lg sm:rounded-xl"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-slate-200 dark:border-slate-700">
-                    <Button
-                      onClick={() => {
-                        setShowCreateOfferDialog(false);
-                        setSelectedProductOffer(null);
-                        setOfferPrice('');
-                        setOfferDescription('');
-                        setSearchQuery('');
-                        setEditingOffer(null);
-                      }}
-                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all"
-                    >
-                      {t.common.cancel}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (selectedProductOffer && offerPrice) {
-                          if (editingOffer) {
-                            handleUpdateOffer(editingOffer.id);
-                          } else {
-                            handleCreateOffer();
-                          }
-                        }
-                      }}
-                      className="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
-                    >
-                      <Sparkles className="h-5 w-5" />
-                      <span className="hidden sm:inline">{editingOffer ? '✨ Update Offer' : '✨ Create Offer'}</span>
-                      <span className="sm:hidden">{editingOffer ? '✏️' : '✨'}</span>
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
             </motion.div>
           )}
 
@@ -1336,58 +1543,58 @@ export default function Website_Enhanced() {
                         </div>
 
                         {/* Actions */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                           <motion.button
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.08, y: -3 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={() => {
                               setSelectedPackageDetails(pkg);
                               setShowPackageDetails(true);
                             }}
-                            className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm"
+                            className="bg-gradient-to-br from-blue-500 via-blue-500 to-blue-600 hover:from-blue-600 hover:via-blue-600 hover:to-blue-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-blue-400"
                             title="View details"
                           >
-                            <Eye className="h-4 sm:h-5 w-4 sm:w-5" />
+                            👁️
                             <span className="hidden sm:inline">{language === 'ar' ? 'عرض' : language === 'fr' ? 'Voir' : 'View'}</span>
                           </motion.button>
 
                           <motion.button
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.08, y: -3 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={() => handleEditPackage(pkg)}
-                            className="bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm"
+                            className="bg-gradient-to-br from-amber-500 via-amber-500 to-amber-600 hover:from-amber-600 hover:via-amber-600 hover:to-amber-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-amber-400"
                             title="Edit package"
                           >
-                            <Edit2 className="h-4 sm:h-5 w-4 sm:w-5" />
+                            ✏️
                             <span className="hidden sm:inline">{language === 'ar' ? 'تعديل' : language === 'fr' ? 'Éditer' : 'Edit'}</span>
                           </motion.button>
 
                           <motion.button
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.08, y: -3 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={() => handleTogglePackageVisibility(pkg)}
-                            className={`font-bold py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm ${
+                            className={`font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 ${
                               pkg.is_visible
-                                ? 'bg-gradient-to-br from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
-                                : 'bg-gradient-to-br from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white'
+                                ? 'bg-gradient-to-br from-emerald-500 via-emerald-500 to-teal-600 hover:from-emerald-600 hover:via-emerald-600 hover:to-teal-700 text-white border-emerald-400'
+                                : 'bg-gradient-to-br from-slate-400 via-slate-400 to-slate-500 hover:from-slate-500 hover:via-slate-500 hover:to-slate-600 text-white border-slate-300'
                             }`}
                             title={pkg.is_visible ? 'Hide package' : 'Show package'}
                           >
-                            {pkg.is_visible ? <Eye className="h-4 sm:h-5 w-4 sm:w-5" /> : <EyeOff className="h-4 sm:h-5 w-4 sm:w-5" />}
-                            <span className="hidden sm:inline">{pkg.is_visible ? '👁️' : '🚫'}</span>
+                            {pkg.is_visible ? '👁️‍🗨️' : '🚫'}
+                            <span className="hidden sm:inline">{pkg.is_visible ? (language === 'ar' ? 'إظهار' : language === 'fr' ? 'Afficher' : 'Show') : (language === 'ar' ? 'إخفاء' : language === 'fr' ? 'Masquer' : 'Hide')}</span>
                           </motion.button>
 
                           <motion.button
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.08, y: -3 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={() => {
                               setSelectedPackageDelete(pkg.id);
                               setShowDeletePackageDialog(true);
                             }}
-                            className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm"
+                            className="bg-gradient-to-br from-red-500 via-red-500 to-red-600 hover:from-red-600 hover:via-red-600 hover:to-red-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-red-400"
                             title="Delete package"
                           >
-                            <Trash2 className="h-4 sm:h-5 w-4 sm:w-5" />
+                            🗑️
                             <span className="hidden sm:inline">{language === 'ar' ? 'حذف' : language === 'fr' ? 'Supprimer' : 'Delete'}</span>
                           </motion.button>
                         </div>
@@ -1399,7 +1606,7 @@ export default function Website_Enhanced() {
 
               {/* Create Package Dialog */}
               <Dialog open={showCreatePackageDialog} onOpenChange={setShowCreatePackageDialog}>
-                <DialogContent className="max-w-full sm:max-w-2xl lg:max-w-3xl bg-gradient-to-br from-white to-emerald-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-emerald-300 dark:border-emerald-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6">
+                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] bg-gradient-to-br from-white to-emerald-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-emerald-300 dark:border-emerald-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col">
                   <DialogHeader>
                     <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-emerald-600 dark:text-emerald-400 font-black">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
@@ -1412,9 +1619,9 @@ export default function Website_Enhanced() {
                     </DialogDescription>
                   </DialogHeader>
 
-                  <div className="space-y-4 sm:space-y-6 py-4 sm:py-6 max-h-[70vh] overflow-y-auto">
+                  <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
-                    <div className="bg-emerald-100 dark:bg-emerald-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-emerald-300 dark:border-emerald-700">
+                    <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-emerald-300 dark:border-emerald-700">
                       <h3 className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300 mb-3 sm:mb-4">📋 {language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
@@ -1456,6 +1663,30 @@ export default function Website_Enhanced() {
                             placeholder={language === 'ar' ? 'وصف الحزمة' : language === 'fr' ? 'Description du pack' : 'Package description'}
                             className="w-full p-3 sm:p-4 border-2 border-emerald-300 dark:border-emerald-600 rounded-lg sm:rounded-xl dark:bg-slate-700 dark:text-white text-sm sm:text-base h-20 sm:h-24 resize-none font-semibold"
                           />
+                        </div>
+
+                        {/* Package Image Upload */}
+                        <div className="space-y-2">
+                          <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
+                            🖼️ {language === 'ar' ? 'صورة الحزمة' : language === 'fr' ? 'Image du Pack' : 'Package Image'}
+                          </Label>
+                          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handlePackageImageChange}
+                              className="flex-1 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 dark:file:bg-emerald-900 dark:file:text-emerald-300 cursor-pointer"
+                            />
+                            {packageImagePreview && (
+                              <motion.img
+                                src={packageImagePreview}
+                                alt="Package preview"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="h-12 sm:h-16 w-12 sm:w-16 rounded-lg object-cover border-2 border-emerald-300 dark:border-emerald-700"
+                              />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1502,7 +1733,7 @@ export default function Website_Enhanced() {
                                       ✅ {product.name}
                                     </div>
                                     <div className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-300">
-                                      {product.mark?.name} • 💰 {product.selling_price} DZD
+                                      {product.mark?.name || 'N/A'} • 💰 {product.selling_price} DZD
                                     </div>
                                   </motion.button>
                                 ))
@@ -1518,31 +1749,61 @@ export default function Website_Enhanced() {
                         <h3 className="text-lg sm:text-xl font-black text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
                           ✅ {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {selectedProductsPackage.map((product, idx) => (
+                        <div className="space-y-3 max-h-64 overflow-y-auto">
+                          {selectedProductsPackage.map((item, idx) => (
                             <motion.div
-                              key={product.id}
+                              key={item.product.id}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.1 }}
-                              className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 rounded-lg sm:rounded-xl border-2 border-purple-300 dark:border-purple-600 shadow-md"
+                              className="p-3 sm:p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 rounded-lg sm:rounded-xl border-2 border-purple-300 dark:border-purple-600 shadow-md"
                             >
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
-                                  📦 {product.name}
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
+                                    📦 {item.product.name}
+                                  </div>
+                                  <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
+                                    {item.product.mark?.name || 'N/A'} • 💰 {item.product.selling_price} DZD
+                                  </div>
                                 </div>
-                                <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
-                                  {product.mark?.name} • 💰 {product.selling_price} DZD
+                                <motion.button
+                                  whileHover={{ scale: 1.15, rotate: 10 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => handleRemoveProductFromPackage(item.product.id)}
+                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
+                                >
+                                  ❌
+                                </motion.button>
+                              </div>
+                              
+                              {/* Quantity and Price Inputs */}
+                              <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-purple-300 dark:border-purple-600">
+                                <div>
+                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                    {language === 'ar' ? 'الكمية' : language === 'fr' ? 'Quantité' : 'Quantity'}
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={item.quantity}
+                                    onChange={(e) => handleUpdateProductQuantity(item.product.id, parseInt(e.target.value))}
+                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                    {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'} (DZD)
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={item.customPrice}
+                                    onChange={(e) => handleUpdateProductPrice(item.product.id, e.target.value)}
+                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                  />
                                 </div>
                               </div>
-                              <motion.button
-                                whileHover={{ scale: 1.15, rotate: 10 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => handleRemoveProductFromPackage(product.id)}
-                                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
-                              >
-                                ❌
-                              </motion.button>
                             </motion.div>
                           ))}
                         </div>
@@ -1571,7 +1832,7 @@ export default function Website_Enhanced() {
 
               {/* Edit Package Dialog */}
               <Dialog open={showEditPackageDialog} onOpenChange={setShowEditPackageDialog}>
-                <DialogContent className="max-w-full sm:max-w-2xl lg:max-w-3xl bg-gradient-to-br from-white to-amber-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-amber-300 dark:border-amber-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6">
+                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] bg-gradient-to-br from-white to-amber-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-amber-300 dark:border-amber-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col">
                   <DialogHeader>
                     <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-amber-600 dark:text-amber-400 font-black">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
@@ -1584,9 +1845,9 @@ export default function Website_Enhanced() {
                     </DialogDescription>
                   </DialogHeader>
 
-                  <div className="space-y-4 sm:space-y-6 py-4 sm:py-6 max-h-[70vh] overflow-y-auto">
+                  <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
-                    <div className="bg-amber-100 dark:bg-amber-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-amber-300 dark:border-amber-700">
+                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-amber-300 dark:border-amber-700">
                       <h3 className="text-lg sm:text-xl font-black text-amber-700 dark:text-amber-300 mb-3 sm:mb-4">📋 {language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
@@ -1635,32 +1896,53 @@ export default function Website_Enhanced() {
                     {/* Step 2: Product Selection */}
                     <div className="bg-cyan-100 dark:bg-cyan-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-cyan-300 dark:border-cyan-700">
                       <h3 className="text-lg sm:text-xl font-black text-cyan-700 dark:text-cyan-300 mb-3 sm:mb-4">🔍 {language === 'ar' ? 'اختيار المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
+                      
+                      {/* Search Field */}
+                      <div className="mb-4">
+                        <Input
+                          type="text"
+                          placeholder={language === 'ar' ? '🔍 ابحث عن منتج...' : language === 'fr' ? '🔍 Rechercher un produit' : '🔍 Search product name...'}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="h-10 sm:h-12 text-sm sm:text-base border-2 border-cyan-300 dark:border-cyan-600 rounded-lg sm:rounded-xl w-full"
+                        />
+                      </div>
+
+                      {/* Product Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {products.map((product, idx) => (
+                        {products
+                          .filter(
+                            (p) =>
+                              p.name.toLowerCase().includes(searchQuery.toLowerCase())
+                          )
+                          .map((product, idx) => (
                           <motion.button
                             key={product.id}
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: idx * 0.05 }}
                             onClick={() => {
-                              const isSelected = selectedProductsPackage.some((p) => p.id === product.id);
+                              const isSelected = selectedProductsPackage.some((p) => p.product.id === product.id);
                               if (isSelected) {
-                                setSelectedProductsPackage(selectedProductsPackage.filter((p) => p.id !== product.id));
+                                setSelectedProductsPackage(selectedProductsPackage.filter((p) => p.product.id !== product.id));
                               } else {
-                                setSelectedProductsPackage([...selectedProductsPackage, product]);
+                                setSelectedProductsPackage([...selectedProductsPackage, { product, quantity: 1, customPrice: product.selling_price.toString() }]);
                               }
                             }}
                             className={`p-2 sm:p-3 rounded-lg sm:rounded-xl border-2 text-left transition-all ${
-                              selectedProductsPackage.some((p) => p.id === product.id)
+                              selectedProductsPackage.some((p) => p.product.id === product.id)
                                 ? 'bg-cyan-500 dark:bg-cyan-600 border-cyan-600 dark:border-cyan-500 text-white shadow-lg'
                                 : 'bg-white dark:bg-slate-700 border-cyan-300 dark:border-cyan-600 text-slate-800 dark:text-white hover:border-cyan-500'
                             }`}
                           >
-                            <div className="font-bold text-xs sm:text-sm truncate">{product.name}</div>
-                            <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{product.mark?.name}</div>
+                            <div className="font-bold text-xs sm:text-sm truncate">✅ {product.name}</div>
+                            <div className="text-xs text-slate-600 dark:text-slate-300 truncate">📦 {product.mark?.name || 'Charger'}</div>
                           </motion.button>
                         ))}
                       </div>
+                      {products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                        <p className="text-center text-slate-500 py-4 text-sm">❌ {language === 'ar' ? 'لا توجد منتجات' : language === 'fr' ? 'Aucun produit' : 'No products found'}</p>
+                      )}
                     </div>
 
                     {/* Step 3: Selected Products */}
@@ -1669,31 +1951,61 @@ export default function Website_Enhanced() {
                         <h3 className="text-lg sm:text-xl font-black text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
                           ✅ {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {selectedProductsPackage.map((product, idx) => (
+                        <div className="space-y-3 max-h-64 overflow-y-auto">
+                          {selectedProductsPackage.map((item, idx) => (
                             <motion.div
-                              key={product.id}
+                              key={item.product.id}
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.1 }}
-                              className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 rounded-lg sm:rounded-xl border-2 border-purple-300 dark:border-purple-600 shadow-md"
+                              className="p-3 sm:p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 rounded-lg sm:rounded-xl border-2 border-purple-300 dark:border-purple-600 shadow-md"
                             >
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
-                                  📦 {product.name}
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
+                                    📦 {item.product.name}
+                                  </div>
+                                  <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
+                                    {item.product.mark?.name || 'N/A'} • 💰 {item.product.selling_price} DZD
+                                  </div>
                                 </div>
-                                <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
-                                  {product.mark?.name} • 💰 {product.selling_price} DZD
+                                <motion.button
+                                  whileHover={{ scale: 1.15, rotate: 10 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => handleRemoveProductFromPackage(item.product.id)}
+                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
+                                >
+                                  ❌
+                                </motion.button>
+                              </div>
+                              
+                              {/* Quantity and Price Inputs */}
+                              <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-purple-300 dark:border-purple-600">
+                                <div>
+                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                    {language === 'ar' ? 'الكمية' : language === 'fr' ? 'Quantité' : 'Quantity'}
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={item.quantity}
+                                    onChange={(e) => handleUpdateProductQuantity(item.product.id, parseInt(e.target.value))}
+                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                    {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'} (DZD)
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={item.customPrice}
+                                    onChange={(e) => handleUpdateProductPrice(item.product.id, e.target.value)}
+                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                  />
                                 </div>
                               </div>
-                              <motion.button
-                                whileHover={{ scale: 1.15, rotate: 10 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => handleRemoveProductFromPackage(product.id)}
-                                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
-                              >
-                                ❌
-                              </motion.button>
                             </motion.div>
                           ))}
                         </div>
@@ -1747,23 +2059,48 @@ export default function Website_Enhanced() {
                       </div>
 
                       <div>
-                        <h4 className="font-bold text-lg mb-3">{t.packages.products_added}</h4>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                        <h4 className="font-bold text-lg mb-3 flex items-center gap-2">📦 {t.packages.products_added}</h4>
+                        <div className="space-y-3 max-h-64 overflow-y-auto">
                           {packageItems
                             .filter((item) => item.package_id === selectedPackageDetails.id)
                             .map((item) => (
-                              <div key={item.id} className="p-3 bg-slate-100 dark:bg-slate-700 rounded-lg border-2 border-slate-300 dark:border-slate-600 flex gap-3">
+                              <motion.div 
+                                key={item.id} 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="p-4 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-650 rounded-xl border-2 border-slate-300 dark:border-slate-600 flex gap-4 items-start hover:shadow-lg transition-all"
+                              >
                                 {item.product_image && (
-                                  <img src={item.product_image} alt={item.product_name} className="h-16 w-16 object-cover rounded-lg" />
+                                  <img src={item.product_image} alt={item.product_name} className="h-20 w-20 object-cover rounded-lg flex-shrink-0" />
                                 )}
                                 <div className="flex-1">
-                                  <div className="font-bold text-slate-800 dark:text-white">{item.product_name}</div>
-                                  <div className="text-sm text-slate-600 dark:text-slate-300">{item.product_mark}</div>
+                                  <div className="flex items-start justify-between mb-1">
+                                    <div>
+                                      <div className="font-bold text-slate-800 dark:text-white text-base">{item.product_name}</div>
+                                      <div className="text-sm text-slate-600 dark:text-slate-300">{item.product_mark}</div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-emerald-400 to-green-500 dark:from-emerald-600 dark:to-green-700 rounded-lg px-3 py-2 flex-shrink-0">
+                                      <div className="text-center">
+                                        <p className="text-xs text-white font-semibold uppercase">Qty</p>
+                                        <p className="text-xl font-bold text-white">{item.quantity || 1}</p>
+                                      </div>
+                                    </div>
+                                  </div>
                                   {item.product_voltage && (
-                                    <div className="text-xs text-slate-500 dark:text-slate-400">⚡ {item.product_voltage}V</div>
+                                    <div className="flex gap-2 mt-2 flex-wrap">
+                                      {item.product_voltage && (
+                                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded">⚡ {item.product_voltage}V</span>
+                                      )}
+                                      {item.product_amperage && (
+                                        <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 px-2 py-1 rounded">🔌 {item.product_amperage}A</span>
+                                      )}
+                                      {item.product_wattage && (
+                                        <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100 px-2 py-1 rounded">⚙️ {item.product_wattage}W</span>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
-                              </div>
+                              </motion.div>
                             ))}
                         </div>
                       </div>
@@ -1968,7 +2305,7 @@ export default function Website_Enhanced() {
 
               {/* Create Special Offer Dialog with Price Visibility */}
               <Dialog open={showCreateSpecialDialog} onOpenChange={setShowCreateSpecialDialog}>
-                <DialogContent className="max-w-2xl bg-white dark:bg-slate-800 border-2 border-purple-300 dark:border-purple-600 rounded-3xl">
+                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] bg-white dark:bg-slate-800 border-2 border-purple-300 dark:border-purple-600 rounded-2xl sm:rounded-3xl p-4 sm:p-6 overflow-y-auto flex flex-col">
                   <DialogHeader>
                     <DialogTitle className="text-3xl flex items-center gap-2 text-purple-600 dark:text-purple-400">
                       <Tag className="h-8 w-8" />
@@ -1976,7 +2313,7 @@ export default function Website_Enhanced() {
                     </DialogTitle>
                   </DialogHeader>
 
-                  <div className="space-y-6 py-6">
+                  <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Product Selection */}
                     {!editingSpecialOffer && (
                       <>
@@ -2331,41 +2668,35 @@ export default function Website_Enhanced() {
                           )}
                         </div>
 
-                        {/* Prices */}
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-700">
-                          <div className="bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900 dark:to-blue-800 p-2 sm:p-3 rounded-lg">
-                            <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🏠 {language === 'ar' ? 'منزل' : language === 'fr' ? 'Domicile' : 'Home'}</div>
-                            <div className="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-300">{agency.price_domicile.toFixed(2)} DZD</div>
-                          </div>
-                          <div className="bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900 dark:to-purple-800 p-2 sm:p-3 rounded-lg">
-                            <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🏢 {language === 'ar' ? 'مكتب' : language === 'fr' ? 'Bureau' : 'Office'}</div>
-                            <div className="text-lg sm:text-xl font-black text-purple-600 dark:text-purple-300">{agency.price_bureau.toFixed(2)} DZD</div>
-                          </div>
-                        </div>
-
                         {/* Actions */}
-                        <div className="grid grid-cols-3 gap-2 pt-3 sm:pt-4">
+                        <div className="grid grid-cols-4 gap-2 pt-3 sm:pt-4">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => handleOpenWilayaPricingDialog(agency)}
+                            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
+                            title="Manage Prices"
+                          >
+                            💰
+                          </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             onClick={() => handleEditDeliveryAgency(agency)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1 text-xs sm:text-sm"
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Edit"
                           >
-                            <Edit2 className="h-4 w-4" />
-                            <span className="hidden sm:inline">✏️</span>
+                            ✏️
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             onClick={() => handleToggleDeliveryVisibility(agency)}
-                            className={`font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1 text-xs sm:text-sm ${
+                            className={`font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl ${
                               agency.is_visible
                                 ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
                                 : 'bg-slate-400 hover:bg-slate-500 text-white'
                             }`}
                             title={agency.is_visible ? 'Hide' : 'Show'}
                           >
-                            {agency.is_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                            <span className="hidden sm:inline">{agency.is_visible ? '👁️' : '🚫'}</span>
+                            {agency.is_visible ? '👁️' : '🚫'}
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -2373,11 +2704,10 @@ export default function Website_Enhanced() {
                               setSelectedDeliveryDelete(agency.id);
                               setShowDeleteDeliveryDialog(true);
                             }}
-                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1 text-xs sm:text-sm"
+                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Delete"
                           >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="hidden sm:inline">🗑️</span>
+                            🗑️
                           </motion.button>
                         </div>
                       </div>
@@ -2437,40 +2767,7 @@ export default function Website_Enhanced() {
                       </div>
                     </div>
 
-                    {/* Section 2: Prices */}
-                    <div className="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-purple-300 dark:border-purple-700">
-                      <h3 className="text-base sm:text-lg font-black text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">💰 {language === 'ar' ? 'الأسعار' : language === 'fr' ? 'Tarifs' : 'Prices'}</h3>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                        {/* Price Domicile */}
-                        <div className="space-y-1 sm:space-y-2">
-                          <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2">
-                            🏠 {language === 'ar' ? 'سعر المنزل' : language === 'fr' ? 'Prix Domicile' : 'Home Price'}
-                          </Label>
-                          <Input
-                            type="number"
-                            value={priceDomicile}
-                            onChange={(e) => setPriceDomicile(e.target.value)}
-                            placeholder="0.00"
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-blue-300 dark:border-blue-600 rounded-lg sm:rounded-xl font-semibold"
-                          />
-                        </div>
 
-                        {/* Price Bureau */}
-                        <div className="space-y-1 sm:space-y-2">
-                          <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2">
-                            🏢 {language === 'ar' ? 'سعر المكتب' : language === 'fr' ? 'Prix Bureau' : 'Office Price'}
-                          </Label>
-                          <Input
-                            type="number"
-                            value={priceBureau}
-                            onChange={(e) => setPriceBureau(e.target.value)}
-                            placeholder="0.00"
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-purple-300 dark:border-purple-600 rounded-lg sm:rounded-xl font-semibold"
-                          />
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-slate-200 dark:border-slate-700 mt-4 sm:mt-6">
@@ -2538,6 +2835,170 @@ export default function Website_Enhanced() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+
+              {/* Wilaya Pricing Management Dialog */}
+              <Dialog open={showWilayaPricingDialog} onOpenChange={setShowWilayaPricingDialog}>
+                <DialogContent className="max-w-full w-full sm:max-w-4xl mx-auto bg-gradient-to-br from-white to-indigo-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-indigo-300 dark:border-indigo-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+                  <DialogHeader className="mb-4 sm:mb-6">
+                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-indigo-600 dark:text-indigo-400 font-black line-clamp-2">
+                      <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex-shrink-0">
+                        💰
+                      </motion.div>
+                      <span className="text-lg sm:text-3xl">
+                        {language === 'ar' ? `تعديل الأسعار - ${wilayaPricingAgencyName}` : language === 'fr' ? `Gérer les Prix - ${wilayaPricingAgencyName}` : `Manage Prices - ${wilayaPricingAgencyName}`}
+                      </span>
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-3 sm:space-y-6 py-2 sm:py-4">
+                    {/* Section 1: Add/Edit Wilaya Price */}
+                    <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-indigo-300 dark:border-indigo-700">
+                      <h3 className="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-300 mb-3 sm:mb-4">
+                        {editingWilayaPriceId ? '✏️' : '➕'} {language === 'ar' ? 'إضافة أو تعديل سعر ولاية' : language === 'fr' ? 'Ajouter ou Modifier un Prix' : 'Add or Edit Wilaya Price'}
+                      </h3>
+
+                      <div className="space-y-2 sm:space-y-3">
+                        {/* Wilaya Selection */}
+                        <div>
+                          <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2 mb-2">
+                            <MapIcon className="h-4 w-4" />
+                            {language === 'ar' ? 'اختر الولاية' : language === 'fr' ? 'Sélectionner une Wilaya' : 'Select Wilaya'}
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              type="text"
+                              placeholder={language === 'ar' ? 'ابحث عن ولاية...' : language === 'fr' ? 'Rechercher une wilaya...' : 'Search wilaya...'}
+                              value={selectedWilayaForEdit}
+                              onChange={(e) => setSelectedWilayaForEdit(e.target.value)}
+                              disabled={editingWilayaPriceId !== null}
+                              className="w-full border-2 border-indigo-300 dark:border-indigo-600 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                              list="wilaya-options"
+                            />
+                            <datalist id="wilaya-options">
+                              {ALGERIAN_WILAYAS.filter(w => 
+                                !wilayaPrices.find(p => p.wilaya_name === w) || w === selectedWilayaForEdit
+                              ).map(wilaya => (
+                                <option key={wilaya} value={wilaya} />
+                              ))}
+                            </datalist>
+                          </div>
+                        </div>
+
+                        {/* Price Inputs */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                          <div>
+                            <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2 mb-2">
+                              🏠 {language === 'ar' ? 'سعر المنزل (DZD)' : language === 'fr' ? 'Prix Domicile (DZD)' : 'Home Delivery (DZD)'}
+                            </Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              value={wilayaPriceDomicile}
+                              onChange={(e) => setWilayaPriceDomicile(e.target.value)}
+                              className="w-full border-2 border-blue-300 dark:border-blue-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2 mb-2">
+                              🏢 {language === 'ar' ? 'سعر المكتب (DZD)' : language === 'fr' ? 'Prix Bureau (DZD)' : 'Office Delivery (DZD)'}
+                            </Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              value={wilayaPriceBureau}
+                              onChange={(e) => setWilayaPriceBureau(e.target.value)}
+                              className="w-full border-2 border-purple-300 dark:border-purple-600 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-2 gap-2 pt-2 sm:pt-3">
+                          <Button
+                            onClick={handleSaveWilayaPrice}
+                            disabled={!selectedWilayaForEdit || !wilayaPriceDomicile || !wilayaPriceBureau}
+                            className="bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-400 text-white font-bold py-2 rounded-lg transition-colors"
+                          >
+                            <Check className="h-4 w-4 mr-2" />
+                            {editingWilayaPriceId ? (language === 'ar' ? 'تحديث' : language === 'fr' ? 'Mettre à jour' : 'Update') : (language === 'ar' ? 'إضافة' : language === 'fr' ? 'Ajouter' : 'Add')}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setSelectedWilayaForEdit('');
+                              setWilayaPriceDomicile('');
+                              setWilayaPriceBureau('');
+                              setEditingWilayaPriceId(null);
+                            }}
+                            className="bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 rounded-lg transition-colors"
+                          >
+                            {language === 'ar' ? 'إلغاء' : language === 'fr' ? 'Annuler' : 'Clear'}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: Configured Wilayas */}
+                    <div className="bg-blue-100 dark:bg-blue-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-blue-300 dark:border-blue-700">
+                      <h3 className="text-base sm:text-lg font-black text-blue-700 dark:text-blue-300 mb-3 sm:mb-4">
+                        📍 {language === 'ar' ? 'الولايات المُعدّة' : language === 'fr' ? 'Wilayas Configurées' : 'Configured Wilayas'} ({wilayaPrices.length})
+                      </h3>
+
+                      {wilayaPrices.length === 0 ? (
+                        <p className="text-center text-slate-600 dark:text-slate-400 py-8">
+                          {language === 'ar' ? 'لا توجد ولايات مُعدّة بعد' : language === 'fr' ? 'Aucune wilaya configurée' : 'No wilayas configured yet'}
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {wilayaPrices.map((price) => (
+                            <div key={`${price.agency_id}-${price.wilaya_name}`} className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-blue-200 dark:border-blue-600 flex items-center justify-between gap-2 sm:gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-bold text-slate-700 dark:text-slate-200 text-sm sm:text-base">{price.wilaya_name}</p>
+                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                                  🏠 {price.price_domicile.toFixed(2)} DZD | 🏢 {price.price_bureau.toFixed(2)} DZD
+                                </p>
+                              </div>
+                              <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+                                <Button
+                                  onClick={() => handleEditWilayaPrice(price)}
+                                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
+                                  title="Edit"
+                                >
+                                  ✏️
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeleteWilayaPrice(price.wilaya_name)}
+                                  className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
+                                  title="Delete"
+                                >
+                                  🗑️
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info Section */}
+                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 sm:p-4 rounded-lg border border-amber-300 dark:border-amber-600">
+                      <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
+                        <strong>ℹ️ {language === 'ar' ? 'ملاحظة' : language === 'fr' ? 'Note' : 'Info'}:</strong> {language === 'ar' ? 'إذا لم تحدد سعراً لولاية معينة، سيتم استخدام السعر الافتراضي للوكالة' : language === 'fr' ? 'Si vous ne définissez pas de prix pour une wilaya, le prix par défaut de l\'agence sera utilisé' : 'If no price is set for a wilaya, the agency default price will be used'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <DialogFooter className="mt-6">
+                    <Button
+                      onClick={() => setShowWilayaPricingDialog(false)}
+                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-lg h-11 px-6 rounded-xl"
+                    >
+                      {language === 'ar' ? 'إغلاق' : language === 'fr' ? 'Fermer' : 'Close'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </motion.div>
           )}
 
@@ -2548,22 +3009,262 @@ export default function Website_Enhanced() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-6 max-w-2xl mx-auto"
+              className="space-y-0"
             >
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 border-slate-300 dark:border-slate-700 shadow-lg">
-                <h3 className="text-2xl font-bold text-slate-600 dark:text-slate-400 mb-6">⚙️ {language === 'ar' ? 'الإعدادات' : language === 'fr' ? 'Paramètres' : 'Settings'}</h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-lg font-bold">{language === 'ar' ? 'اسم الموقع' : language === 'fr' ? 'Nom du Site' : 'Website Name'}</Label>
-                    <Input placeholder="M NEXT TECH" className="h-12 text-base" />
+              {/* Main Settings Container */}
+              <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-slate-900 dark:to-black rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50">
+                
+                {/* Header Section with Preview */}
+                <div className="relative overflow-hidden">
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 pointer-events-none" />
+                  <div className="absolute -right-40 -top-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
+                  <div className="absolute -left-40 -bottom-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl" />
+                  
+                  {/* Header Content */}
+                  <div className="relative z-10 p-8 lg:p-12">
+                    <div className="flex items-start justify-between gap-8 flex-wrap">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-lg">
+                            <Settings className="h-8 w-8 text-white" />
+                          </div>
+                          <h2 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                            {language === 'ar' ? 'إعدادات الموقع' : language === 'fr' ? 'Paramètres du Site' : 'Website Settings'}
+                          </h2>
+                        </div>
+                        <p className="text-slate-400 text-lg">
+                          {language === 'ar' ? '⚙️ إدارة معلومات متجرك والصور' : language === 'fr' ? '⚙️ Gérez les informations de votre magasin' : '⚙️ Manage your store information'}
+                        </p>
+                      </div>
+                      
+                      {/* Logo Preview in Header */}
+                      {(websiteSettings?.logo_url) && (
+                        <motion.div
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="w-32 h-32 rounded-2xl overflow-hidden border-2 border-cyan-400/50 shadow-xl backdrop-blur-sm"
+                        >
+                          <img
+                            src={websiteSettings.logo_url}
+                            alt="Logo"
+                            className="w-full h-full object-cover"
+                          />
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-lg font-bold">{language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}</Label>
-                    <textarea className="w-full h-24 p-3 border-2 border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700" placeholder="Your website description" />
+                </div>
+
+                {/* Settings Content */}
+                <div className="relative z-10 p-8 lg:p-12 space-y-8">
+                  
+                  {/* Section 1: Store Identity */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-cyan-500/30 shadow-lg"
+                  >
+                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                      <span className="text-3xl">🏪</span>
+                      {language === 'ar' ? 'هوية المتجر' : language === 'fr' ? 'Identité du Magasin' : 'Store Identity'}
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Store Name */}
+                      <div className="space-y-3">
+                        <Label className="text-white font-bold text-base flex items-center gap-2">
+                          <span>🏷️</span>
+                          {language === 'ar' ? 'اسم المتجر' : language === 'fr' ? 'Nom du Magasin' : 'Store Name'}
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder={language === 'ar' ? 'أدخل اسم متجرك' : language === 'fr' ? 'Entrez le nom du magasin' : 'Enter store name'}
+                          value={websiteSettings?.store_name || ''}
+                          onChange={(e) => setWebsiteSettings({ ...websiteSettings, store_name: e.target.value })}
+                          className="h-12 bg-slate-900/50 border-2 border-cyan-500/50 text-white placeholder-slate-500 rounded-xl text-lg font-semibold hover:border-cyan-400/70 focus:border-cyan-400 transition-all"
+                        />
+                        {websiteSettings?.store_name && (
+                          <p className="text-sm text-cyan-400">✓ {language === 'ar' ? 'تم الإدخال' : language === 'fr' ? 'Rempli' : 'Filled'}</p>
+                        )}
+                      </div>
+
+                      {/* Slogan */}
+                      <div className="space-y-3">
+                        <Label className="text-white font-bold text-base flex items-center gap-2">
+                          <span>✨</span>
+                          {language === 'ar' ? 'الشعار' : language === 'fr' ? 'Slogan' : 'Slogan'}
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder={language === 'ar' ? 'شعارك المميز' : language === 'fr' ? 'Votre slogan unique' : 'Your unique slogan'}
+                          value={websiteSettings?.slogan || ''}
+                          onChange={(e) => setWebsiteSettings({ ...websiteSettings, slogan: e.target.value })}
+                          className="h-12 bg-slate-900/50 border-2 border-purple-500/50 text-white placeholder-slate-500 rounded-xl text-lg font-semibold hover:border-purple-400/70 focus:border-purple-400 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Section 2: Logo */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-orange-500/30 shadow-lg"
+                  >
+                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                      <span className="text-3xl">🖼️</span>
+                      {language === 'ar' ? 'شعار المتجر' : language === 'fr' ? 'Logo du Magasin' : 'Store Logo'}
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                      {/* Upload Area */}
+                      <label className="lg:col-span-2 flex items-center justify-center h-64 border-3 border-dashed border-orange-400/50 bg-orange-500/5 rounded-2xl cursor-pointer hover:border-orange-400 hover:bg-orange-500/10 transition-all group">
+                        <div className="flex flex-col items-center justify-center">
+                          <motion.div
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className="mb-4"
+                          >
+                            <Upload className="h-16 w-16 text-orange-400 group-hover:text-orange-300 transition-colors" />
+                          </motion.div>
+                          <p className="text-white font-bold text-lg text-center">
+                            {language === 'ar' ? '📤 اختر أو اسحب شعار المتجر' : language === 'fr' ? '📤 Choisir ou glisser le logo' : '📤 Choose or drag logo'}
+                          </p>
+                          <p className="text-slate-400 text-sm mt-2">PNG, JPG, GIF</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
+                        />
+                      </label>
+
+                      {/* Preview */}
+                      {websiteSettings?.logo_url ? (
+                        <motion.div
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          className="h-64 rounded-2xl overflow-hidden border-2 border-orange-400/50 shadow-xl bg-gradient-to-br from-orange-600/20 to-red-600/20 flex items-center justify-center"
+                        >
+                          <img
+                            src={websiteSettings.logo_url}
+                            alt="Logo Preview"
+                            className="w-full h-full object-contain p-4"
+                          />
+                        </motion.div>
+                      ) : (
+                        <div className="h-64 rounded-2xl border-2 border-dashed border-slate-500/30 flex items-center justify-center bg-slate-900/50">
+                          <p className="text-slate-500 text-center">
+                            {language === 'ar' ? 'لا يوجد شعار محمل' : language === 'fr' ? 'Pas de logo' : 'No logo'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+
+                  {/* Section 3: Description */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-blue-500/30 shadow-lg"
+                  >
+                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                      <span className="text-3xl">📝</span>
+                      {language === 'ar' ? 'وصف الموقع' : language === 'fr' ? 'Description du Site' : 'Website Description'}
+                    </h3>
+                    
+                    <textarea
+                      placeholder={language === 'ar' ? 'اكتب وصف شامل لموقعك ومتجرك...' : language === 'fr' ? 'Décrivez votre magasin en détail...' : 'Describe your store...'}
+                      value={websiteSettings?.description || ''}
+                      onChange={(e) => setWebsiteSettings({ ...websiteSettings, description: e.target.value })}
+                      className="w-full h-40 bg-slate-900/50 border-2 border-blue-500/50 text-white placeholder-slate-500 rounded-xl p-4 text-lg font-semibold hover:border-blue-400/70 focus:border-blue-400 transition-all resize-none"
+                    />
+                    {websiteSettings?.description && (
+                      <p className="text-sm text-blue-400 mt-2">✓ {language === 'ar' ? 'تم إدخال الوصف' : language === 'fr' ? 'Description saisie' : 'Description added'} ({websiteSettings.description.length} {language === 'ar' ? 'حرف' : language === 'fr' ? 'caractères' : 'chars'})</p>
+                    )}
+                  </motion.div>
+
+                  {/* Section 4: Landing Page Background */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-pink-500/30 shadow-lg"
+                  >
+                    <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                      <span className="text-3xl">🎨</span>
+                      {language === 'ar' ? 'خلفية صفحة الهبوط' : language === 'fr' ? 'Fond Page Accueil' : 'Landing Page Background'}
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                      {/* Upload Area */}
+                      <label className="lg:col-span-2 flex items-center justify-center h-64 border-3 border-dashed border-pink-400/50 bg-pink-500/5 rounded-2xl cursor-pointer hover:border-pink-400 hover:bg-pink-500/10 transition-all group">
+                        <div className="flex flex-col items-center justify-center">
+                          <motion.div
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className="mb-4"
+                          >
+                            <Upload className="h-16 w-16 text-pink-400 group-hover:text-pink-300 transition-colors" />
+                          </motion.div>
+                          <p className="text-white font-bold text-lg text-center">
+                            {language === 'ar' ? '📤 اختر أو اسحب صورة الخلفية' : language === 'fr' ? '📤 Choisir ou glisser le fond' : '📤 Choose or drag background'}
+                          </p>
+                          <p className="text-slate-400 text-sm mt-2">PNG, JPG, GIF (Recommended: 1920x1080)</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => e.target.files?.[0] && handleLandingPageImageUpload(e.target.files[0])}
+                        />
+                      </label>
+
+                      {/* Preview */}
+                      {websiteSettings?.landing_page_image_url ? (
+                        <motion.div
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          className="h-64 rounded-2xl overflow-hidden border-2 border-pink-400/50 shadow-xl bg-gradient-to-br from-pink-600/20 to-red-600/20 flex items-center justify-center"
+                        >
+                          <img
+                            src={websiteSettings.landing_page_image_url}
+                            alt="Landing Background Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </motion.div>
+                      ) : (
+                        <div className="h-64 rounded-2xl border-2 border-dashed border-slate-500/30 flex items-center justify-center bg-slate-900/50">
+                          <p className="text-slate-500 text-center">
+                            {language === 'ar' ? 'لا يوجد خلفية محملة' : language === 'fr' ? 'Pas de fond' : 'No background'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+
+                  {/* Save Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSaveWebsiteSettings}
+                    className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 text-white px-8 py-5 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-2xl border border-cyan-400/30 transition-all"
+                  >
+                    <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }}>
+                      <Check className="h-7 w-7" />
+                    </motion.div>
+                    {language === 'ar' ? '💾 حفظ جميع الإعدادات' : language === 'fr' ? '💾 Enregistrer les Paramètres' : '💾 Save All Settings'}
+                  </motion.button>
+
+                  {/* Info Box */}
+                  <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
+                    <p className="text-blue-300 text-sm">
+                      <span className="font-bold">ℹ️ {language === 'ar' ? 'ملاحظة:' : language === 'fr' ? 'Info:' : 'Note:'}</span> {language === 'ar' ? ' سيتم حفظ جميع الصور تلقائياً في السحابة' : language === 'fr' ? ' Toutes les images seront enregistrées dans le cloud' : ' All images will be saved to the cloud'}
+                    </p>
                   </div>
-                  <Button className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold text-lg h-12">
-                    {t.common.save}
-                  </Button>
                 </div>
               </div>
             </motion.div>

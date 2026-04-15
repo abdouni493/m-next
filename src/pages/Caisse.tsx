@@ -36,6 +36,8 @@ interface FormData {
   amount: string;
   description: string;
   transaction_date: string;
+  discount_percentage?: string;
+  discount_reason?: string;
 }
 
 const Caisse = () => {
@@ -55,6 +57,8 @@ const Caisse = () => {
     amount: '',
     description: '',
     transaction_date: new Date().toISOString().split('T')[0],
+    discount_percentage: '0',
+    discount_reason: '',
   });
 
   const t = {
@@ -84,6 +88,11 @@ const Caisse = () => {
       no_transactions: 'No transactions yet',
       start_transaction: 'Start by adding your first transaction',
       search: 'Search transactions...',
+      discount: 'Discount',
+      discount_percentage: 'Discount %',
+      discount_reason: 'Reason for Discount',
+      apply_discount: 'Apply Discount',
+      final_amount: 'Final Amount',
     },
     fr: {
       title: 'Caisse',
@@ -111,6 +120,11 @@ const Caisse = () => {
       no_transactions: 'Aucune transaction',
       start_transaction: 'Commencez par ajouter votre première transaction',
       search: 'Rechercher des transactions...',
+      discount: 'Réduction',
+      discount_percentage: 'Pourcentage de réduction',
+      discount_reason: 'Raison de la réduction',
+      apply_discount: 'Appliquer la réduction',
+      final_amount: 'Montant final',
     },
     ar: {
       title: 'الصندوق',
@@ -138,6 +152,11 @@ const Caisse = () => {
       no_transactions: 'لا توجد معاملات',
       start_transaction: 'ابدأ بإضافة معاملتك الأولى',
       search: 'البحث عن المعاملات...',
+      discount: 'تخفيف',
+      discount_percentage: 'نسبة التخفيف',
+      discount_reason: 'سبب التخفيف',
+      apply_discount: 'تطبيق التخفيف',
+      final_amount: 'المبلغ النهائي',
     },
   };
 
@@ -190,14 +209,21 @@ const Caisse = () => {
     }
 
     try {
+      const discountPercent = parseFloat(formData.discount_percentage || '0') || 0;
+      const baseAmount = parseFloat(formData.amount);
+      const discountAmount = (baseAmount * discountPercent) / 100;
+      const finalAmount = baseAmount - discountAmount;
+
       if (isEditingMode && selectedTransaction) {
         const { error } = await supabase
           .from('caisse_transactions')
           .update({
             transaction_type: formData.transaction_type,
-            amount: parseFloat(formData.amount),
+            amount: finalAmount,
             description: formData.description,
             transaction_date: new Date(formData.transaction_date).toISOString(),
+            discount_applied: discountPercent > 0 ? discountPercent : 0,
+            discount_reason: formData.discount_reason,
           })
           .eq('id', selectedTransaction.id);
 
@@ -207,9 +233,11 @@ const Caisse = () => {
           .from('caisse_transactions')
           .insert([{
             transaction_type: formData.transaction_type,
-            amount: parseFloat(formData.amount),
+            amount: finalAmount,
             description: formData.description,
             transaction_date: new Date(formData.transaction_date).toISOString(),
+            discount_applied: discountPercent > 0 ? discountPercent : 0,
+            discount_reason: formData.discount_reason,
           }]);
 
         if (error) throw error;
@@ -266,6 +294,8 @@ const Caisse = () => {
       amount: '',
       description: '',
       transaction_date: new Date().toISOString().split('T')[0],
+      discount_percentage: '0',
+      discount_reason: '',
     });
     setSelectedTransaction(null);
     setIsEditingMode(false);
@@ -564,6 +594,73 @@ const Caisse = () => {
                   onChange={(e) => setFormData({ ...formData, transaction_date: e.target.value })}
                   className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 />
+              </div>
+
+              {/* Discount Section */}
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-700">
+                <label className="block text-sm font-semibold mb-3 text-amber-900 dark:text-amber-100">
+                  💳 {getText('apply_discount')}
+                </label>
+                
+                {/* Discount Percentage */}
+                <div className="mb-3">
+                  <label className="block text-xs font-medium mb-1 text-amber-800 dark:text-amber-200">
+                    {getText('discount_percentage')}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={formData.discount_percentage}
+                      onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
+                      placeholder="0"
+                      className="flex-1 px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 dark:bg-slate-800 dark:border-amber-700 dark:text-white"
+                    />
+                    <span className="px-3 py-2 bg-amber-100 dark:bg-amber-900/40 rounded-lg font-semibold text-amber-900 dark:text-amber-100">%</span>
+                  </div>
+                </div>
+
+                {/* Discount Reason */}
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-amber-800 dark:text-amber-200">
+                    {getText('discount_reason')}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.discount_reason}
+                    onChange={(e) => setFormData({ ...formData, discount_reason: e.target.value })}
+                    placeholder={language === 'ar' ? 'السبب...' : language === 'fr' ? 'Raison...' : 'Reason...'}
+                    className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 dark:bg-slate-800 dark:border-amber-700 dark:text-white text-sm"
+                  />
+                </div>
+
+                {/* Final Amount Preview */}
+                {formData.amount && (
+                  <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-700">
+                    <div className="flex justify-between items-center mb-2 text-sm">
+                      <span className="text-amber-700 dark:text-amber-300">{getText('amount')}:</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{parseFloat(formData.amount || '0').toFixed(2)} DZD</span>
+                    </div>
+                    {parseFloat(formData.discount_percentage || '0') > 0 && (
+                      <>
+                        <div className="flex justify-between items-center mb-2 text-sm">
+                          <span className="text-red-600 dark:text-red-400">{getText('discount')}:</span>
+                          <span className="font-semibold text-red-600 dark:text-red-400">
+                            -{((parseFloat(formData.amount) * parseFloat(formData.discount_percentage || '0')) / 100).toFixed(2)} DZD
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-base bg-green-100 dark:bg-green-900/30 p-2 rounded font-bold">
+                          <span className="text-green-700 dark:text-green-300">{getText('final_amount')}:</span>
+                          <span className="text-green-700 dark:text-green-300">
+                            {(parseFloat(formData.amount) - (parseFloat(formData.amount) * parseFloat(formData.discount_percentage || '0')) / 100).toFixed(2)} DZD
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
