@@ -238,7 +238,7 @@ const SuppliersPage = () => {
             }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-shadow"
+            className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow text-slate-900 dark:text-white"
           />
         </div>
       </motion.div>
@@ -368,7 +368,7 @@ const SuppliersPage = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           >
             <div className="sticky top-0 p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex justify-between items-center">
               <h2 className="text-3xl font-bold text-slate-900">
@@ -378,7 +378,7 @@ const SuppliersPage = () => {
               </h2>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-lg p-2 transition"
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg p-2 transition"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -397,7 +397,7 @@ const SuppliersPage = () => {
                   placeholder={language === 'en' ? 'e.g., Tech Supplies Inc.' : 'Ex: Tech Supplies Inc.'}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-semibold text-lg"
+                  className="w-full px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 font-semibold text-lg text-slate-900 dark:text-white"
                 />
               </motion.div>
 
@@ -408,13 +408,13 @@ const SuppliersPage = () => {
                 transition={{ delay: 0.1 }}
                 className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
               >
-                <h3 className="text-lg font-bold text-green-900 mb-4">📞 {language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'}</h3>
+                <h3 className="text-lg font-bold text-green-900 dark:text-green-300 mb-4">📞 {language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'}</h3>
                 <input
                   type="tel"
                   placeholder="+1 (555) 123-4567"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white font-semibold text-lg"
+                  className="w-full px-4 py-3 border border-green-300 dark:border-green-600 rounded-lg focus:ring-2 focus:ring-green-500 bg-white dark:bg-slate-700 font-semibold text-lg text-slate-900 dark:text-white"
                 />
               </motion.div>
 
@@ -427,13 +427,13 @@ const SuppliersPage = () => {
               >
                 <h3 className="text-lg font-bold text-red-900 mb-4">📍 {language === 'en' ? 'Address' : 'Adresse'}</h3>
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-red-900">{language === 'en' ? 'Address' : 'Adresse'}</label>
+                  <label className="block text-sm font-semibold mb-2 text-red-900 dark:text-red-300">{language === 'en' ? 'Address' : 'Adresse'}</label>
                   <input
                     type="text"
                     placeholder={language === 'en' ? 'Street address' : 'Adresse'}
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-4 py-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 bg-white font-semibold text-lg"
+                    className="w-full px-4 py-3 border border-red-300 dark:border-red-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-slate-700 font-semibold text-lg text-slate-900 dark:text-white"
                   />
                 </div>
               </motion.div>

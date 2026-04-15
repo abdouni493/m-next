@@ -892,14 +892,14 @@ const Inventory = () => {
             }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-shadow"
+            className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow text-slate-900 dark:text-white"
           />
         </div>
 
         <select
           value={filterMark}
           onChange={(e) => setFilterMark(e.target.value)}
-          className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white shadow-sm hover:shadow-md transition-shadow appearance-none"
+          className="px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-shadow appearance-none text-slate-900 dark:text-white"
           style={{backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '16px 12px', paddingRight: '2.5rem'}}
         >
           <option value="">🏷️ {language === 'en' ? 'All Marks' : 'Toutes les Marques'}</option>
@@ -956,7 +956,7 @@ const Inventory = () => {
                 whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
                 className="group"
               >
-                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/80 backdrop-blur-sm overflow-hidden">
+                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm overflow-hidden">
                   {/* Image Section */}
                   <div className="relative h-28 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden group">
                     {charger.primary_image ? (
@@ -1150,9 +1150,9 @@ const Inventory = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            className="bg-white dark:bg-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           >
-            <div className="sticky top-0 p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-emerald-50 flex justify-between items-center">
+            <div className="sticky top-0 p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 dark:from-slate-700 to-emerald-50 dark:to-slate-700 flex justify-between items-center">
               <h2 className="text-3xl font-bold text-slate-900">
                 {isEditingMode 
                   ? (language === 'en' ? '✏️ Edit Charger' : '✏️ Modifier Chargeur')
@@ -1180,7 +1180,7 @@ const Inventory = () => {
                     images: [] as File[],
                   });
                 }}
-                className="text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-lg p-2 transition"
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg p-2 transition"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -1198,7 +1198,7 @@ const Inventory = () => {
                 
                 {/* Existing Images Gallery (when editing) */}
                 {isEditingMode && editingChargerId && chargerImages.length > 0 && (
-                  <div className="mb-4 p-4 bg-white rounded-lg border border-cyan-300">
+                  <div className="mb-4 p-4 bg-white dark:bg-slate-700 rounded-lg border border-cyan-300 dark:border-cyan-600">
                     <p className="text-xs font-semibold text-cyan-700 mb-3">📸 {language === 'en' ? 'Existing Images - Click to set as Primary' : 'Images Existantes - Cliquez pour définir comme principale'} ({chargerImages.length})</p>
                     <div className="grid grid-cols-3 gap-3">
                       {chargerImages.map((imageObj, index) => (
@@ -1228,7 +1228,7 @@ const Inventory = () => {
                 )}
                 
                 {/* Upload Section */}
-                <div className="border-2 border-dashed border-cyan-300 rounded-lg p-6 text-center bg-white mb-4">
+                <div className="border-2 border-dashed border-cyan-300 dark:border-cyan-600 rounded-lg p-6 text-center bg-white dark:bg-slate-700 mb-4">
                   <input
                     type="file"
                     multiple
@@ -1320,12 +1320,12 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      className="w-full px-4 py-2 border border-blue-300 dark:border-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-blue-900">
+                    <label className="block text-sm font-semibold mb-2 text-blue-900 dark:text-blue-300">
                       📝 {language === 'en' ? 'Description' : 'Description'}
                     </label>
                     <textarea
@@ -1335,7 +1335,7 @@ const Inventory = () => {
                         setFormData({ ...formData, description: e.target.value })
                       }
                       rows={3}
-                      className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      className="w-full px-4 py-2 border border-blue-300 dark:border-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -1365,7 +1365,7 @@ const Inventory = () => {
                           setFormData({ ...formData, mark_id: e.target.value });
                           setSelectedBrand(e.target.value);
                         }}
-                        className="flex-1 px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white text-sm"
+                        className="flex-1 px-3 py-2 border border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white"
                       >
                         <option value="">{language === 'en' ? 'Select Mark' : 'Sélectionnez Marque'}</option>
                         {marks.map((mark) => (
@@ -1419,7 +1419,7 @@ const Inventory = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, connector_type_id: e.target.value })
                         }
-                        className="flex-1 px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white text-sm"
+                        className="flex-1 px-3 py-2 border border-purple-300 dark:border-purple-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 text-sm text-slate-900 dark:text-white"
                       >
                         <option value="">{language === 'en' ? 'Select Type' : 'Sélectionnez Type'}</option>
                         {connectorTypes.map((type) => (
@@ -1471,7 +1471,7 @@ const Inventory = () => {
                 <h3 className="text-lg font-bold text-yellow-900 mb-4">⚡ {language === 'en' ? 'Electrical Specs' : 'Spécifications Électriques'}</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-yellow-900">⚡ Voltage</label>
+                    <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">⚡ Voltage</label>
                     <input
                       type="number"
                       step="0.1"
@@ -1480,11 +1480,11 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, voltage: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                      className="w-full px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-yellow-900">🔌 Wattage</label>
+                    <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">🔌 Wattage</label>
                     <input
                       type="number"
                       step="0.1"
@@ -1493,11 +1493,11 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, wattage: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                      className="w-full px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-yellow-900">⚙️ Amperage</label>
+                    <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">⚙️ Amperage</label>
                     <input
                       type="number"
                       step="0.1"
@@ -1506,12 +1506,12 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, amperage: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                      className="w-full px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
                 <div className="mt-4">
-                  <label className="block text-sm font-semibold mb-2 text-yellow-900">🔢 {language === 'en' ? 'Model Number' : 'Numéro de Modèle'}</label>
+                  <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">🔢 {language === 'en' ? 'Model Number' : 'Numéro de Modèle'}</label>
                   <input
                     type="text"
                     placeholder="Optional"
@@ -1519,7 +1519,7 @@ const Inventory = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, model_number: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                    className="w-full px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                   />
                 </div>
               </motion.div>
@@ -1638,16 +1638,16 @@ const Inventory = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            className="bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           >
             {/* Header */}
-            <div className="sticky top-0 p-6 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-pink-50 flex justify-between items-center">
-              <h2 className="text-3xl font-bold text-slate-900">
+            <div className="sticky top-0 p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-purple-50 dark:from-slate-700 to-pink-50 dark:to-slate-700 flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
                 👁️ {selectedCharger.name}
               </h2>
               <button
                 onClick={() => setSelectedCharger(null)}
-                className="text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-lg p-2 transition text-2xl"
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg p-2 transition text-2xl"
               >
                 ❌
               </button>

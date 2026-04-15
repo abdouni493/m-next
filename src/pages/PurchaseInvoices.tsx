@@ -858,7 +858,7 @@ export default function PurchaseInvoices() {
                       
                       {/* Current Images Preview */}
                       {chargerImages.length > 0 && (
-                        <div className="mb-4 p-4 bg-white rounded-lg border border-cyan-300">
+                        <div className="mb-4 p-4 bg-white dark:bg-slate-700 rounded-lg border border-cyan-300 dark:border-cyan-600">
                           <p className="text-xs font-semibold text-cyan-700 mb-3">📸 {language === 'ar' ? 'الصور الحالية' : 'Current Images'}</p>
                           <div className="grid grid-cols-4 gap-2">
                             {chargerImages.map((image) => (
@@ -885,7 +885,7 @@ export default function PurchaseInvoices() {
                       )}
                       
                       {/* Upload Section */}
-                      <div className="border-2 border-dashed border-cyan-300 rounded-lg p-6 text-center bg-white mb-4">
+                      <div className="border-2 border-dashed border-cyan-300 dark:border-cyan-600 rounded-lg p-6 text-center bg-white dark:bg-slate-700 mb-4">
                         <input
                           type="file"
                           multiple
@@ -1036,7 +1036,7 @@ export default function PurchaseInvoices() {
                           <select
                             value={formData.supplier_id}
                             onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
-                            className="w-full px-4 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                            className="w-full px-4 py-2 border border-indigo-300 dark:border-indigo-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                           >
                             <option value="">{language === 'ar' ? 'اختر المورد' : 'Select Supplier'}</option>
                             {suppliers.map((supplier) => (
@@ -1056,20 +1056,20 @@ export default function PurchaseInvoices() {
                       transition={{ delay: 0.15 }}
                       className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200"
                     >
-                      <h3 className="text-lg font-bold text-yellow-900 mb-4">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Electrical Specs'}</h3>
+                      <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-300 mb-4">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Electrical Specs'}</h3>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900">⚡ {language === 'ar' ? 'الجهد' : 'Voltage'} (V)</label>
+                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">⚡ {language === 'ar' ? 'الجهد' : 'Voltage'} (V)</label>
                           <input
                             type="number"
                             step="0.1"
                             value={formData.voltage}
                             onChange={(e) => setFormData({ ...formData, voltage: e.target.value })}
-                            className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                            className="w-full px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900">🔌 {language === 'ar' ? 'القدرة' : 'Wattage'} (W)</label>
+                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">🔌 {language === 'ar' ? 'القدرة' : 'Wattage'} (W)</label>
                           <input
                             type="number"
                             step="0.1"
