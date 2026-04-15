@@ -261,7 +261,7 @@ const SuppliersPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}
-              className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200 hover:border-blue-200 transition-all"
+              className="bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-600 transition-all"
             >
               {/* Header with color-coded top */}
               <div className="mb-4 pb-4 border-b-2 border-gradient-to-r from-blue-200 to-indigo-200">

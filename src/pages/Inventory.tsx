@@ -956,7 +956,7 @@ const Inventory = () => {
                 whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
                 className="group"
               >
-                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm overflow-hidden">
+                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm overflow-hidden">
                   {/* Image Section */}
                   <div className="relative h-28 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden group">
                     {charger.primary_image ? (

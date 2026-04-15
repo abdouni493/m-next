@@ -540,9 +540,9 @@ export default function Settings() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-emerald-50 border-b border-slate-100">
-                <CardTitle className="flex items-center gap-3 text-slate-800">
+            <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-900/30 dark:to-emerald-900/30 border-b border-slate-100 dark:border-slate-700">
+                <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
                   🌐 {language === 'ar' ? 'إعدادات اللغة' : 'Paramètres de Langue'}
                 </CardTitle>
               </CardHeader>
@@ -582,9 +582,9 @@ export default function Settings() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 to-blue-50 border-b border-slate-100">
-                <CardTitle className="flex items-center gap-3 text-slate-800">
+            <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/30 dark:to-blue-900/30 border-b border-slate-100 dark:border-slate-700">
+                <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
                   🔔 {language === 'ar' ? 'إعدادات الإشعارات' : 'Paramètres de Notifications'}
                 </CardTitle>
               </CardHeader>
@@ -636,9 +636,9 @@ export default function Settings() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-100">
-                <CardTitle className="flex items-center gap-3 text-slate-800">
+            <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-b border-slate-100 dark:border-slate-700">
+                <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
                   👤 {language === 'ar' ? 'معلومات الحساب' : 'Informations du Compte'}
                 </CardTitle>
               </CardHeader>
@@ -758,9 +758,9 @@ export default function Settings() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-slate-100">
-                <CardTitle className="flex items-center gap-3 text-slate-800">
+            <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 border-b border-slate-100 dark:border-slate-700">
+                <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
                   🔐 {language === 'ar' ? 'تغيير كلمة المرور' : 'Changer le Mot de Passe'}
                 </CardTitle>
               </CardHeader>
@@ -861,9 +861,9 @@ export default function Settings() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-slate-100">
-                <CardTitle className="flex items-center gap-3 text-slate-800">
+            <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-b border-slate-100 dark:border-slate-700">
+                <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
                   💽 {language === 'ar' ? 'إدارة النسخ الاحتياطية' : 'Gestion des Sauvegardes'}
                 </CardTitle>
               </CardHeader>
@@ -998,7 +998,7 @@ export default function Settings() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
+            <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
               <CardContent className="p-8">
                 <div className="text-center space-y-8">
                   {/* Logo and Title */}
@@ -1012,10 +1012,10 @@ export default function Settings() {
                       <span className="text-3xl">🚗</span>
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                      <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
                         🚀 chargers  
                       </h2>
-                      <p className="text-slate-600 text-lg">
+                      <p className="text-slate-600 dark:text-slate-400 text-lg">
                         {language === 'ar' ? 'نظام إدارة تجاري شامل' : 'Système de Gestion Commercial'}
                       </p>
                       <Badge variant="outline" className="mt-3 px-4 py-1 text-sm font-semibold bg-gradient-to-r from-blue-50 to-emerald-50 border-blue-200">
