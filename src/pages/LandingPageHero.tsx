@@ -127,16 +127,10 @@ export default function LandingPageComponent() {
     }
   };
 
-  // Determine background
-  const backgroundStyle = imageUrl
-    ? {
-        backgroundImage: `url('${imageUrl}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        WebkitBackgroundSize: 'cover',
-      }
-    : {};
+  // Determine background - No background image on section, we'll display it separately
+  const backgroundStyle = {
+    backgroundColor: '#1a1a1a',
+  };
 
   const storeName = settings?.store_name || 'M NEXT TECH';
   const slogan = settings?.slogan || 'Your Trusted Partner';
@@ -144,13 +138,30 @@ export default function LandingPageComponent() {
 
   return (
     <div className="w-full overflow-hidden">
-      {/* Hero Section */}
+      {/* Hero Section - Two Column Layout */}
       <section
         className="relative w-full min-h-screen flex items-center justify-center overflow-hidden"
         style={backgroundStyle}
       >
         {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 z-0" />
+
+        {/* Background Image - Centered Container */}
+        {imageUrl && (
+          <div className="absolute inset-0 z-[1] flex items-center justify-center pointer-events-none">
+            <div className="w-full h-full max-w-6xl flex items-center justify-center">
+              <img
+                src={imageUrl}
+                alt="Hero background"
+                className="w-full h-full object-contain md:object-cover rounded-none md:rounded-2xl shadow-2xl"
+                style={{
+                  maxHeight: '100%',
+                  maxWidth: '100%',
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Upload UI - Admin Panel */}
         {showUploadUI && (
@@ -259,88 +270,101 @@ export default function LandingPageComponent() {
           </motion.div>
         )}
 
-        {/* Content */}
+        {/* Content - Overlay Text */}
         <motion.div
-          className="relative z-20 w-full h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20"
+          className="relative z-[5] w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 lg:px-16 py-8 sm:py-12 md:py-20"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Main Heading */}
-          <motion.div
-            variants={titleVariants}
-            className="text-center mb-8 sm:mb-12 max-w-4xl"
-          >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight">
-              {storeName}
-            </h1>
-            <div className="h-1 w-20 sm:w-24 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-6 sm:mb-8 rounded-full" />
-          </motion.div>
+          {/* Mobile: Stack content, Desktop: Side by side with image */}
+          <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+            {/* Text Content */}
+            <div className="flex-1 text-center md:text-left">
+              {/* Main Heading */}
+              <motion.div
+                variants={titleVariants}
+                className="mb-4 sm:mb-8"
+              >
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 sm:mb-4 tracking-tight leading-tight">
+                  {storeName}
+                </h1>
+                <div className="h-1 w-12 sm:w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto md:mx-0 rounded-full" />
+              </motion.div>
 
-          {/* Slogan */}
-          <motion.p
-            variants={itemVariants}
-            className="text-lg sm:text-xl md:text-2xl text-blue-200 font-light mb-4 text-center max-w-2xl"
-          >
-            {slogan}
-          </motion.p>
+              {/* Slogan */}
+              <motion.p
+                variants={itemVariants}
+                className="text-base sm:text-lg md:text-xl text-blue-200 font-light mb-3 md:mb-4"
+              >
+                {slogan}
+              </motion.p>
 
-          {/* Description */}
-          <motion.p
-            variants={itemVariants}
-            className="text-base sm:text-lg text-gray-300 mb-10 sm:mb-12 text-center max-w-2xl leading-relaxed"
-          >
-            {description}
-          </motion.p>
+              {/* Description */}
+              <motion.p
+                variants={itemVariants}
+                className="text-sm sm:text-base text-gray-300 mb-6 md:mb-8 leading-relaxed"
+              >
+                {description}
+              </motion.p>
 
-          {/* CTA Buttons */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center justify-center mb-12 sm:mb-16"
-          >
-            <motion.button
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-              onClick={() => navigate('/website-shop')}
-              className="px-8 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/50 transition-all duration-300"
-            >
-              Shop Now
-            </motion.button>
+              {/* CTA Buttons */}
+              <motion.div
+                variants={itemVariants}
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start"
+              >
+                <motion.button
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                  onClick={() => navigate('/website-shop')}
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/50 transition-all duration-300 text-sm sm:text-base"
+                >
+                  🛒 Shop Now
+                </motion.button>
 
-            <motion.button
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-              onClick={() => navigate('/website-shop/offers')}
-              className="px-8 sm:px-10 py-3 sm:py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-300"
-            >
-              View Offers
-            </motion.button>
-          </motion.div>
+                <motion.button
+                  variants={buttonVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                  onClick={() => navigate('/website-shop/offers')}
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-300 text-sm sm:text-base"
+                >
+                  ✨ View Offers
+                </motion.button>
+              </motion.div>
 
-          {/* Admin Upload Button - Hidden in production, shown for testing */}
-          {process.env.NODE_ENV === 'development' && (
-            <motion.button
-              variants={itemVariants}
-              onClick={() => setShowUploadUI(!showUploadUI)}
-              className="px-6 py-2 bg-gray-800/50 text-gray-300 rounded-lg border border-gray-600 hover:bg-gray-700/70 hover:text-white transition-all text-sm font-medium"
-            >
-              {showUploadUI ? 'Cancel' : 'Upload Hero Image'}
-            </motion.button>
-          )}
+              {/* Admin Upload Button - Hidden in production, shown for testing */}
+              {process.env.NODE_ENV === 'development' && (
+                <motion.button
+                  variants={itemVariants}
+                  onClick={() => setShowUploadUI(!showUploadUI)}
+                  className="mt-6 px-4 py-2 bg-gray-800/50 text-gray-300 rounded-lg border border-gray-600 hover:bg-gray-700/70 hover:text-white transition-all text-xs sm:text-sm font-medium"
+                >
+                  {showUploadUI ? 'Cancel' : 'Upload Hero Image'}
+                </motion.button>
+              )}
+            </div>
+
+            {/* Hidden on mobile, visible on desktop - separates image display */}
+            {imageUrl && (
+              <div className="hidden md:flex flex-1 items-center justify-center">
+                {/* Image is rendered above in the background container */}
+              </div>
+            )}
+          </div>
         </motion.div>
 
-        {/* Floating Elements - Decorative */}
+        {/* Floating Elements - Decorative - Behind content */}
         <motion.div
           animate={{ y: [0, -20, 0] }}
           transition={{ duration: 6, repeat: Infinity }}
-          className="absolute top-20 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl z-0"
+          className="absolute top-20 left-10 w-24 h-24 sm:w-32 sm:h-32 bg-blue-500/10 rounded-full blur-3xl z-0"
         />
         <motion.div
           animate={{ y: [0, 20, 0] }}
           transition={{ duration: 8, repeat: Infinity, delay: 1 }}
-          className="absolute bottom-20 right-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl z-0"
+          className="absolute bottom-20 right-10 w-28 h-28 sm:w-40 sm:h-40 bg-blue-600/10 rounded-full blur-3xl z-0"
         />
 
         {/* Loading State */}
