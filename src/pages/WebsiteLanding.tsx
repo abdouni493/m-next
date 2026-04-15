@@ -481,47 +481,120 @@ export default function WebsiteLanding() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center justify-center mb-12 sm:mb-16"
           >
-            <Button
-              className="bg-white text-blue-600 hover:bg-blue-50 font-bold text-lg px-8 py-6"
-              size="lg"
-              onClick={() => (window.location.href = '/website-shop/offers')}
-            >
-              {language === 'ar' ? 'تصفح العروض' : 'Voir les Offres'}
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button
-              className="bg-blue-100 text-blue-600 hover:bg-blue-200 font-bold text-lg px-8 py-6"
-              size="lg"
-              onClick={() => (window.location.href = '/website-shop/special-offers')}
-            >
-              {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}
-              <Flame className="ml-2 h-5 w-5" />
-            </Button>
+            {/* Button 1: Voir les Offres - Clean White with Blue Accent */}
             <motion.button
-              whileHover={{ scale: 1.05, boxShadow: '0 15px 35px rgba(168, 85, 247, 0.4)' }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg px-8 py-6 rounded-lg shadow-lg transition-all"
-              onClick={() => (window.location.href = '/website-shop/packages')}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              whileHover={{ 
+                y: -3,
+                boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)',
+                transition: { duration: 0.3 }
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => (window.location.href = '/website-shop/offers')}
+              className="group relative px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-lg text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-blue-400/30"
             >
-              <span className="flex items-center gap-2">
-                {language === 'ar' ? '📦 حزم مميزة' : '📦 Packs Spéciaux'}
-                <Flame className="h-5 w-5" />
-              </span>
+              {/* Animated background shine effect */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                initial={{ x: '-100%' }}
+                animate={{ x: '100%' }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              
+              <div className="relative flex items-center justify-center gap-3">
+                <Eye className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+                <span>{language === 'ar' ? 'تصفح العروض' : 'Voir les Offres'}</span>
+                <motion.div
+                  initial={{ x: 0 }}
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </motion.div>
+              </div>
+            </motion.button>
+
+            {/* Button 2: Offres Spéciales - Vibrant Orange/Amber */}
+            <motion.button
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              whileHover={{ 
+                y: -3,
+                boxShadow: '0 20px 40px rgba(251, 146, 60, 0.4)',
+                transition: { duration: 0.3 }
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => (window.location.href = '/website-shop/special-offers')}
+              className="group relative px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-lg text-white bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-orange-300/40"
+            >
+              {/* Animated pulse background */}
+              <motion.div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-red-400/0 via-white/10 to-orange-400/0"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              
+              <div className="relative flex items-center justify-center gap-3">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Flame className="h-5 w-5" />
+                </motion.div>
+                <span>{language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}</span>
+              </div>
+            </motion.button>
+
+            {/* Button 3: Packs Spéciaux - Premium Purple Gradient */}
+            <motion.button
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              whileHover={{ 
+                y: -3,
+                boxShadow: '0 25px 50px rgba(168, 85, 247, 0.5)',
+                transition: { duration: 0.3 }
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => (window.location.href = '/website-shop/packages')}
+              className="group relative px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-lg text-white bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-purple-300/30"
+            >
+              {/* Multiple animated elements for premium feel */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-200/10 to-transparent"
+                initial={{ x: '-100%' }}
+                animate={{ x: '100%' }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              
+              <motion.div 
+                className="absolute top-0 right-0 w-32 h-32 bg-pink-400/20 rounded-full blur-2xl"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              />
+              
+              <div className="relative flex items-center justify-center gap-3">
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <span className="text-xl">📦</span>
+                </motion.div>
+                <span>{language === 'ar' ? 'حزم مميزة' : 'Packs Spéciaux'}</span>
+                <motion.div
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <Zap className="h-5 w-5" />
+                </motion.div>
+              </div>
             </motion.button>
           </motion.div>
 
-          {/* Admin Upload Button - Hidden in production */}
-          {process.env.NODE_ENV === 'development' && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              onClick={() => setShowUploadUI(!showUploadUI)}
-              className="px-6 py-2 bg-gray-800/50 text-gray-300 rounded-lg border border-gray-600 hover:bg-gray-700/70 hover:text-white transition-all text-sm font-medium"
-            >
-              {showUploadUI ? (language === 'ar' ? 'إلغاء' : 'Annuler') : (language === 'ar' ? '📸 رفع صورة' : '📸 Uploader')}
-            </motion.button>
-          )}
+          
         </div>
 
         {/* Floating Elements - Decorative */}
