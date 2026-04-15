@@ -261,13 +261,13 @@ const SuppliersPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}
-              className="bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-600 transition-all"
+              className="bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-700 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-600 transition-all"
             >
               {/* Header with color-coded top */}
-              <div className="mb-4 pb-4 border-b-2 border-gradient-to-r from-blue-200 to-indigo-200">
+              <div className="mb-4 pb-4 border-b-2 border-gradient-to-r from-blue-200 to-indigo-200 dark:from-blue-600 dark:to-indigo-600">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2">
                       🏭 {supplier.name}
                     </h3>
                   </div>
@@ -275,21 +275,21 @@ const SuppliersPage = () => {
                     <button
                       onClick={() => handleOpenHistoryModal(supplier)}
                       title={language === 'en' ? 'Purchase History' : 'Historique d\'Achats'}
-                      className="p-2.5 text-amber-600 hover:bg-amber-50 rounded-lg hover:shadow-md transition-all"
+                      className="p-2.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-700 rounded-lg hover:shadow-md transition-all"
                     >
                       <span className="text-lg">📊</span>
                     </button>
                     <button
                       onClick={() => handleOpenEditModal(supplier)}
                       title={language === 'en' ? 'Edit' : 'Modifier'}
-                      className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg hover:shadow-md transition-all"
+                      className="p-2.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg hover:shadow-md transition-all"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteSupplier(supplier.id)}
                       title={language === 'en' ? 'Delete' : 'Supprimer'}
-                      className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg hover:shadow-md transition-all"
+                      className="p-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-700 rounded-lg hover:shadow-md transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -300,11 +300,11 @@ const SuppliersPage = () => {
               {/* Contact Info with colored sections */}
               <div className="space-y-3">
                 {supplier.phone && (
-                  <div className="p-3 bg-green-50 rounded-lg border border-green-100 flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-green-600" />
+                  <div className="p-3 bg-green-50 dark:bg-slate-700 rounded-lg border border-green-100 dark:border-green-700 flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
                     <div className="flex-1">
-                      <p className="text-xs text-green-600 font-semibold uppercase">{language === 'en' ? 'Phone' : 'Téléphone'}</p>
-                      <a href={`tel:${supplier.phone}`} className="text-green-900 font-semibold hover:text-green-700">
+                      <p className="text-xs text-green-600 dark:text-green-400 font-semibold uppercase">{language === 'en' ? 'Phone' : 'Téléphone'}</p>
+                      <a href={`tel:${supplier.phone}`} className="text-green-900 dark:text-green-300 font-semibold hover:text-green-700 dark:hover:text-green-200">
                         {supplier.phone}
                       </a>
                     </div>
@@ -312,11 +312,11 @@ const SuppliersPage = () => {
                 )}
 
                 {supplier.address && (
-                  <div className="p-3 bg-red-50 rounded-lg border border-red-100 flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-red-600 mt-1" />
+                  <div className="p-3 bg-red-50 dark:bg-slate-700 rounded-lg border border-red-100 dark:border-red-700 flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-red-600 dark:text-red-400 mt-1" />
                     <div className="flex-1">
-                      <p className="text-xs text-red-600 font-semibold uppercase">{language === 'en' ? 'Address' : 'Adresse'}</p>
-                      <p className="text-red-900 font-semibold text-sm">
+                      <p className="text-xs text-red-600 dark:text-red-400 font-semibold uppercase">{language === 'en' ? 'Address' : 'Adresse'}</p>
+                      <p className="text-red-900 dark:text-red-300 font-semibold text-sm">
                         {supplier.address}
                         {supplier.city && ` · ${supplier.city}`}
                         {supplier.country && ` · ${supplier.country}`}
@@ -326,11 +326,11 @@ const SuppliersPage = () => {
                 )}
 
                 {supplier.email && (
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-blue-600" />
+                  <div className="p-3 bg-blue-50 dark:bg-slate-700 rounded-lg border border-blue-100 dark:border-blue-700 flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     <div className="flex-1">
-                      <p className="text-xs text-blue-600 font-semibold uppercase">Email</p>
-                      <a href={`mailto:${supplier.email}`} className="text-blue-900 font-semibold hover:text-blue-700 text-sm truncate">
+                      <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase">Email</p>
+                      <a href={`mailto:${supplier.email}`} className="text-blue-900 dark:text-blue-300 font-semibold hover:text-blue-700 dark:hover:text-blue-200 text-sm truncate">
                         {supplier.email}
                       </a>
                     </div>
@@ -354,7 +354,7 @@ const SuppliersPage = () => {
       {/* Empty State */}
       {!loading && filteredSuppliers.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-slate-400">
             {language === 'en'
               ? 'No suppliers found. Create your first supplier!'
               : 'Aucun fournisseur trouvé. Créez votre premier fournisseur!'}
@@ -370,8 +370,8 @@ const SuppliersPage = () => {
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           >
-            <div className="sticky top-0 p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex justify-between items-center">
-              <h2 className="text-3xl font-bold text-slate-900">
+            <div className="sticky top-0 p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-700 flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                 {editingSupplier
                   ? '✏️ ' + (language === 'en' ? 'Edit Supplier' : 'Modifier Fournisseur')
                   : '➕ ' + (language === 'en' ? 'Add New Supplier' : 'Ajouter Nouveau Fournisseur')}
@@ -389,9 +389,9 @@ const SuppliersPage = () => {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+                className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-blue-200 dark:border-blue-700"
               >
-                <h3 className="text-lg font-bold text-blue-900 mb-4">🏭 {language === 'en' ? 'Supplier Name' : 'Nom du Fournisseur'}</h3>
+                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4">🏭 {language === 'en' ? 'Supplier Name' : 'Nom du Fournisseur'}</h3>
                 <input
                   type="text"
                   placeholder={language === 'en' ? 'e.g., Tech Supplies Inc.' : 'Ex: Tech Supplies Inc.'}
@@ -406,7 +406,7 @@ const SuppliersPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
+                className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-green-200 dark:border-green-700"
               >
                 <h3 className="text-lg font-bold text-green-900 dark:text-green-300 mb-4">📞 {language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'}</h3>
                 <input
@@ -423,9 +423,9 @@ const SuppliersPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200"
+                className="p-4 bg-gradient-to-br from-red-50 to-red-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-red-200 dark:border-red-700"
               >
-                <h3 className="text-lg font-bold text-red-900 mb-4">📍 {language === 'en' ? 'Address' : 'Adresse'}</h3>
+                <h3 className="text-lg font-bold text-red-900 dark:text-red-300 mb-4">📍 {language === 'en' ? 'Address' : 'Adresse'}</h3>
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-red-900 dark:text-red-300">{language === 'en' ? 'Address' : 'Adresse'}</label>
                   <input
@@ -443,15 +443,15 @@ const SuppliersPage = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200"
+                className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-gray-200 dark:border-slate-600"
               >
-                <p className="text-sm text-gray-600 italic">
+                <p className="text-sm text-gray-600 dark:text-slate-400 italic">
                   ✅ {language === 'en' ? 'All required information provided' : 'Toutes les informations requises fournies'}
                 </p>
               </motion.div>
 
               {/* Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-slate-200">
+              <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <Button
                   onClick={handleSaveSupplier}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg h-12 font-bold text-base"
@@ -461,7 +461,7 @@ const SuppliersPage = () => {
                 <Button
                   onClick={() => setShowAddModal(false)}
                   variant="outline"
-                  className="flex-1 rounded-lg h-12 font-bold text-base"
+                  className="flex-1 rounded-lg h-12 font-bold text-base dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-600"
                 >
                   ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
                 </Button>

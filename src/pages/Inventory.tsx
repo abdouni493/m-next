@@ -956,9 +956,9 @@ const Inventory = () => {
                 whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
                 className="group"
               >
-                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm overflow-hidden">
+                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm overflow-hidden">
                   {/* Image Section */}
-                  <div className="relative h-28 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden group">
+                  <div className="relative h-28 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center overflow-hidden group">
                     {charger.primary_image ? (
                       <img
                         src={charger.primary_image}
@@ -967,8 +967,8 @@ const Inventory = () => {
                       />
                     ) : (
                       <div className="flex flex-col items-center gap-2">
-                        <ImageIcon className="w-12 h-12 text-slate-400" />
-                        <p className="text-xs text-slate-500">{language === 'en' ? 'No image' : 'Pas d\'image'}</p>
+                        <ImageIcon className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'en' ? 'No image' : 'Pas d\'image'}</p>
                       </div>
                     )}
 
@@ -1005,58 +1005,58 @@ const Inventory = () => {
                   {/* Content Section */}
                   <CardContent className="pt-4 pb-4">
                     {/* Product Name */}
-                    <h3 className="text-base font-bold text-slate-800 mb-2 line-clamp-2">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-white mb-2 line-clamp-2">
                       {charger.name}
                     </h3>
 
                     {/* Mark Badge */}
                     {charger.mark && (
                       <div className="mb-3 inline-block">
-                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
                           🏷️ {charger.mark.name}
                         </span>
                       </div>
                     )}
 
                     {/* Specs Grid */}
-                    <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg">
+                    <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 rounded-lg">
                       <div className="text-center">
-                        <p className="text-xs text-slate-600 font-semibold">⚡ V</p>
-                        <p className="text-sm font-bold text-slate-800">{charger.voltage}V</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">⚡ V</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">{charger.voltage}V</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-xs text-slate-600 font-semibold">🔌 W</p>
-                        <p className="text-sm font-bold text-slate-800">{charger.wattage}W</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">🔌 W</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">{charger.wattage}W</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-xs text-slate-600 font-semibold">⚙️ A</p>
-                        <p className="text-sm font-bold text-slate-800">{charger.amperage}A</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">⚙️ A</p>
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">{charger.amperage}A</p>
                       </div>
                       {charger.connector_type && (
                         <div className="text-center col-span-2">
-                          <p className="text-xs text-slate-600 font-semibold">🔗 {charger.connector_type.name}</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">🔗 {charger.connector_type.name}</p>
                         </div>
                       )}
                     </div>
 
                     {/* Stock & Pricing */}
                     <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                      <div className="p-2 bg-purple-50 rounded-lg">
-                        <p className="text-xs text-purple-600 font-bold">📦</p>
-                        <p className="text-base font-bold text-purple-700">{charger.quantity_actual}</p>
+                      <div className="p-2 bg-purple-50 dark:bg-slate-700 rounded-lg">
+                        <p className="text-xs text-purple-600 dark:text-purple-400 font-bold">📦</p>
+                        <p className="text-base font-bold text-purple-700 dark:text-purple-300">{charger.quantity_actual}</p>
                       </div>
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <p className="text-xs text-blue-600 font-bold">💵</p>
-                        <p className="text-sm font-bold text-blue-700">{charger.purchase_price.toFixed(0)}</p>
+                      <div className="p-2 bg-blue-50 dark:bg-slate-700 rounded-lg">
+                        <p className="text-xs text-blue-600 dark:text-blue-400 font-bold">💵</p>
+                        <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{charger.purchase_price.toFixed(0)}</p>
                       </div>
-                      <div className="p-2 bg-emerald-50 rounded-lg">
-                        <p className="text-xs text-emerald-600 font-bold">💰</p>
-                        <p className="text-sm font-bold text-emerald-700">{charger.selling_price.toFixed(0)}</p>
+                      <div className="p-2 bg-emerald-50 dark:bg-slate-700 rounded-lg">
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">💰</p>
+                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">{charger.selling_price.toFixed(0)}</p>
                       </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-1 pt-2 border-t border-slate-200">
+                    <div className="flex gap-1 pt-2 border-t border-slate-200 dark:border-slate-700">
                       <button
                         onClick={() => {
                           // Refresh charger data and then show details
@@ -1153,7 +1153,7 @@ const Inventory = () => {
             className="bg-white dark:bg-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           >
             <div className="sticky top-0 p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 dark:from-slate-700 to-emerald-50 dark:to-slate-700 flex justify-between items-center">
-              <h2 className="text-3xl font-bold text-slate-900">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
                 {isEditingMode 
                   ? (language === 'en' ? '✏️ Edit Charger' : '✏️ Modifier Chargeur')
                   : (language === 'en' ? '➕ Add New Charger' : '➕ Ajouter Nouveau Chargeur')}
@@ -1192,14 +1192,14 @@ const Inventory = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0 }}
-                className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200"
+                className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-cyan-200 dark:border-cyan-700"
               >
-                <h3 className="text-lg font-bold text-cyan-900 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'}</h3>
+                <h3 className="text-lg font-bold text-cyan-900 dark:text-cyan-300 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'}</h3>
                 
                 {/* Existing Images Gallery (when editing) */}
                 {isEditingMode && editingChargerId && chargerImages.length > 0 && (
                   <div className="mb-4 p-4 bg-white dark:bg-slate-700 rounded-lg border border-cyan-300 dark:border-cyan-600">
-                    <p className="text-xs font-semibold text-cyan-700 mb-3">📸 {language === 'en' ? 'Existing Images - Click to set as Primary' : 'Images Existantes - Cliquez pour définir comme principale'} ({chargerImages.length})</p>
+                    <p className="text-xs font-semibold text-cyan-700 dark:text-cyan-300 mb-3">📸 {language === 'en' ? 'Existing Images - Click to set as Primary' : 'Images Existantes - Cliquez pour définir comme principale'} ({chargerImages.length})</p>
                     <div className="grid grid-cols-3 gap-3">
                       {chargerImages.map((imageObj, index) => (
                         <button
@@ -1239,14 +1239,14 @@ const Inventory = () => {
                   />
                   <label htmlFor="imageInput" className="cursor-pointer block">
                     <ImageIcon className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
-                    <p className="text-cyan-900 font-semibold">
+                    <p className="text-cyan-900 dark:text-cyan-300 font-semibold">
                       {formData.images.length > 0
                         ? `✅ ${formData.images.length} ${language === 'en' ? 'new image(s) selected' : 'nouvelle(s) image(s) sélectionnée(s)'}`
                         : language === 'en'
                         ? '📤 Click to select images'
                         : '📤 Cliquez pour sélectionner des images'}
                     </p>
-                    <p className="text-xs text-cyan-700 mt-2">
+                    <p className="text-xs text-cyan-700 dark:text-cyan-400 mt-2">
                       {isEditingMode ? (language === 'en' ? 'Add more images to existing ones' : 'Ajoutez plus d\'images aux existantes') : (language === 'en' ? 'Select one or more images' : 'Sélectionnez une ou plusieurs images')}
                     </p>
                   </label>
@@ -1255,7 +1255,7 @@ const Inventory = () => {
                 {/* Image Preview Section */}
                 {formData.images.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-cyan-700 mb-3">🎯 {language === 'en' ? 'New Images - Select which one is primary' : 'Nouvelles Images - Sélectionnez laquelle est principale'}</p>
+                    <p className="text-xs font-semibold text-cyan-700 dark:text-cyan-400 mb-3">🎯 {language === 'en' ? 'New Images - Select which one is primary' : 'Nouvelles Images - Sélectionnez laquelle est principale'}</p>
                     <div className="grid grid-cols-3 gap-3">
                       {formData.images.map((image, index) => (
                         <button
@@ -1305,12 +1305,12 @@ const Inventory = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
-                className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+                className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-blue-200 dark:border-blue-700"
               >
-                <h3 className="text-lg font-bold text-blue-900 mb-4">📦 {language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
+                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4">📦 {language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-blue-900">
+                    <label className="block text-sm font-semibold mb-2 text-blue-900 dark:text-blue-300">
                       🏷️ {language === 'en' ? 'Product Name' : 'Nom du Produit'} *
                     </label>
                     <input
@@ -1346,16 +1346,16 @@ const Inventory = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200"
+                className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-purple-200 dark:border-purple-700"
               >
-                <h3 className="text-lg font-bold text-purple-900 mb-5">🏢 {language === 'en' ? 'Brand & Connector' : 'Marque & Connecteur'}</h3>
+                <h3 className="text-lg font-bold text-purple-900 dark:text-purple-300 mb-5">🏢 {language === 'en' ? 'Brand & Connector' : 'Marque & Connecteur'}</h3>
                 
                 {/* Streamlined Grid: 1 column on mobile, 2 columns on tablet+ */}
                 <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
                   
                   {/* Brand / Mark Field */}
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-purple-900">
+                    <label className="block text-sm font-semibold mb-2 text-purple-900 dark:text-purple-300">
                       🏷️ {language === 'en' ? 'Mark / Brand' : 'Marque'} *
                     </label>
                     <div className="flex gap-2">
@@ -1410,7 +1410,7 @@ const Inventory = () => {
 
                   {/* Connector Type Field */}
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-purple-900">
+                    <label className="block text-sm font-semibold mb-2 text-purple-900 dark:text-purple-300">
                       🔗 {language === 'en' ? 'Connector Type' : 'Type de Connecteur'} *
                     </label>
                     <div className="flex gap-2">
@@ -1466,9 +1466,9 @@ const Inventory = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200"
+                className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-yellow-200 dark:border-yellow-700"
               >
-                <h3 className="text-lg font-bold text-yellow-900 mb-4">⚡ {language === 'en' ? 'Electrical Specs' : 'Spécifications Électriques'}</h3>
+                <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-300 mb-4">⚡ {language === 'en' ? 'Electrical Specs' : 'Spécifications Électriques'}</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">⚡ Voltage</label>
@@ -1529,16 +1529,16 @@ const Inventory = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="p-4 bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl border border-rose-200"
+                className="p-4 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-rose-200 dark:border-rose-700"
               >
-                <h3 className="text-lg font-bold text-rose-900 mb-4">💰 {language === 'en' ? 'Selling Prices' : 'Prix de Vente'}</h3>
-                <p className="text-sm text-rose-700 mb-4">{language === 'en' ? 'Set different prices for different customer types' : 'Définissez des prix différents pour les différents types de clients'}</p>
+                <h3 className="text-lg font-bold text-rose-900 dark:text-rose-300 mb-4">💰 {language === 'en' ? 'Selling Prices' : 'Prix de Vente'}</h3>
+                <p className="text-sm text-rose-700 dark:text-rose-300 mb-4">{language === 'en' ? 'Set different prices for different customer types' : 'Définissez des prix différents pour les différents types de clients'}</p>
                 
                 {/* Selling Prices - Three Tier System */}
                 <div className="grid grid-cols-3 gap-3">
                   {/* Price 1 - Normal */}
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <label className="block text-xs font-semibold mb-2 text-blue-900">💰 {language === 'en' ? 'Normal Price' : 'Prix Normal'} *</label>
+                  <div className="p-3 bg-blue-50 dark:bg-slate-600 border border-blue-200 dark:border-blue-700 rounded-lg">
+                    <label className="block text-xs font-semibold mb-2 text-blue-900 dark:text-blue-300">💰 {language === 'en' ? 'Normal Price' : 'Prix Normal'} *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -1552,13 +1552,13 @@ const Inventory = () => {
                           selling_price: e.target.value // Keep in sync for backward compatibility
                         })
                       }}
-                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white font-bold text-sm"
+                      className="w-full px-3 py-2 border border-blue-300 dark:border-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 font-bold text-sm text-slate-900 dark:text-white"
                     />
                   </div>
 
                   {/* Price 2 - Revendeur (Reseller) */}
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <label className="block text-xs font-semibold mb-2 text-amber-900">🔄 {language === 'en' ? 'Revendeur Price' : 'Prix Revendeur'}</label>
+                  <div className="p-3 bg-amber-50 dark:bg-slate-600 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <label className="block text-xs font-semibold mb-2 text-amber-900 dark:text-amber-300">🔄 {language === 'en' ? 'Revendeur Price' : 'Prix Revendeur'}</label>
                     <input
                       type="number"
                       step="0.01"
@@ -1568,13 +1568,13 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, selling_price_2: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white font-bold text-sm"
+                      className="w-full px-3 py-2 border border-amber-300 dark:border-amber-600 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white dark:bg-slate-700 font-bold text-sm text-slate-900 dark:text-white"
                     />
                   </div>
 
                   {/* Price 3 - Wholesale */}
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                    <label className="block text-xs font-semibold mb-2 text-emerald-900">📦 {language === 'en' ? 'Wholesale Price' : 'Prix Gros'}</label>
+                  <div className="p-3 bg-emerald-50 dark:bg-slate-600 border border-emerald-200 dark:border-emerald-700 rounded-lg">
+                    <label className="block text-xs font-semibold mb-2 text-emerald-900 dark:text-emerald-300">📦 {language === 'en' ? 'Wholesale Price' : 'Prix Gros'}</label>
                     <input
                       type="number"
                       step="0.01"
@@ -1584,14 +1584,14 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, selling_price_3: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-bold text-sm"
+                      className="w-full px-3 py-2 border border-emerald-300 dark:border-emerald-600 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-700 font-bold text-sm text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
               </motion.div>
 
               {/* Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-slate-200">
+              <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <Button
                   onClick={handleSaveCharger}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-lg h-12 font-bold text-base"
@@ -1622,7 +1622,7 @@ const Inventory = () => {
                     });
                   }}
                   variant="outline"
-                  className="flex-1 rounded-lg h-12 font-bold text-base"
+                  className="flex-1 rounded-lg h-12 font-bold text-base dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-700"
                 >
                   ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
                 </Button>
@@ -1647,7 +1647,7 @@ const Inventory = () => {
               </h2>
               <button
                 onClick={() => setSelectedCharger(null)}
-                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg p-2 transition text-2xl"
+                className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg p-2 transition"
               >
                 ❌
               </button>
@@ -1661,9 +1661,9 @@ const Inventory = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0 }}
-                  className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200"
+                  className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-cyan-200 dark:border-cyan-700"
                 >
-                  <h3 className="text-lg font-bold text-cyan-900 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'} ({chargerImages.length})</h3>
+                  <h3 className="text-lg font-bold text-cyan-900 dark:text-cyan-300 mb-4">🖼️ {language === 'en' ? 'Product Images' : 'Images du Produit'} ({chargerImages.length})</h3>
                   {chargerImages.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {chargerImages.map((imageObj, index) => {
