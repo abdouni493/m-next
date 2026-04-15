@@ -143,19 +143,19 @@ export default function LandingPageComponent() {
         className="relative w-full min-h-screen flex items-center justify-center overflow-hidden"
         style={backgroundStyle}
       >
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 z-0" />
+        {/* Background Overlay - Lighter for mobile to show image better */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/20 md:from-black/40 md:via-black/30 md:to-black/40 z-10" />
 
-        {/* Background Image - Centered Container */}
+        {/* Background Image - Centered Container - Mobile & Desktop Optimized */}
         {imageUrl && (
           <div className="absolute inset-0 z-[1] flex items-center justify-center pointer-events-none">
-            <div className="w-full h-full max-w-6xl flex items-center justify-center">
+            <div className="w-full h-full px-2 sm:px-4 md:px-0 flex items-center justify-center">
               <img
                 src={imageUrl}
                 alt="Hero background"
-                className="w-full h-full object-contain md:object-cover rounded-none md:rounded-2xl shadow-2xl"
+                className="w-full h-full object-cover md:rounded-3xl shadow-2xl"
                 style={{
-                  maxHeight: '100%',
+                  maxHeight: '100vh',
                   maxWidth: '100%',
                 }}
               />
@@ -272,30 +272,30 @@ export default function LandingPageComponent() {
 
         {/* Content - Overlay Text */}
         <motion.div
-          className="relative z-[5] w-full h-full flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 lg:px-16 py-8 sm:py-12 md:py-20"
+          className="relative z-[5] w-full h-full flex flex-col items-center justify-center px-3 sm:px-6 md:px-12 lg:px-16 py-6 sm:py-10 md:py-20 min-h-screen"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Mobile: Stack content, Desktop: Side by side with image */}
-          <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
-            {/* Text Content */}
-            <div className="flex-1 text-center md:text-left">
+          {/* Mobile: Full screen display, Desktop: Side by side with image */}
+          <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
+            {/* Text Content - Optimized for mobile */}
+            <div className="flex-1 text-center md:text-left w-full md:w-auto">
               {/* Main Heading */}
               <motion.div
                 variants={titleVariants}
-                className="mb-4 sm:mb-8"
+                className="mb-3 sm:mb-6"
               >
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 sm:mb-4 tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-2 sm:mb-3 tracking-tight leading-tight">
                   {storeName}
                 </h1>
-                <div className="h-1 w-12 sm:w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto md:mx-0 rounded-full" />
+                <div className="h-1 w-10 sm:w-14 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto md:mx-0 rounded-full" />
               </motion.div>
 
               {/* Slogan */}
               <motion.p
                 variants={itemVariants}
-                className="text-base sm:text-lg md:text-xl text-blue-200 font-light mb-3 md:mb-4"
+                className="text-sm sm:text-base md:text-lg text-blue-200 font-light mb-2 md:mb-3"
               >
                 {slogan}
               </motion.p>
@@ -303,22 +303,22 @@ export default function LandingPageComponent() {
               {/* Description */}
               <motion.p
                 variants={itemVariants}
-                className="text-sm sm:text-base text-gray-300 mb-6 md:mb-8 leading-relaxed"
+                className="text-xs sm:text-sm md:text-base text-gray-300 mb-4 md:mb-6 leading-relaxed"
               >
                 {description}
               </motion.p>
 
-              {/* CTA Buttons */}
+              {/* CTA Buttons - Mobile Optimized */}
               <motion.div
                 variants={itemVariants}
-                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start"
+                className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center md:justify-start w-full sm:w-auto"
               >
                 <motion.button
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
                   onClick={() => navigate('/website-shop')}
-                  className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/50 transition-all duration-300 text-sm sm:text-base"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-blue-500/50 transition-all duration-300 text-xs sm:text-sm md:text-base whitespace-nowrap"
                 >
                   🛒 Shop Now
                 </motion.button>
@@ -328,22 +328,11 @@ export default function LandingPageComponent() {
                   whileHover="hover"
                   whileTap="tap"
                   onClick={() => navigate('/website-shop/offers')}
-                  className="px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-300 text-sm sm:text-base"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-300 text-xs sm:text-sm md:text-base whitespace-nowrap"
                 >
                   ✨ View Offers
                 </motion.button>
               </motion.div>
-
-              {/* Admin Upload Button - Hidden in production, shown for testing */}
-              {process.env.NODE_ENV === 'development' && (
-                <motion.button
-                  variants={itemVariants}
-                  onClick={() => setShowUploadUI(!showUploadUI)}
-                  className="mt-6 px-4 py-2 bg-gray-800/50 text-gray-300 rounded-lg border border-gray-600 hover:bg-gray-700/70 hover:text-white transition-all text-xs sm:text-sm font-medium"
-                >
-                  {showUploadUI ? 'Cancel' : 'Upload Hero Image'}
-                </motion.button>
-              )}
             </div>
 
             {/* Hidden on mobile, visible on desktop - separates image display */}
