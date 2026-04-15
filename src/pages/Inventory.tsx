@@ -858,17 +858,17 @@ const Inventory = () => {
   ).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-4xl font-bold text-slate-800 mb-2">
+        <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-2">
           {language === 'en' ? '🔋 Charger Inventory' : '🔋 Gestion du Stock Chargeurs'}
         </h1>
-        <p className="text-slate-600">
+        <p className="text-slate-600 dark:text-slate-400">
           {language === 'en'
             ? `📊 ${filteredChargers.length} products available • ⚠️ ${lowStockChargers} low stock alerts`
             : `📊 ${filteredChargers.length} produits disponibles • ⚠️ ${lowStockChargers} alertes de rupture`}

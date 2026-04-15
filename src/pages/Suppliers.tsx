@@ -194,7 +194,7 @@ const SuppliersPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -205,7 +205,7 @@ const SuppliersPage = () => {
           <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2">
             🏭 {language === 'en' ? 'Suppliers Management' : 'Gestion des Fournisseurs'}
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             {language === 'en'
               ? `📊 ${suppliers.length} suppliers in your network`
               : `📊 ${suppliers.length} fournisseurs dans votre réseau`}

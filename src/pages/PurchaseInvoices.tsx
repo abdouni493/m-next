@@ -646,7 +646,7 @@ export default function PurchaseInvoices() {
   const restToPay = Math.max(0, totalPrice - amountPaid);
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header with Statistics */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
