@@ -133,7 +133,8 @@ export default function LandingPageComponent() {
         backgroundImage: `url('${imageUrl}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat',
+        WebkitBackgroundSize: 'cover',
       }
     : {};
 
@@ -149,7 +150,7 @@ export default function LandingPageComponent() {
         style={backgroundStyle}
       >
         {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50 z-10" />
 
         {/* Upload UI - Admin Panel */}
         {showUploadUI && (
