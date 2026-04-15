@@ -242,85 +242,96 @@ export default function WebsiteOffers() {
         />
       </motion.div>
 
-      {/* Brand Filter */}
+      {/* Brand Filter - Modern Grid Design with Full Image Cards */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="space-y-4"
+        className="space-y-6"
       >
-        <div className="text-center">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
-            <span className="text-2xl">🏷️</span>
-            {language === 'ar' ? 'تصفية حسب الماركة' : 'Filtrer par Marque'}
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            {language === 'ar' ? 'اختر من جميع الماركات المتاحة' : 'Sélectionnez parmi toutes les marques disponibles'}
-          </p>
+        {/* Header with Counter */}
+        <div className="flex items-center justify-between px-6 py-4">
+          <div>
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              {language === 'ar' ? '🏷️ تصفية حسب الماركة' : '🏷️ Filtrer par Marque'}
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+              {language === 'ar' ? 'اختر من جميع العلامات التجارية المتاحة' : 'Sélectionnez parmi toutes les marques disponibles'}
+            </p>
+          </div>
+          {selectedBrand && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg"
+            >
+              ✅ {language === 'ar' ? `${filteredProducts.length} منتج` : `${filteredProducts.length} produits`}
+            </motion.div>
+          )}
         </div>
-
-        {/* Brand Pills with Logos */}
-        <div className="flex flex-wrap gap-4 justify-center px-4 py-4">
-          {/* Reset Filter Button */}
+        
+        {/* Brand Squares Grid - Full Image Cards */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 py-6 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900/50 dark:via-blue-950/30 dark:to-purple-950/30 rounded-3xl border-2 border-blue-200 dark:border-blue-700/50 backdrop-blur-sm w-full">
+          {/* All Brands Square */}
           <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
+            whileHover={{ scale: 1.08, y: -4 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => {
               setSelectedBrand('');
               applyFilters(searchQuery, '');
             }}
-            className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+            className={`flex flex-col items-center justify-center w-full h-16 sm:h-20 rounded-lg transition-all duration-300 overflow-hidden relative group ${
               selectedBrand === ''
-                ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg scale-105'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-xl ring-2 ring-blue-400'
+                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-lg border-2 border-slate-200 dark:border-slate-600 hover:shadow-xl hover:border-blue-400'
             }`}
           >
-            <span className="text-2xl">✨</span>
-            <span className="text-xs">{language === 'ar' ? 'الكل' : 'Tous'}</span>
+            <span className="text-2xl sm:text-3xl">⭐</span>
+            <span className="text-xs font-bold text-center px-1 hidden sm:block">
+              {language === 'ar' ? 'الكل' : 'All'}
+            </span>
           </motion.button>
 
-          {/* Brand Buttons with Logos */}
-          {marks.map((mark) => (
+          {/* Individual Brand Squares with Full Images */}
+          {marks.map((mark, index) => (
             <motion.button
               key={mark.id}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
+              whileHover={{ scale: 1.08, y: -3 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.03, type: 'spring', damping: 12 }}
               onClick={() => handleBrandFilter(mark.name)}
-              className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+              className={`flex items-center justify-center w-full h-16 sm:h-20 rounded-lg transition-all duration-300 relative group overflow-hidden ${
                 selectedBrand === mark.name
-                  ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg scale-105'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 hover:shadow-md'
+                  ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl ring-2 ring-blue-400'
+                  : 'bg-white dark:bg-slate-800 shadow-lg border-2 border-slate-200 dark:border-slate-600 hover:shadow-xl hover:border-blue-400'
               }`}
+              title={mark.name}
             >
-              {mark.logo_url && (
-                <div className={`h-8 w-8 flex items-center justify-center rounded-lg ${selectedBrand === mark.name ? 'bg-white/20' : 'bg-slate-300 dark:bg-slate-600'}`}>
-                  <img
-                    src={mark.logo_url}
-                    alt={mark.name}
-                    className="h-full w-full object-contain p-1"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
+              {/* Background Image - Full Coverage */}
+              {mark.logo_url ? (
+                <img
+                  src={mark.logo_url}
+                  alt={mark.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <span className="text-xl sm:text-2xl">🏷️</span>
               )}
-              <span className="text-xs line-clamp-1">{mark.name}</span>
+              
+              {/* Hover Overlay with Brand Name */}
+              <div className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                <span className="text-white text-xs font-bold text-center px-2 line-clamp-2">
+                  {mark.name}
+                </span>
+              </div>
             </motion.button>
           ))}
         </div>
-
-        {/* Active Filter Display */}
-        {selectedBrand && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm py-2 px-4">
-              🏷️ {language === 'ar' ? 'منتجات' : 'Produits'} {selectedBrand}: {filteredProducts.length} {language === 'ar' ? 'عنصر' : 'produit'}
-            </Badge>
-          </motion.div>
-        )}
       </motion.div>
 
       {/* Cart Notification Toast */}
