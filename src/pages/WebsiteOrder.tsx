@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getOffersREST, getSpecialOffersREST, createOrderREST, getDeliveryAgenciesForWilaya, supabase } from '@/lib/supabaseClient';
+import { getOffersREST, getSpecialOffersREST, createOrderREST, supabase } from '@/lib/supabaseClient';
 import { ArrowLeft, Zap, ShoppingCart, Check, MapPin, Phone, User } from 'lucide-react';
 
 interface Product {
@@ -32,18 +32,6 @@ interface Product {
   special_price?: number;
   discount_percentage: number;
   is_special?: boolean;
-}
-
-interface DeliveryAgency {
-  id: string;
-  name: string;
-  logo_url?: string;
-  contact_phone?: string;
-  contact_email?: string;
-  wilaya_price?: {
-    price_domicile: number;
-    price_bureau: number;
-  };
 }
 
 // List of Algerian Wilayas
@@ -132,20 +120,12 @@ export default function WebsiteOrder() {
     message: string;
     itemsCount?: number;
   }>({ type: null, message: '' });
-  
-  // Delivery related states
-  const [deliveryAgencies, setDeliveryAgencies] = useState<DeliveryAgency[]>([]);
-  const [selectedAgency, setSelectedAgency] = useState<DeliveryAgency | null>(null);
-  const [deliveryPrice, setDeliveryPrice] = useState(0);
-  const [loadingAgencies, setLoadingAgencies] = useState(false);
-  
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
     address: '',
     wilaya: '',
     deliveryType: 'domicile',
-    deliveryAgency: '',
   });
 
   useEffect(() => {
@@ -193,36 +173,6 @@ export default function WebsiteOrder() {
     fetchProducts();
   }, [searchParams]);
 
-  // Fetch delivery agencies when wilaya changes
-  useEffect(() => {
-    const fetchDeliveryAgencies = async () => {
-      if (!formData.wilaya) {
-        setDeliveryAgencies([]);
-        setSelectedAgency(null);
-        setDeliveryPrice(0);
-        return;
-      }
-
-      setLoadingAgencies(true);
-      try {
-        const agencies = await getDeliveryAgenciesForWilaya(formData.wilaya);
-        setDeliveryAgencies(agencies);
-        
-        // Reset agency selection when wilaya changes
-        setSelectedAgency(null);
-        setFormData(prev => ({ ...prev, deliveryAgency: '' }));
-        setDeliveryPrice(0);
-      } catch (error) {
-        console.error('Error fetching delivery agencies:', error);
-        setDeliveryAgencies([]);
-      } finally {
-        setLoadingAgencies(false);
-      }
-    };
-
-    fetchDeliveryAgencies();
-  }, [formData.wilaya]);
-
   const handleProductSearch = (query: string) => {
     setProductSearchQuery(query);
     if (query.trim() === '') {
@@ -258,32 +208,11 @@ export default function WebsiteOrder() {
     }));
   };
 
-  const handleDeliveryAgencyChange = (agencyId: string) => {
-    const agency = deliveryAgencies.find(a => a.id === agencyId);
-    if (agency && agency.wilaya_price) {
-      setSelectedAgency(agency);
-      setFormData(prev => ({ ...prev, deliveryAgency: agencyId }));
-      // Set default price based on delivery type
-      const price = formData.deliveryType === 'bureau' 
-        ? agency.wilaya_price.price_bureau 
-        : agency.wilaya_price.price_domicile;
-      setDeliveryPrice(price);
-    }
-  };
-
   const handleDeliveryChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
       deliveryType: value,
     }));
-    
-    // Update price based on selected delivery type and agency
-    if (selectedAgency && selectedAgency.wilaya_price) {
-      const price = value === 'bureau' 
-        ? selectedAgency.wilaya_price.price_bureau 
-        : selectedAgency.wilaya_price.price_domicile;
-      setDeliveryPrice(price);
-    }
   };
 
   const addProductToCart = (prod: Product, qty: number) => {
@@ -329,11 +258,10 @@ export default function WebsiteOrder() {
   };
 
   const finalPrice = product ? (product.is_special ? product.special_price : product.offer_price) : 0;
-  const subtotal = (finalPrice || 0) * quantity;
-  const totalPrice = subtotal + deliveryPrice;
+  const totalPrice = (finalPrice || 0) * quantity;
 
   const handlePlaceOrder = async () => {
-    if (!formData.fullName || !formData.phone || !formData.address || !formData.wilaya || !formData.deliveryAgency) {
+    if (!formData.fullName || !formData.phone || !formData.address || !formData.wilaya) {
       const errorMsg = language === 'ar' ? 'الرجاء ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs requis';
       setOrderStatus({ type: 'error', message: errorMsg });
       console.error('❌ Validation Error: Missing required fields');
@@ -355,9 +283,9 @@ export default function WebsiteOrder() {
 
     try {
       // Calculate total from all cart items
-      const subtotalPrice = cartItems.reduce((sum: number, item: any) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+      const totalPrice = cartItems.reduce((sum: number, item: any) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
       const discountAmount = 0;
-      const finalTotalPrice = subtotalPrice + deliveryPrice - discountAmount;
+      const finalPrice = totalPrice - discountAmount;
       
       // Create order in database
       const orderData = {
@@ -367,12 +295,10 @@ export default function WebsiteOrder() {
         customer_address: formData.address,
         customer_wilaya: formData.wilaya,
         delivery_type: formData.deliveryType,
-        delivery_agency_id: formData.deliveryAgency,
-        delivery_price: deliveryPrice,
         status: 'pending',
-        total_price: subtotalPrice,
+        total_price: totalPrice,
         discount_amount: discountAmount,
-        final_price: finalTotalPrice,
+        final_price: finalPrice,
         notes: '',
         user_id: null,
         created_at: new Date().toISOString(),
@@ -746,26 +672,37 @@ export default function WebsiteOrder() {
   }
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 py-12 space-y-8 ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>
+      {/* Header - Fixed/Sticky with Navy Bar */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4"
+        className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 dark:from-slate-900 dark:via-blue-950 dark:to-slate-900 backdrop-blur-xl border-b-4 border-blue-600 dark:border-blue-500 shadow-2xl"
       >
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="hover:bg-blue-100 dark:hover:bg-slate-700"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-          {language === 'ar' ? '📦 صفحة الطلب' : '📦 Passer Commande'}
-        </h1>
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6 flex items-center justify-between gap-4">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate(-1)}
+            className="hover:bg-blue-700/50 dark:hover:bg-blue-900/50 rounded-lg h-10 w-10 p-0 flex-shrink-0 flex items-center justify-center transition-all"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </motion.button>
+          <div className="flex-1 min-w-0">
+            <motion.h1 
+              animate={{ y: [0, -2, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="text-2xl md:text-3xl font-black text-white drop-shadow-lg truncate"
+            >
+              📦 {language === 'ar' ? 'الطلب' : 'Commande'}
+            </motion.h1>
+            <p className="text-xs md:text-sm text-blue-100">{language === 'ar' ? '✨ أضف المنتجات وأكمل طلبك' : '✨ Ajoutez les produits et finalisez'}</p>
+          </div>
+        </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-12 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Product Selection / Search */}
         {showProductSearch && (
           <motion.div
@@ -997,117 +934,39 @@ export default function WebsiteOrder() {
                 </Select>
               </div>
 
-              {/* Delivery Agency Selection */}
-              {formData.wilaya && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-                    🚐 {language === 'ar' ? 'وكالة التوصيل *' : 'Agence de Livraison *'}
-                  </label>
-                  
-                  {loadingAgencies ? (
-                    <div className="flex justify-center py-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                  ) : deliveryAgencies.length === 0 ? (
-                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-700 rounded-lg text-center">
-                      <p className="text-yellow-700 dark:text-yellow-300 font-semibold">
-                        {language === 'ar' ? 'لا توجد وكالات متاحة لهذه الولاية' : 'Aucune agence disponible pour cette wilaya'}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-3">
-                      {deliveryAgencies.map(agency => (
-                        <motion.button
-                          key={agency.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => handleDeliveryAgencyChange(agency.id)}
-                          className={`p-4 rounded-xl border-2 transition-all text-left ${
-                            formData.deliveryAgency === agency.id
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                              : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-blue-400'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                {agency.logo_url && (
-                                  <img src={agency.logo_url} alt={agency.name} className="h-6 w-6 object-contain" />
-                                )}
-                                {agency.name}
-                              </div>
-                              {agency.contact_phone && (
-                                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                  📞 {agency.contact_phone}
-                                </div>
-                              )}
-                            </div>
-                            <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
-                              formData.deliveryAgency === agency.id
-                                ? 'border-blue-500 bg-blue-500'
-                                : 'border-slate-300'
-                            }`}>
-                              {formData.deliveryAgency === agency.id && (
-                                <Check className="w-3 h-3 text-white" />
-                              )}
-                            </div>
-                          </div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
-              )}
-
               {/* Delivery Type */}
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
                   🚚 {language === 'ar' ? 'نوع التوصيل *' : 'Type de Livraison *'}
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {DELIVERY_OPTIONS.map(option => {
-                    const price = option.id === 'bureau' 
-                      ? selectedAgency?.wilaya_price?.price_bureau || 0 
-                      : selectedAgency?.wilaya_price?.price_domicile || 0;
-                    
-                    return (
-                      <motion.button
-                        key={option.id}
-                        onClick={() => handleDeliveryChange(option.id)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        disabled={!selectedAgency}
-                        className={`p-4 rounded-xl border-2 transition-all ${
-                          !selectedAgency 
-                            ? 'opacity-50 cursor-not-allowed'
-                            : formData.deliveryType === option.id
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                            : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700'
-                        }`}
-                      >
-                        <div className="text-2xl mb-2">{option.emoji}</div>
-                        <div className="font-bold text-slate-900 dark:text-white mb-2">
-                          {language === 'ar' ? option.label_ar : option.label_fr}
-                        </div>
-                        <div className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                          {price.toFixed(2)} DZD
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          formData.deliveryType === option.id
-                            ? 'border-blue-500 bg-blue-500'
-                            : 'border-slate-300'
-                        }`}>
-                          {formData.deliveryType === option.id && (
-                            <Check className="w-3 h-3 text-white" />
-                          )}
-                        </div>
-                      </motion.button>
-                    );
-                  })}
+                  {DELIVERY_OPTIONS.map(option => (
+                    <motion.button
+                      key={option.id}
+                      onClick={() => handleDeliveryChange(option.id)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.deliveryType === option.id
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                          : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700'
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">{option.emoji}</div>
+                      <div className="font-bold text-slate-900 dark:text-white">
+                        {language === 'ar' ? option.label_ar : option.label_fr}
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 mt-2 flex items-center justify-center ${
+                        formData.deliveryType === option.id
+                          ? 'border-blue-500 bg-blue-500'
+                          : 'border-slate-300'
+                      }`}>
+                        {formData.deliveryType === option.id && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </div>
+                    </motion.button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1117,7 +976,7 @@ export default function WebsiteOrder() {
               <h3 className="font-bold text-slate-900 dark:text-white mb-4">
                 {language === 'ar' ? '📋 ملخص الطلب' : '📋 Résumé de la Commande'}
               </h3>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>{product.product_name}</span>
                   <span>x{quantity}</span>
@@ -1126,26 +985,9 @@ export default function WebsiteOrder() {
                   <span>{language === 'ar' ? 'سعر الوحدة:' : 'Prix unitaire:'}</span>
                   <span>{finalPrice?.toFixed(2)} DZD</span>
                 </div>
-                <div className="flex justify-between font-semibold text-base">
-                  <span>{language === 'ar' ? 'المنتجات:' : 'Produits:'}</span>
-                  <span className="text-blue-600 dark:text-blue-400">{subtotal.toFixed(2)} DZD</span>
-                </div>
-                
-                {deliveryPrice > 0 && (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="flex items-center gap-2">
-                        📦 {selectedAgency?.name}
-                        <span className="text-xs text-slate-500">({formData.deliveryType === 'bureau' ? language === 'ar' ? 'من المكتب' : 'Au Bureau' : language === 'ar' ? 'للمنزل' : 'À Domicile'})</span>
-                      </span>
-                      <span>{deliveryPrice.toFixed(2)} DZD</span>
-                    </div>
-                  </>
-                )}
-                
-                <div className="border-t border-slate-300 dark:border-slate-600 pt-3 mt-3 flex justify-between font-bold text-base">
+                <div className="border-t border-slate-300 dark:border-slate-600 pt-2 mt-2 flex justify-between font-bold text-base">
                   <span>{language === 'ar' ? 'الإجمالي:' : 'Total:'}</span>
-                  <span className="text-green-600 dark:text-green-400">{totalPrice.toFixed(2)} DZD</span>
+                  <span className="text-blue-600 dark:text-blue-400">{totalPrice.toFixed(2)} DZD</span>
                 </div>
               </div>
             </div>
@@ -1233,6 +1075,7 @@ export default function WebsiteOrder() {
             </div>
           </div>
         </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -275,18 +275,20 @@ export default function WebsiteCart() {
     try {
       // Try to get wilaya-specific price
       if (formData.client_wilaya) {
+        console.log(`🔍 Fetching delivery price for agency ${selectedAgency.id}, wilaya ${formData.client_wilaya}, type ${formData.delivery_type}`);
         const wilayaPrice = await getDeliveryPriceForWilaya(
           selectedAgency.id,
           formData.client_wilaya,
           formData.delivery_type as 'bureau' | 'domicile'
         );
         
+        console.log(`✅ Got wilaya-specific price: ${wilayaPrice}`);
         // Cache the result
         setDeliveryPriceCache(prev => new Map(prev).set(cacheKey, wilayaPrice));
         return wilayaPrice;
       }
     } catch (error) {
-      console.error('Error fetching wilaya-specific price:', error);
+      console.error('❌ Error fetching wilaya-specific price:', error);
     }
     
     // Fallback to agency default price
@@ -294,6 +296,7 @@ export default function WebsiteCart() {
       ? selectedAgency.price_bureau 
       : selectedAgency.price_domicile;
     
+    console.log(`📦 Using default agency price: ${defaultPrice}`);
     setDeliveryPriceCache(prev => new Map(prev).set(cacheKey, defaultPrice));
     return defaultPrice;
   };
@@ -394,27 +397,71 @@ export default function WebsiteCart() {
 
   if (orderPlaced && orderDetails) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 dark:from-slate-900 dark:to-slate-800 py-8 px-4 ${isRTL ? 'rtl' : 'ltr'}`}>
-        <div className="max-w-3xl mx-auto space-y-8">
-          {/* Success Header */}
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-center space-y-4"
-          >
+      <div className={`min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-slate-950 dark:via-green-950 dark:to-slate-900 ${isRTL ? 'rtl' : 'ltr'}`}>
+        {/* Animated Background */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="fixed inset-0 overflow-hidden pointer-events-none"
+        >
+          {[...Array(8)].map((_, i) => (
             <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-              className="mx-auto w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg"
+              key={i}
+              initial={{ y: window.innerHeight + 100, opacity: 0, x: Math.random() * 100 - 50 }}
+              animate={{ y: -100, opacity: [0, 1, 0], x: Math.random() * 100 - 50 }}
+              transition={{
+                duration: 4 + i * 0.5,
+                repeat: Infinity,
+                delay: i * 0.3,
+              }}
+              className="absolute left-1/4 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full blur-sm"
+              style={{ left: `${15 + i * 10}%` }}
+            />
+          ))}
+        </motion.div>
+
+        {/* Main Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="sticky top-0 z-40 bg-gradient-to-r from-green-900 via-emerald-800 to-teal-900 dark:from-slate-900 dark:via-green-950 dark:to-slate-900 backdrop-blur-xl border-b-4 border-green-600 dark:border-emerald-500 shadow-2xl"
+        >
+          <div className="max-w-4xl mx-auto px-4 py-6 text-center">
+            <motion.h1
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-3xl md:text-4xl font-black text-white drop-shadow-lg"
             >
-              <Check className="w-10 h-10 text-white" />
-            </motion.div>
-            <h1 className="text-4xl font-bold text-green-600">
-              {language === 'ar' ? '✅ تم الطلب بنجاح!' : '✅ Commande réussie!'}
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
-              {language === 'ar' ? 'شكراً لك على طلبك. سنتواصل معك قريباً!' : 'Merci pour votre commande. Nous vous contacterons bientôt!'}
-            </p>
+              🎉 {language === 'ar' ? 'شكراً لطلبك!' : 'Merci pour votre Commande!'}
+            </motion.h1>
+            <p className="text-green-100 text-sm md:text-base mt-2">{language === 'ar' ? '✨ سيتم معالجة طلبك في أسرع وقت' : '✨ Nous traiterons votre commande rapidement'}</p>
+          </div>
+        </motion.div>
+
+        <div className="max-w-4xl mx-auto px-4 py-8 md:py-12 space-y-8 relative z-10">
+          {/* Success Icon */}
+          <motion.div
+            initial={{ scale: 0, opacity: 0, rotate: -180 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+            className="flex justify-center"
+          >
+            <div className="relative">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full opacity-30 blur-2xl"
+              />
+              <div className="relative w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white dark:border-slate-800">
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Check className="w-16 h-16 text-white" strokeWidth={3} />
+                </motion.div>
+              </div>
+            </div>
           </motion.div>
 
           {/* Order Number */}
@@ -422,16 +469,20 @@ export default function WebsiteCart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-green-200 dark:border-green-700 p-6 shadow-lg text-center"
+            className="bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-950/30 rounded-3xl border-4 border-green-300 dark:border-green-700 p-8 shadow-xl text-center"
           >
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-              {language === 'ar' ? 'رقم الطلب' : 'Numéro de Commande'}
+            <p className="text-base text-slate-600 dark:text-slate-300 font-semibold mb-3">
+              {language === 'ar' ? '📋 رقم طلبك' : '📋 Votre Numéro de Commande'}
             </p>
-            <p className="text-3xl font-bold text-green-600 dark:text-green-400 font-mono">
-              #{orderDetails.order_number}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-              {orderDetails.created_at}
+            <motion.p
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-5xl font-black text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text font-mono"
+            >
+              {orderDetails.order_number}
+            </motion.p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 font-medium">
+              ⏰ {orderDetails.created_at}
             </p>
           </motion.div>
 
@@ -440,36 +491,32 @@ export default function WebsiteCart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl border border-blue-200 dark:border-blue-700 p-6 shadow-lg"
+            className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-slate-800 rounded-3xl border-3 border-blue-300 dark:border-blue-700 p-8 shadow-lg"
           >
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-600" />
-              {language === 'ar' ? '👤 بيانات العميل' : '👤 Données Client'}
-            </h2>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                <User className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                {language === 'ar' ? '👤 بيانات العميل' : '👤 Informations Client'}
+              </h2>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  {language === 'ar' ? '👤 الاسم' : '👤 Nom'}
-                </p>
-                <p className="font-bold text-slate-900 dark:text-white">{orderDetails.customer_name}</p>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-blue-200 dark:border-blue-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">👤 {language === 'ar' ? 'الاسم' : 'Nom'}</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_name}</p>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  {language === 'ar' ? '📱 الهاتف' : '📱 Téléphone'}
-                </p>
-                <p className="font-bold text-slate-900 dark:text-white">{orderDetails.customer_phone}</p>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-blue-200 dark:border-blue-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">📱 {language === 'ar' ? 'الهاتف' : 'Téléphone'}</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_phone}</p>
               </div>
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  {language === 'ar' ? '🗺️ الولاية' : '🗺️ Wilaya'}
-                </p>
-                <p className="font-bold text-slate-900 dark:text-white">{orderDetails.customer_wilaya}</p>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">🗺️ {language === 'ar' ? 'الولاية' : 'Wilaya'}</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_wilaya}</p>
               </div>
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  {language === 'ar' ? '🚚 نوع التسليم' : '🚚 Livraison'}
-                </p>
-                <p className="font-bold text-slate-900 dark:text-white">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">{orderDetails.delivery_type === 'bureau' ? '🏢' : '🏠'} {language === 'ar' ? 'نوع التسليم' : 'Livraison'}</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">
                   {orderDetails.delivery_type === 'bureau' 
                     ? (language === 'ar' ? '🏢 مكتب' : '🏢 Bureau')
                     : (language === 'ar' ? '🏠 منزل' : '🏠 Domicile')
@@ -477,11 +524,9 @@ export default function WebsiteCart() {
                 </p>
               </div>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-700 mt-4">
-              <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                {language === 'ar' ? '📍 العنوان' : '📍 Adresse'}
-              </p>
-              <p className="font-bold text-slate-900 dark:text-white">{orderDetails.customer_address}</p>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-green-200 dark:border-green-700 mt-4">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">📍 {language === 'ar' ? 'العنوان' : 'Adresse'}</p>
+              <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_address}</p>
             </div>
           </motion.div>
 
@@ -490,71 +535,48 @@ export default function WebsiteCart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl border border-blue-200 dark:border-blue-700 p-6 shadow-lg"
+            className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-slate-800 rounded-3xl border-3 border-orange-300 dark:border-orange-700 p-8 shadow-lg"
           >
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <Package className="w-5 h-5 text-blue-600" />
-              {language === 'ar' ? '📦 المنتجات المطلوبة' : '📦 Produits Commandés'}
-            </h2>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                {language === 'ar' ? '📦 المنتجات المطلوبة' : '📦 Produits Commandés'}
+              </h2>
+            </div>
             <div className="space-y-3 max-h-64 overflow-y-auto">
-              {orderDetails.items.map((item: CartItem, index: number) => (
-                <div key={`${item.product_id}-${index}`} className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
+              {orderDetails.items.map((item: any, index: number) => (
+                <motion.div
+                  key={`${item.product_id}-${index}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                  className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-orange-200 dark:border-orange-700"
+                >
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
-                      <h3 className="font-bold text-slate-900 dark:text-white mb-1">{item.name}</h3>
-                      <div className="flex gap-3 text-sm">
+                      <h3 className="font-bold text-slate-900 dark:text-white mb-2">{item.name}</h3>
+                      <div className="flex gap-3 flex-wrap text-sm">
                         <span className="text-slate-600 dark:text-slate-400">
-                          {language === 'ar' ? 'الكمية:' : 'Quantité:'} <span className="font-bold text-blue-600">{item.quantity}</span>
+                          {language === 'ar' ? 'الكمية:' : 'Quantité:'} <span className="font-bold text-blue-600 dark:text-blue-400">{item.quantity}</span>
                         </span>
                         <span className="text-slate-600 dark:text-slate-400">
-                          {language === 'ar' ? 'السعر:' : 'Prix:'} <span className="font-bold text-green-600">{(item.price || 0).toFixed(2)} DZD</span>
+                          {language === 'ar' ? 'السعر:' : 'Prix:'} <span className="font-bold text-green-600 dark:text-green-400">{(item.price || 0).toFixed(2)} DZD</span>
                         </span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                    <div className="text-right bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-300 dark:border-green-700">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 font-bold">
                         {language === 'ar' ? 'المجموع' : 'Total'}
                       </p>
-                      <p className="text-lg font-bold text-green-600">
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
                         {(item.price * item.quantity).toFixed(2)} DZD
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
-          </motion.div>
-
-          {/* Order Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl border border-orange-200 dark:border-orange-700 p-6 shadow-lg space-y-4"
-          >
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Truck className="w-5 h-5 text-orange-600" />
-              {language === 'ar' ? '🚚 معلومات التسليم' : '🚚 Infos Livraison'}
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  {language === 'ar' ? '🏢 وكالة التسليم' : '🏢 Agence'}
-                </p>
-                <p className="font-bold text-slate-900 dark:text-white">{orderDetails.delivery_agency_name}</p>
-              </div>
-              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 border border-orange-200 dark:border-orange-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  {language === 'ar' ? '📦 نوع التسليم' : '📦 Type'}
-                </p>
-                <p className="font-bold text-slate-900 dark:text-white">
-                  {orderDetails.delivery_type === 'bureau' 
-                    ? (language === 'ar' ? '🏢 مكتب' : '🏢 Bureau')
-                    : (language === 'ar' ? '🏠 منزل' : '🏠 Domicile')
-                  }
-                </p>
-              </div>
             </div>
           </motion.div>
 
@@ -563,33 +585,75 @@ export default function WebsiteCart() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 text-white shadow-lg"
+            className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 dark:from-green-900 dark:via-emerald-900 dark:to-teal-900 rounded-3xl p-8 text-white shadow-2xl border-4 border-green-400 dark:border-green-700"
           >
-            <div className="space-y-3">
-              <div className="flex justify-between items-center pb-3 border-b border-green-400">
-                <span className="font-semibold">{language === 'ar' ? 'عدد المنتجات:' : 'Nombre articles:'}</span>
-                <Badge className="bg-white text-green-600 font-bold">{orderDetails.items.length}</Badge>
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <ShoppingCart className="w-7 h-7" />
+              {language === 'ar' ? '💰 ملخص الدفع' : '💰 Résumé du Paiement'}
+            </h2>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
+                <span className="font-semibold text-base">{language === 'ar' ? 'عدد المنتجات:' : 'Nombre articles:'}</span>
+                <motion.span
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="bg-white/20 text-white font-bold px-4 py-2 rounded-lg"
+                >
+                  {orderDetails.items.length}
+                </motion.span>
               </div>
-              <div className="flex justify-between items-center pb-3 border-b border-green-400">
-                <span className="font-semibold">{language === 'ar' ? 'الكمية الإجمالية:' : 'Quantité totale:'}</span>
-                <Badge className="bg-white text-green-600 font-bold">
-                  {orderDetails.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0)}
-                </Badge>
+              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
+                <span className="font-semibold text-base">{language === 'ar' ? 'الكمية الإجمالية:' : 'Quantité totale:'}</span>
+                <span className="bg-white/20 font-bold px-4 py-2 rounded-lg">
+                  {orderDetails.items.reduce((sum: number, item: any) => sum + item.quantity, 0)}
+                </span>
               </div>
-              <div className="flex justify-between items-center pb-3 border-b border-green-400">
-                <span className="font-semibold">{language === 'ar' ? 'المجموع (بدون توصيل):' : 'Sous-total:'}</span>
+              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
+                <span className="font-semibold text-base">{language === 'ar' ? 'المنتجات (بدون توصيل):' : 'Sous-total:'}</span>
                 <span className="font-semibold">{orderDetails.subtotal.toFixed(2)} DZD</span>
               </div>
-              <div className="flex justify-between items-center pb-3 border-b border-green-400">
-                <span className="font-semibold">{language === 'ar' ? 'رسوم التوصيل:' : 'Frais livraison:'}</span>
-                <span className="font-semibold text-orange-200">{orderDetails.delivery_price.toFixed(2)} DZD</span>
+              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
+                <span className="font-semibold text-base">{language === 'ar' ? 'رسوم التوصيل:' : 'Frais livraison:'}</span>
+                <span className="text-green-100 font-semibold">{orderDetails.delivery_price.toFixed(2)} DZD</span>
               </div>
               <div className="flex justify-between items-baseline gap-4 pt-2">
-                <span className="text-lg font-bold">{language === 'ar' ? 'المجموع النهائي:' : 'Total Final:'}</span>
+                <span className="text-2xl font-bold">{language === 'ar' ? 'المجموع النهائي:' : 'TOTAL FINAL:'}</span>
                 <div className="text-right">
-                  <div className="text-3xl font-bold">{orderDetails.total_price.toFixed(2)}</div>
-                  <div className="text-sm font-semibold">DZD</div>
+                  <div className="text-4xl font-black drop-shadow-lg">{orderDetails.total_price.toFixed(2)}</div>
+                  <div className="text-lg font-bold">DZD</div>
                 </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Delivery Information */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-slate-800 rounded-3xl border-3 border-indigo-300 dark:border-indigo-700 p-8 shadow-lg"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <Truck className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                {language === 'ar' ? '🚚 معلومات التسليم' : '🚚 Infos Livraison'}
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-indigo-200 dark:border-indigo-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">🏢 {language === 'ar' ? 'وكالة التسليم' : 'Agence'}</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.delivery_agency_name}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-indigo-200 dark:border-indigo-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">📦 {language === 'ar' ? 'نوع التسليم' : 'Type livraison'}</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">
+                  {orderDetails.delivery_type === 'bureau' 
+                    ? (language === 'ar' ? '🏢 من المكتب' : '🏢 Au Bureau')
+                    : (language === 'ar' ? '🏠 للمنزل' : '🏠 À Domicile')
+                  }
+                </p>
               </div>
             </div>
           </motion.div>
@@ -598,19 +662,45 @@ export default function WebsiteCart() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.7 }}
+            className="flex flex-col gap-4"
           >
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(34, 197, 94, 0.3)" }}
               whileTap={{ scale: 0.98 }}
               onClick={handleContinueShopping}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-lg text-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 text-white font-bold py-4 md:py-5 rounded-2xl text-lg transition-all duration-200 shadow-xl flex items-center justify-center gap-3 group"
             >
-              <ShoppingCart className="w-5 h-5" />
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
+              </motion.div>
               {language === 'ar' ? '🛒 استمرار التسوق' : '🛒 Continuer les Achats'}
             </motion.button>
-            <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-3">
-              {language === 'ar' ? '🔒 سيتم مسح السلة عند الضغط على الزر' : '🔒 Le panier sera vidé en cliquant'}
+            <p className="text-center text-sm text-slate-600 dark:text-slate-400 font-medium">
+              {language === 'ar' ? '✨ تصفح المزيد من المنتجات والعروض الحصرية' : '✨ Découvrez d\'autres produits et offres'}
+            </p>
+          </motion.div>
+
+          {/* Help Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-900/30 dark:to-slate-800 rounded-3xl border-3 border-yellow-300 dark:border-yellow-700 p-6 text-center"
+          >
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
+              ❓ {language === 'ar' ? 'هل تحتاج مساعدة؟' : 'Besoin d\'aide?'}
+            </h3>
+            <p className="text-slate-600 dark:text-slate-300 mb-4">
+              {language === 'ar' 
+                ? 'سيتم التواصل معك قريباً عبر رقم الهاتف المسجل للتأكيد والتفاصيل الإضافية'
+                : 'Nous vous contacterons sur le numéro fourni pour confirmer et discuter des détails'}
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              ⏱️ {language === 'ar' ? 'يرجى الانتظار من فضلك...' : 'Veuillez attendre...'}
             </p>
           </motion.div>
         </div>
@@ -619,30 +709,41 @@ export default function WebsiteCart() {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header - Fixed/Sticky on Mobile */}
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>
+      {/* Header - Fixed/Sticky with Navy Bar */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border-b border-blue-200 dark:border-blue-700 shadow-md"
+        className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 dark:from-slate-900 dark:via-blue-950 dark:to-slate-900 backdrop-blur-xl border-b-4 border-blue-600 dark:border-blue-500 shadow-2xl"
       >
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <Button
-            variant="ghost"
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6 flex items-center justify-between gap-4">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/website-shop')}
-            className="hover:bg-blue-100 dark:hover:bg-slate-700 rounded-lg h-10 w-10 p-0 flex-shrink-0"
+            className="hover:bg-blue-700/50 dark:hover:bg-blue-900/50 rounded-lg h-10 w-10 p-0 flex-shrink-0 flex items-center justify-center transition-all"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </motion.button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
-              {language === 'ar' ? '🛒 السلة' : '🛒 Mon Panier'}
-            </h1>
+            <motion.h1 
+              animate={{ y: [0, -2, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="text-2xl md:text-3xl font-black text-white drop-shadow-lg truncate"
+            >
+              🛒 {language === 'ar' ? 'سلتي' : 'Mon Panier'}
+            </motion.h1>
+            <p className="text-xs md:text-sm text-blue-100">{language === 'ar' ? '✨ اكمل تسوقك بكل سهولة' : '✨ Finalisez votre commande'}</p>
           </div>
           {itemCount > 0 && (
-            <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-sm px-3 py-1 flex-shrink-0">
-              {itemCount}
-            </Badge>
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold text-sm md:text-base px-4 py-2 rounded-full shadow-lg flex-shrink-0 flex items-center gap-2"
+            >
+              <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+              <span>{itemCount}</span>
+            </motion.div>
           )}
         </div>
       </motion.div>
@@ -1008,26 +1109,32 @@ export default function WebsiteCart() {
                       <Truck className="w-3 h-3 md:w-4 md:h-4 inline mr-1" />
                       {language === 'ar' ? '🏢 وكالة التسليم *' : '🏢 Agence de Livraison *'}
                     </label>
-                    <Select value={formData.delivery_agency_id} onValueChange={(value) => setFormData(prev => ({ ...prev, delivery_agency_id: value }))}>
-                      <SelectTrigger className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm">
-                        <SelectValue placeholder={language === 'ar' ? 'اختر وكالة التسليم' : 'Choisir une agence'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {deliveryAgencies.map(agency => {
-                          const agencyPrice = formData.delivery_type === 'bureau' ? agency.price_bureau : agency.price_domicile;
-                          return (
+                    {formData.client_wilaya ? (
+                      <Select value={formData.delivery_agency_id} onValueChange={(value) => setFormData(prev => ({ ...prev, delivery_agency_id: value }))}>
+                        <SelectTrigger className="border-2 border-blue-300 dark:border-blue-600 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm bg-blue-50 dark:bg-blue-900/20">
+                          <SelectValue placeholder={language === 'ar' ? 'اختر وكالة التسليم' : 'Choisir une agence'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {deliveryAgencies.map(agency => (
                             <SelectItem key={agency.id} value={agency.id}>
-                              <div className="flex items-center gap-2">
-                                <span>{agency.name}</span>
-                                <span className="text-xs text-slate-500">
-                                  ({formData.delivery_type === 'bureau' ? '🏢' : '🏠'} {agencyPrice.toFixed(2)} DZD)
+                              <div className="flex items-center gap-3">
+                                <span className="font-semibold">{agency.name}</span>
+                                <span className="text-xs text-slate-500 bg-slate-100 rounded px-2 py-1">
+                                  {formData.delivery_type === 'bureau' ? '🏢' : '🏠'} {deliveryPrice.toFixed(2)} DZD
                                 </span>
                               </div>
                             </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="border-2 border-orange-300 dark:border-orange-600 rounded-lg p-3 bg-orange-50 dark:bg-orange-900/20">
+                        <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                          {language === 'ar' ? '⚠️ اختر الولاية أولاً لعرض أسعار التسليم' : '⚠️ Choisissez d\'abord une wilaya'}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Delivery Type */}
