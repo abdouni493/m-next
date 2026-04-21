@@ -55,6 +55,9 @@ const ChargerInventory = () => {
   const [selectedCharger, setSelectedCharger] = useState<Charger | null>(null);
   const [isEditingDetail, setIsEditingDetail] = useState(false);
   const [editFormData, setEditFormData] = useState<any>(null);
+  const [editNewImage, setEditNewImage] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [showImageDeleteBtn, setShowImageDeleteBtn] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -908,7 +911,11 @@ const ChargerInventory = () => {
                 ) : (
                   <>
                     <button
-                      onClick={() => setIsEditingDetail(false)}
+                      onClick={() => {
+                        setIsEditingDetail(false);
+                        setEditNewImage(null);
+                        setEditImagePreview(null);
+                      }}
                       className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
                     >
                       {language === 'en' ? 'Cancel' : 'Annuler'}
@@ -916,6 +923,21 @@ const ChargerInventory = () => {
                     <button
                       onClick={async () => {
                         try {
+                          let newPrimaryImageUrl = editFormData.primary_image;
+
+                          // Upload new image if selected
+                          if (editNewImage) {
+                            const fileName = `${selectedCharger.id}/${Date.now()}-${editNewImage.name}`;
+                            const { error: uploadError } = await supabase.storage
+                              .from('chargers')
+                              .upload(fileName, editNewImage);
+                            if (uploadError) throw uploadError;
+                            const { data: urlData } = supabase.storage
+                              .from('chargers')
+                              .getPublicUrl(fileName);
+                            newPrimaryImageUrl = urlData.publicUrl;
+                          }
+
                           const { error } = await supabase
                             .from('products')
                             .update({
@@ -931,11 +953,14 @@ const ChargerInventory = () => {
                               selling_price: parseFloat(editFormData.selling_price) || 0,
                               mark_id: editFormData.mark_id || null,
                               connector_type_id: editFormData.connector_type_id || null,
+                              primary_image: newPrimaryImageUrl || null,
                             })
                             .eq('id', selectedCharger.id);
 
                           if (error) throw error;
                           setIsEditingDetail(false);
+                          setEditNewImage(null);
+                          setEditImagePreview(null);
                           loadChargers();
                           alert(language === 'en' ? 'Updated successfully!' : 'Mis à jour avec succès!');
                         } catch (error) {
@@ -960,22 +985,136 @@ const ChargerInventory = () => {
             {/* Content */}
             <div className="p-6 space-y-6">
               {/* Image Section */}
-              {selectedCharger.primary_image && (
-                <div className="bg-gray-100 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    {language === 'en' ? 'Product Image' : 'Image du Produit'}
-                  </h3>
-                  <img
-                    src={selectedCharger.primary_image}
-                    alt={selectedCharger.name}
-                    className="w-full h-80 object-cover rounded-lg"
-                    onError={(e) => {
-                      console.warn(`Failed to load image: ${selectedCharger.primary_image}`);
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                  {language === 'en' ? 'Product Image' : 'Image du Produit'}
+                </h3>
+
+                {/* Current image or placeholder */}
+                {editFormData?.primary_image && !editImagePreview ? (
+                  <div className="relative mb-3">
+                    {/* Clickable image — toggles delete overlay in edit mode */}
+                    <img
+                      src={editFormData.primary_image}
+                      alt={selectedCharger.name}
+                      className={`w-full h-64 object-cover rounded-lg transition-all duration-200 ${isEditingDetail ? 'cursor-pointer' : ''} ${isEditingDetail && showImageDeleteBtn ? 'brightness-75' : ''}`}
+                      onClick={() => isEditingDetail && setShowImageDeleteBtn((v) => !v)}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    {/* Click hint overlay */}
+                    {isEditingDetail && !showImageDeleteBtn && (
+                      <div
+                        className="absolute inset-0 flex items-center justify-center rounded-lg pointer-events-none"
+                      >
+                        <span className="bg-black/40 text-white text-xs px-3 py-1 rounded-full font-medium select-none">
+                          {language === 'en' ? 'Click image to manage' : 'Cliquez pour gérer'}
+                        </span>
+                      </div>
+                    )}
+                    {/* Delete overlay — shown after clicking the image */}
+                    {isEditingDetail && showImageDeleteBtn && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-lg bg-black/50">
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const confirmDel = window.confirm(
+                              language === 'en'
+                                ? 'Delete this image? This cannot be undone.'
+                                : 'Supprimer cette image? Cette action est irréversible.'
+                            );
+                            if (!confirmDel) { setShowImageDeleteBtn(false); return; }
+                            try {
+                              const url = editFormData.primary_image as string;
+                              const pathMatch = url.match(/chargers\/(.+)$/);
+                              if (pathMatch) {
+                                await supabase.storage.from('chargers').remove([pathMatch[1]]);
+                              }
+                              await supabase
+                                .from('products')
+                                .update({ primary_image: null })
+                                .eq('id', selectedCharger.id);
+                              setEditFormData({ ...editFormData, primary_image: null });
+                              setShowImageDeleteBtn(false);
+                              loadChargers();
+                            } catch (err) {
+                              console.error('Error deleting image:', err);
+                              alert(language === 'en' ? 'Error deleting image' : 'Erreur lors de la suppression');
+                            }
+                          }}
+                          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg shadow-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          {language === 'en' ? 'Delete Image' : 'Supprimer l\'image'}
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowImageDeleteBtn(false); }}
+                          className="text-white/80 hover:text-white text-sm underline"
+                        >
+                          {language === 'en' ? 'Cancel' : 'Annuler'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : editImagePreview ? (
+                  <div className="relative group mb-3">
+                    <img
+                      src={editImagePreview}
+                      alt="New image preview"
+                      className="w-full h-64 object-cover rounded-lg border-2 border-blue-400"
+                    />
+                    <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                      {language === 'en' ? 'New image' : 'Nouvelle image'}
+                    </div>
+                    <button
+                      onClick={() => { setEditNewImage(null); setEditImagePreview(null); }}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 shadow-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : !isEditingDetail ? (
+                  <div className="flex flex-col items-center justify-center h-40 bg-gray-100 rounded-lg text-gray-400">
+                    <ImageIcon className="w-12 h-12 mb-2" />
+                    <span className="text-sm">{language === 'en' ? 'No image' : 'Pas d\'image'}</span>
+                  </div>
+                ) : null}
+
+                {/* Upload new image – only in edit mode */}
+                {isEditingDetail && (
+                  <div className="mt-2">
+                    <label
+                      htmlFor="editImageInput"
+                      className="flex items-center justify-center gap-2 w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors text-sm text-gray-600"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      {editNewImage
+                        ? editNewImage.name
+                        : language === 'en'
+                        ? 'Click to upload a new image'
+                        : 'Cliquez pour télécharger une nouvelle image'}
+                    </label>
+                    <input
+                      id="editImageInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setEditNewImage(file);
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => setEditImagePreview(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        } else {
+                          setEditImagePreview(null);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

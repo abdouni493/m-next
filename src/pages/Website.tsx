@@ -27,6 +27,9 @@ import {
   Sparkles,
   Award,
   Zap,
+  Map,
+  Smartphone,
+  LinkIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1197,85 +1200,288 @@ export default function Website() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-6"
+              className="space-y-8"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Social Media Section */}
-                <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-300 dark:border-blue-700 shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-2xl">
-                      <div className="p-2 bg-blue-500 rounded-lg">
-                        <Zap className="h-6 w-6 text-white" />
-                      </div>
-                      {language === 'ar' ? '📱 وسائل التواصل' : '📱 Réseaux Sociaux'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {[
-                      { icon: Facebook, label: 'Facebook', url: 'facebook_url', placeholder: 'https://facebook.com/...', color: 'bg-blue-100 text-blue-600' },
-                      { icon: Instagram, label: 'Instagram', url: 'instagram_url', placeholder: 'https://instagram.com/...', color: 'bg-pink-100 text-pink-600' },
-                      { icon: MessageCircle, label: 'TikTok', url: 'tiktok_url', placeholder: 'https://tiktok.com/...', color: 'bg-black/10 dark:bg-white/10 text-slate-600' },
-                    ].map(({ icon: Icon, label, url, placeholder, color }) => (
-                      <div key={url}>
-                        <Label className={`flex items-center gap-2 font-bold mb-2 p-2 rounded-lg ${color}`}>
-                          <Icon className="h-5 w-5" />
-                          {label}
+              {/* Header Section */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-slate-900 dark:to-black rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50 p-8"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl shadow-lg">
+                    <Globe className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      {language === 'ar' ? '📞 إدارة جهات الاتصال' : '📞 Gestion des Contacts'}
+                    </h2>
+                    <p className="text-slate-400 mt-2">
+                      {language === 'ar' ? 'أضف روابط وسائل التواصل الاجتماعي وبيانات الاتصال' : 'Ajoutez vos réseaux sociaux et informations de contact'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Social Media URLs Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 dark:from-blue-900/40 dark:to-cyan-900/40 border-2 border-blue-500/50 dark:border-blue-600/50 rounded-3xl overflow-hidden shadow-xl p-0"
+              >
+                <div className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-700 dark:to-cyan-700 px-8 py-6 border-b-2 border-blue-700/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <LinkIcon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">
+                      {language === 'ar' ? '🔗 روابط وسائل التواصل الاجتماعي' : '🔗 Liens Réseaux Sociaux'}
+                    </h3>
+                  </div>
+                  <p className="text-blue-100 mt-2 ml-11">
+                    {language === 'ar' ? 'أضف روابط الملفات الشخصية لديك على منصات التواصل' : 'Ajoutez les URLs de vos profils sociaux'}
+                  </p>
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Facebook */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-blue-400/30 dark:border-blue-600/30 hover:border-blue-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-700 dark:text-blue-300">
+                          <Facebook className="h-5 w-5" />
+                          <span>Facebook</span>
                         </Label>
                         <Input
                           type="url"
-                          placeholder={placeholder}
-                          value={(settings as any)[url] || ''}
-                          onChange={(e) => setSettings({ ...settings, [url]: e.target.value })}
-                          className="border-2 border-blue-200 dark:border-blue-700 h-12 rounded-xl"
+                          placeholder="https://facebook.com/yourpage"
+                          value={(settings as any).facebook_url || ''}
+                          onChange={(e) => setSettings({ ...settings, facebook_url: e.target.value })}
+                          className="border-2 border-blue-300/50 dark:border-blue-700/50 h-12 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
                         />
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                    </motion.div>
 
-                {/* Contact Information Section */}
-                <Card className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border-2 border-green-300 dark:border-green-700 shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-2xl">
-                      <div className="p-2 bg-green-500 rounded-lg">
-                        <Phone className="h-6 w-6 text-white" />
-                      </div>
-                      {language === 'ar' ? '☎️ معلومات الاتصال' : '☎️ Informations'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {[
-                      { icon: Phone, label: language === 'ar' ? 'الهاتف' : 'Téléphone', key: 'phone_number', placeholder: '+213...', color: 'bg-green-100 text-green-600' },
-                      { icon: MessageCircle, label: 'WhatsApp', key: 'whatsapp_number', placeholder: '+213...', color: 'bg-green-100 text-green-600' },
-                      { icon: Send, label: 'Telegram', key: 'telegram_number', placeholder: '@username', color: 'bg-blue-100 text-blue-600' },
-                      { icon: MapPin, label: language === 'ar' ? 'الموقع' : 'Localisation', key: 'location', placeholder: language === 'ar' ? 'العنوان' : 'Adresse', color: 'bg-red-100 text-red-600' },
-                    ].map(({ icon: Icon, label, key, placeholder, color }) => (
-                      <div key={key}>
-                        <Label className={`flex items-center gap-2 font-bold mb-2 p-2 rounded-lg ${color}`}>
-                          <Icon className="h-5 w-5" />
-                          {label}
+                    {/* Instagram */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-pink-400/30 dark:border-pink-600/30 hover:border-pink-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-pink-50 dark:bg-pink-900/30 rounded-xl text-pink-700 dark:text-pink-300">
+                          <Instagram className="h-5 w-5" />
+                          <span>Instagram</span>
                         </Label>
                         <Input
-                          type={key.includes('number') ? 'tel' : 'text'}
-                          placeholder={placeholder}
-                          value={(settings as any)[key] || ''}
-                          onChange={(e) => setSettings({ ...settings, [key]: e.target.value })}
-                          className="border-2 border-green-200 dark:border-green-700 h-12 rounded-xl"
+                          type="url"
+                          placeholder="https://instagram.com/yourprofile"
+                          value={(settings as any).instagram_url || ''}
+                          onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
+                          className="border-2 border-pink-300/50 dark:border-pink-700/50 h-12 rounded-xl focus:border-pink-500 dark:focus:border-pink-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
                         />
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
+                    </motion.div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                onClick={() => handleSaveSettings()}
-                className="w-full bg-gradient-to-r from-green-500 via-teal-500 to-cyan-500 hover:from-green-600 hover:via-teal-600 hover:to-cyan-600 text-white px-8 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-xl"
+                    {/* TikTok */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.35 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-black/30 dark:border-white/20 hover:border-black/60 dark:hover:border-white/40 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-slate-700 dark:text-slate-300">
+                          <Smartphone className="h-5 w-5" />
+                          <span>TikTok</span>
+                        </Label>
+                        <Input
+                          type="url"
+                          placeholder="https://tiktok.com/@yourprofile"
+                          value={(settings as any).tiktok_url || ''}
+                          onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value })}
+                          className="border-2 border-slate-300/50 dark:border-slate-600/50 h-12 rounded-xl focus:border-slate-500 dark:focus:border-slate-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Google Maps */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-red-400/30 dark:border-red-600/30 hover:border-red-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-xl text-red-700 dark:text-red-300">
+                          <Map className="h-5 w-5" />
+                          <span>{language === 'ar' ? 'خرائط Google' : 'Google Maps'}</span>
+                        </Label>
+                        <Input
+                          type="url"
+                          placeholder="https://maps.google.com/..."
+                          value={(settings as any).location || ''}
+                          onChange={(e) => setSettings({ ...settings, location: e.target.value })}
+                          className="border-2 border-red-300/50 dark:border-red-700/50 h-12 rounded-xl focus:border-red-500 dark:focus:border-red-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Contact Numbers Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                className="bg-gradient-to-br from-green-900/30 to-teal-900/30 dark:from-green-900/40 dark:to-teal-900/40 border-2 border-green-500/50 dark:border-green-600/50 rounded-3xl overflow-hidden shadow-xl p-0"
               >
-                <Check className="h-6 w-6" />
-                {language === 'ar' ? '✅ حفظ جميع البيانات' : '✅ Sauvegarder'}
-              </motion.button>
+                <div className="bg-gradient-to-r from-green-600 to-teal-600 dark:from-green-700 dark:to-teal-700 px-8 py-6 border-b-2 border-green-700/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <Phone className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">
+                      {language === 'ar' ? '☎️ أرقام الاتصال' : '☎️ Numéros de Contact'}
+                    </h3>
+                  </div>
+                  <p className="text-green-100 mt-2 ml-11">
+                    {language === 'ar' ? 'أضف أرقام الهاتف والتطبيقات الفورية' : 'Ajoutez vos numéros de téléphone et applications de messagerie'}
+                  </p>
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Phone Number */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-green-400/30 dark:border-green-600/30 hover:border-green-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-xl text-green-700 dark:text-green-300">
+                          <Phone className="h-5 w-5" />
+                          <span>{language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}</span>
+                        </Label>
+                        <Input
+                          type="tel"
+                          placeholder="+213 5XX XX XX XX"
+                          value={(settings as any).phone_number || ''}
+                          onChange={(e) => setSettings({ ...settings, phone_number: e.target.value })}
+                          className="border-2 border-green-300/50 dark:border-green-700/50 h-12 rounded-xl focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* WhatsApp */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.55 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-green-400/30 dark:border-green-600/30 hover:border-green-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-xl text-green-700 dark:text-green-300">
+                          <MessageCircle className="h-5 w-5" />
+                          <span>WhatsApp</span>
+                        </Label>
+                        <Input
+                          type="tel"
+                          placeholder="+213 5XX XX XX XX"
+                          value={(settings as any).whatsapp_number || ''}
+                          onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
+                          className="border-2 border-green-300/50 dark:border-green-700/50 h-12 rounded-xl focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Telegram */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-blue-400/30 dark:border-blue-600/30 hover:border-blue-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-700 dark:text-blue-300">
+                          <Send className="h-5 w-5" />
+                          <span>Telegram</span>
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="@yourusername or +213..."
+                          value={(settings as any).telegram_number || ''}
+                          onChange={(e) => setSettings({ ...settings, telegram_number: e.target.value })}
+                          className="border-2 border-blue-300/50 dark:border-blue-700/50 h-12 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Location/Address */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.65 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-purple-400/30 dark:border-purple-600/30 hover:border-purple-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl text-purple-700 dark:text-purple-300">
+                          <MapPin className="h-5 w-5" />
+                          <span>{language === 'ar' ? 'العنوان' : 'Adresse'}</span>
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder={language === 'ar' ? 'أدخل العنوان الكامل' : 'Entrez l\'adresse complète'}
+                          value={(settings as any).location || ''}
+                          onChange={(e) => setSettings({ ...settings, location: e.target.value })}
+                          className="border-2 border-purple-300/50 dark:border-purple-700/50 h-12 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Save Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <motion.button
+                  whileHover={{ scale: 1.02, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleSaveSettings()}
+                  className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl border-0 transition-all duration-300"
+                >
+                  <Check className="h-6 w-6" />
+                  {language === 'ar' ? '✅ حفظ جميع معلومات الاتصال' : '✅ Sauvegarder tous les contacts'}
+                </motion.button>
+              </motion.div>
+
+              {/* Info Box */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.75 }}
+                className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-xl p-6"
+              >
+                <div className="flex gap-4">
+                  <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-2">
+                      {language === 'ar' ? '💡 نصيحة' : '💡 Conseil'}
+                    </h4>
+                    <p className="text-blue-700 dark:text-blue-400 text-sm">
+                      {language === 'ar' 
+                        ? 'تأكد من إدخال البيانات الصحيحة. تظهر هذه المعلومات على الموقع الإلكتروني الخاص بك ليتمكن العملاء من التواصل معك.'
+                        : 'Assurez-vous d\'entrer les bonnes informations. Ces données apparaîtront sur votre site web pour que les clients puissent vous contacter.'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           )}
 

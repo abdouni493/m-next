@@ -79,6 +79,8 @@ const Inventory = () => {
   const [editingChargerId, setEditingChargerId] = useState<string | null>(null);
   const [chargerImages, setChargerImages] = useState<Array<{ id?: string; image_url: string; file_path?: string; display_order?: number; is_primary: boolean }>>([]);
   const [primaryImageId, setPrimaryImageId] = useState<number | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [deletingImageIndex, setDeletingImageIndex] = useState<number | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -569,6 +571,80 @@ const Inventory = () => {
       ...formData,
       images: updatedImages,
     });
+  };
+
+  const handleDeleteExistingImage = async (index: number) => {
+    const imageToDelete = chargerImages[index];
+    if (!imageToDelete) return;
+
+    const confirmMsg = language === 'en' 
+      ? 'Are you sure you want to delete this image?' 
+      : 'Êtes-vous sûr de vouloir supprimer cette image?';
+    if (!window.confirm(confirmMsg)) return;
+
+    setDeletingImageIndex(index);
+    try {
+      // Delete from storage if file_path exists
+      if (imageToDelete.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from('chargers')
+          .remove([imageToDelete.file_path]);
+        if (storageError) {
+          console.warn('⚠️ Storage delete warning:', storageError);
+        }
+      }
+
+      // Delete from product_images table
+      if (imageToDelete.id) {
+        const { error: dbError } = await supabase
+          .from('product_images')
+          .delete()
+          .eq('id', imageToDelete.id);
+        if (dbError) {
+          console.error('❌ DB delete error:', dbError);
+          throw dbError;
+        }
+      }
+
+      // Update local state
+      const updatedImages = chargerImages.filter((_, i) => i !== index);
+      setChargerImages(updatedImages);
+      setSelectedImageIndex(null);
+
+      // Adjust primaryImageId
+      if (primaryImageId === index) {
+        // Deleted the primary image — set new primary to first remaining
+        setPrimaryImageId(updatedImages.length > 0 ? 0 : null);
+        // Also update the product's primary_image in DB if there are remaining images
+        if (editingChargerId && updatedImages.length > 0) {
+          await supabase
+            .from('products')
+            .update({ primary_image: updatedImages[0].image_url })
+            .eq('id', editingChargerId);
+          // Mark the new first image as primary in product_images
+          if (updatedImages[0].id) {
+            await supabase
+              .from('product_images')
+              .update({ is_primary: true })
+              .eq('id', updatedImages[0].id);
+          }
+        } else if (editingChargerId && updatedImages.length === 0) {
+          await supabase
+            .from('products')
+            .update({ primary_image: null })
+            .eq('id', editingChargerId);
+        }
+      } else if (primaryImageId !== null && primaryImageId > index) {
+        setPrimaryImageId(primaryImageId - 1);
+      }
+
+      console.log('✅ Image deleted successfully');
+    } catch (error) {
+      console.error('❌ Error deleting image:', error);
+      alert(language === 'en' ? 'Error deleting image' : 'Erreur lors de la suppression de l\'image');
+    } finally {
+      setDeletingImageIndex(null);
+    }
   };
 
   const uploadImages = async (productId: string) => {
@@ -1083,6 +1159,8 @@ const Inventory = () => {
                         onClick={async () => {
                           setIsEditingMode(true);
                           setEditingChargerId(charger.id);
+                          setSelectedImageIndex(null);
+                          setDeletingImageIndex(null);
                           setFormData({
                             name: charger.name,
                             description: charger.description || '',
@@ -1163,6 +1241,10 @@ const Inventory = () => {
                   setShowAddModal(false);
                   setIsEditingMode(false);
                   setEditingChargerId(null);
+                  setSelectedImageIndex(null);
+                  setDeletingImageIndex(null);
+                  setChargerImages([]);
+                  setPrimaryImageId(null);
                   setFormData({
                     name: '',
                     description: '',
@@ -1199,30 +1281,83 @@ const Inventory = () => {
                 {/* Existing Images Gallery (when editing) */}
                 {isEditingMode && editingChargerId && chargerImages.length > 0 && (
                   <div className="mb-4 p-4 bg-white dark:bg-slate-700 rounded-lg border border-cyan-300 dark:border-cyan-600">
-                    <p className="text-xs font-semibold text-cyan-700 dark:text-cyan-300 mb-3">📸 {language === 'en' ? 'Existing Images - Click to set as Primary' : 'Images Existantes - Cliquez pour définir comme principale'} ({chargerImages.length})</p>
+                    <p className="text-xs font-semibold text-cyan-700 dark:text-cyan-300 mb-3">📸 {language === 'en' ? 'Existing Images - Click to select, then delete or set primary' : 'Images Existantes - Cliquez pour sélectionner, puis supprimer ou définir comme principale'} ({chargerImages.length})</p>
                     <div className="grid grid-cols-3 gap-3">
-                      {chargerImages.map((imageObj, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => setPrimaryImageId(index)}
-                          className="relative group rounded-lg overflow-hidden border-4 shadow-md transition-all hover:shadow-lg hover:scale-105 cursor-pointer"
-                          style={{borderColor: index === primaryImageId || (primaryImageId === null && index === 0) ? '#06b6d4' : '#cbd5e1'}}
-                          title={language === 'en' ? 'Click to set as primary image' : 'Cliquez pour définir comme image principale'}
-                        >
-                          {(index === primaryImageId || (primaryImageId === null && index === 0)) && <div className="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold z-10">⭐ PRIMARY</div>}
-                          <img
-                            src={imageObj.image_url}
-                            alt={`Existing image ${index + 1}`}
-                            className="w-full h-24 object-cover hover:scale-105 transition-transform duration-300"
-                          />
-                          {(index === primaryImageId || (primaryImageId === null && index === 0)) && (
-                            <div className="absolute inset-0 bg-cyan-400 bg-opacity-20 border-2 border-cyan-400 rounded-lg flex items-center justify-center">
-                              <div className="text-4xl">✓</div>
-                            </div>
-                          )}
-                        </button>
-                      ))}
+                      {chargerImages.map((imageObj, index) => {
+                        const isPrimary = index === primaryImageId || (primaryImageId === null && index === 0);
+                        const isSelected = selectedImageIndex === index;
+                        const isDeleting = deletingImageIndex === index;
+                        
+                        return (
+                          <div
+                            key={imageObj.id || index}
+                            className={`relative rounded-lg overflow-hidden shadow-md transition-all duration-200 cursor-pointer ${
+                              isSelected 
+                                ? 'ring-4 ring-blue-500 ring-offset-2 scale-105 shadow-xl' 
+                                : isPrimary 
+                                  ? 'ring-4 ring-cyan-400 shadow-lg' 
+                                  : 'ring-2 ring-slate-200 dark:ring-slate-500 hover:ring-blue-300 hover:shadow-lg hover:scale-[1.03]'
+                            } ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
+                            onClick={() => {
+                              setSelectedImageIndex(isSelected ? null : index);
+                            }}
+                          >
+                            {/* Primary badge */}
+                            {isPrimary && (
+                              <div className="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-0.5 rounded-full text-[10px] font-bold z-20 shadow-md">
+                                ⭐ PRIMARY
+                              </div>
+                            )}
+
+                            {/* Image */}
+                            <img
+                              src={imageObj.image_url}
+                              alt={`Image ${index + 1}`}
+                              className="w-full h-28 object-cover transition-transform duration-300"
+                            />
+
+                            {/* Selected overlay with action buttons */}
+                            {isSelected && (
+                              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-2 z-10 animate-in fade-in duration-200">
+                                {/* Delete button */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteExistingImage(index);
+                                  }}
+                                  className="bg-red-500 hover:bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95"
+                                  title={language === 'en' ? 'Delete this image' : 'Supprimer cette image'}
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                                {/* Set as primary button (only if not already primary) */}
+                                {!isPrimary && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPrimaryImageId(index);
+                                      setSelectedImageIndex(null);
+                                    }}
+                                    className="bg-yellow-400 hover:bg-yellow-500 text-black rounded-full px-3 py-1.5 flex items-center gap-1 shadow-lg transition-all hover:scale-105 active:scale-95 text-xs font-bold"
+                                    title={language === 'en' ? 'Set as primary' : 'Définir comme principale'}
+                                  >
+                                    ⭐ {language === 'en' ? 'Primary' : 'Principale'}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Deleting spinner */}
+                            {isDeleting && (
+                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-20">
+                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -14,6 +14,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getOffersREST, getSpecialOffersREST, createOrderREST, supabase } from '@/lib/supabaseClient';
 import { ArrowLeft, Zap, ShoppingCart, Check, MapPin, Phone, User } from 'lucide-react';
+import { ALGERIAN_COMMUNES, getAllWilayas, getMunicipalitiesForWilaya } from '@/data/algerian-municipalities';
 
 interface Product {
   id: string;
@@ -35,66 +36,7 @@ interface Product {
 }
 
 // List of Algerian Wilayas
-const ALGERIAN_WILAYAS = [
-  'Adrar',
-  'Chlef',
-  'Laghouat',
-  'Oum El Bouaghi',
-  'Batna',
-  'Béjaïa',
-  'Biskra',
-  'Béchar',
-  'Blida',
-  'Bouira',
-  'Tamanrasset',
-  'Tébessa',
-  'Tlemcen',
-  'Tiaret',
-  'Tizi Ouzou',
-  'Alger',
-  'Djelfa',
-  'Jijel',
-  'Sétif',
-  'Saïda',
-  'Skikda',
-  'Sidi Bel Abbès',
-  'Annaba',
-  'Guelma',
-  'Constantine',
-  'Médéa',
-  'Mostaganem',
-  'M\'Sila',
-  'Mascara',
-  'Ouargla',
-  'Oran',
-  'El Bayadh',
-  'Illizi',
-  'Bordj Bou Arréridj',
-  'Boumerdès',
-  'El Taref',
-  'Tindouf',
-  'Tissemsilt',
-  'El Oued',
-  'Khenchela',
-  'Souk Ahras',
-  'Tipasa',
-  'Mila',
-  'Aïn Defla',
-  'Naama',
-  'Aïn Témouchent',
-  'Ghardaïa',
-  'Relizane',
-  'Draa Ben Stita',
-  'Djanet',
-  'El M\'Ghair',
-  'El Menia',
-  'Ouled Djellal',
-  'Béni Abbès',
-  'In Salah',
-  'In Guezzam',
-  'Touggourt',
-  'Temassasin',
-];
+const ALGERIAN_WILAYAS = getAllWilayas();
 
 const DELIVERY_OPTIONS = [
   { id: 'bureau', label_fr: 'Au Bureau (Retrait)', label_ar: 'من المكتب (استلام)', emoji: '🏢' },
@@ -123,7 +65,7 @@ export default function WebsiteOrder() {
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
-    address: '',
+    municipality: '',
     wilaya: '',
     deliveryType: 'domicile',
   });
@@ -205,6 +147,14 @@ export default function WebsiteOrder() {
     setFormData(prev => ({
       ...prev,
       wilaya: value,
+      municipality: '', // Reset municipality when wilaya changes
+    }));
+  };
+
+  const handleMunicipalityChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      municipality: value,
     }));
   };
 
@@ -261,7 +211,7 @@ export default function WebsiteOrder() {
   const totalPrice = (finalPrice || 0) * quantity;
 
   const handlePlaceOrder = async () => {
-    if (!formData.fullName || !formData.phone || !formData.address || !formData.wilaya) {
+    if (!formData.fullName || !formData.phone || !formData.municipality || !formData.wilaya) {
       const errorMsg = language === 'ar' ? 'الرجاء ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs requis';
       setOrderStatus({ type: 'error', message: errorMsg });
       console.error('❌ Validation Error: Missing required fields');
@@ -292,7 +242,7 @@ export default function WebsiteOrder() {
         customer_name: formData.fullName,
         customer_phone: formData.phone,
         customer_email: null,
-        customer_address: formData.address,
+        customer_address: `${formData.municipality}, ${formData.wilaya}`,
         customer_wilaya: formData.wilaya,
         delivery_type: formData.deliveryType,
         status: 'pending',
@@ -554,9 +504,9 @@ export default function WebsiteOrder() {
                   <div className="text-2xl">📍</div>
                   <div className="flex-1">
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {language === 'ar' ? 'العنوان' : 'Adresse'}
+                      {language === 'ar' ? 'البلدية' : 'Commune'}
                     </p>
-                    <p className="font-bold text-slate-900 dark:text-white">{formData.address}</p>
+                    <p className="font-bold text-slate-900 dark:text-white">{formData.municipality}</p>
                   </div>
                 </div>
 
@@ -899,39 +849,51 @@ export default function WebsiteOrder() {
                 />
               </div>
 
-              {/* Address */}
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  {language === 'ar' ? 'العنوان *' : 'Adresse *'}
-                </label>
-                <Input
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  placeholder={language === 'ar' ? 'شارع، رقم البناء، إلخ' : 'Rue, numéro, etc'}
-                  className="border-2 border-slate-300 dark:border-slate-600 py-6 text-base"
-                />
-              </div>
+              {/* Wilaya and Municipality */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Wilaya */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    {language === 'ar' ? 'الولاية *' : 'Wilaya *'}
+                  </label>
+                  <Select value={formData.wilaya} onValueChange={handleWilayaChange}>
+                    <SelectTrigger className="border-2 border-slate-300 dark:border-slate-600 h-12">
+                      <SelectValue placeholder={language === 'ar' ? 'اختر ولاية' : 'Sélectionner une wilaya'} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      {ALGERIAN_WILAYAS.map(wilaya => (
+                        <SelectItem key={wilaya} value={wilaya}>
+                          {wilaya}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Wilaya */}
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  {language === 'ar' ? 'الولاية *' : 'Wilaya *'}
-                </label>
-                <Select value={formData.wilaya} onValueChange={handleWilayaChange}>
-                  <SelectTrigger className="border-2 border-slate-300 dark:border-slate-600 h-12">
-                    <SelectValue placeholder={language === 'ar' ? 'اختر ولاية' : 'Sélectionner une wilaya'} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-96">
-                    {ALGERIAN_WILAYAS.map(wilaya => (
-                      <SelectItem key={wilaya} value={wilaya}>
-                        {wilaya}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {/* Municipality */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    {language === 'ar' ? 'البلدية *' : 'Commune *'}
+                  </label>
+                  <Select 
+                    value={formData.municipality} 
+                    onValueChange={handleMunicipalityChange}
+                    disabled={!formData.wilaya}
+                  >
+                    <SelectTrigger className="border-2 border-slate-300 dark:border-slate-600 h-12 disabled:bg-slate-100 dark:disabled:bg-slate-700">
+                      <SelectValue placeholder={!formData.wilaya ? (language === 'ar' ? 'اختر ولاية أولاً' : 'Sélectionner une wilaya d\'abord') : (language === 'ar' ? 'اختر بلدية' : 'Sélectionner une commune')} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      {formData.wilaya && getMunicipalitiesForWilaya(formData.wilaya).map(municipality => (
+                        <SelectItem key={municipality} value={municipality}>
+                          {municipality}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Delivery Type */}

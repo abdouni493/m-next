@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { getMunicipalitiesForWilaya, getAllWilayas } from '@/data/algerian-municipalities';
 import {
   Dialog,
   DialogContent,
@@ -64,14 +65,7 @@ interface Testimonial {
 }
 
 // List of Algerian Wilayas
-const ALGERIAN_WILAYAS = [
-  'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
-  'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tiaret', 'Tizi Ouzou', 'Algiers', 'Djelfa',
-  'Jijel', 'Sétif', 'Saïda', 'Skikda', 'Sidi Bel Abbès', 'Annaba', 'Guelma', 'Constantine',
-  'Médéa', 'Mostaghanem', 'M\'Sila', 'Mascara', 'Ouargla', 'Oran', 'El Bayadh', 'Illizi',
-  'Bordj Bou Arréridj', 'El Tarf', 'Tindouf', 'Tissemsilt', 'El Oued', 'Khenchela', 'Souk Ahras',
-  'Tipaza', 'Mila', 'Aïn Defla', 'Naâma', 'Aïn Témouchent', 'Ghardaïa', 'Relizane', 'Beni Saf'
-];
+const ALGERIAN_WILAYAS = getAllWilayas();
 
 export default function WebsiteCart() {
   const { language, isRTL } = useLanguage();
@@ -99,7 +93,7 @@ export default function WebsiteCart() {
     client_name: '',
     client_phone: '',
     client_wilaya: '',
-    client_address: '',
+    client_municipality: '',
     delivery_agency_id: '',
     delivery_type: 'domicile'
   });
@@ -345,7 +339,7 @@ export default function WebsiteCart() {
       return;
     }
 
-    if (!formData.client_name || !formData.client_phone || !formData.client_wilaya || !formData.client_address || !formData.delivery_agency_id) {
+    if (!formData.client_name || !formData.client_phone || !formData.client_wilaya || !formData.client_municipality || !formData.delivery_agency_id) {
       alert(language === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -357,7 +351,7 @@ export default function WebsiteCart() {
         customer_name: formData.client_name,
         customer_phone: formData.client_phone,
         customer_wilaya: formData.client_wilaya,
-        customer_address: formData.client_address,
+        customer_address: `${formData.client_municipality}, ${formData.client_wilaya}`,
         delivery_agency_id: formData.delivery_agency_id,
         delivery_type: formData.delivery_type,
         delivery_price: deliveryPrice,
@@ -375,7 +369,7 @@ export default function WebsiteCart() {
         customer_name: formData.client_name,
         customer_phone: formData.client_phone,
         customer_wilaya: formData.client_wilaya,
-        customer_address: formData.client_address,
+        customer_address: `${formData.client_municipality}, ${formData.client_wilaya}`,
         delivery_agency_id: formData.delivery_agency_id,
         delivery_agency_name: selectedAgency?.name || '',
         delivery_type: formData.delivery_type,
@@ -1076,7 +1070,7 @@ export default function WebsiteCart() {
                       <MapPin className="w-3 h-3 md:w-4 md:h-4 inline mr-1" />
                       {language === 'ar' ? '🗺️ الولاية *' : '🗺️ Wilaya *'}
                     </label>
-                    <Select value={formData.client_wilaya} onValueChange={(value) => setFormData(prev => ({ ...prev, client_wilaya: value }))}>
+                    <Select value={formData.client_wilaya} onValueChange={(value) => setFormData(prev => ({ ...prev, client_wilaya: value, client_municipality: '' }))}>
                       <SelectTrigger className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm">
                         <SelectValue placeholder={language === 'ar' ? 'اختر الولاية' : 'Choisir une wilaya'} />
                       </SelectTrigger>
@@ -1088,19 +1082,25 @@ export default function WebsiteCart() {
                     </Select>
                   </div>
 
-                  {/* Address */}
+                  {/* Municipality */}
                   <div>
                     <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      {language === 'ar' ? '📍 العنوان *' : '📍 Adresse *'}
+                      {language === 'ar' ? '📍 البلدية *' : '📍 Commune *'}
                     </label>
-                    <Input
-                      name="client_address"
-                      placeholder={language === 'ar' ? 'شارع، رقم البيت...' : 'Rue, numéro...'}
-                      value={formData.client_address}
-                      onChange={handleFormChange}
-                      className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm"
-                      required
-                    />
+                    <Select 
+                      value={formData.client_municipality} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, client_municipality: value }))}
+                      disabled={!formData.client_wilaya}
+                    >
+                      <SelectTrigger className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm disabled:bg-slate-100 dark:disabled:bg-slate-700">
+                        <SelectValue placeholder={!formData.client_wilaya ? (language === 'ar' ? 'اختر ولاية أولاً' : 'Choisir une wilaya d\'abord') : (language === 'ar' ? 'اختر بلدية' : 'Choisir une commune')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {formData.client_wilaya && getMunicipalitiesForWilaya(formData.client_wilaya).map(municipality => (
+                          <SelectItem key={municipality} value={municipality}>{municipality}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Delivery Agency Selection */}

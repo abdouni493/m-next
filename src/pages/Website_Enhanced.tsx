@@ -34,6 +34,9 @@ import {
   Truck,
   DollarSign,
   MapIcon,
+  Map,
+  Smartphone,
+  LinkIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -391,6 +394,15 @@ export default function Website_Enhanced() {
     store_name: '',
     slogan: '',
     description: '',
+    logo_url: '',
+    landing_page_image_url: '',
+    facebook_url: '',
+    instagram_url: '',
+    tiktok_url: '',
+    phone_number: '',
+    whatsapp_number: '',
+    telegram_number: '',
+    location: '',
   });
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -400,6 +412,13 @@ export default function Website_Enhanced() {
     description: '',
     logo_url: '',
     landing_page_image_url: '',
+    facebook_url: '',
+    instagram_url: '',
+    tiktok_url: '',
+    phone_number: '',
+    whatsapp_number: '',
+    telegram_number: '',
+    location: '',
   });
   const [landingPageImageFile, setLandingPageImageFile] = useState<File | null>(null);
 
@@ -535,21 +554,35 @@ export default function Website_Enhanced() {
 
   const handleSaveWebsiteSettings = async () => {
     try {
-      if (!websiteSettings.store_name || !websiteSettings.description) {
-        toast({
-          title: t.common.error,
-          description: 'Please fill in all required fields',
-          variant: 'destructive',
-        });
-        return;
+      // For contacts tab, don't require store_name and description
+      if (activeTab === 'contacts') {
+        // Contacts save - no validation needed, all fields are optional
+      } else {
+        // For settings tab, require store_name and description
+        if (!websiteSettings.store_name || !websiteSettings.description) {
+          toast({
+            title: t.common.error,
+            description: 'Please fill in all required fields',
+            variant: 'destructive',
+          });
+          return;
+        }
       }
 
       const settingsToSave = {
-        store_name: websiteSettings.store_name,
+        store_name: websiteSettings.store_name || '',
         slogan: websiteSettings.slogan || '',
-        description: websiteSettings.description,
+        description: websiteSettings.description || '',
         logo_url: websiteSettings.logo_url || '',
         landing_page_image_url: websiteSettings.landing_page_image_url || '',
+        // Include all contact fields
+        facebook_url: websiteSettings.facebook_url || '',
+        instagram_url: websiteSettings.instagram_url || '',
+        tiktok_url: websiteSettings.tiktok_url || '',
+        phone_number: websiteSettings.phone_number || '',
+        whatsapp_number: websiteSettings.whatsapp_number || '',
+        telegram_number: websiteSettings.telegram_number || '',
+        location: websiteSettings.location || '',
       };
 
       // Update in database
@@ -560,7 +593,9 @@ export default function Website_Enhanced() {
         setWebsiteSettings(result);
         toast({
           title: t.common.success,
-          description: 'Website settings saved successfully!',
+          description: activeTab === 'contacts' 
+            ? 'Contacts saved successfully!' 
+            : 'Website settings saved successfully!',
         });
       }
     } catch (error) {
@@ -2542,28 +2577,288 @@ export default function Website_Enhanced() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-6 max-w-2xl mx-auto"
+              className="space-y-8"
             >
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border-2 border-blue-300 dark:border-blue-700 shadow-lg">
-                <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-6">📱 {language === 'ar' ? 'معلومات الاتصال' : language === 'fr' ? 'Informations de Contact' : 'Contact Information'}</h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-lg font-bold">{language === 'ar' ? 'رقم الهاتف' : language === 'fr' ? 'Numéro de Téléphone' : 'Phone Number'}</Label>
-                    <Input type="tel" placeholder="+213 XXX XXX XXX" className="h-12 text-base" />
+              {/* Header Section */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-slate-900 dark:to-black rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50 p-8"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl shadow-lg">
+                    <Globe className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <Label className="text-lg font-bold">{language === 'ar' ? 'عنوان البريد الإلكتروني' : language === 'fr' ? 'Adresse Email' : 'Email Address'}</Label>
-                    <Input type="email" placeholder="contact@example.com" className="h-12 text-base" />
+                    <h2 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      {language === 'ar' ? '📞 إدارة جهات الاتصال' : '📞 Gestion des Contacts'}
+                    </h2>
+                    <p className="text-slate-400 mt-2">
+                      {language === 'ar' ? 'أضف روابط وسائل التواصل الاجتماعي وبيانات الاتصال' : 'Ajoutez vos réseaux sociaux et informations de contact'}
+                    </p>
                   </div>
-                  <div>
-                    <Label className="text-lg font-bold">{language === 'ar' ? 'رقم الواتساب' : language === 'fr' ? 'Numéro WhatsApp' : 'WhatsApp Number'}</Label>
-                    <Input type="tel" placeholder="+213 XXX XXX XXX" className="h-12 text-base" />
-                  </div>
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg h-12">
-                    {t.common.save}
-                  </Button>
                 </div>
-              </div>
+              </motion.div>
+
+              {/* Social Media URLs Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 dark:from-blue-900/40 dark:to-cyan-900/40 border-2 border-blue-500/50 dark:border-blue-600/50 rounded-3xl overflow-hidden shadow-xl p-0"
+              >
+                <div className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-700 dark:to-cyan-700 px-8 py-6 border-b-2 border-blue-700/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <LinkIcon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">
+                      {language === 'ar' ? '🔗 روابط وسائل التواصل الاجتماعي' : '🔗 Liens Réseaux Sociaux'}
+                    </h3>
+                  </div>
+                  <p className="text-blue-100 mt-2 ml-11">
+                    {language === 'ar' ? 'أضف روابط الملفات الشخصية لديك على منصات التواصل' : 'Ajoutez les URLs de vos profils sociaux'}
+                  </p>
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Facebook */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-blue-400/30 dark:border-blue-600/30 hover:border-blue-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-700 dark:text-blue-300">
+                          <Facebook className="h-5 w-5" />
+                          <span>Facebook</span>
+                        </Label>
+                        <Input
+                          type="url"
+                          placeholder="https://facebook.com/yourpage"
+                          value={settings.facebook_url || ''}
+                          onChange={(e) => setSettings({ ...settings, facebook_url: e.target.value })}
+                          className="border-2 border-blue-300/50 dark:border-blue-700/50 h-12 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Instagram */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-pink-400/30 dark:border-pink-600/30 hover:border-pink-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-pink-50 dark:bg-pink-900/30 rounded-xl text-pink-700 dark:text-pink-300">
+                          <Instagram className="h-5 w-5" />
+                          <span>Instagram</span>
+                        </Label>
+                        <Input
+                          type="url"
+                          placeholder="https://instagram.com/yourprofile"
+                          value={settings.instagram_url || ''}
+                          onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
+                          className="border-2 border-pink-300/50 dark:border-pink-700/50 h-12 rounded-xl focus:border-pink-500 dark:focus:border-pink-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* TikTok */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.35 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-black/30 dark:border-white/20 hover:border-black/60 dark:hover:border-white/40 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-slate-700 dark:text-slate-300">
+                          <Smartphone className="h-5 w-5" />
+                          <span>TikTok</span>
+                        </Label>
+                        <Input
+                          type="url"
+                          placeholder="https://tiktok.com/@yourprofile"
+                          value={settings.tiktok_url || ''}
+                          onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value })}
+                          className="border-2 border-slate-300/50 dark:border-slate-600/50 h-12 rounded-xl focus:border-slate-500 dark:focus:border-slate-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Google Maps */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-red-400/30 dark:border-red-600/30 hover:border-red-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-xl text-red-700 dark:text-red-300">
+                          <Map className="h-5 w-5" />
+                          <span>{language === 'ar' ? 'خرائط Google' : 'Google Maps'}</span>
+                        </Label>
+                        <Input
+                          type="url"
+                          placeholder="https://maps.google.com/..."
+                          value={settings.location || ''}
+                          onChange={(e) => setSettings({ ...settings, location: e.target.value })}
+                          className="border-2 border-red-300/50 dark:border-red-700/50 h-12 rounded-xl focus:border-red-500 dark:focus:border-red-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Contact Numbers Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                className="bg-gradient-to-br from-green-900/30 to-teal-900/30 dark:from-green-900/40 dark:to-teal-900/40 border-2 border-green-500/50 dark:border-green-600/50 rounded-3xl overflow-hidden shadow-xl p-0"
+              >
+                <div className="bg-gradient-to-r from-green-600 to-teal-600 dark:from-green-700 dark:to-teal-700 px-8 py-6 border-b-2 border-green-700/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <Phone className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">
+                      {language === 'ar' ? '☎️ أرقام الاتصال' : '☎️ Numéros de Contact'}
+                    </h3>
+                  </div>
+                  <p className="text-green-100 mt-2 ml-11">
+                    {language === 'ar' ? 'أضف أرقام الهاتف والتطبيقات الفورية' : 'Ajoutez vos numéros de téléphone et applications de messagerie'}
+                  </p>
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Phone Number */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-green-400/30 dark:border-green-600/30 hover:border-green-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-xl text-green-700 dark:text-green-300">
+                          <Phone className="h-5 w-5" />
+                          <span>{language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}</span>
+                        </Label>
+                        <Input
+                          type="tel"
+                          placeholder="+213 5XX XX XX XX"
+                          value={settings.phone_number || ''}
+                          onChange={(e) => setSettings({ ...settings, phone_number: e.target.value })}
+                          className="border-2 border-green-300/50 dark:border-green-700/50 h-12 rounded-xl focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* WhatsApp */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.55 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-green-400/30 dark:border-green-600/30 hover:border-green-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-xl text-green-700 dark:text-green-300">
+                          <MessageCircle className="h-5 w-5" />
+                          <span>WhatsApp</span>
+                        </Label>
+                        <Input
+                          type="tel"
+                          placeholder="+213 5XX XX XX XX"
+                          value={settings.whatsapp_number || ''}
+                          onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
+                          className="border-2 border-green-300/50 dark:border-green-700/50 h-12 rounded-xl focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Telegram */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-blue-400/30 dark:border-blue-600/30 hover:border-blue-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-700 dark:text-blue-300">
+                          <Send className="h-5 w-5" />
+                          <span>Telegram</span>
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="@yourusername or +213..."
+                          value={settings.telegram_number || ''}
+                          onChange={(e) => setSettings({ ...settings, telegram_number: e.target.value })}
+                          className="border-2 border-blue-300/50 dark:border-blue-700/50 h-12 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+
+                    {/* Location/Address */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.65 }}
+                    >
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-purple-400/30 dark:border-purple-600/30 hover:border-purple-500 hover:shadow-lg transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl text-purple-700 dark:text-purple-300">
+                          <MapPin className="h-5 w-5" />
+                          <span>{language === 'ar' ? 'العنوان' : 'Adresse'}</span>
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder={language === 'ar' ? 'أدخل العنوان الكامل' : 'Entrez l\'adresse complète'}
+                          value={settings.location || ''}
+                          onChange={(e) => setSettings({ ...settings, location: e.target.value })}
+                          className="border-2 border-purple-300/50 dark:border-purple-700/50 h-12 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Save Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <motion.button
+                  whileHover={{ scale: 1.02, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleSaveWebsiteSettings()}
+                  className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl border-0 transition-all duration-300"
+                >
+                  <Check className="h-6 w-6" />
+                  {language === 'ar' ? '✅ حفظ جميع معلومات الاتصال' : '✅ Sauvegarder tous les contacts'}
+                </motion.button>
+              </motion.div>
+
+              {/* Info Box */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.75 }}
+                className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-xl p-6"
+              >
+                <div className="flex gap-4">
+                  <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-2">
+                      {language === 'ar' ? '💡 نصيحة' : '💡 Conseil'}
+                    </h4>
+                    <p className="text-blue-700 dark:text-blue-400 text-sm">
+                      {language === 'ar' 
+                        ? 'تأكد من إدخال البيانات الصحيحة. تظهر هذه المعلومات على الموقع الإلكتروني الخاص بك ليتمكن العملاء من التواصل معك.'
+                        : 'Assurez-vous d\'entrer les bonnes informations. Ces données apparaîtront sur votre site web pour que les clients puissent vous contacter.'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           )}
 
