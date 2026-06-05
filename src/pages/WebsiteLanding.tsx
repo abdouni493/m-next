@@ -1,13 +1,15 @@
 import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { getWebsiteSettingsREST, getAllProductsREST, getApprovedTestimonials, createTestimonial } from '@/lib/supabaseClient';
-import { ChevronRight, Zap, Flame, ShoppingCart, Eye, X, Upload, Loader, AlertCircle } from 'lucide-react';
+import { ChevronRight, Zap, Flame, ShoppingCart, Eye, X, Upload, Loader, AlertCircle, Truck, Shield, Star } from 'lucide-react';
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { uploadLandingImage, deleteLandingImage } from '@/lib/uploadLandingImage';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
+import GlowCard from '@/components/website/GlowCard';
+import ElectricBadge from '@/components/website/ElectricBadge';
+import FloatingParticles from '@/components/website/FloatingParticles';
 
 interface Testimonial {
   id: string;
@@ -40,15 +42,32 @@ interface WebsiteSettings {
   logo_url?: string;
 }
 
+// Animated counter component
+function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const { ref, isInView } = useScrollReveal();
+  const count = useMotionValue(0);
+  const rounded = useSpring(count, { stiffness: 80, damping: 20 });
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (isInView) count.set(target);
+  }, [isInView, target, count]);
+
+  useEffect(() => rounded.on('change', v => setDisplay(Math.round(v))), [rounded]);
+
+  return (
+    <span ref={ref}>
+      {display}{suffix}
+    </span>
+  );
+}
+
 export default function WebsiteLanding() {
   const { language, isRTL } = useLanguage();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Use custom hook to fetch settings with image
-  const { settings: websiteSettings, imageUrl, loading: settingsLoading, error: settingsError, refetch: refetchSettings } = useWebsiteSettings();
-  
-  // Legacy state for other data
+
+  const { settings: websiteSettings, imageUrl, loading: settingsLoading, refetch: refetchSettings } = useWebsiteSettings();
   const [settings, setSettings] = useState<WebsiteSettings | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -62,88 +81,52 @@ export default function WebsiteLanding() {
   const [testimonialOpinion, setTestimonialOpinion] = useState('');
   const [testimonialRating, setTestimonialRating] = useState(5);
   const [submittingTestimonial, setSubmittingTestimonial] = useState(false);
-  
-  // Image upload state
   const [showUploadUI, setShowUploadUI] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const statsReveal = useScrollReveal();
+  const productsReveal = useScrollReveal();
+  const whyReveal = useScrollReveal();
+  const testimonialsReveal = useScrollReveal();
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Use REST API instead of Supabase client to bypass auth issues
         const [settingsData, productsData, testimonialsData] = await Promise.all([
           getWebsiteSettingsREST(),
           getAllProductsREST(),
           getApprovedTestimonials(),
         ]);
-
-        setSettings(settingsData || {
-          store_name: 'Chargeur Store',
-          slogan: 'Quality Chargers at Best Prices'
-        });
-        
-        // Get all active products (visible on website)
-        const visibleProducts = (productsData || []).filter((p: any) => p.is_active);
-        setAllProducts(visibleProducts);
-        
-        // Debug: log all products
-        console.log('📦 All visible products:', visibleProducts);
-        console.log('📦 Total products count:', visibleProducts.length);
-        
-        // Extract unique brands from ALL products
-        const brands = Array.from(new Set(
-          visibleProducts
-            .map((p: any) => p.product_mark)
-            .filter((mark: any) => mark && mark.trim() !== '')
-        )).sort() as string[];
-        
-        console.log('🏷️ Brands found:', brands);
-        console.log('🏷️ Total brands:', brands.length);
-        
+        setSettings(settingsData || { store_name: 'Chargeur Store', slogan: 'Quality Chargers at Best Prices' });
+        const visible = (productsData || []).filter((p: any) => p.is_active);
+        setAllProducts(visible);
+        const brands = Array.from(new Set(visible.map((p: any) => p.product_mark).filter(Boolean))).sort() as string[];
         setAvailableBrands(brands);
-        
-        // Show first 3 products for initial load
-        setProducts(visibleProducts.slice(0, 3));
-        
-        // Set testimonials from database
+        setProducts(visible.slice(0, 3));
         setTestimonials(testimonialsData || []);
-      } catch (error) {
-        console.error('Error fetching website data:', error);
-        // Show default values even if data fetch fails
-        setSettings({
-          store_name: 'Chargeur Store',
-          slogan: 'Quality Chargers at Best Prices'
-        });
+      } catch {
+        setSettings({ store_name: 'Chargeur Store', slogan: 'Quality Chargers at Best Prices' });
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  // Handle image upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     setUploadError(null);
-
     try {
       const result = await uploadLandingImage(file);
-
       if (result.success) {
-        // Success - refetch to get updated image
         await refetchSettings();
         setShowUploadUI(false);
-        // Reset file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
       } else {
         setUploadError(result.error || 'Upload failed');
       }
@@ -154,22 +137,14 @@ export default function WebsiteLanding() {
     }
   };
 
-  // Handle image deletion
   const handleDeleteImage = async () => {
     if (!imageUrl) return;
-
     setDeleting(true);
     setUploadError(null);
-
     try {
       const result = await deleteLandingImage(imageUrl);
-
-      if (result.success) {
-        // Success - refetch to clear image
-        await refetchSettings();
-      } else {
-        setUploadError(result.error || 'Deletion failed');
-      }
+      if (result.success) await refetchSettings();
+      else setUploadError(result.error || 'Deletion failed');
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -177,1000 +152,718 @@ export default function WebsiteLanding() {
     }
   };
 
-  // Handle Brand Filter - Show ALL products for selected brand
   const handleBrandClick = (brand: string | null) => {
     setSelectedBrand(brand);
-    
     if (brand === null) {
-      // Show all products (up to first 3 for initial load)
       setProducts(allProducts.slice(0, 3));
     } else {
-      // Show ALL products for the selected brand (NO LIMITS)
-      const filtered = allProducts.filter(p => {
-        const mark = p.product_mark || p.product_mark;
-        return mark === brand;
-      });
-      
-      // Debug: log what we found
-      console.log(`🏷️ Brand "${brand}" found ${filtered.length} products:`, filtered);
-      
-      // Set ALL filtered products - NO slice limit
-      setProducts(filtered.length > 0 ? filtered : []);
+      const filtered = allProducts.filter(p => p.product_mark === brand);
+      setProducts(filtered);
     }
   };
 
-  // Handle Submit Testimonial
+  const handleAddToCart = (product: Product) => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existing = cart.find((item: any) => item.product_id === product.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ id: product.id, product_id: product.id, name: product.name, price: product.selling_price, quantity: 1, image: product.primary_image, from_offer: false });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new Event('cartUpdated'));
+    setCartNotification(product.name);
+    setTimeout(() => setCartNotification(null), 3000);
+  };
+
+  const handleViewDetails = () => navigate('/website-shop/offers');
+
+  const handleOrder = (product: Product) => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    if (!cart.find((i: any) => i.product_id === product.id)) handleAddToCart(product);
+    navigate('/website-shop/order');
+  };
+
   const handleSubmitTestimonial = async () => {
     if (!testimonialName.trim() || !testimonialOpinion.trim()) {
       alert(language === 'ar' ? 'يرجى ملء جميع الحقول' : 'Veuillez remplir tous les champs');
       return;
     }
-
     setSubmittingTestimonial(true);
     try {
-      const newTestimonial = await createTestimonial(
-        testimonialName,
-        testimonialOpinion,
-        testimonialRating
-      );
-      
-      if (newTestimonial) {
-        // Add the new testimonial to the list
-        setTestimonials([newTestimonial, ...testimonials]);
-        
-        // Reset form
-        setTestimonialName('');
-        setTestimonialOpinion('');
-        setTestimonialRating(5);
+      const t = await createTestimonial(testimonialName, testimonialOpinion, testimonialRating);
+      if (t) {
+        setTestimonials([t, ...testimonials]);
+        setTestimonialName(''); setTestimonialOpinion(''); setTestimonialRating(5);
         setShowTestimonialModal(false);
-        
-        // Show success message
-        alert(language === 'ar' 
-          ? 'شكراً! سيتم مراجعة رأيك وعرضه قريباً' 
-          : 'Merci! Votre avis sera publié après modération');
+        alert(language === 'ar' ? 'شكراً! سيتم مراجعة رأيك وعرضه قريباً' : 'Merci! Votre avis sera publié après modération');
       }
-    } catch (error) {
-      console.error('Error submitting testimonial:', error);
-      alert(language === 'ar' ? 'حدث خطأ، يرجى المحاولة مجدداً' : 'Une erreur est survenue, veuillez réessayer');
+    } catch {
+      alert(language === 'ar' ? 'حدث خطأ' : 'Une erreur est survenue');
     } finally {
       setSubmittingTestimonial(false);
     }
   };
 
-  // Handle Add to Cart
-  const handleAddToCart = (product: Product) => {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    
-    // Check if product already in cart - if so, increase quantity instead of adding duplicate
-    const existingItem = cart.find((item: any) => item.product_id === product.id);
-    
-    if (existingItem) {
-      // Increase quantity instead of adding duplicate
-      existingItem.quantity += 1;
-    } else {
-      // Add new item only if not in cart
-      cart.push({
-        id: product.id,
-        product_id: product.id,
-        name: product.name,
-        price: product.selling_price,
-        quantity: 1,
-        image: product.primary_image,
-        from_offer: false
-      });
-    }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Trigger cart update event for navbar
-    window.dispatchEvent(new Event('cartUpdated'));
-    
-    // Show success notification
-    setCartNotification(product.name);
-    setTimeout(() => setCartNotification(null), 3000);
-  };
+  const featureCards = [
+    { icon: <Zap className="w-7 h-7" />, color: '#00D4FF', title: language === 'ar' ? 'جودة عالية' : 'Qualité Premium', desc: language === 'ar' ? 'شواحن مختبرة ومضمونة' : 'Chargeurs testés et garantis' },
+    { icon: <Truck className="w-7 h-7" />, color: '#7C3AED', title: language === 'ar' ? 'توصيل سريع' : 'Livraison Rapide', desc: language === 'ar' ? 'إلى جميع ولايات الجزائر' : 'Dans toute l\'Algérie' },
+    { icon: <Shield className="w-7 h-7" />, color: '#FF6B35', title: language === 'ar' ? 'ضمان كامل' : 'Garantie Totale', desc: language === 'ar' ? 'خدمة ما بعد البيع مضمونة' : 'Service après-vente assuré' },
+  ];
 
-  // Handle View Details
-  const handleViewDetails = (product: Product) => {
-    // Navigate to boutique page with the selected product
-    navigate('/website-shop/offers');
-  };
-
-  // Handle Order
-  const handleOrder = (product: Product) => {
-    // Add to cart if not already there
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find((item: any) => item.product_id === product.id);
-    if (!existingItem) {
-      handleAddToCart(product);
-    }
-    // Navigate to cart
-    navigate(`/website-shop/order`);
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  };
+  const stats = [
+    { value: 359, suffix: '+', label: language === 'ar' ? 'منتج' : 'Produits' },
+    { value: 100, suffix: '%', label: language === 'ar' ? 'جودة' : 'Qualité' },
+    { value: 58, suffix: '', label: language === 'ar' ? 'ولاية' : 'Wilayas' },
+    { value: 24, suffix: '/7', label: language === 'ar' ? 'دعم' : 'Support' },
+  ];
 
   return (
-    <div className="space-y-12">
-      {/* Cart Notification Toast */}
-      {cartNotification && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-green-400 to-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
-        >
-          ✅ {cartNotification} {language === 'ar' ? 'تمت إضافتها للسلة' : 'ajouté au panier'}
-        </motion.div>
-      )}
+    <div style={{ background: '#020817', color: '#F1F5F9' }} className="min-h-screen">
 
-      {/* Hero Section - WITH BACKGROUND IMAGE SUPPORT */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="relative w-full min-h-screen md:min-h-96 flex items-center justify-center overflow-hidden rounded-3xl shadow-2xl"
-        style={imageUrl ? {
-          backgroundImage: `url('${imageUrl}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-        } : {}}
-      >
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 z-10" />
-
-        {/* Upload UI Modal */}
-        {showUploadUI && (
+      {/* Cart toast */}
+      <AnimatePresence>
+        {cartNotification && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="absolute top-0 left-0 right-0 bottom-0 bg-black/80 z-50 flex items-center justify-center p-4 rounded-3xl"
+            initial={{ opacity: 0, y: -30, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -30, x: '-50%' }}
+            className="fixed top-24 left-1/2 z-50 px-6 py-3 rounded-xl font-semibold text-sm"
+            style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', boxShadow: '0 0 20px rgba(16,185,129,0.4)' }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">{language === 'ar' ? 'رفع صورة البطل' : 'Télécharger l\'image'}</h2>
-                <button
-                  onClick={() => setShowUploadUI(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  disabled={uploading || deleting}
-                >
-                  <X className="w-6 h-6 text-gray-600" />
-                </button>
-              </div>
-
-              {/* Error Message */}
-              {uploadError && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
-                >
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700">{uploadError}</p>
-                </motion.div>
-              )}
-
-              {/* Upload Area */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="mb-6 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group"
-              >
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3 group-hover:text-blue-500 transition-colors" />
-                <p className="text-gray-700 font-medium mb-1">{language === 'ar' ? 'انقر للتحميل' : 'Cliquez pour télécharger'}</p>
-                <p className="text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
-              </div>
-
-              {/* Hidden File Input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                disabled={uploading || deleting}
-                className="hidden"
-              />
-
-              {/* Current Image Preview */}
-              {imageUrl && (
-                <div className="mb-6 bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm font-medium text-gray-700 mb-3">{language === 'ar' ? 'الصورة الحالية' : 'Image actuelle'}</p>
-                  <img
-                    src={imageUrl}
-                    alt="Current hero"
-                    className="w-full h-32 object-cover rounded-lg mb-3"
-                  />
-                  <button
-                    onClick={handleDeleteImage}
-                    disabled={deleting || uploading}
-                    className="w-full px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
-                  >
-                    {deleting ? (
-                      <>
-                        <Loader className="w-4 h-4 animate-spin" />
-                        {language === 'ar' ? 'جاري الحذف...' : 'Suppression...'}
-                      </>
-                    ) : (
-                      <>
-                        <X className="w-4 h-4" />
-                        {language === 'ar' ? 'حذف الصورة' : 'Supprimer l\'image'}
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-
-              {/* Upload Button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading || deleting}
-                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
-              >
-                {uploading ? (
-                  <>
-                    <Loader className="w-4 h-4 animate-spin" />
-                    {language === 'ar' ? 'جاري التحميل...' : 'Téléchargement...'}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    {language === 'ar' ? 'اختر صورة' : 'Choisir une image'}
-                  </>
-                )}
-              </button>
-            </motion.div>
+            ✅ {cartNotification} {language === 'ar' ? 'أضيف للسلة' : 'ajouté au panier'}
           </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Hero Content */}
-        <div className="relative z-20 w-full h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="text-center mb-8 sm:mb-12 max-w-4xl"
-          >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight">
-              ⚡ {settings?.store_name || websiteSettings?.store_name || 'Charger Shop'}
-            </h1>
-            <div className="h-1 w-20 sm:w-24 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-6 sm:mb-8 rounded-full" />
-          </motion.div>
+      {/* ===== HERO ===== */}
+      <section className="relative min-h-screen flex items-center overflow-hidden px-4">
+        <FloatingParticles />
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl text-blue-200 font-light mb-4 text-center max-w-2xl"
-          >
-            {settings?.slogan || websiteSettings?.slogan || 'Best Chargers for Your Devices'}
-          </motion.p>
+        {/* Background radial glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,212,255,0.07) 0%, transparent 70%)' }} />
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-base sm:text-lg text-gray-300 mb-10 sm:mb-12 text-center max-w-2xl leading-relaxed"
-          >
-            {settings?.description || websiteSettings?.description || 'Premium quality chargers at unbeatable prices'}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center justify-center mb-12 sm:mb-16"
-          >
-            {/* Button 1: Voir les Offres - Clean White with Blue Accent */}
-            <motion.button
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              whileHover={{ 
-                y: -3,
-                boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)',
-                transition: { duration: 0.3 }
-              }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => (window.location.href = '/website-shop/offers')}
-              className="group relative px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-lg text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-blue-400/30"
-            >
-              {/* Animated background shine effect */}
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                initial={{ x: '-100%' }}
-                animate={{ x: '100%' }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              
-              <div className="relative flex items-center justify-center gap-3">
-                <Eye className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-                <span>{language === 'ar' ? 'تصفح العروض' : 'Voir les Offres'}</span>
-                <motion.div
-                  initial={{ x: 0 }}
-                  whileHover={{ x: 5 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </motion.div>
-              </div>
-            </motion.button>
-
-            {/* Button 2: Offres Spéciales - Vibrant Orange/Amber */}
-            <motion.button
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              whileHover={{ 
-                y: -3,
-                boxShadow: '0 20px 40px rgba(251, 146, 60, 0.4)',
-                transition: { duration: 0.3 }
-              }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => (window.location.href = '/website-shop/special-offers')}
-              className="group relative px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-lg text-white bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-orange-300/40"
-            >
-              {/* Animated pulse background */}
-              <motion.div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-red-400/0 via-white/10 to-orange-400/0"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              
-              <div className="relative flex items-center justify-center gap-3">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Flame className="h-5 w-5" />
-                </motion.div>
-                <span>{language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}</span>
-              </div>
-            </motion.button>
-
-            {/* Button 3: Packs Spéciaux - Premium Purple Gradient */}
-            <motion.button
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              whileHover={{ 
-                y: -3,
-                boxShadow: '0 25px 50px rgba(168, 85, 247, 0.5)',
-                transition: { duration: 0.3 }
-              }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => (window.location.href = '/website-shop/packages')}
-              className="group relative px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-lg text-white bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-purple-300/30"
-            >
-              {/* Multiple animated elements for premium feel */}
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-200/10 to-transparent"
-                initial={{ x: '-100%' }}
-                animate={{ x: '100%' }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              
-              <motion.div 
-                className="absolute top-0 right-0 w-32 h-32 bg-pink-400/20 rounded-full blur-2xl"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
-              
-              <div className="relative flex items-center justify-center gap-3">
-                <motion.div
-                  animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <span className="text-xl">📦</span>
-                </motion.div>
-                <span>{language === 'ar' ? 'حزم مميزة' : 'Packs Spéciaux'}</span>
-                <motion.div
-                  animate={{ y: [0, -3, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <Zap className="h-5 w-5" />
-                </motion.div>
-              </div>
-            </motion.button>
-          </motion.div>
-
-          
-        </div>
-
-        {/* Floating Elements - Decorative */}
-        <motion.div
-          animate={{ y: [0, -20, 0] }}
-          transition={{ duration: 6, repeat: Infinity }}
-          className="absolute top-20 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl z-0"
-        />
-        <motion.div
-          animate={{ y: [0, 20, 0] }}
-          transition={{ duration: 8, repeat: Infinity, delay: 1 }}
-          className="absolute bottom-20 right-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl z-0"
-        />
-      </motion.section>
-
-      {/* Featured Products */}
-      {!loading && products.length > 0 && (
-        <motion.section
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="space-y-6"
-        >
-          <div className="text-center space-y-2">
-            <h2 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-              🛍️ {language === 'ar' ? 'الشواحن المتاحة' : 'Nos Chargeurs'}
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400">
-              {language === 'ar' ? 'استكشف مجموعتنا الكاملة من الشواحن' : 'Découvrez notre collection complète de chargeurs'}
-            </p>
-          </div>
-
-          {/* Brand Filter - Modern Circular Design */}
-          {availableBrands.length > 0 && (
+        {/* Hero content */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Text side */}
+          <div className={isRTL ? 'text-right' : ''}>
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-6"
+              transition={{ duration: 0.5 }}
+              className="mb-4"
             >
-              {/* Header with Counter */}
-              <div className="flex items-center justify-between px-6 py-4">
-                <div>
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    {language === 'ar' ? '🏷️ تصفية حسب الماركة' : '🏷️ Filtrer par Marque'}
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                    {language === 'ar' ? 'اختر من جميع العلامات التجارية المتاحة' : 'Sélectionnez parmi toutes les marques disponibles'}
-                  </p>
+              <ElectricBadge color="cyan">
+                {language === 'ar' ? 'الأفضل في الجزائر' : 'N°1 en Algérie'}
+              </ElectricBadge>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="font-grotesk font-black leading-tight mb-6"
+              style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', color: '#F1F5F9' }}
+            >
+              {language === 'ar' ? (
+                <>
+                  الشاحن{' '}
+                  <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+                    الأفضل
+                  </span>{' '}
+                  لسيارتك
+                </>
+              ) : (
+                <>
+                  Le Chargeur{' '}
+                  <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+                    Parfait
+                  </span>{' '}
+                  pour Votre Voiture
+                </>
+              )}
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg mb-10 leading-relaxed"
+              style={{ color: '#64748B', maxWidth: '480px' }}
+            >
+              {settings?.slogan || websiteSettings?.slogan || 'Quality Chargers at Best Prices'}
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-wrap gap-4"
+            >
+              <motion.button
+                whileHover={{ scale: 1.04, boxShadow: '0 0 30px rgba(0,212,255,0.5)' }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/website-shop/offers')}
+                className="relative flex items-center gap-2 px-7 py-4 rounded-xl font-grotesk font-bold text-base overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817', boxShadow: '0 0 20px rgba(0,212,255,0.3)' }}
+              >
+                <motion.span
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <ShoppingCart className="w-5 h-5" />
+                {language === 'ar' ? 'اكتشف البوتيك' : 'Découvrir la Boutique'}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.04, borderColor: '#FF6B35', boxShadow: '0 0 20px rgba(255,107,53,0.3)' }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/website-shop/special-offers')}
+                className="flex items-center gap-2 px-7 py-4 rounded-xl font-grotesk font-bold text-base transition-all duration-200"
+                style={{ background: 'rgba(255,107,53,0.08)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.3)' }}
+              >
+                <Flame className="w-5 h-5" />
+                {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}
+              </motion.button>
+            </motion.div>
+          </div>
+
+          {/* Visual side — animated orb (CSS-based, no Three.js needed for hero since it's decorative) */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="hidden lg:flex items-center justify-center relative"
+            style={{ height: '420px' }}
+          >
+            {/* Outer ring */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+              className="absolute w-80 h-80 rounded-full"
+              style={{ border: '1px solid rgba(0,212,255,0.2)' }}
+            />
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+              className="absolute w-64 h-64 rounded-full"
+              style={{ border: '1px dashed rgba(124,58,237,0.3)' }}
+            />
+            {/* Center glow orb */}
+            <motion.div
+              animate={{ scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="w-44 h-44 rounded-full flex items-center justify-center"
+              style={{
+                background: 'radial-gradient(circle, rgba(0,212,255,0.25) 0%, rgba(124,58,237,0.15) 50%, transparent 70%)',
+                boxShadow: '0 0 60px rgba(0,212,255,0.4), 0 0 120px rgba(0,212,255,0.15)',
+              }}
+            >
+              <Zap className="w-16 h-16" style={{ color: '#00D4FF', filter: 'drop-shadow(0 0 10px #00D4FF)' }} />
+            </motion.div>
+            {/* Orbiting dots */}
+            {[0, 120, 240].map((deg, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-3 h-3 rounded-full"
+                style={{ background: i === 0 ? '#00D4FF' : i === 1 ? '#7C3AED' : '#FF6B35' }}
+                animate={{ rotate: [deg, deg + 360] }}
+                transition={{ duration: 6 + i * 2, repeat: Infinity, ease: 'linear' }}
+                transformTemplate={({ rotate }) => `rotate(${rotate}) translateX(140px) rotate(-${rotate})`}
+              />
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Hero background image support */}
+        {imageUrl && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ backgroundImage: `url(${imageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.08 }}
+          />
+        )}
+
+        {/* Upload UI */}
+        <AnimatePresence>
+          {showUploadUI && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex items-center justify-center p-4"
+              style={{ background: 'rgba(2,8,23,0.9)' }}
+            >
+              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+                className="rounded-2xl p-8 w-full max-w-md"
+                style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.2)' }}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="font-grotesk font-bold text-xl" style={{ color: '#F1F5F9' }}>
+                    {language === 'ar' ? 'رفع صورة' : 'Image Hero'}
+                  </h2>
+                  <button onClick={() => setShowUploadUI(false)} style={{ color: '#64748B' }}>
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-                {selectedBrand && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg"
-                  >
-                    ✅ {language === 'ar' ? `${products.length} شاحن` : `${products.length} produits`}
-                  </motion.div>
+                {uploadError && (
+                  <div className="mb-4 p-3 rounded-lg flex items-center gap-2 text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {uploadError}
+                  </div>
                 )}
-              </div>
-              
-              {/* Brand Squares Grid */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 py-6 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900/50 dark:via-blue-950/30 dark:to-purple-950/30 rounded-3xl border-2 border-blue-200 dark:border-blue-700/50 backdrop-blur-sm w-full">
-                {/* All Brands Square */}
-                <motion.button
-                  whileHover={{ scale: 1.08, y: -4 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleBrandClick(null)}
-                  className={`flex flex-col items-center justify-center w-full h-16 sm:h-20 rounded-lg transition-all duration-300 overflow-hidden relative group ${
-                    selectedBrand === null
-                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-xl ring-2 ring-blue-400'
-                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-lg border-2 border-slate-200 dark:border-slate-600 hover:shadow-xl hover:border-blue-400'
-                  }`}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mb-4 rounded-xl p-8 text-center cursor-pointer transition-all"
+                  style={{ border: '2px dashed rgba(0,212,255,0.3)' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = '#00D4FF')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(0,212,255,0.3)')}
                 >
-                  <span className="text-2xl sm:text-3xl">⭐</span>
-                  <span className="text-xs font-bold text-center px-1 hidden sm:block">
-                    {language === 'ar' ? 'الكل' : 'All'}
-                  </span>
-                </motion.button>
+                  <Upload className="w-10 h-10 mx-auto mb-2" style={{ color: '#00D4FF' }} />
+                  <p className="text-sm" style={{ color: '#64748B' }}>PNG, JPG up to 5MB</p>
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} disabled={uploading || deleting} className="hidden" />
+                {imageUrl && (
+                  <div className="mb-4">
+                    <img src={imageUrl} alt="Current" className="w-full h-24 object-cover rounded-lg mb-2" />
+                    <button onClick={handleDeleteImage} disabled={deleting || uploading}
+                      className="w-full py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all"
+                      style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}
+                    >
+                      {deleting ? <><Loader className="w-4 h-4 animate-spin" /> Suppression...</> : <><X className="w-4 h-4" /> {language === 'ar' ? 'حذف الصورة' : 'Supprimer'}</>}
+                    </button>
+                  </div>
+                )}
+                <button onClick={() => fileInputRef.current?.click()} disabled={uploading || deleting}
+                  className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817' }}
+                >
+                  {uploading ? <><Loader className="w-4 h-4 animate-spin" /> Uploading...</> : <><Upload className="w-4 h-4" /> {language === 'ar' ? 'اختر صورة' : 'Choisir'}</>}
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
 
-                {/* Individual Brand Squares */}
-                {availableBrands.map((brand, index) => {
-                  // Try to find brand logo from products data
+      {/* ===== STATS BAR ===== */}
+      <section ref={statsReveal.ref} className="py-12 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={statsReveal.isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4"
+        >
+          {stats.map((s, i) => (
+            <GlowCard key={i} className="p-6 text-center">
+              <div className="font-grotesk font-black text-3xl mb-1" style={{ color: '#00D4FF' }}>
+                <AnimatedCounter target={s.value} suffix={s.suffix} />
+              </div>
+              <div className="text-sm font-medium" style={{ color: '#64748B' }}>{s.label}</div>
+            </GlowCard>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* ===== FEATURED PRODUCTS ===== */}
+      {!loading && allProducts.length > 0 && (
+        <section ref={productsReveal.ref} className="py-12 px-4">
+          <div className="max-w-7xl mx-auto">
+            {/* Section header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={productsReveal.isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-10"
+            >
+              <h2 className="font-grotesk font-black text-3xl md:text-4xl mb-3">
+                <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+                  ⚡ {language === 'ar' ? 'منتجات مميزة' : 'Produits Vedettes'}
+                </span>
+              </h2>
+              <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }} />
+            </motion.div>
+
+            {/* Brand filter */}
+            {availableBrands.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={productsReveal.isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="flex flex-wrap gap-2 justify-center mb-8"
+              >
+                <button
+                  onClick={() => handleBrandClick(null)}
+                  className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+                  style={{
+                    background: selectedBrand === null ? 'rgba(0,212,255,0.15)' : 'rgba(30,58,95,0.4)',
+                    color: selectedBrand === null ? '#00D4FF' : '#64748B',
+                    border: `1px solid ${selectedBrand === null ? 'rgba(0,212,255,0.4)' : 'rgba(30,58,95,0.6)'}`,
+                  }}
+                >
+                  {language === 'ar' ? '⭐ الكل' : '⭐ Tous'}
+                </button>
+                {availableBrands.map((brand, i) => {
                   const brandProduct = allProducts.find(p => p.product_mark === brand);
-                  const logoUrl = brandProduct && (brandProduct as any).brand_logo ? (brandProduct as any).brand_logo : null;
-
+                  const logoUrl = (brandProduct as any)?.brand_logo || null;
                   return (
                     <motion.button
                       key={brand}
-                      whileHover={{ scale: 1.08, y: -3 }}
-                      whileTap={{ scale: 0.95 }}
-                      initial={{ opacity: 0, scale: 0.5 }}
+                      initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.03, type: 'spring', damping: 12 }}
+                      transition={{ delay: i * 0.03 }}
                       onClick={() => handleBrandClick(brand)}
-                      className={`flex items-center justify-center w-full h-16 sm:h-20 rounded-lg transition-all duration-300 relative group overflow-hidden ${
-                        selectedBrand === brand
-                          ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl ring-2 ring-blue-400'
-                          : 'bg-white dark:bg-slate-800 shadow-lg border-2 border-slate-200 dark:border-slate-600 hover:shadow-xl hover:border-blue-400'
-                      }`}
                       title={brand}
+                      className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-2"
+                      style={{
+                        background: selectedBrand === brand ? 'rgba(0,212,255,0.15)' : 'rgba(30,58,95,0.4)',
+                        color: selectedBrand === brand ? '#00D4FF' : '#64748B',
+                        border: `1px solid ${selectedBrand === brand ? 'rgba(0,212,255,0.4)' : 'rgba(30,58,95,0.6)'}`,
+                      }}
                     >
-                      {logoUrl ? (
-                        <img
-                          src={logoUrl}
-                          alt={brand}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <span className="text-xl sm:text-2xl">🏷️</span>
-                      )}
-                      
-                      {/* Hover Overlay with Brand Name */}
-                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                        <span className="text-white text-xs font-bold text-center px-2 line-clamp-2">
-                          {brand}
-                        </span>
-                      </div>
+                      {logoUrl && <img src={logoUrl} alt={brand} className="w-4 h-4 object-contain" onError={e => (e.currentTarget.style.display = 'none')} />}
+                      🏷️ {brand}
                     </motion.button>
                   );
                 })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Products Grid - WITH COMPLETE REDESIGN */}
-          <motion.div
-            key={`products-grid-${selectedBrand || 'all'}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="w-full"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products && products.length > 0 ? (
-                products.map((product, idx) => (
-                  <motion.div
-                    key={`${product.id}-${idx}`}
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: idx * 0.08, duration: 0.4 }}
-                    whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
-                    onClick={() => handleViewDetails(product)}
-                    className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border-2 border-blue-100 dark:border-blue-700 flex flex-col h-full cursor-pointer"
-                  >
-                {/* Product Image */}
-                <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 mx-4 rounded-xl mb-3 flex items-center justify-center overflow-hidden mt-4">
-                  {product.primary_image ? (
-                    <motion.img
-                      src={product.primary_image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      whileHover={{ scale: 1.12 }}
-                    />
-                  ) : (
-                    <Zap className="h-16 w-16 text-slate-300" />
-                  )}
-                </div>
-
-                {/* Brand */}
-                <Badge variant="outline" className="mx-4 w-fit text-xs font-bold border-blue-300 bg-blue-50 dark:bg-blue-900/30">
-                  🏷️ {product.product_mark || 'Charger'}
-                </Badge>
-
-                {/* Product Name */}
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white mb-1 mx-4 line-clamp-2">
-                  {product.name}
-                </h3>
-
-                {/* Description */}
-                {product.description && (
-                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mx-4 mb-2 break-words whitespace-pre-wrap">
-                    📝 {product.description}
-                  </p>
-                )}
-
-                {/* Specs Section Header */}
-                <div className="mx-4 mb-2">
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">⚡ {language === 'ar' ? 'المواصفات' : 'Spécifications'}</p>
-                </div>
-
-                {/* Specs Grid */}
-                <div className="grid grid-cols-2 gap-1.5 mx-4 mb-3">
-                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-1.5 text-center border border-blue-200 dark:border-blue-700">
-                    <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
-                    <div className="text-xs font-bold text-blue-600 dark:text-blue-400">{product.voltage ? `${product.voltage}V` : 'N/A'}</div>
-                  </div>
-                  <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-1.5 text-center border border-purple-200 dark:border-purple-700">
-                    <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔌 {language === 'ar' ? 'القوة' : 'Wattage'}</div>
-                    <div className="text-xs font-bold text-purple-600 dark:text-purple-400">{product.wattage ? `${product.wattage}W` : 'N/A'}</div>
-                  </div>
-                  <div className="bg-pink-50 dark:bg-pink-900/30 rounded-lg p-1.5 text-center border border-pink-200 dark:border-pink-700">
-                    <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚙️ {language === 'ar' ? 'التيار' : 'Ampérage'}</div>
-                    <div className="text-xs font-bold text-pink-600 dark:text-pink-400">{product.amperage ? `${product.amperage}A` : 'N/A'}</div>
-                  </div>
-                  <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-1.5 text-center border border-green-200 dark:border-green-700">
-                    <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔧 {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
-                    <div className="text-xs font-bold text-green-600 dark:text-green-400 truncate">{product.connection_type || 'N/A'}</div>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="mx-4 mb-3">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {product.selling_price.toFixed(2)} DZD
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-1.5 px-4 pb-4 mt-auto">
-                  <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => handleAddToCart(product)}
-                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-lg py-2 text-xs"
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-1" />
-                      {language === 'ar' ? 'سلة' : 'Panier'}
-                    </Button>
-                  </motion.div>
-                  <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => handleViewDetails(product)}
-                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-lg py-2 text-xs"
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      {language === 'ar' ? 'عرض' : 'Voir'}
-                    </Button>
-                  </motion.div>
-                  <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      onClick={() => handleOrder(product)}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-lg py-2 text-xs"
-                    >
-                      {language === 'ar' ? '📦 طلب' : '📦 Commande'}
-                    </Button>
-                  </motion.div>
-                </div>
               </motion.div>
-                ))
-              ) : (
-                // No Results Message - FULL WIDTH, CENTERED
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
-                  className="col-span-1 md:col-span-2 lg:col-span-3 py-24 text-center space-y-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-2xl border-2 border-dashed border-blue-300 dark:border-blue-600"
-                >
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="text-7xl"
-                  >
-                    🔍
-                  </motion.div>
-                  <h3 className="text-3xl font-bold text-slate-900 dark:text-white">
-                    {language === 'ar' ? 'لا توجد منتجات' : 'Aucun Produit'}
-                  </h3>
-                  <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-                    {language === 'ar' 
-                      ? `للأسف، لم نجد أي منتجات لماركة "${selectedBrand}". حاول اختيار ماركة أخرى أو عرض جميع المنتجات المتاحة.`
-                      : `Désolé, aucun produit trouvé pour la marque "${selectedBrand}". Essayez de sélectionner une autre marque ou consultez tous les produits disponibles.`}
-                  </p>
-                  <motion.button
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.92 }}
-                    onClick={() => handleBrandClick(null)}
-                    className="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg"
-                  >
-                    {language === 'ar' ? '⭐ عرض جميع المنتجات' : '⭐ Voir Tous les Produits'}
-                  </motion.button>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
+            )}
 
-          <div className="text-center">
-            <Button
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold text-lg px-8 py-6"
-              size="lg"
-              onClick={() => (window.location.href = '/website-shop/offers')}
-            >
-              {language === 'ar' ? 'عرض جميع الشواحن' : 'Voir Tous Les Chargeurs'}
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
+            {/* Products grid */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedBrand || 'all'}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {products.length > 0 ? products.map((product) => (
+                  <GlowCard key={product.id} className="flex flex-col h-full">
+                    {/* Image */}
+                    <div
+                      className="relative h-52 overflow-hidden"
+                      style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.05), rgba(124,58,237,0.05))' }}
+                    >
+                      {product.primary_image ? (
+                        <motion.img
+                          src={product.primary_image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.08 }}
+                          transition={{ duration: 0.4 }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Zap className="w-16 h-16" style={{ color: '#1E3A5F' }} />
+                        </div>
+                      )}
+                      {/* Brand badge */}
+                      {product.product_mark && (
+                        <div className="absolute top-3 left-3">
+                          <ElectricBadge color="cyan">{product.product_mark}</ElectricBadge>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="font-grotesk font-bold text-base mb-2 line-clamp-2" style={{ color: '#F1F5F9' }}>
+                        {product.name}
+                      </h3>
+
+                      {product.description && (
+                        <p className="text-sm mb-3 line-clamp-2" style={{ color: '#64748B' }}>{product.description}</p>
+                      )}
+
+                      {/* Specs chips */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {product.voltage && (
+                          <span className="px-2 py-1 rounded-md text-xs font-bold" style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.2)' }}>
+                            ⚡ {product.voltage}V
+                          </span>
+                        )}
+                        {product.amperage && (
+                          <span className="px-2 py-1 rounded-md text-xs font-bold" style={{ background: 'rgba(124,58,237,0.08)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                            🔌 {product.amperage}A
+                          </span>
+                        )}
+                        {product.wattage && (
+                          <span className="px-2 py-1 rounded-md text-xs font-bold" style={{ background: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
+                            💡 {product.wattage}W
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Price */}
+                      <div className="mb-5 mt-auto">
+                        <span className="font-grotesk font-black text-2xl" style={{ color: '#F59E0B' }}>
+                          {product.selling_price.toLocaleString()} DZD
+                        </span>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="grid grid-cols-3 gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.04 }}
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => handleAddToCart(product)}
+                          className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all"
+                          style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+                        >
+                          <ShoppingCart className="w-3.5 h-3.5" />
+                          {language === 'ar' ? 'سلة' : 'Panier'}
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.04 }}
+                          whileTap={{ scale: 0.96 }}
+                          onClick={handleViewDetails}
+                          className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all"
+                          style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.25)' }}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          {language === 'ar' ? 'عرض' : 'Voir'}
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.04, boxShadow: '0 0 15px rgba(255,107,53,0.4)' }}
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => handleOrder(product)}
+                          className="flex items-center justify-center py-2 rounded-lg text-xs font-bold text-white"
+                          style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                        >
+                          {language === 'ar' ? '📦 طلب' : '📦 Commander'}
+                        </motion.button>
+                      </div>
+                    </div>
+                  </GlowCard>
+                )) : (
+                  <div className="col-span-3 py-20 text-center rounded-2xl" style={{ border: '2px dashed rgba(0,212,255,0.15)', background: 'rgba(0,212,255,0.02)' }}>
+                    <Zap className="w-16 h-16 mx-auto mb-4" style={{ color: '#1E3A5F' }} />
+                    <p className="text-lg font-semibold mb-4" style={{ color: '#64748B' }}>
+                      {language === 'ar' ? 'لا توجد منتجات' : 'Aucun produit trouvé'}
+                    </p>
+                    <button onClick={() => handleBrandClick(null)}
+                      className="px-6 py-2 rounded-xl text-sm font-bold"
+                      style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }}
+                    >
+                      {language === 'ar' ? 'عرض الكل' : 'Voir tous'}
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* View all button */}
+            <div className="text-center mt-10">
+              <motion.button
+                whileHover={{ scale: 1.04, boxShadow: '0 0 25px rgba(0,212,255,0.3)' }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/website-shop/offers')}
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-grotesk font-bold text-base"
+                style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+              >
+                {language === 'ar' ? 'عرض جميع المنتجات' : 'Voir Tous Les Chargeurs'}
+                <ChevronRight className="w-5 h-5" />
+              </motion.button>
+            </div>
           </div>
-        </motion.section>
+        </section>
       )}
 
-      {/* ========== TESTIMONIALS SECTION - PREMIUM DESIGN ========== */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="mb-16 mt-20 relative overflow-hidden"
-      >
-        {/* Background Gradient Blobs */}
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl opacity-50" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-pink-400/20 to-blue-400/20 rounded-full blur-3xl opacity-50" />
-
-        {/* Main Container */}
-        <div className="relative z-10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-slate-900 dark:to-black rounded-3xl p-12 md:p-16 border border-slate-700/50 backdrop-blur-sm shadow-2xl">
-          
-          {/* Header Section */}
-          <div className="text-center mb-16">
-            <motion.div
-              animate={{ rotateY: [0, 5, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="inline-block mb-4"
-            >
-              <span className="text-6xl filter drop-shadow-lg">⭐</span>
-            </motion.div>
-            
-            <h2 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-              {language === 'ar' ? 'ما يقول عملاؤنا' : language === 'fr' ? 'Ce que disent nos clients' : 'What Our Customers Say'}
+      {/* ===== WHY US ===== */}
+      <section ref={whyReveal.ref} className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={whyReveal.isInView ? { opacity: 1, y: 0 } : {}}
+            className="text-center mb-12"
+          >
+            <h2 className="font-grotesk font-black text-3xl md:text-4xl mb-3">
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+                {language === 'ar' ? 'لماذا تختارنا؟' : 'Pourquoi Nous Choisir?'}
+              </span>
             </h2>
-            
-            <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">
-              {language === 'ar' 
-                ? 'اكتشف تجارب العملاء الفعلية مع منتجاتنا وخدماتنا'
-                : 'Découvrez les expériences réelles de nos clients avec nos produits et services'}
-            </p>
-          </div>
+            <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }} />
+          </motion.div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featureCards.map((card, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                animate={whyReveal.isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: i * 0.15, duration: 0.5 }}
+              >
+                <GlowCard glowColor={i === 0 ? 'cyan' : i === 1 ? 'violet' : 'orange'} className="p-7 h-full">
+                  {/* Top border accent */}
+                  <div className="h-0.5 absolute top-0 left-0 right-0 rounded-t-2xl" style={{ background: card.color }} />
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ background: `rgba(${card.color === '#00D4FF' ? '0,212,255' : card.color === '#7C3AED' ? '124,58,237' : '255,107,53'},0.12)` }}>
+                    <span style={{ color: card.color }}>{card.icon}</span>
+                  </div>
+                  <h3 className="font-grotesk font-bold text-lg mb-2" style={{ color: '#F1F5F9' }}>{card.title}</h3>
+                  <p className="text-sm" style={{ color: '#64748B' }}>{card.desc}</p>
+                </GlowCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== TESTIMONIALS ===== */}
+      <section ref={testimonialsReveal.ref} className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={testimonialsReveal.isInView ? { opacity: 1, y: 0 } : {}}
+            className="text-center mb-12"
+          >
+            <Star className="w-10 h-10 mx-auto mb-4" style={{ color: '#F59E0B' }} />
+            <h2 className="font-grotesk font-black text-3xl md:text-4xl mb-3">
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #FF6B35)' }}>
+                {language === 'ar' ? 'آراء عملائنا' : 'Ce que Disent Nos Clients'}
+              </span>
+            </h2>
+            <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #F59E0B, #FF6B35)' }} />
+          </motion.div>
+
+          {/* Share review button */}
+          <div className="flex justify-center mb-10">
             <motion.button
-              whileHover={{ scale: 1.05, y: -3 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04, boxShadow: '0 0 20px rgba(0,212,255,0.3)' }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setShowTestimonialModal(true)}
-              className="group relative inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg overflow-hidden"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
+              style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
             >
-              <span>+</span>
-              {language === 'ar' ? 'شارك رأيك' : language === 'fr' ? 'Partagez votre avis' : 'Share Your Review'}
+              + {language === 'ar' ? 'شارك رأيك' : 'Partagez votre avis'}
             </motion.button>
           </div>
 
-          {/* Testimonials Grid - Dynamic from Database */}
-          {testimonials && testimonials.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatePresence mode="popLayout">
-                  {testimonials.map((testimonial, index) => (
-                    <motion.div
-                      key={testimonial.id}
-                      initial={{ opacity: 0, y: 50 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -50 }}
-                      transition={{ delay: index * 0.1, type: 'spring', stiffness: 80, damping: 15 }}
-                      whileHover={{ y: -15, transition: { duration: 0.3 } }}
-                      className="group relative"
-                    >
-                      {/* Card */}
-                      <div className="h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 shadow-xl overflow-hidden relative">
-                        {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/0 to-pink-600/0 group-hover:from-purple-600/10 group-hover:to-pink-600/10 transition-all duration-300" />
-
-                        <div className="relative z-10">
-                          {/* Stars */}
-                          <div className="flex items-center gap-1 mb-6">
-                            {[...Array(testimonial.rating || 5)].map((_, i) => (
-                              <motion.span
-                                key={i}
-                                initial={{ scale: 0, rotate: -90 }}
-                                animate={{ scale: 1, rotate: 0 }}
-                                transition={{ delay: 0.1 + i * 0.05, type: 'spring', stiffness: 150 }}
-                                className="text-2xl text-yellow-400"
-                              >
-                                ★
-                              </motion.span>
-                            ))}
-                          </div>
-
-                          {/* Quote Icon */}
-                          <div className="text-4xl text-purple-400/30 mb-4 font-serif">"</div>
-
-                          {/* Opinion Text */}
-                          <p className="text-slate-300 text-lg mb-6 leading-relaxed line-clamp-5 group-hover:line-clamp-none transition-all duration-300 min-h-[6rem]">
-                            {testimonial.opinion}
-                          </p>
-
-                          {/* Divider */}
-                          <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent mb-6" />
-
-                          {/* Author Info */}
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-bold text-white text-base group-hover:text-purple-400 transition-colors">
-                                {testimonial.client_name}
-                              </p>
-                              <p className="text-slate-500 text-xs mt-1">
-                                {new Date(testimonial.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-
-                            {/* Emoji Animation */}
-                            <motion.div
-                              animate={{ scale: [1, 1.15, 1], rotate: [0, 10, -10, 0] }}
-                              transition={{ duration: 2.5, repeat: Infinity, delay: index * 0.1 }}
-                              className="text-3xl"
-                            >
-                              😊
-                            </motion.div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-
-              {/* View All CTA */}
-              {testimonials.length > 3 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.6 }}
-                  className="text-center mt-16"
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="group relative inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 text-white font-bold text-lg rounded-xl shadow-2xl overflow-hidden"
+          {testimonials.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <AnimatePresence>
+                {testimonials.slice(0, 6).map((t, i) => (
+                  <motion.div
+                    key={t.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={testimonialsReveal.isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
                   >
-                    <span className="relative z-10">{language === 'ar' ? `شاهد جميع الآراء (${testimonials.length})` : `Voir tous les avis (${testimonials.length})`}</span>
-                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </motion.button>
-                </motion.div>
-              )}
-            </>
+                    <GlowCard className="p-6 h-full flex flex-col">
+                      {/* Stars */}
+                      <div className="flex gap-1 mb-4">
+                        {[...Array(t.rating || 5)].map((_, s) => (
+                          <Star key={s} className="w-4 h-4 fill-current" style={{ color: '#F59E0B' }} />
+                        ))}
+                      </div>
+                      {/* Quote */}
+                      <div className="text-4xl font-serif mb-2" style={{ color: 'rgba(0,212,255,0.15)' }}>"</div>
+                      <p className="text-sm leading-relaxed mb-5 flex-1" style={{ color: '#94A3B8' }}>{t.opinion}</p>
+                      {/* Author */}
+                      <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid rgba(0,212,255,0.1)' }}>
+                        <div>
+                          <p className="font-semibold text-sm" style={{ color: '#F1F5F9' }}>{t.client_name}</p>
+                          <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>{new Date(t.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <span className="text-2xl">😊</span>
+                      </div>
+                    </GlowCard>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
           ) : (
-            // No Testimonials Message
-            <div className="text-center py-20">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="text-6xl mb-6"
-              >
-                💭
-              </motion.div>
-              <p className="text-xl text-slate-400 mb-6">
-                {language === 'ar' 
-                  ? 'لا توجد آراء حتى الآن. كن الأول في مشاركة رأيك!'
-                  : 'Aucun avis pour l\'instant. Soyez le premier à partager votre expérience!'}
+            <div className="text-center py-16 rounded-2xl" style={{ border: '2px dashed rgba(0,212,255,0.1)', background: 'rgba(0,212,255,0.01)' }}>
+              <p className="text-lg mb-4" style={{ color: '#64748B' }}>
+                {language === 'ar' ? 'لا توجد آراء بعد' : 'Aucun avis pour l\'instant'}
               </p>
-              <motion.button
-                whileHover={{ scale: 1.05, y: -3 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowTestimonialModal(true)}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg"
+              <button onClick={() => setShowTestimonialModal(true)}
+                className="px-6 py-3 rounded-xl font-bold text-sm"
+                style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
               >
-                <span>✨</span>
-                {language === 'ar' ? 'أضف رأيك الآن' : 'Ajouter votre avis'}
-              </motion.button>
+                {language === 'ar' ? 'أضف رأيك' : 'Ajouter votre avis'}
+              </button>
             </div>
           )}
+        </div>
+      </section>
 
-      {/* Testimonial Form Modal */}
-      <AnimatePresence mode="wait">
+      {/* Testimonial modal */}
+      <AnimatePresence>
         {showTestimonialModal && (
           <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowTestimonialModal(false)}
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.8)', backdropFilter: 'blur(4px)' }}
             />
-
-            {/* Modal */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               className="fixed inset-0 flex items-center justify-center z-50 p-4"
             >
-              <div className="w-full max-w-lg bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-slate-700 shadow-2xl">
-                {/* Close Button */}
-                <button
-                  onClick={() => setShowTestimonialModal(false)}
-                  className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-
-                {/* Modal Header */}
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {language === 'ar' ? 'شارك رأيك معنا' : 'Partagez votre avis'}
-                </h3>
-                <p className="text-slate-400 mb-6">
-                  {language === 'ar' 
-                    ? 'أخبرنا عن تجربتك مع منتجاتنا'
-                    : 'Aidez-nous à améliorer nos services'}
-                </p>
-
-                {/* Form */}
-                <div className="space-y-6">
-                  {/* Name Field */}
+              <div className="w-full max-w-lg rounded-2xl p-8" style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.2)' }}>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-grotesk font-bold text-xl" style={{ color: '#F1F5F9' }}>
+                    {language === 'ar' ? 'شارك رأيك' : 'Partagez votre avis'}
+                  </h3>
+                  <button onClick={() => setShowTestimonialModal(false)} style={{ color: '#64748B' }}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#94A3B8' }}>
                       {language === 'ar' ? 'اسمك' : 'Votre nom'}
                     </label>
                     <input
-                      type="text"
-                      value={testimonialName}
-                      onChange={(e) => setTestimonialName(e.target.value)}
-                      placeholder={language === 'ar' ? 'أدخل اسمك' : 'Entrez votre nom'}
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      type="text" value={testimonialName} onChange={e => setTestimonialName(e.target.value)}
+                      placeholder={language === 'ar' ? 'اسمك...' : 'Votre nom...'}
+                      className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+                      style={{ background: '#1E293B', color: '#F1F5F9', border: '1px solid rgba(0,212,255,0.15)' }}
+                      onFocus={e => (e.target.style.borderColor = '#00D4FF')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
                     />
                   </div>
-
-                  {/* Rating Field */}
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#94A3B8' }}>
                       {language === 'ar' ? 'التقييم' : 'Note'}
                     </label>
                     <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((rating) => (
-                        <motion.button
-                          key={rating}
-                          whileHover={{ scale: 1.2 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => setTestimonialRating(rating)}
-                          className={`text-3xl transition-all ${
-                            rating <= testimonialRating
-                              ? 'text-yellow-400 scale-110'
-                              : 'text-slate-500 hover:text-yellow-400'
-                          }`}
-                        >
-                          ★
-                        </motion.button>
+                      {[1,2,3,4,5].map(r => (
+                        <button key={r} onClick={() => setTestimonialRating(r)} className="text-2xl transition-transform hover:scale-110">
+                          <Star className={`w-6 h-6 ${r <= testimonialRating ? 'fill-current' : ''}`} style={{ color: r <= testimonialRating ? '#F59E0B' : '#1E3A5F' }} />
+                        </button>
                       ))}
                     </div>
                   </div>
-
-                  {/* Opinion Field */}
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold mb-2" style={{ color: '#94A3B8' }}>
                       {language === 'ar' ? 'رأيك' : 'Votre avis'}
                     </label>
                     <textarea
-                      value={testimonialOpinion}
-                      onChange={(e) => setTestimonialOpinion(e.target.value)}
-                      placeholder={language === 'ar' ? 'شارك تجربتك معنا...' : 'Partagez votre expérience...'}
-                      rows={5}
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
+                      value={testimonialOpinion} onChange={e => setTestimonialOpinion(e.target.value)}
+                      placeholder={language === 'ar' ? 'تجربتك...' : 'Votre expérience...'}
+                      rows={4} className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
+                      style={{ background: '#1E293B', color: '#F1F5F9', border: '1px solid rgba(0,212,255,0.15)' }}
+                      onFocus={e => (e.target.style.borderColor = '#00D4FF')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
                     />
                   </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-4 pt-4">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowTestimonialModal(false)}
-                      className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
+                  <div className="flex gap-3 pt-2">
+                    <button onClick={() => setShowTestimonialModal(false)}
+                      className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all"
+                      style={{ background: 'rgba(30,41,59,0.8)', color: '#64748B', border: '1px solid rgba(30,58,95,0.6)' }}
                     >
                       {language === 'ar' ? 'إلغاء' : 'Annuler'}
-                    </motion.button>
+                    </button>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleSubmitTestimonial}
-                      disabled={submittingTestimonial}
-                      className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold rounded-lg transition-all"
+                      whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                      onClick={handleSubmitTestimonial} disabled={submittingTestimonial}
+                      className="flex-1 py-3 rounded-xl text-sm font-bold transition-all"
+                      style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817' }}
                     >
-                      {submittingTestimonial 
-                        ? (language === 'ar' ? 'جاري الإرسال...' : 'Envoi...')
-                        : (language === 'ar' ? 'إرسال' : 'Envoyer')}
+                      {submittingTestimonial ? (language === 'ar' ? 'إرسال...' : 'Envoi...') : (language === 'ar' ? 'إرسال' : 'Envoyer')}
                     </motion.button>
                   </div>
                 </div>
@@ -1179,33 +872,31 @@ export default function WebsiteLanding() {
           </>
         )}
       </AnimatePresence>
-        </div>
-      </motion.section>
 
-      {/* Call to Action */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        className="bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-900 dark:to-blue-900 text-white py-16 px-4 rounded-3xl text-center space-y-6"
-      >
-        <h2 className="text-4xl font-black">
-          {language === 'ar' ? 'جاهز للطلب؟' : 'Prêt à Passer Commande?'}
-        </h2>
-        <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-          {language === 'ar'
-            ? 'استمتع بتوصيل سريع وآمن إلى جميع أنحاء الجزائر'
-            : 'Profitez de la livraison rapide et sécurisée dans toute l\'Algérie'}
-        </p>
-        <Button
-          className="bg-white text-blue-600 hover:bg-blue-50 font-bold text-lg px-8 py-6"
-          size="lg"
-          onClick={() => (window.location.href = '/website-shop/offers')}
+      {/* ===== FINAL CTA ===== */}
+      <section className="py-16 px-4">
+        <div className="max-w-3xl mx-auto text-center rounded-3xl p-12 relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,58,237,0.08))', border: '1px solid rgba(0,212,255,0.15)' }}
         >
-          {language === 'ar' ? 'تصفح المتجر الآن' : 'Parcourir la Boutique'}
-          <ChevronRight className="ml-2 h-5 w-5" />
-        </Button>
-      </motion.section>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%)' }} />
+          <h2 className="font-grotesk font-black text-3xl mb-4 relative" style={{ color: '#F1F5F9' }}>
+            {language === 'ar' ? 'جاهز للطلب؟' : 'Prêt à Commander?'}
+          </h2>
+          <p className="mb-8 relative" style={{ color: '#64748B' }}>
+            {language === 'ar' ? 'توصيل سريع إلى جميع ولايات الجزائر' : 'Livraison rapide dans toute l\'Algérie'}
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(0,212,255,0.4)' }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/website-shop/offers')}
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-grotesk font-bold text-base relative"
+            style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817' }}
+          >
+            {language === 'ar' ? 'تصفح المتجر' : 'Parcourir la Boutique'}
+            <ChevronRight className="w-5 h-5" />
+          </motion.button>
+        </div>
+      </section>
     </div>
   );
 }

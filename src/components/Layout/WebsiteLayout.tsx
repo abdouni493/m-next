@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Menu, X, ShoppingCart, LogIn, Globe, LogOut, Moon, Sun } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { Menu, X, ShoppingCart, LogIn, LogOut, Sun, Moon, Zap, Facebook, Instagram, MessageCircle, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { getWebsiteSettingsREST } from '@/lib/supabaseClient';
@@ -12,292 +12,450 @@ interface WebsiteSettings {
   logo_url?: string;
   description?: string;
   phone_number?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  whatsapp_number?: string;
 }
 
 export const WebsiteLayout = () => {
   const { language, isRTL } = useLanguage();
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [settings, setSettings] = useState<WebsiteSettings | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return document.documentElement.classList.contains('dark');
-  });
+  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
   const [cartCount, setCartCount] = useState(0);
-  const location = useLocation();
+  const { scrollY } = useScroll();
+  const navBg = useTransform(scrollY, [0, 80], ['rgba(2,8,23,0)', 'rgba(2,8,23,0.97)']);
+  const navBorderOpacity = useTransform(scrollY, [0, 80], [0, 1]);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const data = await getWebsiteSettingsREST();
-        if (data) {
-          setSettings(data);
-        } else {
-          // Fallback to default settings if database is unavailable
-          setSettings({
-            store_name: 'Chargeur Store',
-            slogan: 'Quality Chargers at Best Prices',
-            logo_url: '',
-            description: 'Welcome to our online store'
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching settings:', error);
-        // Set default settings on error
-        setSettings({
+        setSettings(data || {
           store_name: 'Chargeur Store',
           slogan: 'Quality Chargers at Best Prices',
-          logo_url: '',
-          description: 'Welcome to our online store'
         });
+      } catch {
+        setSettings({ store_name: 'Chargeur Store', slogan: 'Quality Chargers at Best Prices' });
       }
     };
     fetchSettings();
   }, []);
 
   useEffect(() => {
-    // Update cart count from localStorage
-    const updateCartCount = () => {
+    const update = () => {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       setCartCount(cart.length);
     };
-
-    updateCartCount();
-
-    // Listen for storage changes
-    window.addEventListener('storage', updateCartCount);
-    return () => window.removeEventListener('storage', updateCartCount);
-  }, []);
-
-  // Also add a custom event listener for cart updates from the same tab
-  useEffect(() => {
-    const handleCartUpdate = () => {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      setCartCount(cart.length);
+    update();
+    window.addEventListener('storage', update);
+    window.addEventListener('cartUpdated', update);
+    return () => {
+      window.removeEventListener('storage', update);
+      window.removeEventListener('cartUpdated', update);
     };
-
-    window.addEventListener('cartUpdated', handleCartUpdate);
-    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, []);
 
   const navItems = [
     { label: language === 'ar' ? '🏠 الرئيسية' : '🏠 Accueil', href: '/website-shop' },
     { label: language === 'ar' ? '🛍️ متجر' : '🛍️ Boutique', href: '/website-shop/offers' },
-    { label: language === 'ar' ? '🔥 عروض خاصة' : '🔥 Spéciales', href: '/website-shop/special-offers' },
+    { label: language === 'ar' ? '🔥 عروض' : '🔥 Spéciales', href: '/website-shop/special-offers' },
     { label: language === 'ar' ? '📦 حزم' : '📦 Packs', href: '/website-shop/packages' },
-    { label: language === 'ar' ? '📞 جهات الاتصال' : '📞 Contacts', href: '/website-shop/contacts' },
+    { label: language === 'ar' ? '📞 تواصل' : '📞 Contacts', href: '/website-shop/contacts' },
     { label: language === 'ar' ? '🛒 طلب' : '🛒 Commande', href: '/website-shop/order' },
   ];
 
+  const isActive = (href: string) =>
+    href === '/website-shop'
+      ? location.pathname === href
+      : location.pathname.startsWith(href);
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Navigation Bar */}
-      <nav className="sticky top-0 z-50 bg-gradient-to-r from-white to-blue-50 dark:from-slate-800 dark:to-slate-700 border-b-4 border-gradient-to-r from-blue-400 via-blue-500 to-purple-500 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo and Store Name */}
-            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="w-14 h-14 rounded-full overflow-hidden shadow-lg border-4 border-gradient-to-r from-blue-400 to-purple-500 bg-white flex items-center justify-center hover:scale-110 transition-transform duration-300">
-                {settings?.logo_url ? (
-                  <img src={settings.logo_url} alt="Logo" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-2xl">⚡</span>
-                )}
+    <div className="flex flex-col min-h-screen" style={{ background: '#020817', color: '#F1F5F9' }}>
+
+      {/* Animated top gradient bar */}
+      <div className="gradient-bar fixed top-0 left-0 right-0 z-[60]" />
+
+      {/* Navbar */}
+      <motion.nav
+        style={{ backgroundColor: navBg }}
+        className="fixed top-[3px] left-0 right-0 z-50 backdrop-blur-xl"
+      >
+        <motion.div
+          style={{ opacity: navBorderOpacity }}
+          className="absolute bottom-0 left-0 right-0 h-px"
+          style={{ background: 'rgba(0,212,255,0.2)' } as any}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+
+            {/* Logo */}
+            <motion.div
+              className={`flex items-center gap-3 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}
+              onClick={() => navigate('/website-shop')}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="relative w-11 h-11">
+                <div
+                  className="w-11 h-11 hex-clip flex items-center justify-center overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2))', border: '1px solid rgba(0,212,255,0.3)' }}
+                >
+                  {settings?.logo_url ? (
+                    <img src={settings.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Zap className="w-5 h-5" style={{ color: '#00D4FF' }} />
+                  )}
+                </div>
+                {/* Rotating glow ring */}
+                <div
+                  className="absolute inset-0 rounded-full animate-spin"
+                  style={{
+                    background: 'conic-gradient(from 0deg, transparent 70%, rgba(0,212,255,0.6) 100%)',
+                    animationDuration: '3s',
+                  }}
+                />
               </div>
               <div className={isRTL ? 'text-right' : ''}>
-                <h1 className="font-black text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1
+                  className="font-grotesk font-bold text-lg leading-tight bg-clip-text text-transparent"
+                  style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}
+                >
                   {settings?.store_name || 'Charger Shop'}
                 </h1>
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                  ✨ {settings?.slogan || 'Best Chargers'}
+                <p className="text-xs font-medium" style={{ color: '#64748B' }}>
+                  {settings?.slogan || 'Best Chargers'}
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1">
-              {navItems.map((item, index) => (
-                <a
+            {/* Desktop nav links */}
+            <div className="hidden lg:flex items-center gap-1">
+              {navItems.map((item, i) => (
+                <motion.a
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                    location.pathname === item.href
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600'
-                  }`}
+                  custom={i}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.06, type: 'spring' }}
+                  className="relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                  style={{
+                    color: isActive(item.href) ? '#00D4FF' : '#94A3B8',
+                    background: isActive(item.href) ? 'rgba(0,212,255,0.08)' : 'transparent',
+                  }}
+                  onMouseEnter={e => {
+                    if (!isActive(item.href)) (e.currentTarget as HTMLElement).style.color = '#F1F5F9';
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive(item.href)) (e.currentTarget as HTMLElement).style.color = '#94A3B8';
+                  }}
                 >
                   {item.label}
-                </a>
+                  {isActive(item.href) && (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                      style={{ background: '#00D4FF', boxShadow: '0 0 6px #00D4FF' }}
+                    />
+                  )}
+                </motion.a>
               ))}
             </div>
 
-            {/* Right Section */}
-            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              {/* Dark Mode Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
+            {/* Right controls */}
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {/* Dark mode toggle */}
+              <button
                 onClick={() => {
                   setIsDarkMode(!isDarkMode);
                   document.documentElement.classList.toggle('dark');
                   localStorage.setItem('theme', !isDarkMode ? 'dark' : 'light');
                 }}
-                className="hover:bg-blue-100 dark:hover:bg-slate-700"
+                className="p-2 rounded-lg transition-all duration-200"
+                style={{ color: '#64748B' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#00D4FF')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#64748B')}
               >
-                {isDarkMode ? (
-                  <Sun className="w-5 h-5 text-yellow-400" />
-                ) : (
-                  <Moon className="w-5 h-5 text-blue-600" />
-                )}
-              </Button>
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
 
-              {/* Shopping Cart */}
-              <Button
-                variant="ghost"
-                size="icon"
+              {/* Cart */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/website-shop/order')}
-                className="relative hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100 dark:hover:bg-slate-700 transition-all duration-300 text-blue-600"
+                className="relative p-2 rounded-lg"
+                style={{ color: '#00D4FF' }}
               >
                 <ShoppingCart className="w-5 h-5" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-black animate-bounce shadow-lg">
-                    {cartCount}
-                  </span>
-                )}
-              </Button>
+                <AnimatePresence>
+                  {cartCount > 0 && (
+                    <motion.span
+                      key="cart-badge"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ type: 'spring', stiffness: 400 }}
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-black text-white animate-pulse"
+                      style={{ background: 'linear-gradient(135deg, #EF4444, #FF6B35)' }}
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
 
-              {/* Auth Button */}
+              {/* Auth — desktop only */}
               {isAuthenticated ? (
-                <Button
-                  onClick={() => {
-                    logout();
-                    navigate('/login');
-                  }}
-                  className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-bold hidden md:flex"
-                  size="sm"
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => { logout(); navigate('/login'); }}
+                  className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
+                  style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-4 h-4" />
                   {language === 'ar' ? 'خروج' : 'Déconnexion'}
-                </Button>
+                </motion.button>
               ) : (
-                <Button
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(0,212,255,0.3)' }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => navigate('/login')}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold hidden md:flex"
-                  size="sm"
+                  className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
+                  style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }}
                 >
-                  <LogIn className="w-4 h-4 mr-2" />
+                  <LogIn className="w-4 h-4" />
                   {language === 'ar' ? 'دخول' : 'Connexion'}
-                </Button>
+                </motion.button>
               )}
 
-              {/* Mobile Menu Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
+              {/* Hamburger */}
+              <button
+                className="lg:hidden p-2 rounded-lg"
+                style={{ color: '#94A3B8' }}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </Button>
+              </button>
             </div>
           </div>
+        </div>
+      </motion.nav>
 
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-4 pt-4 border-t-2 border-blue-200 dark:border-blue-700 space-y-2 bg-gradient-to-b from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 rounded-lg p-2">
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={`block px-4 py-3 rounded-lg text-sm font-bold transition-all duration-300 ${
-                    location.pathname === item.href
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </a>
-              ))}
-              
-              {/* Mobile Auth Button */}
-              <div className="px-4 py-2 pt-4 border-t-2 border-blue-200 dark:border-blue-700">
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed top-0 left-0 bottom-0 w-72 z-50 flex flex-col lg:hidden"
+              style={{ background: '#0F172A', borderRight: '1px solid rgba(0,212,255,0.15)' }}
+            >
+              <div className="gradient-bar" />
+              <div className="p-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(0,212,255,0.1)' }}>
+                <span className="font-grotesk font-bold text-lg bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+                  {settings?.store_name || 'Menu'}
+                </span>
+                <button onClick={() => setMobileMenuOpen(false)} style={{ color: '#64748B' }}>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                {navItems.map((item, i) => (
+                  <motion.a
+                    key={item.href}
+                    href={item.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      color: isActive(item.href) ? '#00D4FF' : '#94A3B8',
+                      background: isActive(item.href) ? 'rgba(0,212,255,0.08)' : 'transparent',
+                      borderLeft: isActive(item.href) ? '2px solid #00D4FF' : '2px solid transparent',
+                    }}
+                  >
+                    {item.label}
+                  </motion.a>
+                ))}
+              </nav>
+              <div className="p-4" style={{ borderTop: '1px solid rgba(0,212,255,0.1)' }}>
                 {isAuthenticated ? (
-                  <Button
-                    onClick={() => {
-                      logout();
-                      navigate('/login');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-bold"
-                    size="sm"
+                  <button
+                    onClick={() => { logout(); navigate('/login'); setMobileMenuOpen(false); }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold"
+                    style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}
                   >
-                    <LogOut className="w-4 h-4 mr-2" />
+                    <LogOut className="w-4 h-4" />
                     {language === 'ar' ? 'خروج' : 'Déconnexion'}
-                  </Button>
+                  </button>
                 ) : (
-                  <Button
-                    onClick={() => {
-                      navigate('/login');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold"
-                    size="sm"
+                  <button
+                    onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold"
+                    style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }}
                   >
-                    <LogIn className="w-4 h-4 mr-2" />
+                    <LogIn className="w-4 h-4" />
                     {language === 'ar' ? 'دخول' : 'Connexion'}
-                  </Button>
+                  </button>
                 )}
               </div>
-            </div>
-          )}
-        </div>
-      </nav>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
-      {/* Main Content */}
-      <main className="flex-1">
-        <Outlet />
+      {/* Main content */}
+      <main className="flex-1 pt-[3px]" style={{ paddingTop: '67px' }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.22, ease: 'easeInOut' }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-blue-900 to-purple-900 text-white py-12 mt-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+      <footer style={{ background: '#020817', borderTop: '1px solid rgba(0,212,255,0.15)' }} className="mt-16">
+        <div className="gradient-bar" />
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+
             {/* About */}
             <div>
-              <h3 className="font-bold text-lg mb-4">
-                {language === 'ar' ? 'حول المتجر' : 'À propos'}
-              </h3>
-              <p className="text-blue-100">
-                {settings?.description || 'Your best charger store'}
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-5 h-5" style={{ color: '#00D4FF' }} />
+                <h3 className="font-grotesk font-bold text-lg" style={{ color: '#F1F5F9' }}>
+                  {settings?.store_name || 'Charger Shop'}
+                </h3>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: '#64748B' }}>
+                {settings?.slogan || 'Quality Chargers at Best Prices'}
               </p>
+              <div className="flex gap-3 mt-5">
+                {settings?.facebook_url && (
+                  <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
+                    style={{ background: 'rgba(30,42,95,0.6)', border: '1px solid rgba(0,212,255,0.15)' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 12px rgba(59,130,246,0.5)'; (e.currentTarget as HTMLElement).style.borderColor = '#3B82F6'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,212,255,0.15)'; }}
+                  >
+                    <Facebook className="w-4 h-4" style={{ color: '#3B82F6' }} />
+                  </a>
+                )}
+                {settings?.instagram_url && (
+                  <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
+                    style={{ background: 'rgba(30,42,95,0.6)', border: '1px solid rgba(0,212,255,0.15)' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 12px rgba(236,72,153,0.5)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+                  >
+                    <Instagram className="w-4 h-4" style={{ color: '#EC4899' }} />
+                  </a>
+                )}
+                {settings?.whatsapp_number && (
+                  <a href={`https://wa.me/${settings.whatsapp_number}`} target="_blank" rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
+                    style={{ background: 'rgba(30,42,95,0.6)', border: '1px solid rgba(0,212,255,0.15)' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 12px rgba(37,211,102,0.5)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+                  >
+                    <MessageCircle className="w-4 h-4" style={{ color: '#25D366' }} />
+                  </a>
+                )}
+              </div>
             </div>
 
-            {/* Quick Links */}
+            {/* Quick links */}
             <div>
-              <h3 className="font-bold text-lg mb-4">
+              <h3 className="font-grotesk font-bold text-sm uppercase tracking-widest mb-4" style={{ color: '#00D4FF' }}>
                 {language === 'ar' ? 'روابط سريعة' : 'Liens Rapides'}
               </h3>
-              <ul className="space-y-2 text-blue-100">
-                <li><a href="/website-shop" className="hover:text-white transition">{language === 'ar' ? 'الرئيسية' : 'Accueil'}</a></li>
-                <li><a href="/website-shop/offers" className="hover:text-white transition">{language === 'ar' ? 'متجر' : 'Boutique'}</a></li>
-                <li><a href="/website-shop/contacts" className="hover:text-white transition">{language === 'ar' ? 'جهات الاتصال' : 'Contacts'}</a></li>
+              <ul className="space-y-2">
+                {navItems.map(item => (
+                  <li key={item.href}>
+                    <a
+                      href={item.href}
+                      className="text-sm transition-colors duration-200 flex items-center gap-2"
+                      style={{ color: '#64748B' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#00D4FF')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#64748B')}
+                    >
+                      <span style={{ color: '#1E3A5F' }}>›</span>
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 
             {/* Contact */}
             <div>
-              <h3 className="font-bold text-lg mb-4">
-                {language === 'ar' ? 'جهات الاتصال' : 'Contact'}
+              <h3 className="font-grotesk font-bold text-sm uppercase tracking-widest mb-4" style={{ color: '#00D4FF' }}>
+                {language === 'ar' ? 'تواصل معنا' : 'Contact'}
               </h3>
-              <p className="text-blue-100">
-                {settings?.phone_number || 'Not available'}
-              </p>
+              {settings?.phone_number && (
+                <a
+                  href={`tel:${settings.phone_number}`}
+                  className="flex items-center gap-2 text-sm mb-3 transition-colors"
+                  style={{ color: '#64748B' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#00D4FF')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#64748B')}
+                >
+                  <Phone className="w-4 h-4" />
+                  {settings.phone_number}
+                </a>
+              )}
+              {settings?.whatsapp_number && (
+                <a
+                  href={`https://wa.me/${settings.whatsapp_number}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm transition-colors"
+                  style={{ color: '#64748B' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#25D366')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#64748B')}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  WhatsApp
+                </a>
+              )}
             </div>
           </div>
 
-          <div className="border-t border-blue-700 pt-8 text-center text-blue-100">
-            <p>&copy; 2026 {settings?.store_name || 'Charger Shop'}. {language === 'ar' ? 'جميع الحقوق محفوظة' : 'Tous droits réservés'}.</p>
+          {/* Divider */}
+          <div className="h-px mb-6" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)' }} />
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs" style={{ color: '#64748B' }}>
+              © 2026 {settings?.store_name || 'Charger Shop'}.{' '}
+              {language === 'ar' ? 'جميع الحقوق محفوظة' : 'Tous droits réservés'}.
+            </p>
+            <div className="flex items-center gap-1 text-xs" style={{ color: '#64748B' }}>
+              <Zap className="w-3 h-3" style={{ color: '#00D4FF' }} />
+              <span>Powered by Electric ⚡</span>
+            </div>
           </div>
         </div>
       </footer>

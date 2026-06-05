@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -367,3 +367,93 @@ All colors MUST be HSL.
     transform: translate3d(0, -4px, 0);
   }
 }
+
+/* ====== ELECTRIC NEON DARK THEME — Website-specific ====== */
+
+@keyframes borderGlow {
+  0% { box-shadow: 0 0 5px rgba(0,212,255,0.3), inset 0 0 5px rgba(0,212,255,0.05); }
+  100% { box-shadow: 0 0 20px rgba(0,212,255,0.8), 0 0 40px rgba(0,212,255,0.3), inset 0 0 10px rgba(0,212,255,0.1); }
+}
+
+@keyframes borderFire {
+  0% { border-color: #FF6B35; box-shadow: 0 0 10px rgba(255,107,53,0.4); }
+  33% { border-color: #F59E0B; box-shadow: 0 0 10px rgba(245,158,11,0.4); }
+  66% { border-color: #EF4444; box-shadow: 0 0 10px rgba(239,68,68,0.4); }
+  100% { border-color: #FF6B35; box-shadow: 0 0 10px rgba(255,107,53,0.4); }
+}
+
+@keyframes topGradientBar {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes ringAnim {
+  0% { transform: rotate(-15deg); }
+  50% { transform: rotate(15deg); }
+  100% { transform: rotate(-15deg); }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes electricPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Website scrollbar */
+.website-scrollbar::-webkit-scrollbar { width: 4px; }
+.website-scrollbar::-webkit-scrollbar-track { background: #020817; }
+.website-scrollbar::-webkit-scrollbar-thumb { background: #00D4FF; border-radius: 2px; }
+
+/* Electric glow card */
+.glow-card {
+  background: #0F172A;
+  border: 1px solid #1E3A5F;
+  transition: all 0.3s ease;
+}
+.glow-card:hover {
+  border-color: rgba(0,212,255,0.4);
+  box-shadow: 0 0 20px rgba(0,212,255,0.3), 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* Animated gradient top bar */
+.gradient-bar {
+  height: 3px;
+  background: linear-gradient(90deg, #00D4FF, #7C3AED, #FF6B35, #00D4FF);
+  background-size: 200% 100%;
+  animation: topGradientBar 3s ease infinite;
+}
+
+/* Fire border animation */
+.fire-border {
+  animation: borderFire 2s ease infinite;
+}
+
+/* Neon text */
+.neon-text {
+  text-shadow: 0 0 10px rgba(0,212,255,0.8), 0 0 20px rgba(0,212,255,0.4);
+}
+
+/* Glass morphism */
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+/* Hex clip for logo */
+.hex-clip {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* Font helpers */
+.font-grotesk { font-family: 'Space Grotesk', sans-serif; }

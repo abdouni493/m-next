@@ -1,19 +1,11 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { getAllProductsREST, getProductImages, getMarks } from '@/lib/supabaseClient';
-import { Search, Zap, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Zap, ShoppingCart, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import GlowCard from '@/components/website/GlowCard';
+import ElectricBadge from '@/components/website/ElectricBadge';
 
 interface Product {
   id: string;
@@ -49,7 +41,6 @@ interface Mark {
 
 export default function WebsiteOffers() {
   const { language, isRTL } = useLanguage();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -68,13 +59,10 @@ export default function WebsiteOffers() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch products
         const productsData = await getAllProductsREST();
         const visibleProducts = productsData.filter((p: any) => p.is_active);
         setProducts(visibleProducts);
         setFilteredProducts(visibleProducts);
-
-        // Fetch marks/brands
         const marksData = await getMarks();
         setMarks(marksData);
       } catch (error) {
@@ -83,7 +71,6 @@ export default function WebsiteOffers() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -93,37 +80,28 @@ export default function WebsiteOffers() {
   };
 
   const handleBrandFilter = (brand: string) => {
-    setSelectedBrand(brand === selectedBrand ? '' : brand);
-    applyFilters(searchQuery, brand === selectedBrand ? '' : brand);
+    const next = brand === selectedBrand ? '' : brand;
+    setSelectedBrand(next);
+    applyFilters(searchQuery, next);
   };
 
   const applyFilters = (query: string, brand: string) => {
     const filtered = products.filter(product => {
-      const matchesSearch = 
+      const matchesSearch =
         product.name.toLowerCase().includes(query.toLowerCase()) ||
         product.product_mark?.toLowerCase().includes(query.toLowerCase()) ||
         product.description?.toLowerCase().includes(query.toLowerCase());
-      
       const matchesBrand = !brand || product.product_mark?.toLowerCase() === brand.toLowerCase();
-      
       return matchesSearch && matchesBrand;
     });
     setFilteredProducts(filtered);
   };
 
-  const getAllBrands = () => {
-    const brands = [...new Set(products
-      .map(p => p.product_mark)
-      .filter(Boolean)
-    )].sort() as string[];
-    return brands;
-  };
-
   const handleAddToCart = (product: Product) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find((item: any) => item.product_id === product.id);
-    if (existingItem) {
-      existingItem.quantity += 1;
+    const existing = cart.find((item: any) => item.product_id === product.id);
+    if (existing) {
+      existing.quantity += 1;
     } else {
       cart.push({
         product_id: product.id,
@@ -145,18 +123,14 @@ export default function WebsiteOffers() {
     }
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cartUpdated'));
-    
     setCartNotification(product.name);
     setTimeout(() => setCartNotification(null), 3000);
   };
 
   const handleOrder = (product: Product) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find((item: any) => item.product_id === product.id);
-    if (!existingItem) {
-      handleAddToCart(product);
-    }
-    navigate(`/website-shop/order`);
+    if (!cart.find((item: any) => item.product_id === product.id)) handleAddToCart(product);
+    navigate('/website-shop/order');
   };
 
   const handleViewDetails = (product: Product) => {
@@ -172,535 +146,400 @@ export default function WebsiteOffers() {
       const images = await getProductImages(productId);
       setProductImages(images);
       setCurrentImageIndex(0);
-    } catch (error) {
-      console.error('Error loading product images:', error);
+    } catch {
       setProductImages([]);
     } finally {
       setImagesLoading(false);
     }
   };
 
-  const goToPreviousImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? productImages.length - 1 : prev - 1));
-  };
-
-  const goToNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === productImages.length - 1 ? 0 : prev + 1));
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-    hover: {
-      y: -10,
-      transition: { duration: 0.3 },
-    },
-  };
+  const goToPreviousImage = () => setCurrentImageIndex(p => (p === 0 ? productImages.length - 1 : p - 1));
+  const goToNextImage = () => setCurrentImageIndex(p => (p === productImages.length - 1 ? 0 : p + 1));
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 py-12 space-y-8 ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center space-y-3"
-      >
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-          {language === 'ar' ? '🛍️ متجرنا' : '🛍️ Notre Boutique'}
-        </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400">
-          {language === 'ar' ? 'اكتشف جميع شواحننا عالية الجودة' : 'Découvrez tous nos chargeurs de haute qualité'}
-        </p>
-      </motion.div>
+    <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
 
-      {/* Search Bar */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="relative max-w-md mx-auto"
-      >
-        <Search className={`absolute top-3 h-5 w-5 text-slate-400 ${isRTL ? 'right-3' : 'left-3'}`} />
-        <Input
-          placeholder={language === 'ar' ? '🔍 ابحث عن شاحن...' : '🔍 Rechercher un chargeur...'}
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          className={`${isRTL ? 'pr-10' : 'pl-10'} bg-white dark:bg-slate-800 border-2 border-blue-200 dark:border-blue-700 focus:border-purple-500 py-6 text-lg`}
-        />
-      </motion.div>
-
-      {/* Brand Filter - Modern Grid Design with Full Image Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="space-y-6"
-      >
-        {/* Header with Counter */}
-        <div className="flex items-center justify-between px-6 py-4">
-          <div>
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {language === 'ar' ? '🏷️ تصفية حسب الماركة' : '🏷️ Filtrer par Marque'}
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              {language === 'ar' ? 'اختر من جميع العلامات التجارية المتاحة' : 'Sélectionnez parmi toutes les marques disponibles'}
+      {/* Page header banner */}
+      <div className="relative py-16 px-4 overflow-hidden" style={{ background: 'linear-gradient(180deg, rgba(0,212,255,0.06) 0%, transparent 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(0,212,255,0.08) 0%, transparent 60%)' }} />
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <h1 className="font-grotesk font-black text-4xl md:text-5xl mb-3">
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+                🛍️ {language === 'ar' ? 'بوتيكنا' : 'Notre Boutique'}
+              </span>
+            </h1>
+            <p className="text-base" style={{ color: '#64748B' }}>
+              {language === 'ar' ? 'اكتشف جميع شواحننا عالية الجودة' : 'Découvrez tous nos chargeurs de haute qualité'}
             </p>
-          </div>
-          {selectedBrand && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg"
-            >
-              ✅ {language === 'ar' ? `${filteredProducts.length} منتج` : `${filteredProducts.length} produits`}
-            </motion.div>
-          )}
-        </div>
-        
-        {/* Brand Squares Grid - Full Image Cards */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 py-6 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900/50 dark:via-blue-950/30 dark:to-purple-950/30 rounded-3xl border-2 border-blue-200 dark:border-blue-700/50 backdrop-blur-sm w-full">
-          {/* All Brands Square */}
-          <motion.button
-            whileHover={{ scale: 1.08, y: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              setSelectedBrand('');
-              applyFilters(searchQuery, '');
-            }}
-            className={`flex flex-col items-center justify-center w-full h-16 sm:h-20 rounded-lg transition-all duration-300 overflow-hidden relative group ${
-              selectedBrand === ''
-                ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-xl ring-2 ring-blue-400'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-lg border-2 border-slate-200 dark:border-slate-600 hover:shadow-xl hover:border-blue-400'
-            }`}
-          >
-            <span className="text-2xl sm:text-3xl">⭐</span>
-            <span className="text-xs font-bold text-center px-1 hidden sm:block">
-              {language === 'ar' ? 'الكل' : 'All'}
-            </span>
-          </motion.button>
-
-          {/* Individual Brand Squares with Full Images */}
-          {marks.map((mark, index) => (
-            <motion.button
-              key={mark.id}
-              whileHover={{ scale: 1.08, y: -3 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.03, type: 'spring', damping: 12 }}
-              onClick={() => handleBrandFilter(mark.name)}
-              className={`flex items-center justify-center w-full h-16 sm:h-20 rounded-lg transition-all duration-300 relative group overflow-hidden ${
-                selectedBrand === mark.name
-                  ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl ring-2 ring-blue-400'
-                  : 'bg-white dark:bg-slate-800 shadow-lg border-2 border-slate-200 dark:border-slate-600 hover:shadow-xl hover:border-blue-400'
-              }`}
-              title={mark.name}
-            >
-              {/* Background Image - Full Coverage */}
-              {mark.logo_url ? (
-                <img
-                  src={mark.logo_url}
-                  alt={mark.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <span className="text-xl sm:text-2xl">🏷️</span>
-              )}
-              
-              {/* Hover Overlay with Brand Name */}
-              <div className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                <span className="text-white text-xs font-bold text-center px-2 line-clamp-2">
-                  {mark.name}
-                </span>
-              </div>
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Cart Notification Toast */}
-      {cartNotification && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-green-400 to-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
-        >
-          ✅ {cartNotification} {language === 'ar' ? 'تمت إضافتها للسلة' : 'ajouté au panier'}
-        </motion.div>
-      )}      {/* Loading State */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="h-12 w-12 rounded-full border-4 border-blue-200 dark:border-blue-700 border-t-blue-600"
-          />
-        </div>
-      ) : (
-        <>
-          {/* Products Grid */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                variants={itemVariants}
-                whileHover="hover"
-                className="group relative cursor-pointer"
-                onClick={() => handleViewDetails(product)}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-all duration-300" />
-                
-                <div className="relative bg-white dark:bg-slate-800 border-2 border-blue-200 dark:border-blue-700 rounded-2xl overflow-hidden h-full flex flex-col shadow-lg hover:shadow-2xl transition-all duration-300">
-                  {/* Product Image */}
-                  <div className="relative h-72 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center overflow-hidden w-full">
-                    {product.primary_image ? (
-                      <motion.img
-                        src={product.primary_image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        whileHover={{ scale: 1.12 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    ) : (
-                      <motion.div
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                      >
-                        <Zap className="h-20 w-20 text-slate-300" />
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* Content Area */}
-                  <div className="p-6 flex-1 flex flex-col">
-                    {/* Brand */}
-                    <Badge variant="outline" className="w-fit mb-3 text-xs font-bold border-blue-300 bg-blue-50 dark:bg-blue-900/30">
-                      🏷️ {product.product_mark || 'Charger'}
-                    </Badge>
-
-                    {/* Product Name */}
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white mb-2 line-clamp-2">
-                      {product.name}
-                    </h3>
-
-                    {/* Description */}
-                    {product.description && (
-                      <p className="text-sm text-slate-700 dark:text-slate-300 mb-3 line-clamp-2">
-                        📝 {product.description}
-                      </p>
-                    )}
-
-                    {/* Specs Grid */}
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-2 text-center border border-blue-200 dark:border-blue-700">
-                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚡ V</div>
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">{product.voltage ? `${product.voltage}` : 'N/A'}</div>
-                      </div>
-                      <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-2 text-center border border-yellow-200 dark:border-yellow-700">
-                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔌 W</div>
-                        <div className="text-sm font-bold text-yellow-600 dark:text-yellow-400">{product.wattage ? `${product.wattage}` : 'N/A'}</div>
-                      </div>
-                      <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-2 text-center border border-purple-200 dark:border-purple-700">
-                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚙️ A</div>
-                        <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{product.amperage ? `${product.amperage}` : 'N/A'}</div>
-                      </div>
-                      <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-2 text-center border border-green-200 dark:border-green-700">
-                        <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔧 T</div>
-                        <div className="text-sm font-bold text-green-600 dark:text-green-400 truncate">{product.connection_type || 'N/A'}</div>
-                      </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-3 mb-3 border-2 border-green-200 dark:border-green-700">
-                      <div className="flex items-baseline gap-2 justify-center">
-                        <span className="text-3xl font-bold text-green-600 dark:text-green-400">
-                          {product.selling_price.toFixed(2)}
-                        </span>
-                        <span className="text-base text-slate-600 dark:text-slate-400 font-semibold">
-                          DZD
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 mt-auto pt-3 min-h-12">
-                      <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                        <Button
-                          onClick={() => handleAddToCart(product)}
-                          className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-lg py-2 px-3 text-sm transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap"
-                        >
-                          🛒 Panier
-                        </Button>
-                      </motion.div>
-                      <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                        <Button
-                          onClick={() => handleViewDetails(product)}
-                          className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-lg py-2 px-3 text-sm transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap"
-                          variant="default"
-                        >
-                          👁️ Voir
-                        </Button>
-                      </motion.div>
-                      <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                        <Button
-                          onClick={() => handleOrder(product)}
-                          className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-lg py-2 px-3 text-sm transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap"
-                        >
-                          🚀 Cmd
-                        </Button>
-                      </motion.div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
           </motion.div>
+        </div>
+      </div>
 
-          {/* Empty State */}
-          {filteredProducts.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12"
+      <div className="max-w-7xl mx-auto px-4 pb-16 space-y-8">
+
+        {/* Search */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative max-w-lg mx-auto">
+          <Search className="absolute top-1/2 -translate-y-1/2 left-4 w-5 h-5 pointer-events-none" style={{ color: '#00D4FF' }} />
+          <input
+            placeholder={language === 'ar' ? '🔍 ابحث عن شاحن...' : '🔍 Rechercher un chargeur...'}
+            value={searchQuery}
+            onChange={e => handleSearch(e.target.value)}
+            className="w-full pl-12 pr-4 py-4 rounded-xl text-sm outline-none transition-all"
+            style={{ background: '#0F172A', color: '#F1F5F9', border: '1px solid rgba(0,212,255,0.2)' }}
+            onFocus={e => (e.target.style.borderColor = '#00D4FF')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.2)')}
+          />
+        </motion.div>
+
+        {/* Brand filter */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-grotesk font-bold text-sm uppercase tracking-widest" style={{ color: '#00D4FF' }}>
+              {language === 'ar' ? '🏷️ تصفية بالماركة' : '🏷️ Filtrer par Marque'}
+            </h3>
+            {selectedBrand && (
+              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
+                className="px-3 py-1 rounded-full text-xs font-bold"
+                style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }}
+              >
+                ✅ {filteredProducts.length} {language === 'ar' ? 'منتج' : 'produits'}
+              </motion.span>
+            )}
+          </div>
+
+          <div
+            className="flex flex-wrap gap-2 p-4 rounded-2xl"
+            style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(0,212,255,0.1)' }}
+          >
+            {/* All */}
+            <motion.button
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => { setSelectedBrand(''); applyFilters(searchQuery, ''); }}
+              className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+              style={{
+                background: selectedBrand === '' ? 'rgba(0,212,255,0.15)' : 'rgba(30,58,95,0.4)',
+                color: selectedBrand === '' ? '#00D4FF' : '#64748B',
+                border: `1px solid ${selectedBrand === '' ? 'rgba(0,212,255,0.4)' : 'rgba(30,58,95,0.6)'}`,
+              }}
             >
-              <Zap className="h-16 w-16 mx-auto text-slate-300 mb-4" />
-              <h3 className="text-2xl font-bold text-slate-600 dark:text-slate-400 mb-2">
-                {language === 'ar' ? 'لا توجد منتجات' : 'Aucun produit trouvé'}
-              </h3>
-              <p className="text-slate-500 dark:text-slate-500">
-                {language === 'ar' ? 'حاول البحث عن منتج آخر' : 'Essayez une autre recherche'}
-              </p>
+              ⭐ {language === 'ar' ? 'الكل' : 'Tous'}
+            </motion.button>
+
+            {marks.map((mark, i) => (
+              <motion.button
+                key={mark.id}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.03 }}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => handleBrandFilter(mark.name)}
+                title={mark.name}
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all relative overflow-hidden"
+                style={{
+                  background: selectedBrand === mark.name ? 'rgba(0,212,255,0.15)' : 'rgba(30,58,95,0.4)',
+                  color: selectedBrand === mark.name ? '#00D4FF' : '#64748B',
+                  border: `1px solid ${selectedBrand === mark.name ? 'rgba(0,212,255,0.4)' : 'rgba(30,58,95,0.6)'}`,
+                }}
+              >
+                {mark.logo_url && (
+                  <img src={mark.logo_url} alt={mark.name} className="w-4 h-4 object-contain rounded"
+                    onError={e => (e.currentTarget.style.display = 'none')} />
+                )}
+                🏷️ {mark.name}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Cart toast */}
+        <AnimatePresence>
+          {cartNotification && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: -20, x: '-50%' }}
+              className="fixed top-24 left-1/2 z-50 px-6 py-3 rounded-xl font-semibold text-sm"
+              style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', boxShadow: '0 0 20px rgba(16,185,129,0.4)' }}
+            >
+              ✅ {cartNotification} {language === 'ar' ? 'أضيف للسلة' : 'ajouté au panier'}
             </motion.div>
           )}
-        </>
-      )}
+        </AnimatePresence>
 
-      {/* Details Dialog */}
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-3xl bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-purple-700 rounded-2xl max-h-screen overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {selectedProduct?.name}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedProduct && (
+        {/* Loading */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+              className="w-12 h-12 rounded-full"
+              style={{ border: '2px solid rgba(0,212,255,0.1)', borderTopColor: '#00D4FF' }}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Products grid */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {/* Image Gallery */}
-              <motion.div
-                className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-900/30 dark:via-purple-900/30 dark:to-pink-900/30 rounded-2xl min-h-96 border-2 border-purple-200 dark:border-purple-700 p-4"
-                whileHover={{ scale: 1.02 }}
-              >
-                {imagesLoading ? (
-                  <div className="text-center">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }} className="mb-4">
-                      <Zap className="h-12 w-12 text-purple-500 mx-auto" />
-                    </motion.div>
-                    <p className="text-slate-600 dark:text-slate-400">Loading images...</p>
-                  </div>
-                ) : productImages.length > 0 ? (
-                  <div className="w-full space-y-4">
-                    {/* Main Image */}
-                    <div className="relative bg-white dark:bg-slate-700 rounded-xl p-4 min-h-80 flex items-center justify-center">
-                      <img
-                        src={productImages[currentImageIndex].image_url}
-                        alt={`${selectedProduct?.name} - ${currentImageIndex + 1}`}
-                        className="max-w-full max-h-full object-contain"
-                      />
+              {filteredProducts.map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                >
+                  <GlowCard className="flex flex-col h-full cursor-pointer" onClick={() => handleViewDetails(product)}>
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden"
+                      style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.04), rgba(124,58,237,0.04))' }}
+                    >
+                      {product.primary_image ? (
+                        <motion.img
+                          src={product.primary_image} alt={product.name}
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.08 }} transition={{ duration: 0.4 }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Zap className="w-14 h-14" style={{ color: '#1E3A5F' }} />
+                        </div>
+                      )}
+                      {product.product_mark && (
+                        <div className="absolute top-3 left-3">
+                          <ElectricBadge color="cyan">{product.product_mark}</ElectricBadge>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Image Counter & Navigation */}
-                    <div className="flex items-center justify-between gap-3">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={goToPreviousImage}
-                        className="p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-all shadow-md"
-                        disabled={productImages.length <= 1}
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </motion.button>
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="font-grotesk font-bold text-base mb-2 line-clamp-2" style={{ color: '#F1F5F9' }}>
+                        {product.name}
+                      </h3>
+                      {product.description && (
+                        <p className="text-sm mb-3 line-clamp-2" style={{ color: '#64748B' }}>{product.description}</p>
+                      )}
 
-                      <div className="flex-1 text-center">
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          📸 {currentImageIndex + 1} / {productImages.length}
-                        </p>
-                        {productImages.length > 1 && (
-                          <div className="flex gap-1 justify-center mt-2 flex-wrap">
-                            {productImages.map((_, idx) => (
-                              <motion.button
-                                key={idx}
-                                onClick={() => setCurrentImageIndex(idx)}
-                                className={`h-2 rounded-full transition-all ${
-                                  idx === currentImageIndex
-                                    ? 'bg-purple-600 w-6'
-                                    : 'bg-purple-300 dark:bg-purple-700 w-2 hover:w-3'
-                                }`}
-                                whileHover={{ scale: 1.2 }}
-                              />
-                            ))}
-                          </div>
+                      {/* Specs chips */}
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {product.voltage && (
+                          <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.2)' }}>
+                            ⚡ {product.voltage}V
+                          </span>
+                        )}
+                        {product.amperage && (
+                          <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(124,58,237,0.08)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                            🔌 {product.amperage}A
+                          </span>
+                        )}
+                        {product.wattage && (
+                          <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
+                            💡 {product.wattage}W
+                          </span>
+                        )}
+                        {product.connection_type && (
+                          <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(16,185,129,0.08)', color: '#10B981', border: '1px solid rgba(16,185,129,0.2)' }}>
+                            🔧 {product.connection_type}
+                          </span>
                         )}
                       </div>
 
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={goToNextImage}
-                        className="p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-all shadow-md"
-                        disabled={productImages.length <= 1}
+                      {/* Price */}
+                      <div className="mb-4 mt-auto">
+                        <span className="font-grotesk font-black text-2xl" style={{ color: '#F59E0B' }}>
+                          {product.selling_price.toLocaleString()} DZD
+                        </span>
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="grid grid-cols-3 gap-2" onClick={e => e.stopPropagation()}>
+                        <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                          onClick={() => handleAddToCart(product)}
+                          className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold"
+                          style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+                        >
+                          <ShoppingCart className="w-3.5 h-3.5" />
+                          {language === 'ar' ? 'سلة' : 'Panier'}
+                        </motion.button>
+                        <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                          onClick={() => handleViewDetails(product)}
+                          className="flex items-center justify-center py-2 rounded-lg text-xs font-bold"
+                          style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.25)' }}
+                        >
+                          👁️ {language === 'ar' ? 'عرض' : 'Voir'}
+                        </motion.button>
+                        <motion.button whileHover={{ scale: 1.04, boxShadow: '0 0 12px rgba(255,107,53,0.4)' }} whileTap={{ scale: 0.96 }}
+                          onClick={() => handleOrder(product)}
+                          className="flex items-center justify-center py-2 rounded-lg text-xs font-bold text-white"
+                          style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                        >
+                          📦 {language === 'ar' ? 'طلب' : 'Cmd'}
+                        </motion.button>
+                      </div>
+                    </div>
+                  </GlowCard>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Empty state */}
+            {filteredProducts.length === 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="text-center py-24 rounded-2xl"
+                style={{ border: '2px dashed rgba(0,212,255,0.1)', background: 'rgba(0,212,255,0.01)' }}
+              >
+                <Zap className="w-16 h-16 mx-auto mb-4" style={{ color: '#1E3A5F' }} />
+                <h3 className="font-grotesk font-bold text-xl mb-2" style={{ color: '#64748B' }}>
+                  {language === 'ar' ? 'لا توجد منتجات' : 'Aucun produit trouvé'}
+                </h3>
+                <p className="text-sm mb-6" style={{ color: '#1E3A5F' }}>
+                  {language === 'ar' ? 'جرب بحثاً آخر' : 'Essayez une autre recherche'}
+                </p>
+                <button onClick={() => { setSearchQuery(''); setSelectedBrand(''); setFilteredProducts(products); }}
+                  className="px-6 py-3 rounded-xl text-sm font-bold"
+                  style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+                >
+                  {language === 'ar' ? 'إعادة تعيين' : 'Réinitialiser'}
+                </button>
+              </motion.div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Product detail modal */}
+      <AnimatePresence>
+        {showDetails && selectedProduct && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowDetails(false)}
+              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              className="fixed inset-4 sm:inset-8 z-50 rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.2)', maxWidth: '900px', margin: 'auto' }}
+            >
+              {/* Modal header */}
+              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(0,212,255,0.1)' }}>
+                <h2 className="font-grotesk font-bold text-lg line-clamp-1 pr-4" style={{ color: '#F1F5F9' }}>
+                  {selectedProduct.name}
+                </h2>
+                <button onClick={() => setShowDetails(false)}
+                  className="p-2 rounded-lg flex-shrink-0 transition-all"
+                  style={{ color: '#64748B' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#F1F5F9')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#64748B')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal body */}
+              <div className="flex-1 overflow-y-auto p-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Image gallery */}
+                  <div className="rounded-xl overflow-hidden flex flex-col gap-3" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.1)' }}>
+                    <div className="h-64 flex items-center justify-center relative p-4">
+                      {imagesLoading ? (
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
+                          className="w-10 h-10 rounded-full"
+                          style={{ border: '2px solid rgba(0,212,255,0.1)', borderTopColor: '#00D4FF' }}
+                        />
+                      ) : productImages.length > 0 ? (
+                        <img src={productImages[currentImageIndex].image_url} alt={selectedProduct.name} className="max-w-full max-h-full object-contain rounded-lg" />
+                      ) : selectedProduct.primary_image ? (
+                        <img src={selectedProduct.primary_image} alt={selectedProduct.name} className="max-w-full max-h-full object-contain rounded-lg" />
+                      ) : (
+                        <Zap className="w-20 h-20" style={{ color: '#1E3A5F' }} />
+                      )}
+                    </div>
+                    {productImages.length > 1 && (
+                      <div className="flex items-center justify-between px-4 pb-4">
+                        <button onClick={goToPreviousImage} className="p-2 rounded-lg transition-all" style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <div className="flex gap-1">
+                          {productImages.map((_, idx) => (
+                            <button key={idx} onClick={() => setCurrentImageIndex(idx)}
+                              className="rounded-full transition-all"
+                              style={{ width: idx === currentImageIndex ? '20px' : '8px', height: '8px', background: idx === currentImageIndex ? '#00D4FF' : 'rgba(0,212,255,0.2)' }}
+                            />
+                          ))}
+                        </div>
+                        <button onClick={goToNextImage} className="p-2 rounded-lg transition-all" style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="space-y-4">
+                    {selectedProduct.product_mark && (
+                      <div className="p-3 rounded-xl" style={{ background: 'rgba(0,212,255,0.05)', borderLeft: '3px solid #00D4FF' }}>
+                        <p className="text-xs font-bold mb-1" style={{ color: '#64748B' }}>🏷️ {language === 'ar' ? 'الماركة' : 'Marque'}</p>
+                        <p className="font-grotesk font-bold text-lg" style={{ color: '#00D4FF' }}>{selectedProduct.product_mark}</p>
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: '#64748B' }}>
+                        ⚡ {language === 'ar' ? 'المواصفات' : 'Spécifications'}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { label: 'Voltage', value: selectedProduct.voltage ? `${selectedProduct.voltage}V` : 'N/A', color: '#00D4FF', bg: 'rgba(0,212,255,0.06)' },
+                          { label: 'Ampérage', value: selectedProduct.amperage ? `${selectedProduct.amperage}A` : 'N/A', color: '#7C3AED', bg: 'rgba(124,58,237,0.06)' },
+                          { label: 'Puissance', value: selectedProduct.wattage ? `${selectedProduct.wattage}W` : 'N/A', color: '#F59E0B', bg: 'rgba(245,158,11,0.06)' },
+                          { label: 'Connexion', value: selectedProduct.connection_type || 'N/A', color: '#10B981', bg: 'rgba(16,185,129,0.06)' },
+                        ].map(spec => (
+                          <div key={spec.label} className="p-3 rounded-xl" style={{ background: spec.bg, border: `1px solid ${spec.color}22` }}>
+                            <p className="text-xs mb-1" style={{ color: '#64748B' }}>{spec.label}</p>
+                            <p className="font-grotesk font-bold text-lg" style={{ color: spec.color }}>{spec.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {selectedProduct.description && (
+                      <div className="p-3 rounded-xl" style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(30,58,95,0.6)' }}>
+                        <p className="text-xs font-bold mb-1" style={{ color: '#64748B' }}>📝 Description</p>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#94A3B8' }}>{selectedProduct.description}</p>
+                      </div>
+                    )}
+
+                    <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                      <span className="font-grotesk font-black text-3xl" style={{ color: '#F59E0B' }}>
+                        {selectedProduct.selling_price.toLocaleString()} DZD
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                        onClick={() => { handleAddToCart(selectedProduct); setShowDetails(false); }}
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+                        style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }}
                       >
-                        <ChevronRight className="h-5 w-5" />
+                        <ShoppingCart className="w-4 h-4" />
+                        {language === 'ar' ? 'أضف للسلة' : 'Ajouter au Panier'}
+                      </motion.button>
+                      <motion.button whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(255,107,53,0.4)' }} whileTap={{ scale: 0.98 }}
+                        onClick={() => handleOrder(selectedProduct)}
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white"
+                        style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                      >
+                        🚀 {language === 'ar' ? 'اطلب الآن' : 'Commander'}
                       </motion.button>
                     </div>
                   </div>
-                ) : selectedProduct?.primary_image ? (
-                  <img
-                    src={selectedProduct.primary_image}
-                    alt={selectedProduct.name}
-                    className="max-w-full max-h-full object-contain"
-                  />
-                ) : (
-                  <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity }}>
-                    <Zap className="h-48 w-48 text-slate-300" />
-                  </motion.div>
-                )}
-              </motion.div>
-
-              {/* Details */}
-              <div className="space-y-6 overflow-y-auto max-h-96 pr-2">
-                {/* Brand */}
-                {selectedProduct.product_mark && (
-                  <motion.div
-                    initial={{ x: 20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 border-l-4 border-blue-500"
-                  >
-                    <p className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      🏷️ Marque
-                    </p>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {selectedProduct.product_mark}
-                    </p>
-                  </motion.div>
-                )}
-
-                {/* Specifications */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="space-y-2"
-                >
-                  <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-3">
-                    ⚡ Spécifications Électriques
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/50 rounded-lg p-3 border-2 border-blue-200 dark:border-blue-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">⚡ Voltage</div>
-                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedProduct.voltage ? `${selectedProduct.voltage}V` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-900/50 rounded-lg p-3 border-2 border-purple-200 dark:border-purple-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">⚙️ Ampérage</div>
-                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{selectedProduct.amperage ? `${selectedProduct.amperage}A` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-900/50 rounded-lg p-3 border-2 border-yellow-200 dark:border-yellow-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">🔌 Puissance</div>
-                      <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{selectedProduct.wattage ? `${selectedProduct.wattage}W` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-900/50 rounded-lg p-3 border-2 border-green-200 dark:border-green-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">🔧 Connexion</div>
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">{selectedProduct.connection_type || 'N/A'}</div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Description */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border-2 border-slate-200 dark:border-slate-600"
-                >
-                  <p className="font-bold text-slate-900 dark:text-white mb-2">
-                    📝 Description
-                  </p>
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap">
-                    {selectedProduct.description || 'Aucune description disponible'}
-                  </p>
-                </motion.div>
-
-                {/* Pricing */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-4 border-2 border-green-200 dark:border-green-700"
-                >
-                  <div className="text-center space-y-2">
-                    <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
-                      Prix
-                    </p>
-                    <div className="flex items-baseline justify-center gap-2">
-                      <span className="text-4xl font-bold text-green-600 dark:text-green-400">
-                        {selectedProduct.selling_price.toFixed(2)}
-                      </span>
-                      <span className="text-xl text-slate-600 dark:text-slate-400 font-bold">
-                        DZD
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-                <div className="flex gap-3 pt-4">
-                  <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                    <Button
-                      onClick={() => handleAddToCart(selectedProduct)}
-                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-6 rounded-lg text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      🛒 Ajouter au Panier
-                    </Button>
-                  </motion.div>
-                  <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                    <Button
-                      onClick={() => handleOrder(selectedProduct)}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-6 rounded-lg text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      🚀 Acheter Maintenant
-                    </Button>
-                  </motion.div>
                 </div>
               </div>
             </motion.div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

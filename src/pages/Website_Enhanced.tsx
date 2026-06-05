@@ -754,12 +754,22 @@ export default function Website_Enhanced() {
     }
 
     try {
-      let imageUrl = '';
+      const newPackageData = {
+        name: packageName,
+        description: packageDescription,
+        package_price: parseFloat(packagePrice),
+        image_url: '',
+        is_visible: true,
+        is_active: true,
+      };
 
-      // Upload package image if provided
+      const createdPackage = await createPackage(newPackageData);
+
+      // Upload package image if provided, now that we have the package ID
+      let imageUrl = '';
       if (packageImage) {
-        const timestamp = new Date().getTime();
-        const filePath = `packages/${timestamp}-${packageImage.name}`;
+        const timestamp = Date.now();
+        const filePath = `packages/${createdPackage.id}/${timestamp}_${packageImage.name}`;
         
         const { error: uploadError } = await supabase.storage
           .from('chargers')
@@ -772,18 +782,13 @@ export default function Website_Enhanced() {
           .from('chargers')
           .getPublicUrl(filePath);
         imageUrl = urlData.publicUrl;
+
+        // Update package with image URL
+        await updatePackage(createdPackage.id, {
+          image_url: imageUrl,
+          storage_bucket_path: filePath,
+        });
       }
-
-      const newPackageData = {
-        name: packageName,
-        description: packageDescription,
-        package_price: parseFloat(packagePrice),
-        image_url: imageUrl,
-        is_visible: true,
-        is_active: true,
-      };
-
-      const createdPackage = await createPackage(newPackageData);
 
       // Add products to package with quantity and custom price
       for (const item of selectedProductsPackage) {

@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
+import { getMunicipalitiesForWilaya, getAllWilayas } from '@/data/algerian-municipalities';
 import {
   Select,
   SelectContent,
@@ -11,20 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getMunicipalitiesForWilaya, getAllWilayas } from '@/data/algerian-municipalities';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { createOrderREST, getVisibleDeliveryAgencies, getDeliveryPriceForWilaya, getTestimonialsByName, createTestimonial, updateTestimonial, deleteTestimonial } from '@/lib/supabaseClient';
-import { ArrowLeft, Trash2, ShoppingCart, Check, MapPin, User, Package, Truck, MessageSquare, Edit2, Plus, AlertCircle, X } from 'lucide-react';
+import { ArrowLeft, Trash2, ShoppingCart, Check, MapPin, User, Package, Truck, MessageSquare, Edit2, Plus, AlertCircle, X, Zap } from 'lucide-react';
+import GlowCard from '@/components/website/GlowCard';
 
 interface CartItem {
   id: string;
@@ -64,8 +53,18 @@ interface Testimonial {
   is_approved?: boolean;
 }
 
-// List of Algerian Wilayas
 const ALGERIAN_WILAYAS = getAllWilayas();
+
+const inputStyle = {
+  background: '#0F172A',
+  color: '#F1F5F9',
+  border: '1px solid rgba(0,212,255,0.15)',
+  borderRadius: '10px',
+  padding: '10px 14px',
+  fontSize: '14px',
+  outline: 'none',
+  width: '100%',
+};
 
 export default function WebsiteCart() {
   const { language, isRTL } = useLanguage();
@@ -88,22 +87,18 @@ export default function WebsiteCart() {
   const [loadingTestimonials, setLoadingTestimonials] = useState(false);
   const [submittingTestimonial, setSubmittingTestimonial] = useState(false);
 
-  // Form state
   const [formData, setFormData] = useState({
     client_name: '',
     client_phone: '',
     client_wilaya: '',
     client_municipality: '',
     delivery_agency_id: '',
-    delivery_type: 'domicile'
+    delivery_type: 'domicile',
   });
 
-  // Load cart and delivery agencies from database
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     setCartItems(cart);
-    
-    // Fetch delivery agencies
     const fetchAgencies = async () => {
       try {
         const agencies = await getVisibleDeliveryAgencies();
@@ -111,15 +106,11 @@ export default function WebsiteCart() {
         if (agencies && agencies.length > 0) {
           setFormData(prev => ({ ...prev, delivery_agency_id: agencies[0].id }));
         }
-      } catch (error) {
-        console.error('Error fetching delivery agencies:', error);
-      }
+      } catch (error) { console.error('Error fetching delivery agencies:', error); }
     };
-    
     fetchAgencies();
   }, []);
 
-  // Remove item from cart
   const handleRemoveItem = (productId: string) => {
     const updatedCart = cartItems.filter(item => item.product_id !== productId);
     setCartItems(updatedCart);
@@ -127,19 +118,13 @@ export default function WebsiteCart() {
     window.dispatchEvent(new Event('cartUpdated'));
   };
 
-  // Update quantity
   const handleUpdateQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) return;
-    const updatedCart = cartItems.map(item =>
-      item.product_id === productId ? { ...item, quantity } : item
-    );
+    const updatedCart = cartItems.map(item => item.product_id === productId ? { ...item, quantity } : item);
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
-  // ========== TESTIMONIALS HANDLERS ==========
-
-  // Load user testimonials
   const loadUserTestimonials = async (clientName: string) => {
     if (!clientName.trim()) return;
     setLoadingTestimonials(true);
@@ -148,78 +133,41 @@ export default function WebsiteCart() {
       setUserTestimonials(testimonials || []);
     } catch (error) {
       console.error('Error loading testimonials:', error);
-      toast({
-        title: language === 'ar' ? 'خطأ' : 'Erreur',
-        description: language === 'ar' ? 'فشل في تحميل آرائك' : 'Impossible de charger vos avis',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingTestimonials(false);
-    }
+      toast({ title: language === 'ar' ? 'خطأ' : 'Erreur', description: language === 'ar' ? 'فشل في تحميل آرائك' : 'Impossible de charger vos avis', variant: 'destructive' });
+    } finally { setLoadingTestimonials(false); }
   };
 
-  // Open testimonials modal
   const handleOpenTestimonials = async () => {
     if (formData.client_name.trim()) {
       await loadUserTestimonials(formData.client_name);
       setShowTestimonialsModal(true);
     } else {
-      toast({
-        title: language === 'ar' ? 'تنبيه' : 'Attention',
-        description: language === 'ar' ? 'الرجاء إدخال اسمك أولاً' : 'Veuillez d\'abord entrer votre nom',
-        variant: 'destructive',
-      });
+      toast({ title: language === 'ar' ? 'تنبيه' : 'Attention', description: language === 'ar' ? 'الرجاء إدخال اسمك أولاً' : 'Veuillez d\'abord entrer votre nom', variant: 'destructive' });
     }
   };
 
-  // Submit testimonial (create or update)
   const handleSubmitTestimonial = async () => {
     if (!testimonialOpinion.trim()) {
-      toast({
-        title: language === 'ar' ? 'تنبيه' : 'Attention',
-        description: language === 'ar' ? 'الرجاء إدخال رأيك' : 'Veuillez entrer votre avis',
-        variant: 'destructive',
-      });
+      toast({ title: language === 'ar' ? 'تنبيه' : 'Attention', description: language === 'ar' ? 'الرجاء إدخال رأيك' : 'Veuillez entrer votre avis', variant: 'destructive' });
       return;
     }
-
     setSubmittingTestimonial(true);
     try {
       if (editingTestimonial) {
-        // Update existing testimonial
         await updateTestimonial(editingTestimonial.id, testimonialOpinion, testimonialRating);
-        toast({
-          title: language === 'ar' ? '✅ تم' : '✅ Succès',
-          description: language === 'ar' ? 'تم تحديث رأيك' : 'Votre avis a été mis à jour',
-        });
+        toast({ title: '✅', description: language === 'ar' ? 'تم تحديث رأيك' : 'Avis mis à jour' });
       } else {
-        // Create new testimonial
         await createTestimonial(formData.client_name, testimonialOpinion, testimonialRating);
-        toast({
-          title: language === 'ar' ? '✅ شكراً!' : '✅ Merci!',
-          description: language === 'ar' ? 'تم استقبال رأيك' : 'Votre avis a été enregistré',
-        });
+        toast({ title: '✅', description: language === 'ar' ? 'تم استقبال رأيك' : 'Avis enregistré' });
       }
-
-      // Reset form and reload testimonials
-      setTestimonialOpinion('');
-      setTestimonialRating(5);
-      setEditingTestimonial(null);
-      setShowTestimonialForm(false);
+      setTestimonialOpinion(''); setTestimonialRating(5); setEditingTestimonial(null); setShowTestimonialForm(false);
       await loadUserTestimonials(formData.client_name);
     } catch (error) {
       console.error('Error submitting testimonial:', error);
-      toast({
-        title: language === 'ar' ? 'خطأ' : 'Erreur',
-        description: language === 'ar' ? 'فشل في إرسال الرأي' : 'Erreur lors de l\'envoi',
-        variant: 'destructive',
-      });
-    } finally {
-      setSubmittingTestimonial(false);
-    }
+      toast({ title: language === 'ar' ? 'خطأ' : 'Erreur', description: language === 'ar' ? 'فشل في إرسال الرأي' : 'Erreur lors de l\'envoi', variant: 'destructive' });
+    } finally { setSubmittingTestimonial(false); }
   };
 
-  // Edit testimonial
   const handleEditTestimonial = (testimonial: Testimonial) => {
     setEditingTestimonial(testimonial);
     setTestimonialOpinion(testimonial.opinion);
@@ -227,126 +175,67 @@ export default function WebsiteCart() {
     setShowTestimonialForm(true);
   };
 
-  // Delete testimonial
   const handleDeleteTestimonial = async (testimonialId: string) => {
     if (!confirm(language === 'ar' ? 'هل تريد حذف هذا الرأي؟' : 'Êtes-vous sûr?')) return;
-
     try {
       await deleteTestimonial(testimonialId);
-      toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
-        description: language === 'ar' ? 'تم حذف رأيك' : 'Votre avis a été supprimé',
-      });
+      toast({ title: '✅', description: language === 'ar' ? 'تم حذف رأيك' : 'Avis supprimé' });
       await loadUserTestimonials(formData.client_name);
     } catch (error) {
       console.error('Error deleting testimonial:', error);
-      toast({
-        title: language === 'ar' ? 'خطأ' : 'Erreur',
-        description: language === 'ar' ? 'فشل في حذف الرأي' : 'Erreur lors de la suppression',
-        variant: 'destructive',
-      });
+      toast({ title: language === 'ar' ? 'خطأ' : 'Erreur', description: language === 'ar' ? 'فشل في حذف الرأي' : 'Erreur lors de la suppression', variant: 'destructive' });
     }
   };
 
-  // Calculate totals with delivery
   const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  
-  // Get selected delivery agency
   const selectedAgency = deliveryAgencies.find(a => a.id === formData.delivery_agency_id);
-  
-  // Calculate delivery price with wilaya-specific pricing support
+
   const getDeliveryPrice = async () => {
     if (!selectedAgency) return 0;
-    
-    // Create cache key
     const cacheKey = `${selectedAgency.id}-${formData.client_wilaya}-${formData.delivery_type}`;
-    
-    // Return from cache if available
-    if (deliveryPriceCache.has(cacheKey)) {
-      return deliveryPriceCache.get(cacheKey) || 0;
-    }
-    
+    if (deliveryPriceCache.has(cacheKey)) return deliveryPriceCache.get(cacheKey) || 0;
     try {
-      // Try to get wilaya-specific price
       if (formData.client_wilaya) {
-        console.log(`🔍 Fetching delivery price for agency ${selectedAgency.id}, wilaya ${formData.client_wilaya}, type ${formData.delivery_type}`);
-        const wilayaPrice = await getDeliveryPriceForWilaya(
-          selectedAgency.id,
-          formData.client_wilaya,
-          formData.delivery_type as 'bureau' | 'domicile'
-        );
-        
-        console.log(`✅ Got wilaya-specific price: ${wilayaPrice}`);
-        // Cache the result
+        const wilayaPrice = await getDeliveryPriceForWilaya(selectedAgency.id, formData.client_wilaya, formData.delivery_type as 'bureau' | 'domicile');
         setDeliveryPriceCache(prev => new Map(prev).set(cacheKey, wilayaPrice));
         return wilayaPrice;
       }
-    } catch (error) {
-      console.error('❌ Error fetching wilaya-specific price:', error);
-    }
-    
-    // Fallback to agency default price
-    const defaultPrice = formData.delivery_type === 'bureau' 
-      ? selectedAgency.price_bureau 
-      : selectedAgency.price_domicile;
-    
-    console.log(`📦 Using default agency price: ${defaultPrice}`);
+    } catch (error) { console.error('Error fetching wilaya-specific price:', error); }
+    const defaultPrice = formData.delivery_type === 'bureau' ? selectedAgency.price_bureau : selectedAgency.price_domicile;
     setDeliveryPriceCache(prev => new Map(prev).set(cacheKey, defaultPrice));
     return defaultPrice;
   };
-  
-  // Calculate delivery price (will be computed in async manner)
+
   const [deliveryPrice, setDeliveryPrice] = useState(0);
-  
   useEffect(() => {
-    const updatePrice = async () => {
-      const price = await getDeliveryPrice();
-      setDeliveryPrice(price);
-    };
+    const updatePrice = async () => { const price = await getDeliveryPrice(); setDeliveryPrice(price); };
     updatePrice();
   }, [selectedAgency?.id, formData.client_wilaya, formData.delivery_type]);
-  
+
   const finalTotal = total + deliveryPrice;
-  
   const itemCount = cartItems.length;
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Handle form change
   const handleFormChange = (e: any) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle continue shopping
   const handleContinueShopping = () => {
-    // Clear cart from localStorage
     localStorage.setItem('cart', JSON.stringify([]));
     window.dispatchEvent(new Event('cartUpdated'));
-    // Reset form
-    setOrderPlaced(false);
-    setOrderDetails(null);
-    setCartItems([]);
-    // Navigate to shop
+    setOrderPlaced(false); setOrderDetails(null); setCartItems([]);
     navigate('/website-shop');
   };
 
-  // Handle checkout
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (cartItems.length === 0) {
-      alert(language === 'ar' ? 'السلة فارغة' : 'Votre panier est vide');
-      return;
-    }
-
+    if (cartItems.length === 0) { alert(language === 'ar' ? 'السلة فارغة' : 'Votre panier est vide'); return; }
     if (!formData.client_name || !formData.client_phone || !formData.client_wilaya || !formData.client_municipality || !formData.delivery_agency_id) {
-      alert(language === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs obligatoires');
-      return;
+      alert(language === 'ar' ? 'يرجى ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs obligatoires'); return;
     }
-
     setLoading(true);
     try {
-      // Create single order for all items together
       const orderData = {
         customer_name: formData.client_name,
         customer_phone: formData.client_phone,
@@ -356,13 +245,9 @@ export default function WebsiteCart() {
         delivery_type: formData.delivery_type,
         delivery_price: deliveryPrice,
         status: 'pending',
-        total_price: finalTotal
+        total_price: finalTotal,
       };
-
-      // Create the order using REST API with cart items
       const order = await createOrderREST(orderData, cartItems);
-
-      // Store order details for display
       setOrderDetails({
         id: order.id,
         order_number: order.id.substring(0, 8).toUpperCase(),
@@ -370,1044 +255,597 @@ export default function WebsiteCart() {
         customer_phone: formData.client_phone,
         customer_wilaya: formData.client_wilaya,
         customer_address: `${formData.client_municipality}, ${formData.client_wilaya}`,
-        delivery_agency_id: formData.delivery_agency_id,
         delivery_agency_name: selectedAgency?.name || '',
         delivery_type: formData.delivery_type,
         items: cartItems,
         subtotal: total,
         delivery_price: deliveryPrice,
         total_price: finalTotal,
-        created_at: new Date().toLocaleString(language === 'ar' ? 'ar-SA' : 'fr-FR')
+        created_at: new Date().toLocaleString(language === 'ar' ? 'ar-SA' : 'fr-FR'),
       });
-
       setOrderPlaced(true);
     } catch (error) {
       console.error('Error placing order:', error);
-      alert(language === 'ar' ? 'حدث خطأ في الطلب' : 'Une erreur est survenue lors du placement de la commande');
-    } finally {
-      setLoading(false);
-    }
+      alert(language === 'ar' ? 'حدث خطأ في الطلب' : 'Une erreur est survenue');
+    } finally { setLoading(false); }
   };
 
+  // ======= SUCCESS SCREEN =======
   if (orderPlaced && orderDetails) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-slate-950 dark:via-green-950 dark:to-slate-900 ${isRTL ? 'rtl' : 'ltr'}`}>
-        {/* Animated Background */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          className="fixed inset-0 overflow-hidden pointer-events-none"
-        >
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ y: window.innerHeight + 100, opacity: 0, x: Math.random() * 100 - 50 }}
-              animate={{ y: -100, opacity: [0, 1, 0], x: Math.random() * 100 - 50 }}
-              transition={{
-                duration: 4 + i * 0.5,
-                repeat: Infinity,
-                delay: i * 0.3,
-              }}
-              className="absolute left-1/4 w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full blur-sm"
-              style={{ left: `${15 + i * 10}%` }}
+      <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
+        {/* Confetti particles */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+          {[...Array(20)].map((_, i) => (
+            <motion.div key={i}
+              initial={{ y: -20, x: `${5 + i * 4.5}vw`, opacity: 0 }}
+              animate={{ y: '110vh', opacity: [0, 1, 1, 0], rotate: [0, 180, 360] }}
+              transition={{ duration: 3 + (i % 4) * 0.5, delay: i * 0.15, ease: 'linear' }}
+              className="absolute w-2 h-2 rounded-sm"
+              style={{ background: ['#00D4FF', '#7C3AED', '#FF6B35', '#10B981', '#F59E0B'][i % 5], top: 0 }}
             />
           ))}
-        </motion.div>
+        </div>
 
-        {/* Main Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="sticky top-0 z-40 bg-gradient-to-r from-green-900 via-emerald-800 to-teal-900 dark:from-slate-900 dark:via-green-950 dark:to-slate-900 backdrop-blur-xl border-b-4 border-green-600 dark:border-emerald-500 shadow-2xl"
-        >
-          <div className="max-w-4xl mx-auto px-4 py-6 text-center">
-            <motion.h1
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-3xl md:text-4xl font-black text-white drop-shadow-lg"
-            >
-              🎉 {language === 'ar' ? 'شكراً لطلبك!' : 'Merci pour votre Commande!'}
-            </motion.h1>
-            <p className="text-green-100 text-sm md:text-base mt-2">{language === 'ar' ? '✨ سيتم معالجة طلبك في أسرع وقت' : '✨ Nous traiterons votre commande rapidement'}</p>
-          </div>
-        </motion.div>
-
-        <div className="max-w-4xl mx-auto px-4 py-8 md:py-12 space-y-8 relative z-10">
-          {/* Success Icon */}
-          <motion.div
-            initial={{ scale: 0, opacity: 0, rotate: -180 }}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+        <div className="relative z-10 max-w-3xl mx-auto px-4 py-12 space-y-6">
+          {/* Animated check */}
+          <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 120, damping: 15 }}
             className="flex justify-center"
           >
-            <div className="relative">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full opacity-30 blur-2xl"
+            <div className="relative w-28 h-28">
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                className="absolute inset-0 rounded-full"
+                style={{ border: '2px solid transparent', borderTopColor: '#10B981', borderRightColor: '#00D4FF' }}
               />
-              <div className="relative w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white dark:border-slate-800">
-                <motion.div
-                  animate={{ scale: [1, 1.15, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Check className="w-16 h-16 text-white" strokeWidth={3} />
+              <div className="absolute inset-2 rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.1)', border: '2px solid rgba(16,185,129,0.3)' }}>
+                <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                  <Check className="w-12 h-12" style={{ color: '#10B981' }} strokeWidth={3} />
                 </motion.div>
               </div>
             </div>
           </motion.div>
 
-          {/* Order Number */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-950/30 rounded-3xl border-4 border-green-300 dark:border-green-700 p-8 shadow-xl text-center"
-          >
-            <p className="text-base text-slate-600 dark:text-slate-300 font-semibold mb-3">
-              {language === 'ar' ? '📋 رقم طلبك' : '📋 Votre Numéro de Commande'}
-            </p>
-            <motion.p
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-5xl font-black text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text font-mono"
-            >
-              {orderDetails.order_number}
-            </motion.p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 font-medium">
-              ⏰ {orderDetails.created_at}
-            </p>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-center">
+            <h1 className="font-grotesk font-black text-3xl mb-2">
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #00D4FF)' }}>
+                🎉 {language === 'ar' ? 'شكراً لطلبك!' : 'Merci pour votre Commande!'}
+              </span>
+            </h1>
+            <p className="text-sm" style={{ color: '#64748B' }}>{language === 'ar' ? 'سيتم التواصل معك قريباً للتأكيد' : 'Nous vous contacterons bientôt pour confirmation'}</p>
           </motion.div>
 
-          {/* Customer Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-slate-800 rounded-3xl border-3 border-blue-300 dark:border-blue-700 p-8 shadow-lg"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {language === 'ar' ? '👤 بيانات العميل' : '👤 Informations Client'}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-blue-200 dark:border-blue-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">👤 {language === 'ar' ? 'الاسم' : 'Nom'}</p>
-                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_name}</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-blue-200 dark:border-blue-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">📱 {language === 'ar' ? 'الهاتف' : 'Téléphone'}</p>
-                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_phone}</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">🗺️ {language === 'ar' ? 'الولاية' : 'Wilaya'}</p>
-                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_wilaya}</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">{orderDetails.delivery_type === 'bureau' ? '🏢' : '🏠'} {language === 'ar' ? 'نوع التسليم' : 'Livraison'}</p>
-                <p className="text-lg font-bold text-slate-900 dark:text-white">
-                  {orderDetails.delivery_type === 'bureau' 
-                    ? (language === 'ar' ? '🏢 مكتب' : '🏢 Bureau')
-                    : (language === 'ar' ? '🏠 منزل' : '🏠 Domicile')
-                  }
-                </p>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-green-200 dark:border-green-700 mt-4">
-              <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">📍 {language === 'ar' ? 'العنوان' : 'Adresse'}</p>
-              <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.customer_address}</p>
-            </div>
+          {/* Order number */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <GlowCard glowColor="cyan" className="text-center p-6">
+              <p className="text-xs font-semibold mb-2" style={{ color: '#64748B' }}>📋 {language === 'ar' ? 'رقم الطلب' : 'N° de Commande'}</p>
+              <motion.p animate={{ scale: [1, 1.03, 1] }} transition={{ duration: 2, repeat: Infinity }}
+                className="font-grotesk font-black text-5xl tracking-widest" style={{ color: '#00D4FF' }}>
+                {orderDetails.order_number}
+              </motion.p>
+              <p className="text-xs mt-2" style={{ color: '#64748B' }}>⏰ {orderDetails.created_at}</p>
+            </GlowCard>
           </motion.div>
 
-          {/* Order Items */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-slate-800 rounded-3xl border-3 border-orange-300 dark:border-orange-700 p-8 shadow-lg"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-                <Package className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {language === 'ar' ? '📦 المنتجات المطلوبة' : '📦 Produits Commandés'}
+          {/* Customer info */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+            <GlowCard glowColor="violet" className="p-5">
+              <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#7C3AED' }}>
+                <User className="w-4 h-4" /> {language === 'ar' ? 'بيانات العميل' : 'Infos Client'}
               </h2>
-            </div>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {orderDetails.items.map((item: any, index: number) => (
-                <motion.div
-                  key={`${item.product_id}-${index}`}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-orange-200 dark:border-orange-700"
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-slate-900 dark:text-white mb-2">{item.name}</h3>
-                      <div className="flex gap-3 flex-wrap text-sm">
-                        <span className="text-slate-600 dark:text-slate-400">
-                          {language === 'ar' ? 'الكمية:' : 'Quantité:'} <span className="font-bold text-blue-600 dark:text-blue-400">{item.quantity}</span>
-                        </span>
-                        <span className="text-slate-600 dark:text-slate-400">
-                          {language === 'ar' ? 'السعر:' : 'Prix:'} <span className="font-bold text-green-600 dark:text-green-400">{(item.price || 0).toFixed(2)} DZD</span>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-300 dark:border-green-700">
-                      <p className="text-xs text-slate-600 dark:text-slate-400 font-bold">
-                        {language === 'ar' ? 'المجموع' : 'Total'}
-                      </p>
-                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                        {(item.price * item.quantity).toFixed(2)} DZD
-                      </p>
-                    </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: language === 'ar' ? 'الاسم' : 'Nom', value: orderDetails.customer_name, color: '#7C3AED' },
+                  { label: language === 'ar' ? 'الهاتف' : 'Téléphone', value: orderDetails.customer_phone, color: '#00D4FF' },
+                  { label: language === 'ar' ? 'الولاية' : 'Wilaya', value: orderDetails.customer_wilaya, color: '#10B981' },
+                  { label: language === 'ar' ? 'التسليم' : 'Livraison', value: orderDetails.delivery_type === 'bureau' ? '🏢 Bureau' : '🏠 Domicile', color: '#FF6B35' },
+                ].map(info => (
+                  <div key={info.label} className="p-3 rounded-xl" style={{ background: 'rgba(30,58,95,0.3)', border: `1px solid ${info.color}22` }}>
+                    <p className="text-xs mb-1" style={{ color: '#64748B' }}>{info.label}</p>
+                    <p className="font-bold text-sm" style={{ color: info.color }}>{info.value}</p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(16,185,129,0.15)' }}>
+                <p className="text-xs mb-1" style={{ color: '#64748B' }}>📍 {language === 'ar' ? 'العنوان' : 'Adresse'}</p>
+                <p className="font-bold text-sm" style={{ color: '#10B981' }}>{orderDetails.customer_address}</p>
+              </div>
+            </GlowCard>
           </motion.div>
 
-          {/* Pricing Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 dark:from-green-900 dark:via-emerald-900 dark:to-teal-900 rounded-3xl p-8 text-white shadow-2xl border-4 border-green-400 dark:border-green-700"
-          >
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <ShoppingCart className="w-7 h-7" />
-              {language === 'ar' ? '💰 ملخص الدفع' : '💰 Résumé du Paiement'}
-            </h2>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
-                <span className="font-semibold text-base">{language === 'ar' ? 'عدد المنتجات:' : 'Nombre articles:'}</span>
-                <motion.span
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="bg-white/20 text-white font-bold px-4 py-2 rounded-lg"
-                >
-                  {orderDetails.items.length}
-                </motion.span>
-              </div>
-              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
-                <span className="font-semibold text-base">{language === 'ar' ? 'الكمية الإجمالية:' : 'Quantité totale:'}</span>
-                <span className="bg-white/20 font-bold px-4 py-2 rounded-lg">
-                  {orderDetails.items.reduce((sum: number, item: any) => sum + item.quantity, 0)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
-                <span className="font-semibold text-base">{language === 'ar' ? 'المنتجات (بدون توصيل):' : 'Sous-total:'}</span>
-                <span className="font-semibold">{orderDetails.subtotal.toFixed(2)} DZD</span>
-              </div>
-              <div className="flex justify-between items-center pb-4 border-b-2 border-green-400/50">
-                <span className="font-semibold text-base">{language === 'ar' ? 'رسوم التوصيل:' : 'Frais livraison:'}</span>
-                <span className="text-green-100 font-semibold">{orderDetails.delivery_price.toFixed(2)} DZD</span>
-              </div>
-              <div className="flex justify-between items-baseline gap-4 pt-2">
-                <span className="text-2xl font-bold">{language === 'ar' ? 'المجموع النهائي:' : 'TOTAL FINAL:'}</span>
-                <div className="text-right">
-                  <div className="text-4xl font-black drop-shadow-lg">{orderDetails.total_price.toFixed(2)}</div>
-                  <div className="text-lg font-bold">DZD</div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Delivery Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-slate-800 rounded-3xl border-3 border-indigo-300 dark:border-indigo-700 p-8 shadow-lg"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center">
-                <Truck className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {language === 'ar' ? '🚚 معلومات التسليم' : '🚚 Infos Livraison'}
+          {/* Items */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+            <GlowCard glowColor="orange" className="p-5">
+              <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#FF6B35' }}>
+                <Package className="w-4 h-4" /> {language === 'ar' ? 'المنتجات' : 'Produits'} ({orderDetails.items.length})
               </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-indigo-200 dark:border-indigo-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">🏢 {language === 'ar' ? 'وكالة التسليم' : 'Agence'}</p>
-                <p className="text-lg font-bold text-slate-900 dark:text-white">{orderDetails.delivery_agency_name}</p>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {orderDetails.items.map((item: any, idx: number) => (
+                  <div key={`${item.product_id}-${idx}`} className="flex items-center justify-between p-3 rounded-xl"
+                    style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(255,107,53,0.1)' }}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm truncate" style={{ color: '#F1F5F9' }}>{item.name}</p>
+                      <p className="text-xs" style={{ color: '#64748B' }}>x{item.quantity} × {(item.price || 0).toFixed(2)} DZD</p>
+                    </div>
+                    <span className="font-grotesk font-bold text-sm" style={{ color: '#FF6B35' }}>{(item.price * item.quantity).toFixed(2)} DZD</span>
+                  </div>
+                ))}
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 border-2 border-indigo-200 dark:border-indigo-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-bold mb-1">📦 {language === 'ar' ? 'نوع التسليم' : 'Type livraison'}</p>
-                <p className="text-lg font-bold text-slate-900 dark:text-white">
-                  {orderDetails.delivery_type === 'bureau' 
-                    ? (language === 'ar' ? '🏢 من المكتب' : '🏢 Au Bureau')
-                    : (language === 'ar' ? '🏠 للمنزل' : '🏠 À Domicile')
-                  }
-                </p>
+            </GlowCard>
+          </motion.div>
+
+          {/* Totals */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+            <div className="p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(16,185,129,0.08))', border: '1px solid rgba(16,185,129,0.25)' }}>
+              <div className="space-y-2 mb-4 text-sm" style={{ color: '#94A3B8' }}>
+                <div className="flex justify-between"><span>{language === 'ar' ? 'المنتجات' : 'Sous-total'}</span><span>{orderDetails.subtotal.toFixed(2)} DZD</span></div>
+                <div className="flex justify-between"><span>🚚 {language === 'ar' ? 'التوصيل' : 'Livraison'}</span><span>{orderDetails.delivery_price.toFixed(2)} DZD</span></div>
+              </div>
+              <div className="flex justify-between items-baseline pt-3" style={{ borderTop: '1px solid rgba(16,185,129,0.2)' }}>
+                <span className="font-grotesk font-bold text-lg" style={{ color: '#F1F5F9' }}>{language === 'ar' ? 'المجموع النهائي' : 'TOTAL FINAL'}</span>
+                <span className="font-grotesk font-black text-3xl" style={{ color: '#10B981' }}>{orderDetails.total_price.toFixed(2)} DZD</span>
               </div>
             </div>
           </motion.div>
 
-          {/* Continue Shopping Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="flex flex-col gap-4"
-          >
-            <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(34, 197, 94, 0.3)" }}
-              whileTap={{ scale: 0.98 }}
+          {/* Continue shopping */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+            <motion.button whileHover={{ scale: 1.02, boxShadow: '0 0 24px rgba(16,185,129,0.3)' }} whileTap={{ scale: 0.98 }}
               onClick={handleContinueShopping}
-              className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 text-white font-bold py-4 md:py-5 rounded-2xl text-lg transition-all duration-200 shadow-xl flex items-center justify-center gap-3 group"
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-grotesk font-bold text-white text-base"
+              style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}
             >
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
-              </motion.div>
+              <ShoppingCart className="w-5 h-5" />
               {language === 'ar' ? '🛒 استمرار التسوق' : '🛒 Continuer les Achats'}
             </motion.button>
-            <p className="text-center text-sm text-slate-600 dark:text-slate-400 font-medium">
-              {language === 'ar' ? '✨ تصفح المزيد من المنتجات والعروض الحصرية' : '✨ Découvrez d\'autres produits et offres'}
-            </p>
-          </motion.div>
-
-          {/* Help Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-900/30 dark:to-slate-800 rounded-3xl border-3 border-yellow-300 dark:border-yellow-700 p-6 text-center"
-          >
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
-              ❓ {language === 'ar' ? 'هل تحتاج مساعدة؟' : 'Besoin d\'aide?'}
-            </h3>
-            <p className="text-slate-600 dark:text-slate-300 mb-4">
-              {language === 'ar' 
-                ? 'سيتم التواصل معك قريباً عبر رقم الهاتف المسجل للتأكيد والتفاصيل الإضافية'
-                : 'Nous vous contacterons sur le numéro fourni pour confirmer et discuter des détails'}
-            </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              ⏱️ {language === 'ar' ? 'يرجى الانتظار من فضلك...' : 'Veuillez attendre...'}
-            </p>
           </motion.div>
         </div>
       </div>
     );
   }
 
+  // ======= MAIN CART =======
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header - Fixed/Sticky with Navy Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 dark:from-slate-900 dark:via-blue-950 dark:to-slate-900 backdrop-blur-xl border-b-4 border-blue-600 dark:border-blue-500 shadow-2xl"
-      >
-        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6 flex items-center justify-between gap-4">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+    <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
+
+      {/* Sticky header */}
+      <div className="sticky top-0 z-40" style={{ background: 'rgba(2,8,23,0.95)', borderBottom: '1px solid rgba(0,212,255,0.1)', backdropFilter: 'blur(12px)' }}>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/website-shop')}
-            className="hover:bg-blue-700/50 dark:hover:bg-blue-900/50 rounded-lg h-10 w-10 p-0 flex-shrink-0 flex items-center justify-center transition-all"
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.15)' }}
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-4 h-4" style={{ color: '#00D4FF' }} />
           </motion.button>
-          <div className="flex-1 min-w-0">
-            <motion.h1 
-              animate={{ y: [0, -2, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="text-2xl md:text-3xl font-black text-white drop-shadow-lg truncate"
-            >
+          <div className="flex-1">
+            <h1 className="font-grotesk font-black text-xl" style={{ color: '#F1F5F9' }}>
               🛒 {language === 'ar' ? 'سلتي' : 'Mon Panier'}
-            </motion.h1>
-            <p className="text-xs md:text-sm text-blue-100">{language === 'ar' ? '✨ اكمل تسوقك بكل سهولة' : '✨ Finalisez votre commande'}</p>
+            </h1>
+            <p className="text-xs" style={{ color: '#64748B' }}>{language === 'ar' ? 'اكمل تسوقك' : 'Finalisez votre commande'}</p>
           </div>
           {itemCount > 0 && (
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold text-sm md:text-base px-4 py-2 rounded-full shadow-lg flex-shrink-0 flex items-center gap-2"
-            >
-              <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-              <span>{itemCount}</span>
+            <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 2, repeat: Infinity }}
+              className="px-3 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-1.5"
+              style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}>
+              <ShoppingCart className="w-3.5 h-3.5" /> {itemCount}
             </motion.div>
           )}
         </div>
-      </motion.div>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 md:py-12 space-y-6 md:space-y-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
+        {/* Empty cart */}
         {cartItems.length === 0 ? (
-          // Empty Cart State
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-12 md:py-20 bg-white dark:bg-slate-800 rounded-2xl md:rounded-3xl border-2 border-dashed border-blue-300 dark:border-blue-700 shadow-lg mx-auto max-w-2xl"
-          >
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <ShoppingCart className="w-20 h-20 md:w-24 md:h-24 mx-auto text-blue-300 dark:text-blue-700 mb-4 md:mb-6" />
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-24 rounded-2xl max-w-lg mx-auto"
+            style={{ border: '2px dashed rgba(0,212,255,0.1)', background: 'rgba(0,212,255,0.01)' }}>
+            <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+              <ShoppingCart className="w-20 h-20 mx-auto mb-4" style={{ color: 'rgba(0,212,255,0.2)' }} />
             </motion.div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3">
+            <h2 className="font-grotesk font-bold text-2xl mb-2" style={{ color: '#64748B' }}>
               {language === 'ar' ? 'سلتك فارغة' : 'Votre panier est vide'}
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg mb-6 md:mb-8 px-4">
-              {language === 'ar' ? 'ابدأ التسوق واضف بعض المنتجات المميزة' : 'Commencez vos achats et découvrez nos produits'}
+            <p className="text-sm mb-6" style={{ color: '#1E3A5F' }}>
+              {language === 'ar' ? 'ابدأ التسوق واضف منتجات مميزة' : 'Commencez vos achats'}
             </p>
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-center px-4">
-              <Button
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 onClick={() => navigate('/website-shop/offers')}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 md:px-8 py-3 text-base md:text-lg font-bold rounded-lg shadow-lg w-full md:w-auto"
-              >
-                {language === 'ar' ? '⚡ عروضنا' : '⚡ Nos Offres'}
-              </Button>
-              <Button
+                className="px-5 py-2.5 rounded-xl font-bold text-sm"
+                style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.2)' }}
+              >⚡ {language === 'ar' ? 'عروضنا' : 'Nos Offres'}</motion.button>
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 onClick={() => navigate('/website-shop/special-offers')}
-                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 md:px-8 py-3 text-base md:text-lg font-bold rounded-lg shadow-lg w-full md:w-auto"
-              >
-                {language === 'ar' ? '👑 عروض حصرية' : '👑 Offres Exclusives'}
-              </Button>
+                className="px-5 py-2.5 rounded-xl font-bold text-sm"
+                style={{ background: 'rgba(255,107,53,0.08)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.2)' }}
+              >🔥 {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}</motion.button>
             </div>
           </motion.div>
         ) : (
-          <div className="space-y-8">
-            {/* ====== PRODUCTS SECTION ====== */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full space-y-4 md:space-y-6"
-            >
-              {/* Section Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl md:rounded-2xl p-4 md:p-6 text-white shadow-lg">
-                <div className="flex items-center gap-3 mb-2">
-                  <Package className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
-                  <h2 className="text-xl md:text-2xl font-bold">
-                    {language === 'ar' ? '📦 المنتجات' : '📦 Vos Produits'}
-                  </h2>
-                </div>
-                <p className="text-blue-100 text-sm md:text-base">
-                  {itemCount} {language === 'ar' ? 'منتج' : 'article'} • {totalQuantity} {language === 'ar' ? 'وحدة' : 'unité'}
-                </p>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+            {/* Cart items */}
+            <div className="xl:col-span-2 space-y-5">
+              <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.1)' }}>
+                <Package className="w-5 h-5" style={{ color: '#00D4FF' }} />
+                <h2 className="font-grotesk font-bold text-lg" style={{ color: '#F1F5F9' }}>
+                  {language === 'ar' ? '📦 المنتجات' : '📦 Produits'} — {itemCount} {language === 'ar' ? 'منتج' : 'article'} · {totalQuantity} {language === 'ar' ? 'وحدة' : 'unité'}
+                </h2>
               </div>
 
-              {/* Product Items - Grid Layout */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {cartItems.map((item, index) => (
-                  <motion.div
-                    key={`${item.product_id}-${index}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover="hover"
-                    className="group relative"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-all duration-300" />
-                    
-                    <div className="relative bg-white dark:bg-slate-800 border-2 border-blue-200 dark:border-blue-700 rounded-2xl p-4 h-full flex flex-col overflow-hidden">
-                      {/* Product Image */}
-                      <div className="relative h-40 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl mb-3 flex items-center justify-center overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {cartItems.map((item, idx) => (
+                  <motion.div key={`${item.product_id}-${idx}`}
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.06 }}>
+                    <GlowCard glowColor="cyan" className="flex flex-col h-full p-4 space-y-3">
+                      {/* Image */}
+                      <div className="h-36 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: 'rgba(0,212,255,0.04)' }}>
                         {item.image ? (
-                          <motion.img
-                            src={item.image}
-                            alt={item.name}
-                            className="max-w-full max-h-full object-contain p-2"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.3 }}
-                          />
+                          <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain p-2" />
                         ) : (
-                          <ShoppingCart className="h-12 w-12 text-slate-300" />
+                          <ShoppingCart className="w-10 h-10" style={{ color: 'rgba(0,212,255,0.2)' }} />
                         )}
                       </div>
 
-                      {/* Product Name */}
-                      <h3 className="font-bold text-xs text-slate-900 dark:text-white mb-2 line-clamp-2">
-                        {item.name}
-                      </h3>
+                      <div>
+                        <h3 className="font-bold text-sm line-clamp-2 mb-1" style={{ color: '#F1F5F9' }}>{item.name}</h3>
+                        {item.product_mark && <span className="text-xs px-2 py-0.5 rounded-md" style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.15)' }}>🏷️ {item.product_mark}</span>}
+                      </div>
 
-                      {/* Brand Badge */}
-                      {item.product_mark && (
-                        <Badge variant="outline" className="w-fit mb-2 text-xs font-bold border-blue-300 bg-blue-50 dark:bg-blue-900/30">
-                          🏷️ {item.product_mark}
-                        </Badge>
-                      )}
-
-                      {/* Description */}
-                      {item.product_description && (
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 line-clamp-1 italic">
-                          📝 {item.product_description}
-                        </p>
-                      )}
-
-                      {/* Specs Section */}
-                      {(item.voltage || item.wattage || item.amperage || item.connection_type) && (
-                        <>
-                          <div className="mb-2">
-                            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">⚡ {language === 'ar' ? 'المواصفات' : 'Spécifications'}</p>
-                          </div>
-                          <div className="grid grid-cols-2 gap-1 mb-3">
-                            {item.voltage && (
-                              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-1.5 text-center border border-blue-200 dark:border-blue-700">
-                                <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
-                                <div className="text-xs font-bold text-blue-600 dark:text-blue-400">{item.voltage}V</div>
-                              </div>
-                            )}
-                            {item.wattage && (
-                              <div className="bg-yellow-50 dark:bg-yellow-900/30 rounded-lg p-1.5 text-center border border-yellow-200 dark:border-yellow-700">
-                                <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔌 {language === 'ar' ? 'القوة' : 'Wattage'}</div>
-                                <div className="text-xs font-bold text-yellow-600 dark:text-yellow-400">{item.wattage}W</div>
-                              </div>
-                            )}
-                            {item.amperage && (
-                              <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-1.5 text-center border border-purple-200 dark:border-purple-700">
-                                <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">⚙️ {language === 'ar' ? 'التيار' : 'Amperage'}</div>
-                                <div className="text-xs font-bold text-purple-600 dark:text-purple-400">{item.amperage}A</div>
-                              </div>
-                            )}
-                            {item.connection_type && (
-                              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-1.5 text-center border border-green-200 dark:border-green-700">
-                                <div className="text-xs text-slate-600 dark:text-slate-400 font-bold">🔧 {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
-                                <div className="text-xs font-bold text-green-600 dark:text-green-400 truncate">{item.connection_type}</div>
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      )}
-
-                      {/* Price Section */}
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-2 mb-3 border-2 border-green-200 dark:border-green-700">
-                        <div className="flex items-baseline gap-1 justify-center">
-                          <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                            {(item.price || 0).toFixed(2)}
-                          </span>
-                          <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">
-                            {language === 'ar' ? 'دج' : 'DZD'}
-                          </span>
+                      {/* Specs */}
+                      {(item.voltage || item.wattage || item.amperage) && (
+                        <div className="flex gap-1.5 flex-wrap">
+                          {item.voltage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,212,255,0.06)', color: '#00D4FF' }}>⚡{item.voltage}V</span>}
+                          {item.wattage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(245,158,11,0.06)', color: '#F59E0B' }}>💡{item.wattage}W</span>}
+                          {item.amperage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(124,58,237,0.06)', color: '#7C3AED' }}>🔌{item.amperage}A</span>}
                         </div>
-                        <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-0.5 font-semibold">
-                          {language === 'ar' ? '💰 السعر' : '💰 Prix'}
-                        </p>
+                      )}
+
+                      {/* Price */}
+                      <div className="text-center py-2 rounded-xl" style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.1)' }}>
+                        <span className="font-grotesk font-black text-xl" style={{ color: '#F59E0B' }}>{(item.price || 0).toFixed(2)}</span>
+                        <span className="text-xs ml-1" style={{ color: '#64748B' }}>DZD</span>
                       </div>
 
-                      {/* Quantity Control */}
-                      <div className="flex items-center justify-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1 mb-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                      {/* Qty controls */}
+                      <div className="flex items-center justify-center gap-2 py-1 rounded-lg" style={{ background: 'rgba(30,58,95,0.4)' }}>
+                        <motion.button whileTap={{ scale: 0.9 }}
                           onClick={() => handleUpdateQuantity(item.product_id, item.quantity - 1)}
-                          className="h-6 w-6 p-0 rounded text-xs"
-                        >
-                          −
-                        </Button>
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateQuantity(item.product_id, parseInt(e.target.value) || 1)}
-                          className="w-10 h-6 text-center text-xs font-bold border-0 bg-transparent"
-                          min="1"
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm"
+                          style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>−</motion.button>
+                        <input type="number" value={item.quantity}
+                          onChange={e => handleUpdateQuantity(item.product_id, parseInt(e.target.value) || 1)}
+                          className="w-10 text-center text-sm font-bold bg-transparent outline-none" min="1"
+                          style={{ color: '#F1F5F9' }} />
+                        <motion.button whileTap={{ scale: 0.9 }}
                           onClick={() => handleUpdateQuantity(item.product_id, item.quantity + 1)}
-                          className="h-6 w-6 p-0 rounded text-xs"
-                        >
-                          +
-                        </Button>
+                          className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm"
+                          style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>+</motion.button>
                       </div>
 
-                      {/* Subtotal */}
-                      <div className="text-center mb-3">
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">
-                          {language === 'ar' ? 'المجموع' : 'Total'}
-                        </p>
-                        <p className="text-base font-bold text-slate-900 dark:text-white">
-                          {(item.price * item.quantity).toFixed(2)} {language === 'ar' ? 'دج' : 'DZD'}
-                        </p>
+                      <div className="flex items-center justify-between">
+                        <span className="font-grotesk font-bold text-sm" style={{ color: '#F1F5F9' }}>{(item.price * item.quantity).toFixed(2)} DZD</span>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                          onClick={() => handleRemoveItem(item.product_id)}
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold"
+                          style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.15)' }}>
+                          <Trash2 className="w-3 h-3" /> {language === 'ar' ? 'حذف' : 'Retirer'}
+                        </motion.button>
                       </div>
+                    </GlowCard>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
 
-                      {/* Delete Button */}
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleRemoveItem(item.product_id)}
-                        className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold rounded-lg py-2 text-xs transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1"
+            {/* Right panel: summary + form */}
+            <div className="space-y-5">
+              {/* Summary */}
+              <GlowCard glowColor="cyan" className="p-5">
+                <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#00D4FF' }}>
+                  <Zap className="w-4 h-4" /> {language === 'ar' ? 'الملخص' : 'Résumé'}
+                </h2>
+                <div className="space-y-2 text-sm mb-4 pb-4" style={{ borderBottom: '1px solid rgba(0,212,255,0.1)' }}>
+                  <div className="flex justify-between" style={{ color: '#94A3B8' }}>
+                    <span>{language === 'ar' ? 'المنتجات' : 'Articles'}</span><span>{itemCount} ({totalQuantity})</span>
+                  </div>
+                  <div className="flex justify-between" style={{ color: '#94A3B8' }}>
+                    <span>{language === 'ar' ? 'الإجمالي' : 'Sous-total'}</span><span>{total.toFixed(2)} DZD</span>
+                  </div>
+                  <div className="flex justify-between" style={{ color: '#94A3B8' }}>
+                    <span>🚚 {language === 'ar' ? 'التوصيل' : 'Livraison'}</span><span>{deliveryPrice.toFixed(2)} DZD</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="font-bold text-base" style={{ color: '#F1F5F9' }}>TOTAL</span>
+                  <div>
+                    <span className="font-grotesk font-black text-3xl" style={{ color: '#10B981' }}>{finalTotal.toFixed(2)}</span>
+                    <span className="text-sm ml-1" style={{ color: '#64748B' }}>DZD</span>
+                  </div>
+                </div>
+              </GlowCard>
+
+              {/* Form */}
+              <form onSubmit={handleCheckout} className="space-y-4">
+                <div className="flex items-center gap-2 p-4 rounded-xl" style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.1)' }}>
+                  <User className="w-4 h-4" style={{ color: '#7C3AED' }} />
+                  <h2 className="font-grotesk font-bold text-base" style={{ color: '#F1F5F9' }}>{language === 'ar' ? '👤 بيانات التسليم' : '👤 Infos Livraison'}</h2>
+                </div>
+
+                {/* Name */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#64748B' }}>👤 {language === 'ar' ? 'الاسم الكامل *' : 'Nom complet *'}</label>
+                  <div className="flex gap-2">
+                    <input name="client_name" required placeholder={language === 'ar' ? 'أدخل اسمك' : 'Entrez votre nom'}
+                      value={formData.client_name} onChange={handleFormChange}
+                      style={inputStyle}
+                      onFocus={e => (e.target.style.borderColor = '#7C3AED')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
+                    />
+                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                      type="button" onClick={handleOpenTestimonials} disabled={!formData.client_name.trim()}
+                      className="px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-1 whitespace-nowrap flex-shrink-0 disabled:opacity-40"
+                      style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{language === 'ar' ? 'آرائي' : 'Avis'}</span>
+                    </motion.button>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#64748B' }}>📱 {language === 'ar' ? 'رقم الهاتف *' : 'Téléphone *'}</label>
+                  <input name="client_phone" required placeholder="+213..."
+                    value={formData.client_phone} onChange={handleFormChange}
+                    style={inputStyle}
+                    onFocus={e => (e.target.style.borderColor = '#00D4FF')}
+                    onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
+                  />
+                </div>
+
+                {/* Wilaya */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#64748B' }}>🗺️ {language === 'ar' ? 'الولاية *' : 'Wilaya *'}</label>
+                  <Select value={formData.client_wilaya} onValueChange={(v) => setFormData(prev => ({ ...prev, client_wilaya: v, client_municipality: '' }))}>
+                    <SelectTrigger style={{ ...inputStyle, cursor: 'pointer' }}>
+                      <SelectValue placeholder={language === 'ar' ? 'اختر الولاية' : 'Choisir une wilaya'} />
+                    </SelectTrigger>
+                    <SelectContent style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.15)' }}>
+                      {ALGERIAN_WILAYAS.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Municipality */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#64748B' }}>📍 {language === 'ar' ? 'البلدية *' : 'Commune *'}</label>
+                  <Select value={formData.client_municipality} onValueChange={(v) => setFormData(prev => ({ ...prev, client_municipality: v }))} disabled={!formData.client_wilaya}>
+                    <SelectTrigger style={{ ...inputStyle, cursor: formData.client_wilaya ? 'pointer' : 'not-allowed', opacity: formData.client_wilaya ? 1 : 0.5 }}>
+                      <SelectValue placeholder={!formData.client_wilaya ? (language === 'ar' ? 'اختر ولاية أولاً' : 'Wilaya d\'abord') : (language === 'ar' ? 'اختر بلدية' : 'Choisir commune')} />
+                    </SelectTrigger>
+                    <SelectContent style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.15)' }}>
+                      {formData.client_wilaya && getMunicipalitiesForWilaya(formData.client_wilaya).map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Delivery agency */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold flex items-center gap-1" style={{ color: '#64748B' }}>
+                    <Truck className="w-3 h-3" /> {language === 'ar' ? 'وكالة التسليم *' : 'Agence *'}
+                  </label>
+                  {formData.client_wilaya ? (
+                    <Select value={formData.delivery_agency_id} onValueChange={(v) => setFormData(prev => ({ ...prev, delivery_agency_id: v }))}>
+                      <SelectTrigger style={{ ...inputStyle, cursor: 'pointer' }}>
+                        <SelectValue placeholder={language === 'ar' ? 'اختر الوكالة' : 'Choisir agence'} />
+                      </SelectTrigger>
+                      <SelectContent style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.15)' }}>
+                        {deliveryAgencies.map(a => (
+                          <SelectItem key={a.id} value={a.id}>
+                            {a.name} — {deliveryPrice.toFixed(2)} DZD
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold"
+                      style={{ background: 'rgba(255,107,53,0.05)', border: '1px solid rgba(255,107,53,0.15)', color: '#FF6B35' }}>
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      {language === 'ar' ? 'اختر الولاية أولاً' : 'Choisissez d\'abord une wilaya'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Delivery type */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold" style={{ color: '#64748B' }}>🚚 {language === 'ar' ? 'نوع التسليم *' : 'Type de Livraison *'}</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: 'bureau', emoji: '🏢', label: language === 'ar' ? 'مكتب' : 'Bureau', color: '#00D4FF' },
+                      { value: 'domicile', emoji: '🏠', label: language === 'ar' ? 'منزل' : 'Domicile', color: '#10B981' },
+                    ].map(opt => (
+                      <motion.button key={opt.value} whileTap={{ scale: 0.97 }} type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, delivery_type: opt.value }))}
+                        className="relative p-4 rounded-xl text-center font-semibold text-sm transition-all"
+                        style={{
+                          background: formData.delivery_type === opt.value ? `${opt.color}12` : 'rgba(30,58,95,0.3)',
+                          border: `2px solid ${formData.delivery_type === opt.value ? opt.color : 'rgba(30,58,95,0.6)'}`,
+                          color: formData.delivery_type === opt.value ? opt.color : '#64748B',
+                        }}
                       >
-                        <Trash2 className="w-3 h-3" />
-                        {language === 'ar' ? '🗑️ حذف' : '🗑️ Retirer'}
+                        <div className="text-2xl mb-1">{opt.emoji}</div>
+                        <div className="text-xs">{opt.label}</div>
+                        {formData.delivery_type === opt.value && (
+                          <Check className="absolute top-1.5 right-1.5 w-3.5 h-3.5" style={{ color: opt.color }} />
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <motion.button type="submit" disabled={loading}
+                  whileHover={!loading ? { scale: 1.02, boxShadow: '0 0 24px rgba(0,212,255,0.3)' } : {}}
+                  whileTap={!loading ? { scale: 0.98 } : {}}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-grotesk font-bold text-white text-base disabled:opacity-60"
+                  style={{ background: loading ? 'rgba(30,58,95,0.5)' : 'linear-gradient(135deg, #00D4FF, #7C3AED)' }}
+                >
+                  {loading ? (
+                    <><motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}
+                      className="w-5 h-5 rounded-full" style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
+                      {language === 'ar' ? 'جاري...' : 'Traitement...'}</>
+                  ) : (
+                    <><Check className="w-5 h-5" /> {language === 'ar' ? '✅ تأكيد الطلب' : '✅ Confirmer'}</>
+                  )}
+                </motion.button>
+
+                <p className="text-center text-xs" style={{ color: '#1E3A5F' }}>🔒 {language === 'ar' ? 'بيانات آمنة' : 'Données sécurisées'}</p>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Testimonials modal */}
+      <AnimatePresence>
+        {showTestimonialsModal && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowTestimonialsModal(false)}
+              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }} />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+              className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[560px] z-50 rounded-2xl flex flex-col overflow-hidden"
+              style={{ background: '#0F172A', border: '1px solid rgba(124,58,237,0.25)', maxHeight: '80vh' }}>
+              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(124,58,237,0.12)' }}>
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" style={{ color: '#7C3AED' }} />
+                  <h2 className="font-grotesk font-bold text-lg" style={{ color: '#F1F5F9' }}>{language === 'ar' ? '💬 آرائي' : '💬 Mes avis'}</h2>
+                </div>
+                <button onClick={() => setShowTestimonialsModal(false)} style={{ color: '#64748B' }}><X className="w-5 h-5" /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+                {loadingTestimonials ? (
+                  <div className="text-center py-8">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                      className="w-8 h-8 rounded-full mx-auto" style={{ border: '2px solid rgba(124,58,237,0.1)', borderTopColor: '#7C3AED' }} />
+                  </div>
+                ) : userTestimonials.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm mb-4" style={{ color: '#64748B' }}>{language === 'ar' ? 'لا توجد آراء' : 'Aucun avis'}</p>
+                    <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                      onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
+                      className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-bold mx-auto"
+                      style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                      <Plus className="w-4 h-4" /> {language === 'ar' ? 'إضافة رأي' : 'Ajouter un avis'}
+                    </motion.button>
+                  </div>
+                ) : userTestimonials.map(t => (
+                  <motion.div key={t.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    className="p-4 rounded-xl space-y-2" style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(124,58,237,0.12)' }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => <span key={i} className={i < (t.rating || 5) ? '' : 'opacity-20'}>⭐</span>)}</div>
+                      <div className="flex items-center gap-2">
+                        {t.is_approved ? <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>✅</span>
+                          : <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}>⏳</span>}
+                        <span className="text-xs" style={{ color: '#64748B' }}>{new Date(t.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm" style={{ color: '#94A3B8' }}>"{t.opinion}"</p>
+                    <div className="flex gap-2 pt-1">
+                      <motion.button whileHover={{ scale: 1.03 }} onClick={() => handleEditTestimonial(t)}
+                        className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.15)' }}>
+                        <Edit2 className="w-3 h-3" /> {language === 'ar' ? 'تعديل' : 'Modifier'}
+                      </motion.button>
+                      <motion.button whileHover={{ scale: 1.03 }} onClick={() => handleDeleteTestimonial(t.id)}
+                        className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.15)' }}>
+                        <Trash2 className="w-3 h-3" /> {language === 'ar' ? 'حذف' : 'Supprimer'}
                       </motion.button>
                     </div>
                   </motion.div>
                 ))}
               </div>
-            </motion.div>
-
-            {/* ====== CLIENT INFORMATION & CHECKOUT SECTION ====== */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full space-y-6"
-            >
-              {/* Summary Card */}
-              <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl md:rounded-2xl p-5 md:p-6 text-white shadow-lg">
-                <h2 className="text-lg md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2">
-                  <Check className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
-                  {language === 'ar' ? '📊 الملخص' : '📊 Résumé'}
-                </h2>
-
-                {/* Summary Details */}
-                <div className="space-y-2 md:space-y-3 mb-4 md:mb-6 pb-4 md:pb-6 border-b border-green-400">
-                  <div className="flex justify-between items-center text-green-50 text-sm md:text-base">
-                    <span className="font-semibold">{language === 'ar' ? 'المنتجات:' : 'Articles:'}</span>
-                    <Badge className="bg-white text-green-600 font-bold px-2 md:px-3 py-0.5 md:py-1 text-xs md:text-sm">{itemCount}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center text-green-50 text-sm md:text-base">
-                    <span className="font-semibold">{language === 'ar' ? 'الكمية:' : 'Quantité:'}</span>
-                    <Badge className="bg-white text-green-600 font-bold px-2 md:px-3 py-0.5 md:py-1 text-xs md:text-sm">{totalQuantity}</Badge>
-                  </div>
-                </div>
-
-                {/* Pricing Breakdown */}
-                <div className="space-y-2 md:space-y-3">
-                  {/* Subtotal */}
-                  <div className="flex justify-between items-center text-green-100 text-sm md:text-base">
-                    <span className="font-semibold">{language === 'ar' ? 'المنتجات:' : 'Sous-total:'}</span>
-                    <span className="font-bold">{total.toFixed(2)} {language === 'ar' ? 'دج' : 'DZD'}</span>
-                  </div>
-
-                  {/* Delivery Fee */}
-                  {deliveryAgencies.length > 0 && (
-                    <div className="flex justify-between items-center text-green-100 text-sm md:text-base">
-                      <span className="font-semibold">
-                        {language === 'ar' ? '🚚 التسليم:' : '🚚 Livraison:'}
-                      </span>
-                      <span className="font-bold">
-                        {deliveryPrice.toFixed(2)} {language === 'ar' ? 'دج' : 'DZD'}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Divider */}
-                  <div className="my-2 md:my-3 border-t border-green-400" />
-
-                  {/* Total */}
-                  <div className="flex justify-between items-center text-green-50">
-                    <span className="text-base md:text-lg font-bold">{language === 'ar' ? 'المجموع النهائي:' : 'TOTAL:'}</span>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl md:text-4xl font-bold">{finalTotal.toFixed(2)}</span>
-                      <span className="text-xl md:text-2xl font-bold">{language === 'ar' ? 'دج' : 'DZD'}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Client Information Form */}
-              <form onSubmit={handleCheckout} className="bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-xl md:rounded-2xl p-5 md:p-6 shadow-lg space-y-5 md:space-y-6">
-                <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <User className="w-4 h-4 md:w-5 md:h-5 text-blue-600 flex-shrink-0" />
-                  {language === 'ar' ? '👤 بيانات التسليم' : '👤 Infos Livraison'}
-                </h2>
-
-                {/* Form Fields */}
-                <div className="space-y-3 md:space-y-4">
-                  {/* Name */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      {language === 'ar' ? '👤 الاسم الكامل *' : '👤 Nom complet *'}
-                    </label>
-                    <div className="flex gap-2 flex-wrap">
-                      <div className="flex-1 min-w-[200px]">
-                        <Input
-                          name="client_name"
-                          placeholder={language === 'ar' ? 'أدخل اسمك' : 'Entrez votre nom'}
-                          value={formData.client_name}
-                          onChange={handleFormChange}
-                          className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm"
-                          required
-                        />
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        type="button"
-                        onClick={handleOpenTestimonials}
-                        disabled={!formData.client_name.trim()}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-3 md:px-4 py-2 rounded-lg flex items-center gap-1 md:gap-2 whitespace-nowrap text-xs md:text-sm h-10"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                        <span className="hidden sm:inline">{language === 'ar' ? 'آرائي' : 'Mes avis'}</span>
-                        <span className="sm:hidden">💬</span>
-                      </motion.button>
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      {language === 'ar' ? '📱 رقم الهاتف *' : '📱 Téléphone *'}
-                    </label>
-                    <Input
-                      name="client_phone"
-                      placeholder={language === 'ar' ? '+213...' : '+33...'}
-                      value={formData.client_phone}
-                      onChange={handleFormChange}
-                      className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm"
-                      required
-                    />
-                  </div>
-
-                  {/* Wilaya */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      <MapPin className="w-3 h-3 md:w-4 md:h-4 inline mr-1" />
-                      {language === 'ar' ? '🗺️ الولاية *' : '🗺️ Wilaya *'}
-                    </label>
-                    <Select value={formData.client_wilaya} onValueChange={(value) => setFormData(prev => ({ ...prev, client_wilaya: value, client_municipality: '' }))}>
-                      <SelectTrigger className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm">
-                        <SelectValue placeholder={language === 'ar' ? 'اختر الولاية' : 'Choisir une wilaya'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ALGERIAN_WILAYAS.map(wilaya => (
-                          <SelectItem key={wilaya} value={wilaya}>{wilaya}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Municipality */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      {language === 'ar' ? '📍 البلدية *' : '📍 Commune *'}
-                    </label>
-                    <Select 
-                      value={formData.client_municipality} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, client_municipality: value }))}
-                      disabled={!formData.client_wilaya}
-                    >
-                      <SelectTrigger className="border border-blue-200 dark:border-blue-700 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm disabled:bg-slate-100 dark:disabled:bg-slate-700">
-                        <SelectValue placeholder={!formData.client_wilaya ? (language === 'ar' ? 'اختر ولاية أولاً' : 'Choisir une wilaya d\'abord') : (language === 'ar' ? 'اختر بلدية' : 'Choisir une commune')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {formData.client_wilaya && getMunicipalitiesForWilaya(formData.client_wilaya).map(municipality => (
-                          <SelectItem key={municipality} value={municipality}>{municipality}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Delivery Agency Selection */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      <Truck className="w-3 h-3 md:w-4 md:h-4 inline mr-1" />
-                      {language === 'ar' ? '🏢 وكالة التسليم *' : '🏢 Agence de Livraison *'}
-                    </label>
-                    {formData.client_wilaya ? (
-                      <Select value={formData.delivery_agency_id} onValueChange={(value) => setFormData(prev => ({ ...prev, delivery_agency_id: value }))}>
-                        <SelectTrigger className="border-2 border-blue-300 dark:border-blue-600 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm bg-blue-50 dark:bg-blue-900/20">
-                          <SelectValue placeholder={language === 'ar' ? 'اختر وكالة التسليم' : 'Choisir une agence'} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {deliveryAgencies.map(agency => (
-                            <SelectItem key={agency.id} value={agency.id}>
-                              <div className="flex items-center gap-3">
-                                <span className="font-semibold">{agency.name}</span>
-                                <span className="text-xs text-slate-500 bg-slate-100 rounded px-2 py-1">
-                                  {formData.delivery_type === 'bureau' ? '🏢' : '🏠'} {deliveryPrice.toFixed(2)} DZD
-                                </span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="border-2 border-orange-300 dark:border-orange-600 rounded-lg p-3 bg-orange-50 dark:bg-orange-900/20">
-                        <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                          {language === 'ar' ? '⚠️ اختر الولاية أولاً لعرض أسعار التسليم' : '⚠️ Choisissez d\'abord une wilaya'}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Delivery Type */}
-                  <div>
-                    <label className="block text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-                      {language === 'ar' ? '🚚 نوع التسليم *' : '🚚 Type de Livraison *'}
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Bureau Option */}
-                      <motion.button
-                        whileTap={{ scale: 0.98 }}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, delivery_type: 'bureau' }))}
-                        className={`relative p-4 rounded-lg border-2 transition-all text-center font-semibold ${
-                          formData.delivery_type === 'bureau'
-                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400'
-                        }`}
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <span className="text-2xl">🏢</span>
-                          <span className="text-sm">{language === 'ar' ? 'مكتب' : 'Bureau'}</span>
-                        </div>
-                        {formData.delivery_type === 'bureau' && (
-                          <Check className="absolute top-2 right-2 w-4 h-4 text-blue-600" />
-                        )}
-                      </motion.button>
-
-                      {/* Domicile Option */}
-                      <motion.button
-                        whileTap={{ scale: 0.98 }}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, delivery_type: 'domicile' }))}
-                        className={`relative p-4 rounded-lg border-2 transition-all text-center font-semibold ${
-                          formData.delivery_type === 'domicile'
-                            ? 'border-green-600 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:border-green-400'
-                        }`}
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <span className="text-2xl">🏠</span>
-                          <span className="text-sm">{language === 'ar' ? 'منزل' : 'Domicile'}</span>
-                        </div>
-                        {formData.delivery_type === 'domicile' && (
-                          <Check className="absolute top-2 right-2 w-4 h-4 text-green-600" />
-                        )}
-                      </motion.button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:from-slate-400 disabled:to-slate-500 text-white font-bold py-3 md:py-4 rounded-lg text-base md:text-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }} className="w-4 h-4 md:w-5 md:h-5 border-2 border-white border-t-transparent rounded-full" />
-                      <span className="text-sm md:text-base">{language === 'ar' ? 'جاري...' : 'Traitement...'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4 md:w-5 md:h-5" />
-                      <span className="text-sm md:text-base">{language === 'ar' ? '✅ تأكيد الطلب' : '✅ Confirmer'}</span>
-                    </>
-                  )}
+              <div className="flex gap-3 p-5" style={{ borderTop: '1px solid rgba(124,58,237,0.12)' }}>
+                <motion.button whileHover={{ scale: 1.02 }} onClick={() => setShowTestimonialsModal(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'rgba(30,58,95,0.5)', color: '#94A3B8' }}>
+                  {language === 'ar' ? 'إغلاق' : 'Fermer'}
                 </motion.button>
-
-                {/* Security Badge */}
-                <div className="text-center text-xs text-slate-600 dark:text-slate-400 flex items-center justify-center gap-1">
-                  <span>🔒</span>
-                  {language === 'ar' ? 'بيانات آمنة' : 'Données sécurisées'}
-                </div>
-              </form>
+                <motion.button whileHover={{ scale: 1.02 }} onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
+                  className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-sm font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
+                  <Plus className="w-4 h-4" /> {language === 'ar' ? 'رأي جديد' : 'Nouvel avis'}
+                </motion.button>
+              </div>
             </motion.div>
-          </div>
+          </>
         )}
-      </div>
+      </AnimatePresence>
 
-      {/* ========== TESTIMONIALS MODAL ========== */}
-      <Dialog open={showTestimonialsModal} onOpenChange={setShowTestimonialsModal}>
-        <DialogContent className="max-w-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-2 border-blue-300 dark:border-blue-700 rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-purple-600" />
-              {language === 'ar' ? '💬 آرائي' : '💬 Mes avis'}
-            </DialogTitle>
-            <DialogDescription>
-              {language === 'ar' 
-                ? `آرائك من ${formData.client_name} - يمكنك تعديل أو حذف أي رأي`
-                : `Vos avis de ${formData.client_name} - Modifier ou supprimer`
-              }
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Testimonials List */}
-          <div className="space-y-4 max-h-[400px] overflow-y-auto py-4">
-            {loadingTestimonials ? (
-              <div className="text-center py-8">
-                <p className="text-slate-500">{language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}</p>
+      {/* Testimonial form modal */}
+      <AnimatePresence>
+        {showTestimonialForm && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowTestimonialForm(false)}
+              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }} />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+              className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 z-50 rounded-2xl overflow-hidden"
+              style={{ background: '#0F172A', border: '1px solid rgba(124,58,237,0.25)' }}>
+              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(124,58,237,0.12)' }}>
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" style={{ color: '#7C3AED' }} />
+                  <h2 className="font-grotesk font-bold text-base" style={{ color: '#F1F5F9' }}>
+                    {editingTestimonial ? (language === 'ar' ? 'تعديل الرأي' : 'Modifier l\'avis') : (language === 'ar' ? 'رأي جديد' : 'Nouvel avis')}
+                  </h2>
+                </div>
+                <button onClick={() => setShowTestimonialForm(false)} style={{ color: '#64748B' }}><X className="w-4 h-4" /></button>
               </div>
-            ) : userTestimonials.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-slate-500 mb-4">
-                  {language === 'ar' ? 'لا توجد آراء حالياً' : 'Aucun avis pour le moment'}
-                </p>
-                <Button
-                  onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  {language === 'ar' ? 'إضافة رأي' : 'Ajouter un avis'}
-                </Button>
-              </div>
-            ) : (
-              userTestimonials.map((testimonial) => (
-                <motion.div
-                  key={testimonial.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 space-y-3"
-                >
-                  {/* Header with Stars and Status */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i} className={i < (testimonial.rating || 5) ? 'text-lg' : 'text-lg opacity-30'}>
-                            ⭐
-                          </span>
-                        ))}
-                      </div>
-                      {testimonial.is_approved && (
-                        <Badge className="bg-green-500 text-white text-xs">✅ {language === 'ar' ? 'موافق عليه' : 'Approuvé'}</Badge>
-                      )}
-                      {!testimonial.is_approved && (
-                        <Badge className="bg-yellow-500 text-white text-xs">⏳ {language === 'ar' ? 'قيد المراجعة' : 'En attente'}</Badge>
-                      )}
-                    </div>
-                    <span className="text-xs text-slate-500">
-                      {new Date(testimonial.created_at).toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'fr-FR')}
-                    </span>
+              <div className="p-5 space-y-4">
+                <div>
+                  <label className="text-xs font-semibold mb-2 block" style={{ color: '#64748B' }}>⭐ {language === 'ar' ? 'التقييم' : 'Note'}</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button key={star} onClick={() => setTestimonialRating(star)} className="text-2xl transition-transform hover:scale-110">
+                        {star <= testimonialRating ? '⭐' : '☆'}
+                      </button>
+                    ))}
                   </div>
-
-                  {/* Opinion Text */}
-                  <p className="text-slate-700 dark:text-slate-300 text-sm">"{testimonial.opinion}"</p>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      onClick={() => handleEditTestimonial(testimonial)}
-                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold h-9 text-sm rounded-lg flex items-center justify-center gap-1"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                      {language === 'ar' ? 'تعديل' : 'Modifier'}
-                    </Button>
-                    <Button
-                      onClick={() => handleDeleteTestimonial(testimonial.id)}
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold h-9 text-sm rounded-lg flex items-center justify-center gap-1"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      {language === 'ar' ? 'حذف' : 'Supprimer'}
-                    </Button>
-                  </div>
-                </motion.div>
-              ))
-            )}
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              onClick={() => setShowTestimonialsModal(false)}
-              className="bg-slate-500 hover:bg-slate-600 text-white font-bold"
-            >
-              {language === 'ar' ? 'إغلاق' : 'Fermer'}
-            </Button>
-            <Button
-              onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              {language === 'ar' ? 'رأي جديد' : 'Nouvel avis'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ========== TESTIMONIAL FORM DIALOG ========== */}
-      <Dialog open={showTestimonialForm} onOpenChange={setShowTestimonialForm}>
-        <DialogContent className="max-w-md bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-2 border-blue-300 dark:border-blue-700 rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-purple-600" />
-              {editingTestimonial 
-                ? (language === 'ar' ? '✏️ تعديل الرأي' : '✏️ Modifier l\'avis')
-                : (language === 'ar' ? '➕ رأي جديد' : '➕ Nouvel avis')
-              }
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {/* Rating Selector */}
-            <div>
-              <Label className="font-bold mb-2 block">
-                ⭐ {language === 'ar' ? 'التقييم' : 'Note'}
-              </Label>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setTestimonialRating(star)}
-                    className="text-3xl transition-transform hover:scale-125"
-                  >
-                    {star <= testimonialRating ? '⭐' : '☆'}
-                  </button>
-                ))}
+                </div>
+                <div>
+                  <label className="text-xs font-semibold mb-2 block" style={{ color: '#64748B' }}>💬 {language === 'ar' ? 'رأيك' : 'Votre avis'}</label>
+                  <textarea value={testimonialOpinion} onChange={e => setTestimonialOpinion(e.target.value)}
+                    placeholder={language === 'ar' ? 'شارك رأيك...' : 'Partagez votre avis...'}
+                    rows={4} className="w-full rounded-xl p-3 text-sm resize-none outline-none"
+                    style={{ background: '#1E293B', color: '#F1F5F9', border: '1px solid rgba(124,58,237,0.2)' }}
+                  />
+                  <p className="text-xs mt-1" style={{ color: '#64748B' }}>{testimonialOpinion.length} {language === 'ar' ? 'حرف' : 'caractères'}</p>
+                </div>
               </div>
-            </div>
-
-            {/* Opinion Text Area */}
-            <div>
-              <Label className="font-bold mb-2 block">
-                💬 {language === 'ar' ? 'رأيك' : 'Votre avis'}
-              </Label>
-              <textarea
-                value={testimonialOpinion}
-                onChange={(e) => setTestimonialOpinion(e.target.value)}
-                placeholder={language === 'ar' ? 'شارك رأيك هنا...' : 'Partagez votre avis ici...'}
-                className="w-full border-2 border-blue-300 dark:border-blue-600 rounded-lg p-3 dark:bg-slate-700 dark:text-white text-sm min-h-[100px] focus:border-blue-500 focus:outline-none"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                {testimonialOpinion.length} {language === 'ar' ? 'حرف' : 'caractères'}
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              onClick={() => {
-                setShowTestimonialForm(false);
-                setEditingTestimonial(null);
-                setTestimonialOpinion('');
-                setTestimonialRating(5);
-              }}
-              disabled={submittingTestimonial}
-              className="bg-slate-500 hover:bg-slate-600 text-white font-bold"
-            >
-              {language === 'ar' ? 'إلغاء' : 'Annuler'}
-            </Button>
-            <Button
-              onClick={handleSubmitTestimonial}
-              disabled={submittingTestimonial || !testimonialOpinion.trim()}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold disabled:opacity-50 flex items-center gap-2"
-            >
-              {submittingTestimonial ? (
-                <>
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }} className="w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                  {language === 'ar' ? 'جاري...' : 'Envoi...'}
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  {language === 'ar' ? 'إرسال' : 'Envoyer'}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <div className="flex gap-3 p-5" style={{ borderTop: '1px solid rgba(124,58,237,0.12)' }}>
+                <motion.button whileHover={{ scale: 1.02 }} disabled={submittingTestimonial}
+                  onClick={() => { setShowTestimonialForm(false); setEditingTestimonial(null); setTestimonialOpinion(''); setTestimonialRating(5); }}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'rgba(30,58,95,0.5)', color: '#94A3B8' }}>
+                  {language === 'ar' ? 'إلغاء' : 'Annuler'}
+                </motion.button>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={handleSubmitTestimonial} disabled={submittingTestimonial || !testimonialOpinion.trim()}
+                  className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
+                  {submittingTestimonial ? (
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}
+                      className="w-4 h-4 rounded-full" style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
+                  ) : <><Check className="w-4 h-4" /> {language === 'ar' ? 'إرسال' : 'Envoyer'}</>}
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

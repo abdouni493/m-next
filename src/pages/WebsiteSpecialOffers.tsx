@@ -1,19 +1,11 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { getSpecialOffersREST } from '@/lib/supabaseClient';
-import { Search, Zap, ShoppingCart, Eye, Crown } from 'lucide-react';
+import { Search, Zap, ShoppingCart, X, Flame, MessageCircle } from 'lucide-react';
+import GlowCard from '@/components/website/GlowCard';
+import ElectricBadge from '@/components/website/ElectricBadge';
 
 interface SpecialOffer {
   id: string;
@@ -32,12 +24,12 @@ interface SpecialOffer {
   offer_price?: number;
   discount_percentage: number;
   is_visible: boolean;
+  show_price?: boolean;
   description?: string;
 }
 
 export default function WebsiteSpecialOffers() {
   const { language, isRTL } = useLanguage();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [offers, setOffers] = useState<SpecialOffer[]>([]);
   const [filteredOffers, setFilteredOffers] = useState<SpecialOffer[]>([]);
@@ -52,34 +44,32 @@ export default function WebsiteSpecialOffers() {
       setLoading(true);
       try {
         const data = await getSpecialOffersREST();
-        const visibleOffers = data.filter((o: any) => o.is_visible);
-        setOffers(visibleOffers);
-        setFilteredOffers(visibleOffers);
+        const visible = data.filter((o: any) => o.is_visible);
+        setOffers(visible);
+        setFilteredOffers(visible);
       } catch (error) {
         console.error('Error fetching special offers:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchOffers();
   }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = offers.filter(offer =>
-      offer.product_name.toLowerCase().includes(query.toLowerCase()) ||
-      offer.product_mark?.toLowerCase().includes(query.toLowerCase()) ||
-      offer.product_description?.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredOffers(filtered);
+    setFilteredOffers(offers.filter(o =>
+      o.product_name.toLowerCase().includes(query.toLowerCase()) ||
+      o.product_mark?.toLowerCase().includes(query.toLowerCase()) ||
+      o.product_description?.toLowerCase().includes(query.toLowerCase())
+    ));
   };
 
   const handleAddToCart = (offer: SpecialOffer) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find((item: any) => item.product_id === offer.product_id);
-    if (existingItem) {
-      existingItem.quantity += 1;
+    const existing = cart.find((item: any) => item.product_id === offer.product_id);
+    if (existing) {
+      existing.quantity += 1;
     } else {
       cart.push({
         product_id: offer.product_id,
@@ -98,27 +88,19 @@ export default function WebsiteSpecialOffers() {
         amperage: offer.amperage,
         connection_type: offer.connection_type,
         from_offer: true,
-        offer_id: offer.id
+        offer_id: offer.id,
       });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Trigger cart update event for navbar
     window.dispatchEvent(new Event('cartUpdated'));
-    
     setCartNotification(offer.product_name);
     setTimeout(() => setCartNotification(null), 3000);
   };
 
   const handleOrder = (offer: SpecialOffer) => {
-    // Add to cart if not already there
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find((item: any) => item.product_id === offer.product_id);
-    if (!existingItem) {
-      handleAddToCart(offer);
-    }
-    // Navigate to cart
-    navigate(`/website-shop/order`);
+    if (!cart.find((i: any) => i.product_id === offer.product_id)) handleAddToCart(offer);
+    navigate('/website-shop/order');
   };
 
   const handleViewDetails = (offer: SpecialOffer) => {
@@ -126,415 +108,366 @@ export default function WebsiteSpecialOffers() {
     setShowDetails(true);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-    hover: {
-      y: -10,
-      transition: { duration: 0.3 },
-    },
-  };
+  const displayPrice = (offer: SpecialOffer) => offer.offer_price ?? offer.special_price;
 
   return (
-    <div className={`max-w-7xl mx-auto px-4 py-12 space-y-8 ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center space-y-3"
-      >
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-red-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
-          {language === 'ar' ? '👑 العروض الحصرية' : '👑 Offres Exclusives'}
-        </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400">
-          {language === 'ar' ? 'اغتنم الفرصة - عروض محدودة الوقت على شواحن متميزة' : 'Saisissez l\'occasion - Offres limitées sur des chargeurs premium'}
-        </p>
-      </motion.div>
+    <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
 
-      {/* Search Bar */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="relative max-w-md mx-auto"
-      >
-        <Search className={`absolute top-3 h-5 w-5 text-slate-400 ${isRTL ? 'right-3' : 'left-3'}`} />
-        <Input
-          placeholder={language === 'ar' ? '🔍 ابحث عن شاحن حصري...' : '🔍 Rechercher une offre...'}
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          className={`${isRTL ? 'pr-10' : 'pl-10'} bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700 focus:border-pink-500 py-6 text-lg`}
-        />
-      </motion.div>
-
-      {/* Cart Notification Toast */}
-      {cartNotification && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-green-400 to-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold"
-        >
-          ✅ {cartNotification} {language === 'ar' ? 'تمت إضافتها للسلة' : 'ajouté au panier'}
-        </motion.div>
-      )}      {/* Loading State */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="h-12 w-12 rounded-full border-4 border-red-200 dark:border-red-700 border-t-red-600"
+      {/* Fire-themed page header */}
+      <div className="relative py-16 px-4 overflow-hidden">
+        {/* Fire radial glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%)' }} />
+        {/* Animated fire particles (CSS) */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div key={i}
+            className="absolute bottom-0 rounded-full pointer-events-none"
+            style={{ width: `${4 + i * 3}px`, height: `${4 + i * 3}px`, left: `${10 + i * 15}%`, background: i % 2 === 0 ? '#FF6B35' : '#F59E0B', filter: 'blur(2px)' }}
+            animate={{ y: [0, -80, -160], opacity: [0.8, 0.4, 0] }}
+            transition={{ duration: 2 + i * 0.3, repeat: Infinity, delay: i * 0.4, ease: 'easeOut' }}
           />
-        </div>
-      ) : (
-        <>
-          {/* Offers Grid */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredOffers.map((offer, index) => (
-              <motion.div
-                key={offer.id}
-                variants={itemVariants}
-                whileHover="hover"
-                className="group relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-all duration-300" />
-                
-                <div className="relative bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700 rounded-2xl overflow-hidden h-full flex flex-col shadow-lg hover:shadow-2xl transition-all duration-300">
-                  {/* Premium Badge */}
-                  <motion.div
-                    initial={{ scale: 0, rotate: -45 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="absolute top-3 left-3 z-10"
-                  >
-                    <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-slate-900 text-xs font-bold px-3 py-1 animate-bounce">
-                      👑 {language === 'ar' ? 'حصري' : 'PREMIUM'}
-                    </Badge>
-                  </motion.div>
+        ))}
 
-                  {/* Discount Badge */}
-                  <motion.div
-                    initial={{ scale: 0, rotate: -45 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: index * 0.1 + 0.1 }}
-                    className="absolute top-3 right-3 z-10"
-                  >
-                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-bold px-3 py-1 animate-pulse">
-                      👑 -{offer.discount_percentage}%
-                    </Badge>
-                  </motion.div>
-
-                  {/* Product Image - Full Screen */}
-                  <div className="relative h-72 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 flex items-center justify-center overflow-hidden w-full">
-                    {offer.product_image ? (
-                      <motion.img
-                        src={offer.product_image}
-                        alt={offer.product_name}
-                        className="w-full h-full object-cover"
-                        whileHover={{ scale: 1.12 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    ) : (
-                      <motion.div
-                        animate={{ rotate: [0, 10, -10, 0], y: [0, -10, 0] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                      >
-                        <Crown className="h-20 w-20 text-slate-300" />
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* Content Area */}
-                  <div className="p-6 flex-1 flex flex-col">
-                    {/* Brand - Always Show */}
-                    <Badge variant="outline" className="w-fit mb-3 text-xs font-bold border-red-300 bg-red-50 dark:bg-red-900/30">
-                      🏆 {offer.product_mark || 'Charger'}
-                    </Badge>
-
-                    {/* Product Name */}
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white mb-2 line-clamp-2">
-                      {offer.product_name}
-                    </h3>
-
-                    {/* Description - Bold and Bigger */}
-                    {offer.product_description && (
-                      <p className="text-base font-bold text-slate-700 dark:text-slate-300 mb-3">
-                        📝 {offer.product_description}
-                      </p>
-                    )}
-
-                    {/* Specs Section Header */}
-                    <div className="mb-3">
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Spécifications Électriques'}</p>
-                    </div>
-
-                    {/* Specs Grid - Always Show */}
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/50 rounded-lg p-2 text-center border border-red-200 dark:border-red-700">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
-                        <div className="text-sm font-bold text-red-600 dark:text-red-400">{offer.voltage ? `${offer.voltage}V` : 'N/A'}</div>
-                      </div>
-                      <div className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-900/50 rounded-lg p-2 text-center border border-rose-200 dark:border-rose-700">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">🔌 {language === 'ar' ? 'القوة' : 'Wattage'}</div>
-                        <div className="text-sm font-bold text-rose-600 dark:text-rose-400">{offer.wattage ? `${offer.wattage}W` : 'N/A'}</div>
-                      </div>
-                      <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-900/50 rounded-lg p-2 text-center border border-pink-200 dark:border-pink-700">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">⚙️ {language === 'ar' ? 'التيار' : 'Amperage'}</div>
-                        <div className="text-sm font-bold text-pink-600 dark:text-pink-400">{offer.amperage ? `${offer.amperage}A` : 'N/A'}</div>
-                      </div>
-                      <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/50 rounded-lg p-2 text-center border border-orange-200 dark:border-orange-700">
-                        <div className="text-xs font-bold text-slate-600 dark:text-slate-400">🔧 {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
-                        <div className="text-sm font-bold text-orange-600 dark:text-orange-400 truncate">{offer.connection_type || 'N/A'}</div>
-                      </div>
-                    </div>
-
-                    {/* Price - Only Real Price */}
-                    {(offer.offer_price !== undefined && offer.offer_price !== null) && (
-                    <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/30 dark:to-pink-900/30 rounded-xl p-3 mb-3 border-2 border-red-200 dark:border-red-700">
-                      <div className="flex items-baseline gap-2 justify-center">
-                        <span className="text-3xl font-bold text-red-600 dark:text-red-400">
-                          {(offer.offer_price || 0).toFixed(2)}
-                        </span>
-                        <span className="text-base text-slate-600 dark:text-slate-400 font-semibold">
-                          {language === 'ar' ? 'دج' : 'DZD'}
-                        </span>
-                      </div>
-                      <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">
-                        {language === 'ar' ? '✅ السعر النهائي الحصري' : '✅ Prix Final Exclusif'}
-                      </p>
-                    </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 mt-auto pt-3 min-h-12">
-                    <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                      <Button
-                        onClick={() => handleAddToCart(offer)}
-                        className="w-full h-12 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold rounded-lg py-2 px-4 text-base transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap"
-                      >
-                        {language === 'ar' ? '🛒 سلة' : '🛒 Panier'}
-                      </Button>
-                    </motion.div>
-                    <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                      <Button
-                        onClick={() => handleViewDetails(offer)}
-                        className="w-full h-12 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold rounded-lg py-2 px-4 text-base transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap"
-                      >
-                        {language === 'ar' ? '👁️ عرض' : '👁️ Voir'}
-                      </Button>
-                    </motion.div>
-                    <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                      <Button
-                        onClick={() => handleOrder(offer)}
-                        className="w-full h-12 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold rounded-lg py-2 px-4 text-base transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap"
-                      >
-                        {language === 'ar' ? '🚀 طلب' : '🚀 Commande'}
-                      </Button>
-                    </motion.div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Empty State */}
-          {filteredOffers.length === 0 && (
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="inline-block mb-4"
             >
-              <Crown className="h-16 w-16 mx-auto text-slate-300 mb-4" />
-              <h3 className="text-2xl font-bold text-slate-600 dark:text-slate-400 mb-2">
-                {language === 'ar' ? 'لا توجد عروض حصرية' : 'Aucune offre exclusive trouvée'}
-              </h3>
-              <p className="text-slate-500 dark:text-slate-500">
-                {language === 'ar' ? 'عد قريبا للحصول على عروض جديدة' : 'Revenez bientôt pour de nouvelles offres'}
+              <Flame className="w-12 h-12 mx-auto" style={{ color: '#FF6B35', filter: 'drop-shadow(0 0 8px #FF6B35)' }} />
+            </motion.div>
+            <h1 className="font-grotesk font-black text-4xl md:text-5xl mb-3">
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #FF6B35, #F59E0B, #EF4444)' }}>
+                🔥 {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}
+              </span>
+            </h1>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: Infinity }}
+                className="w-2 h-2 rounded-full" style={{ background: '#EF4444' }}
+              />
+              <p className="text-sm font-semibold" style={{ color: '#FF6B35' }}>
+                {language === 'ar' ? 'عروض محدودة!' : 'Offres Limitées !'}
               </p>
+            </div>
+            <p className="text-base" style={{ color: '#64748B' }}>
+              {language === 'ar' ? 'اغتنم الفرصة — خصومات حصرية على شواحن مميزة' : 'Saisissez l\'occasion — Remises exclusives sur des chargeurs premium'}
+            </p>
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 pb-16 space-y-8">
+
+        {/* Search */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative max-w-lg mx-auto">
+          <Search className="absolute top-1/2 -translate-y-1/2 left-4 w-5 h-5 pointer-events-none" style={{ color: '#FF6B35' }} />
+          <input
+            placeholder={language === 'ar' ? '🔍 ابحث عن عرض...' : '🔍 Rechercher une offre...'}
+            value={searchQuery}
+            onChange={e => handleSearch(e.target.value)}
+            className="w-full pl-12 pr-4 py-4 rounded-xl text-sm outline-none transition-all"
+            style={{ background: '#0F172A', color: '#F1F5F9', border: '1px solid rgba(255,107,53,0.2)' }}
+            onFocus={e => (e.target.style.borderColor = '#FF6B35')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(255,107,53,0.2)')}
+          />
+        </motion.div>
+
+        {/* Cart toast */}
+        <AnimatePresence>
+          {cartNotification && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: -20, x: '-50%' }}
+              className="fixed top-24 left-1/2 z-50 px-6 py-3 rounded-xl font-semibold text-sm"
+              style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: '#fff', boxShadow: '0 0 20px rgba(16,185,129,0.4)' }}
+            >
+              ✅ {cartNotification} {language === 'ar' ? 'أضيف للسلة' : 'ajouté au panier'}
             </motion.div>
           )}
-        </>
-      )}
+        </AnimatePresence>
 
-      {/* Details Dialog */}
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-3xl bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700 rounded-2xl max-h-screen overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-              👑 {selectedOffer?.product_name}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedOffer && (
+        {/* Loading */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+              className="w-12 h-12 rounded-full"
+              style={{ border: '2px solid rgba(255,107,53,0.1)', borderTopColor: '#FF6B35' }}
+            />
+          </div>
+        ) : (
+          <>
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {/* Image */}
-              <motion.div
-                className="flex items-center justify-center bg-gradient-to-br from-red-100 via-pink-100 to-rose-100 dark:from-red-900/30 dark:via-pink-900/30 dark:to-rose-900/30 rounded-2xl min-h-96 border-2 border-red-200 dark:border-red-700 p-4"
-                whileHover={{ scale: 1.02 }}
+              {filteredOffers.map((offer, i) => (
+                <motion.div
+                  key={offer.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <GlowCard glowColor="orange" className="flex flex-col h-full relative cursor-pointer" onClick={() => handleViewDetails(offer)}>
+                    {/* Animated fire border */}
+                    <div className="absolute inset-0 rounded-2xl pointer-events-none fire-border" style={{ border: '1px solid #FF6B35', opacity: 0.5 }} />
+
+                    {/* PROMO ribbon */}
+                    {offer.discount_percentage > 0 && (
+                      <div className="absolute top-4 right-0 z-10 overflow-hidden" style={{ width: '80px' }}>
+                        <div className="text-xs font-black text-white text-center py-1 px-2 rotate-0"
+                          style={{ background: 'linear-gradient(135deg, #EF4444, #FF6B35)', borderRadius: '4px 0 0 4px' }}
+                        >
+                          -{offer.discount_percentage}%
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,107,53,0.05), rgba(239,68,68,0.05))' }}>
+                      {offer.product_image ? (
+                        <motion.img src={offer.product_image} alt={offer.product_name}
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.08 }} transition={{ duration: 0.4 }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Flame className="w-14 h-14" style={{ color: 'rgba(255,107,53,0.3)' }} />
+                        </div>
+                      )}
+                      {offer.product_mark && (
+                        <div className="absolute top-3 left-3">
+                          <ElectricBadge color="orange">{offer.product_mark}</ElectricBadge>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="font-grotesk font-bold text-base mb-2 line-clamp-2" style={{ color: '#F1F5F9' }}>
+                        {offer.product_name}
+                      </h3>
+                      {offer.product_description && (
+                        <p className="text-sm mb-3 line-clamp-2" style={{ color: '#64748B' }}>{offer.product_description}</p>
+                      )}
+
+                      {/* Specs */}
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {offer.voltage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(255,107,53,0.08)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.2)' }}>⚡ {offer.voltage}V</span>}
+                        {offer.amperage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>🔌 {offer.amperage}A</span>}
+                        {offer.wattage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>💡 {offer.wattage}W</span>}
+                      </div>
+
+                      {/* Price */}
+                      <div className="mb-4 mt-auto">
+                        {offer.show_price === false ? (
+                          <p className="text-sm font-semibold" style={{ color: '#64748B' }}>
+                            📞 {language === 'ar' ? 'تواصل للسعر' : 'Contactez-nous'}
+                          </p>
+                        ) : (
+                          <div className="flex items-baseline gap-2">
+                            {offer.original_price > 0 && (
+                              <span className="text-sm line-through" style={{ color: '#64748B' }}>
+                                {offer.original_price.toLocaleString()} DZD
+                              </span>
+                            )}
+                            {displayPrice(offer) != null && (
+                              <span className="font-grotesk font-black text-2xl" style={{ color: '#FF6B35' }}>
+                                {(displayPrice(offer) as number).toLocaleString()} DZD
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="grid grid-cols-3 gap-2" onClick={e => e.stopPropagation()}>
+                        {offer.show_price === false ? (
+                          <>
+                            <a href={`https://wa.me/`} target="_blank" rel="noopener noreferrer"
+                              className="col-span-3 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white"
+                              style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                              {language === 'ar' ? 'تواصل معنا' : 'Contactez-nous'}
+                            </a>
+                          </>
+                        ) : (
+                          <>
+                            <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                              onClick={() => handleAddToCart(offer)}
+                              className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold"
+                              style={{ background: 'rgba(255,107,53,0.1)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.25)' }}
+                            >
+                              <ShoppingCart className="w-3.5 h-3.5" />
+                              {language === 'ar' ? 'سلة' : 'Panier'}
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                              onClick={() => handleViewDetails(offer)}
+                              className="flex items-center justify-center py-2 rounded-lg text-xs font-bold"
+                              style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}
+                            >
+                              👁️ {language === 'ar' ? 'عرض' : 'Voir'}
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.04, boxShadow: '0 0 14px rgba(255,107,53,0.5)' }} whileTap={{ scale: 0.96 }}
+                              onClick={() => handleOrder(offer)}
+                              className="flex items-center justify-center py-2 rounded-lg text-xs font-bold text-white"
+                              style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                            >
+                              📦 {language === 'ar' ? 'طلب' : 'Cmd'}
+                            </motion.button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </GlowCard>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Empty */}
+            {filteredOffers.length === 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="text-center py-24 rounded-2xl"
+                style={{ border: '2px dashed rgba(255,107,53,0.1)', background: 'rgba(255,107,53,0.01)' }}
               >
-                {selectedOffer.product_image ? (
-                  <img
-                    src={selectedOffer.product_image}
-                    alt={selectedOffer.product_name}
-                    className="max-w-full max-h-full object-contain"
-                  />
-                ) : (
-                  <motion.div animate={{ rotate: [0, 360], y: [0, -20, 0] }} transition={{ duration: 20, repeat: Infinity }}>
-                    <Crown className="h-48 w-48 text-slate-300" />
-                  </motion.div>
-                )}
+                <Flame className="w-16 h-16 mx-auto mb-4" style={{ color: 'rgba(255,107,53,0.2)' }} />
+                <h3 className="font-grotesk font-bold text-xl mb-2" style={{ color: '#64748B' }}>
+                  {language === 'ar' ? 'لا توجد عروض حالياً' : 'Aucune offre disponible'}
+                </h3>
+                <p className="text-sm" style={{ color: '#1E3A5F' }}>
+                  {language === 'ar' ? 'عد قريباً للحصول على عروض جديدة' : 'Revenez bientôt pour de nouvelles offres'}
+                </p>
               </motion.div>
+            )}
+          </>
+        )}
+      </div>
 
-              {/* Details */}
-              <div className="space-y-6 overflow-y-auto max-h-96 pr-2">
-                {/* Brand & Mark */}
-                {selectedOffer.product_mark && (
-                  <motion.div
-                    initial={{ x: 20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/30 dark:to-pink-900/30 rounded-xl p-4 border-l-4 border-red-500"
+      {/* Detail modal */}
+      <AnimatePresence>
+        {showDetails && selectedOffer && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowDetails(false)}
+              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              className="fixed inset-4 sm:inset-8 z-50 rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: '#0F172A', border: '1px solid rgba(255,107,53,0.3)', maxWidth: '900px', margin: 'auto' }}
+            >
+              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(255,107,53,0.15)' }}>
+                <div className="flex items-center gap-3">
+                  <Flame className="w-5 h-5 flex-shrink-0" style={{ color: '#FF6B35' }} />
+                  <h2 className="font-grotesk font-bold text-lg line-clamp-1" style={{ color: '#F1F5F9' }}>
+                    {selectedOffer.product_name}
+                  </h2>
+                </div>
+                <button onClick={() => setShowDetails(false)} style={{ color: '#64748B' }}>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Image */}
+                  <div className="h-64 rounded-xl flex items-center justify-center overflow-hidden"
+                    style={{ background: 'rgba(255,107,53,0.04)', border: '1px solid rgba(255,107,53,0.15)' }}
                   >
-                    <p className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      🏆 {language === 'ar' ? 'الماركة المميزة' : 'Marque Premium'}
-                    </p>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                      {selectedOffer.product_mark}
-                    </p>
-                  </motion.div>
-                )}
-
-                {/* Specifications */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="space-y-2"
-                >
-                  <h4 className="font-bold text-lg text-slate-900 dark:text-white mb-3">
-                    ⚡ {language === 'ar' ? 'المواصفات الكهربائية المتقدمة' : 'Spécifications Électriques Avancées'}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/50 rounded-lg p-3 border-2 border-red-200 dark:border-red-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">⚡ {language === 'ar' ? 'الفولت' : 'Voltage'}</div>
-                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">{selectedOffer.voltage ? `${selectedOffer.voltage}V` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-900/50 rounded-lg p-3 border-2 border-pink-200 dark:border-pink-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">⚙️ {language === 'ar' ? 'التيار' : 'Ampérage'}</div>
-                      <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">{selectedOffer.amperage ? `${selectedOffer.amperage}A` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-900/50 rounded-lg p-3 border-2 border-rose-200 dark:border-rose-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">🔌 {language === 'ar' ? 'القوة' : 'Puissance'}</div>
-                      <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">{selectedOffer.wattage ? `${selectedOffer.wattage}W` : 'N/A'}</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/50 rounded-lg p-3 border-2 border-orange-200 dark:border-orange-700">
-                      <div className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">� {language === 'ar' ? 'الوصلة' : 'Connexion'}</div>
-                      <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{selectedOffer.connection_type || 'N/A'}</div>
-                    </div>
+                    {selectedOffer.product_image ? (
+                      <img src={selectedOffer.product_image} alt={selectedOffer.product_name} className="max-w-full max-h-full object-contain p-4" />
+                    ) : (
+                      <Flame className="w-20 h-20" style={{ color: 'rgba(255,107,53,0.2)' }} />
+                    )}
                   </div>
-                </motion.div>
 
-                {/* Description */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border-2 border-slate-200 dark:border-slate-600"
-                >
-                  <p className="font-bold text-slate-900 dark:text-white mb-2">
-                    📝 {language === 'ar' ? 'الوصف التفصيلي' : 'Description Détaillée'}
-                  </p>
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                    {selectedOffer.product_description || (language === 'ar' ? 'لا يوجد وصف' : 'Aucune description disponible')}
-                  </p>
-                </motion.div>
+                  {/* Details */}
+                  <div className="space-y-4">
+                    {selectedOffer.product_mark && (
+                      <div className="p-3 rounded-xl" style={{ background: 'rgba(255,107,53,0.05)', borderLeft: '3px solid #FF6B35' }}>
+                        <p className="text-xs mb-1" style={{ color: '#64748B' }}>🏷️ Marque</p>
+                        <p className="font-grotesk font-bold text-lg" style={{ color: '#FF6B35' }}>{selectedOffer.product_mark}</p>
+                      </div>
+                    )}
 
-                {/* Pricing & Discount */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.35 }}
-                  className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 rounded-xl p-4 border-2 border-orange-200 dark:border-orange-700"
-                >
-                  <p className="font-bold text-slate-900 dark:text-white mb-2">
-                    💰 {language === 'ar' ? 'السعر' : 'Prix'}
-                  </p>
-                  <div className="space-y-1">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {language === 'ar' ? 'السعر الأصلي' : 'Prix Original'}: <span className="font-semibold text-slate-900 dark:text-white">{selectedOffer.original_price ? selectedOffer.original_price.toFixed(2) : 'N/A'} DZD</span>
-                    </p>
-                  </div>
-                </motion.div>
-
-                {/* Pricing */}
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/30 dark:to-pink-900/30 rounded-xl p-4 border-2 border-red-200 dark:border-red-700"
-                >
-                  <div className="text-center space-y-2">
-                    <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
-                      {language === 'ar' ? 'السعر النهائي الحصري' : 'Prix Final Exclusif'}
-                    </p>
-                    <div className="flex items-baseline justify-center gap-2">
-                      <span className="text-4xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                        {selectedOffer.offer_price.toFixed(2)}
-                      </span>
-                      <span className="text-xl text-slate-600 dark:text-slate-400 font-bold">
-                        {language === 'ar' ? 'دج' : 'DZD'}
-                      </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { label: 'Voltage', value: selectedOffer.voltage ? `${selectedOffer.voltage}V` : 'N/A', color: '#FF6B35' },
+                        { label: 'Ampérage', value: selectedOffer.amperage ? `${selectedOffer.amperage}A` : 'N/A', color: '#EF4444' },
+                        { label: 'Puissance', value: selectedOffer.wattage ? `${selectedOffer.wattage}W` : 'N/A', color: '#F59E0B' },
+                        { label: 'Connexion', value: selectedOffer.connection_type || 'N/A', color: '#10B981' },
+                      ].map(s => (
+                        <div key={s.label} className="p-3 rounded-xl" style={{ background: 'rgba(30,58,95,0.3)', border: `1px solid ${s.color}22` }}>
+                          <p className="text-xs mb-1" style={{ color: '#64748B' }}>{s.label}</p>
+                          <p className="font-grotesk font-bold text-lg" style={{ color: s.color }}>{s.value}</p>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                </motion.div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                    <Button
-                      onClick={() => handleAddToCart(selectedOffer)}
-                      className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-6 rounded-lg text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      🛒 {language === 'ar' ? 'إضافة للسلة' : 'Ajouter au Panier'}
-                    </Button>
-                  </motion.div>
-                  <motion.div className="flex-1" whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
-                    <Button
-                      onClick={() => handleOrder(selectedOffer)}
-                      className="w-full bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white font-bold py-6 rounded-lg text-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      🚀 {language === 'ar' ? 'اشتري الآن' : 'Acheter Maintenant'}
-                    </Button>
-                  </motion.div>
+                    {selectedOffer.product_description && (
+                      <div className="p-3 rounded-xl" style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(30,58,95,0.6)' }}>
+                        <p className="text-xs mb-1" style={{ color: '#64748B' }}>📝 Description</p>
+                        <p className="text-sm leading-relaxed" style={{ color: '#94A3B8' }}>{selectedOffer.product_description}</p>
+                      </div>
+                    )}
+
+                    {/* Price section */}
+                    {selectedOffer.show_price !== false && displayPrice(selectedOffer) != null && (
+                      <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(255,107,53,0.06)', border: '1px solid rgba(255,107,53,0.2)' }}>
+                        {selectedOffer.original_price > 0 && (
+                          <p className="text-sm line-through mb-1" style={{ color: '#64748B' }}>
+                            {selectedOffer.original_price.toLocaleString()} DZD
+                          </p>
+                        )}
+                        <span className="font-grotesk font-black text-3xl" style={{ color: '#FF6B35' }}>
+                          {(displayPrice(selectedOffer) as number).toLocaleString()} DZD
+                        </span>
+                        {selectedOffer.discount_percentage > 0 && (
+                          <div className="mt-1">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444' }}>
+                              -{selectedOffer.discount_percentage}% {language === 'ar' ? 'خصم' : 'de remise'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedOffer.show_price === false ? (
+                      <a href="https://wa.me/" target="_blank" rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white w-full"
+                        style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        {language === 'ar' ? 'تواصل للسعر' : 'Contactez-nous pour le prix'}
+                      </a>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                          onClick={() => { handleAddToCart(selectedOffer); setShowDetails(false); }}
+                          className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
+                          style={{ background: 'rgba(255,107,53,0.1)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.3)' }}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          {language === 'ar' ? 'أضف للسلة' : 'Ajouter'}
+                        </motion.button>
+                        <motion.button whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(255,107,53,0.4)' }} whileTap={{ scale: 0.98 }}
+                          onClick={() => handleOrder(selectedOffer)}
+                          className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white"
+                          style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                        >
+                          🚀 {language === 'ar' ? 'اطلب الآن' : 'Commander'}
+                        </motion.button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
