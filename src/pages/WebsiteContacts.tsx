@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getWebsiteSettingsREST } from '@/lib/supabaseClient';
 import { Facebook, Instagram, Smartphone, Mail, MapPin, MessageCircle, Send, Phone, Globe, Zap } from 'lucide-react';
 import GlowCard from '@/components/website/GlowCard';
+import { imgSrc } from '@/lib/imageUtils';
 
 interface WebsiteSettings {
   store_name?: string;
@@ -157,8 +158,9 @@ export default function WebsiteContacts() {
             <GlowCard glowColor="cyan" className="text-center p-8 space-y-4">
               {settings.logo_url && (
                 <div className="flex justify-center">
-                  <motion.img src={settings.logo_url} alt="Logo"
+                  <motion.img src={imgSrc.thumb(settings.logo_url)} alt="Logo"
                     className="h-24 w-24 rounded-2xl object-cover"
+                    loading="lazy" decoding="async"
                     style={{ boxShadow: '0 0 20px rgba(0,212,255,0.2)' }}
                     whileHover={{ scale: 1.05 }}
                   />

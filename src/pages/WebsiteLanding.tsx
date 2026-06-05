@@ -10,6 +10,7 @@ import { useScrollReveal } from '@/hooks/useScrollReveal';
 import GlowCard from '@/components/website/GlowCard';
 import ElectricBadge from '@/components/website/ElectricBadge';
 import FloatingParticles from '@/components/website/FloatingParticles';
+import { imgSrc } from '@/lib/imageUtils';
 
 interface Testimonial {
   id: string;
@@ -262,37 +263,11 @@ export default function WebsiteLanding() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-grotesk font-black leading-tight mb-6"
-              style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', color: '#F1F5F9' }}
+              className="font-grotesk font-black leading-tight mb-6 bg-clip-text text-transparent"
+              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}
             >
-              {language === 'ar' ? (
-                <>
-                  الشاحن{' '}
-                  <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
-                    الأفضل
-                  </span>{' '}
-                  لسيارتك
-                </>
-              ) : (
-                <>
-                  Le Chargeur{' '}
-                  <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
-                    Parfait
-                  </span>{' '}
-                  pour Votre Voiture
-                </>
-              )}
+              {settings?.description || websiteSettings?.description || ''}
             </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg mb-10 leading-relaxed"
-              style={{ color: '#64748B', maxWidth: '480px' }}
-            >
-              {settings?.slogan || websiteSettings?.slogan || 'Quality Chargers at Best Prices'}
-            </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -546,9 +521,11 @@ export default function WebsiteLanding() {
                     >
                       {product.primary_image ? (
                         <motion.img
-                          src={product.primary_image}
+                          src={imgSrc.card(product.primary_image)}
                           alt={product.name}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
                           whileHover={{ scale: 1.08 }}
                           transition={{ duration: 0.4 }}
                         />

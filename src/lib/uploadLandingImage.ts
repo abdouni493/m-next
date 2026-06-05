@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
+import { compressImage } from '@/lib/imageUtils';
 
 interface UploadResponse {
   success: boolean;
@@ -26,25 +27,27 @@ export const uploadLandingImage = async (file: File): Promise<UploadResponse> =>
       return { success: false, publicUrl: null, error: 'Invalid file type. Please upload an image.' };
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (max 10MB before compression)
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      return { success: false, publicUrl: null, error: 'File size exceeds 5MB limit' };
+      return { success: false, publicUrl: null, error: 'File size exceeds 10MB limit' };
     }
+
+    // Compress before upload
+    const compressed = await compressImage(file, 1600, 0.85);
 
     // Generate unique filename with timestamp
     const timestamp = Date.now();
-    const fileExtension = file.name.split('.').pop() || 'jpg';
-    const fileName = `landing_bg_${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const ext = compressed.name.split('.').pop() || 'webp';
+    const fileName = `landing_bg_${timestamp}.${ext}`;
 
-    console.log('📤 Uploading image to Supabase Storage:', fileName);
-
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage with 1-year cache (filename is unique per upload)
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('chargers')
-      .upload(fileName, file, {
-        cacheControl: '3600',
+      .upload(fileName, compressed, {
+        cacheControl: '31536000',
         upsert: false,
+        contentType: compressed.type,
       });
 
     if (uploadError) {

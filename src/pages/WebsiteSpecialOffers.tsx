@@ -6,6 +6,7 @@ import { getSpecialOffersREST } from '@/lib/supabaseClient';
 import { Search, Zap, ShoppingCart, X, Flame, MessageCircle } from 'lucide-react';
 import GlowCard from '@/components/website/GlowCard';
 import ElectricBadge from '@/components/website/ElectricBadge';
+import { imgSrc } from '@/lib/imageUtils';
 
 interface SpecialOffer {
   id: string;
@@ -224,8 +225,9 @@ export default function WebsiteSpecialOffers() {
                     {/* Image */}
                     <div className="relative h-56 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,107,53,0.05), rgba(239,68,68,0.05))' }}>
                       {offer.product_image ? (
-                        <motion.img src={offer.product_image} alt={offer.product_name}
+                        <motion.img src={imgSrc.card(offer.product_image)} alt={offer.product_name}
                           className="w-full h-full object-cover"
+                          loading="lazy" decoding="async"
                           whileHover={{ scale: 1.08 }} transition={{ duration: 0.4 }}
                         />
                       ) : (
@@ -377,7 +379,7 @@ export default function WebsiteSpecialOffers() {
                     style={{ background: 'rgba(255,107,53,0.04)', border: '1px solid rgba(255,107,53,0.15)' }}
                   >
                     {selectedOffer.product_image ? (
-                      <img src={selectedOffer.product_image} alt={selectedOffer.product_name} className="max-w-full max-h-full object-contain p-4" />
+                      <img src={imgSrc.detail(selectedOffer.product_image)} alt={selectedOffer.product_name} className="max-w-full max-h-full object-contain p-4" loading="lazy" decoding="async" />
                     ) : (
                       <Flame className="w-20 h-20" style={{ color: 'rgba(255,107,53,0.2)' }} />
                     )}

@@ -6,6 +6,7 @@ import { getAllProductsREST, getProductImages, getMarks } from '@/lib/supabaseCl
 import { Search, Zap, ShoppingCart, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import GlowCard from '@/components/website/GlowCard';
 import ElectricBadge from '@/components/website/ElectricBadge';
+import { imgSrc } from '@/lib/imageUtils';
 
 interface Product {
   id: string;
@@ -294,8 +295,9 @@ export default function WebsiteOffers() {
                     >
                       {product.primary_image ? (
                         <motion.img
-                          src={product.primary_image} alt={product.name}
+                          src={imgSrc.card(product.primary_image)} alt={product.name}
                           className="w-full h-full object-cover"
+                          loading="lazy" decoding="async"
                           whileHover={{ scale: 1.08 }} transition={{ duration: 0.4 }}
                         />
                       ) : (
@@ -448,9 +450,9 @@ export default function WebsiteOffers() {
                           style={{ border: '2px solid rgba(0,212,255,0.1)', borderTopColor: '#00D4FF' }}
                         />
                       ) : productImages.length > 0 ? (
-                        <img src={productImages[currentImageIndex].image_url} alt={selectedProduct.name} className="max-w-full max-h-full object-contain rounded-lg" />
+                        <img src={imgSrc.detail(productImages[currentImageIndex].image_url)} alt={selectedProduct.name} className="max-w-full max-h-full object-contain rounded-lg" loading="lazy" decoding="async" />
                       ) : selectedProduct.primary_image ? (
-                        <img src={selectedProduct.primary_image} alt={selectedProduct.name} className="max-w-full max-h-full object-contain rounded-lg" />
+                        <img src={imgSrc.detail(selectedProduct.primary_image)} alt={selectedProduct.name} className="max-w-full max-h-full object-contain rounded-lg" loading="lazy" decoding="async" />
                       ) : (
                         <Zap className="w-20 h-20" style={{ color: '#1E3A5F' }} />
                       )}

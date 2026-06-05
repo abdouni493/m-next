@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { createOrderREST, getVisibleDeliveryAgencies, getDeliveryPriceForWilaya, getTestimonialsByName, createTestimonial, updateTestimonial, deleteTestimonial } from '@/lib/supabaseClient';
 import { ArrowLeft, Trash2, ShoppingCart, Check, MapPin, User, Package, Truck, MessageSquare, Edit2, Plus, AlertCircle, X, Zap } from 'lucide-react';
 import GlowCard from '@/components/website/GlowCard';
+import { imgSrc } from '@/lib/imageUtils';
 
 interface CartItem {
   id: string;
@@ -483,7 +484,7 @@ export default function WebsiteCart() {
                       {/* Image */}
                       <div className="h-36 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: 'rgba(0,212,255,0.04)' }}>
                         {item.image ? (
-                          <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain p-2" />
+                          <img src={imgSrc.thumb(item.image)} alt={item.name} className="max-w-full max-h-full object-contain p-2" loading="lazy" decoding="async" />
                         ) : (
                           <ShoppingCart className="w-10 h-10" style={{ color: 'rgba(0,212,255,0.2)' }} />
                         )}

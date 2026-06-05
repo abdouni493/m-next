@@ -105,7 +105,7 @@ export const WebsiteLayout = () => {
                   style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2))', border: '1px solid rgba(0,212,255,0.3)' }}
                 >
                   {settings?.logo_url ? (
-                    <img src={settings.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                    <img src={settings.logo_url} alt="Logo" className="w-full h-full object-cover" fetchpriority="high" decoding="async" />
                   ) : (
                     <Zap className="w-5 h-5" style={{ color: '#00D4FF' }} />
                   )}

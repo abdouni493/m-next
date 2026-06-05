@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
+import { compressImage } from '@/lib/imageUtils';
 
 interface Charger {
   id: string;
@@ -263,12 +264,18 @@ const ChargerInventory = () => {
 
     try {
       for (let i = 0; i < formData.images.length; i++) {
-        const file = formData.images[i];
-        const fileName = `${productId}/${Date.now()}-${file.name}`;
+        const raw = formData.images[i];
+        const file = await compressImage(raw, 1200, 0.85);
+        const ext = file.name.split('.').pop() || 'webp';
+        const fileName = `${productId}/${Date.now()}-${i}.${ext}`;
 
         const { error: uploadError } = await supabase.storage
           .from('chargers')
-          .upload(fileName, file);
+          .upload(fileName, file, {
+            cacheControl: '31536000',
+            upsert: false,
+            contentType: file.type,
+          });
 
         if (uploadError) throw uploadError;
 

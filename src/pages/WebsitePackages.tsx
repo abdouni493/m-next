@@ -7,6 +7,7 @@ import { getVisiblePackagesREST, getPackageDetails } from '@/lib/supabaseClient'
 import { Search, ShoppingCart, Eye, Package as PackageIcon, X } from 'lucide-react';
 import GlowCard from '@/components/website/GlowCard';
 import ElectricBadge from '@/components/website/ElectricBadge';
+import { imgSrc } from '@/lib/imageUtils';
 
 interface Package {
   id: string;
@@ -221,7 +222,8 @@ export default function WebsitePackages() {
                   {/* Image */}
                   <div className="relative h-52 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.05), rgba(0,212,255,0.05))' }}>
                     {pkg.image_url ? (
-                      <motion.img src={pkg.image_url} alt={pkg.name} className="w-full h-full object-cover"
+                      <motion.img src={imgSrc.card(pkg.image_url)} alt={pkg.name} className="w-full h-full object-cover"
+                        loading="lazy" decoding="async"
                         whileHover={{ scale: 1.08 }} transition={{ duration: 0.4 }}
                       />
                     ) : (
@@ -328,7 +330,7 @@ export default function WebsitePackages() {
               <div className="flex-1 overflow-y-auto p-5 space-y-5">
                 {selectedPackage.image_url && (
                   <div className="h-56 rounded-xl overflow-hidden">
-                    <img src={selectedPackage.image_url} alt={selectedPackage.name} className="w-full h-full object-cover" />
+                    <img src={imgSrc.detail(selectedPackage.image_url)} alt={selectedPackage.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   </div>
                 )}
 
@@ -367,7 +369,7 @@ export default function WebsitePackages() {
                           style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(16,185,129,0.1)' }}
                         >
                           {item.product_image && (
-                            <img src={item.product_image} alt={item.product_name} className="w-16 h-16 object-cover rounded-lg flex-shrink-0" />
+                            <img src={imgSrc.thumb(item.product_image)} alt={item.product_name} className="w-16 h-16 object-cover rounded-lg flex-shrink-0" loading="lazy" decoding="async" />
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="font-bold text-sm truncate" style={{ color: '#F1F5F9' }}>{item.product_name}</p>

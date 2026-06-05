@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
+import { compressImage } from '@/lib/imageUtils';
 
 interface Charger {
   id: string;
@@ -656,22 +657,23 @@ const Inventory = () => {
       console.log(`🚀 Starting image upload for product ${productId}. Total images: ${formData.images.length}`);
       
       for (let i = 0; i < formData.images.length; i++) {
-        const file = formData.images[i];
+        const raw = formData.images[i];
         const isPrimary = i === primaryImageId || (primaryImageId === null && i === 0);
-        
-        // Create unique filename with timestamp
+
+        // Compress before upload
+        const file = await compressImage(raw, 1200, 0.85);
+
         const timestamp = Date.now();
-        const fileExtension = file.name.split('.').pop();
-        const fileName = `${productId}/${timestamp}-${i}.${fileExtension}`;
-        
-        console.log(`📸 Uploading image ${i + 1}/${formData.images.length}: ${fileName}`);
-        
-        // 1. Upload file to storage bucket 'chargers'
+        const ext = file.name.split('.').pop() || 'webp';
+        const fileName = `${productId}/${timestamp}-${i}.${ext}`;
+
+        // 1. Upload file to storage bucket 'chargers' with 1-year cache
         const { error: uploadError } = await supabase.storage
           .from('chargers')
           .upload(fileName, file, {
-            cacheControl: '3600',
+            cacheControl: '31536000',
             upsert: false,
+            contentType: file.type,
           });
 
         if (uploadError) {
