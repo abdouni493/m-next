@@ -52,6 +52,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { PageHero, formatDA } from '@/admin/ui';
 import { uploadImage } from '@/lib/imageUpload';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
@@ -1189,111 +1190,60 @@ export default function Website_Enhanced() {
 
   // ========== RENDER ==========
   return (
-    <div className={`min-h-screen p-6 bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`${isRTL ? 'rtl' : 'ltr'}`}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto"
       >
-        {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <div className="p-4 rounded-2xl bg-primary text-primary-foreground">
-            <Globe className="h-8 w-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">
-              {language === 'ar' ? 'إدارة الموقع' : language === 'fr' ? 'Gestion Web' : 'Website Manager'}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {language === 'ar' ? 'تحكم كامل في عروضك والتواصل' : language === 'fr' ? 'Contrôle complet de vos offres' : 'Complete control over your offers'}
-            </p>
-          </div>
-        </div>
+        <PageHero
+          eyebrow={language === 'ar' ? 'المتجر الإلكتروني' : language === 'fr' ? 'Boutique en ligne' : 'Online store'}
+          icon={Globe}
+          title={language === 'ar' ? 'إدارة الموقع' : language === 'fr' ? 'Gestion Web' : 'Website Manager'}
+          description={language === 'ar' ? 'تحكم كامل في عروضك والتواصل' : language === 'fr' ? 'Produits, offres, packs, contacts et livraison de votre boutique — au même endroit.' : 'Products, offers, packs, contacts and delivery for your store — in one place.'}
+          actions={
+            <Button variant="outline" onClick={() => window.open('/website-shop', '_blank')}>
+              <Eye className="h-4 w-4" /> {language === 'ar' ? 'عرض المتجر' : language === 'fr' ? 'Voir la boutique' : 'View store'}
+            </Button>
+          }
+          stats={[
+            { label: language === 'fr' ? 'Produits' : language === 'ar' ? 'منتجات' : 'Products', value: products.length },
+            { label: language === 'fr' ? 'Offres spéciales' : language === 'ar' ? 'عروض خاصة' : 'Special offers', value: specialOffers.length },
+            { label: 'Packs', value: packages.length },
+            { label: language === 'fr' ? 'Offres' : language === 'ar' ? 'عروض' : 'Offers', value: offers.length },
+          ]}
+        />
 
         {/* Tabs Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-wrap gap-3 mb-8 overflow-x-auto pb-2"
-        >
-          <motion.button
-            onClick={() => setActiveTab('offers')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-              activeTab === 'offers'
-                ? 'text-primary-foreground shadow-sm bg-primary'
-                : 'bg-card text-foreground border-2 border-border hover:border-border'
-            }`}
-          >
-            {language === 'ar' ? 'عروض' : language === 'fr' ? 'Offres' : 'Offers'}
-          </motion.button>
-
-          <motion.button
-            onClick={() => setActiveTab('special')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-              activeTab === 'special'
-                ? 'text-primary-foreground shadow-sm bg-primary'
-                : 'bg-card text-foreground border-2 border-border hover:border-border'
-            }`}
-          >
-            {language === 'ar' ? 'عروض خاصة' : language === 'fr' ? 'Spéciales' : 'Special'}
-          </motion.button>
-
-          <motion.button
-            onClick={() => setActiveTab('packages')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-              activeTab === 'packages'
-                ? 'text-primary-foreground shadow-sm bg-primary'
-                : 'bg-card text-foreground border-2 border-border hover:border-border'
-            }`}
-          >
-            {language === 'ar' ? 'باقات' : language === 'fr' ? 'Packs' : 'Packages'}
-          </motion.button>
-
-          <motion.button
-            onClick={() => setActiveTab('contacts')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-              activeTab === 'contacts'
-                ? 'text-primary-foreground shadow-sm bg-primary'
-                : 'bg-card text-foreground border-2 border-border hover:border-border'
-            }`}
-          >
-            {language === 'ar' ? 'جهات الاتصال' : language === 'fr' ? 'Contacts' : 'Contacts'}
-          </motion.button>
-
-          <motion.button
-            onClick={() => setActiveTab('delivery')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-              activeTab === 'delivery'
-                ? 'text-primary-foreground shadow-sm bg-primary'
-                : 'bg-card text-foreground border-2 border-border hover:border-border'
-            }`}
-          >
-            {language === 'ar' ? 'التوصيل' : language === 'fr' ? 'Livraison' : 'Delivery'}
-          </motion.button>
-
-          <motion.button
-            onClick={() => setActiveTab('settings')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
-              activeTab === 'settings'
-                ? 'text-primary-foreground shadow-sm bg-primary'
-                : 'bg-card text-foreground border-2 border-border hover:border-border'
-            }`}
-          >
-            {language === 'ar' ? 'الإعدادات' : language === 'fr' ? 'Paramètres' : 'Settings'}
-          </motion.button>
-        </motion.div>
+        <div className="mb-6 overflow-x-auto rounded-2xl border border-border bg-card p-1.5 shadow-sm">
+          <div className="flex min-w-max gap-1" role="tablist">
+            {([
+              ['offers', ShoppingBag, language === 'ar' ? 'المنتجات' : language === 'fr' ? 'Produits' : 'Products', products.length],
+              ['special', Tag, language === 'ar' ? 'عروض خاصة' : language === 'fr' ? 'Offres spéciales' : 'Special offers', specialOffers.length],
+              ['packages', PackageIcon, language === 'ar' ? 'باقات' : 'Packs', packages.length],
+              ['contacts', Phone, language === 'ar' ? 'جهات الاتصال' : 'Contacts', null],
+              ['delivery', Truck, language === 'ar' ? 'التوصيل' : language === 'fr' ? 'Livraison' : 'Delivery', null],
+              ['settings', Settings, language === 'ar' ? 'الإعدادات' : language === 'fr' ? 'Paramètres' : 'Settings', null],
+            ] as const).map(([key, Icon, label, count]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === key}
+                onClick={() => setActiveTab(key)}
+                className={`inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-[10px] px-4 text-sm font-semibold transition-colors ${
+                  activeTab === key ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+                {count !== null && (
+                  <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${activeTab === key ? 'bg-[#C6F432] text-[#0B1220]' : 'bg-surface-2 text-foreground'}`}>{count}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Content */}
         <AnimatePresence mode="wait">
@@ -1306,13 +1256,12 @@ export default function Website_Enhanced() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-6"
             >
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="w-full text-primary-foreground px-8 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-sm bg-primary"
-              >
-                <ShoppingBag className="h-6 w-6" />
-                {language === 'ar' ? 'جميع منتجات المتجر' : language === 'fr' ? 'Tous les Produits de la Boutique' : 'All Store Products'}
-              </motion.div>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">{language === 'ar' ? 'جميع منتجات المتجر' : language === 'fr' ? 'Tous les produits de la boutique' : 'All store products'}</h2>
+                  <p className="text-sm text-muted-foreground">{products.length} {language === 'fr' ? 'produits publiés' : 'products'}</p>
+                </div>
+              </div>
 
               {products.length === 0 ? (
                 <motion.div
@@ -1326,93 +1275,63 @@ export default function Website_Enhanced() {
                   </p>
                 </motion.div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {products.map((product) => (
                     <motion.div
                       key={product.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      whileHover={{ y: -10 }}
-                      className="bg-card rounded-2xl border-2 border-border overflow-hidden shadow-sm hover:shadow-md transition-all"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                     >
-                      <div className="relative h-40 overflow-hidden flex items-center justify-center bg-card">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-surface-2">
                         {product.primary_image ? (
-                          <img
-                            src={product.primary_image}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={product.primary_image} alt={product.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
-                          <PackageIcon className="h-16 w-16 text-muted-foreground" />
+                          <div className="flex h-full w-full items-center justify-center"><PackageIcon className="h-12 w-12 text-muted-foreground" /></div>
+                        )}
+                        {product.mark && (
+                          <span className="absolute right-3 top-3 rounded-full bg-[#0B1220]/85 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">{product.mark.name}</span>
                         )}
                       </div>
-
-                      <div className="p-5 space-y-4">
-                        <div>
-                          <h3 className="font-bold text-lg text-foreground line-clamp-2">{product.name}</h3>
-                          {product.mark && (
-                            <p className="text-sm text-electric">{product.mark.name}</p>
-                          )}
-                        </div>
-                        
+                      <div className="flex flex-1 flex-col p-4">
+                        <h3 className="line-clamp-2 min-h-[2.5rem] text-[15px] font-semibold leading-tight text-foreground">{product.name}</h3>
                         {(product.voltage || product.wattage || product.amperage) && (
-                          <div className="grid grid-cols-3 gap-2 text-xs">
-                            {product.voltage && (
-                              <div className="bg-surface-2 rounded p-2 text-center">
-                                <span className="font-bold text-electric">{product.voltage}V</span>
-                              </div>
-                            )}
-                            {product.wattage && (
-                              <div className="bg-surface-2 rounded p-2 text-center">
-                                <span className="font-bold text-electric">{product.wattage}W</span>
-                              </div>
-                            )}
-                            {product.amperage && (
-                              <div className="bg-surface-2 rounded p-2 text-center">
-                                <span className="font-bold text-electric">{product.amperage}A</span>
-                              </div>
-                            )}
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {product.voltage ? <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-semibold tabular-nums"><Zap className="h-3 w-3 text-electric" />{product.voltage}V</span> : null}
+                            {product.wattage ? <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-semibold tabular-nums"><Zap className="h-3 w-3 text-electric" />{product.wattage}W</span> : null}
+                            {product.amperage ? <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-semibold tabular-nums"><Zap className="h-3 w-3 text-electric" />{product.amperage}A</span> : null}
                           </div>
                         )}
-
-                        <div className="flex items-center gap-3 bg-surface-2 p-3 rounded-xl">
-                          <span className="text-2xl font-bold text-success">{product.selling_price?.toFixed(2) || 0} DZD</span>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <motion.button
-                            whileHover={{ scale: 1.08 }}
-                            whileTap={{ scale: 0.92 }}
-                            onClick={() => {
-                              const boutiquUrl = window.location.origin + '/website-shop/offers#product-' + product.id;
-                              navigator.clipboard.writeText(boutiquUrl);
-                              alert(language === 'ar' ? 'تم نسخ الرابط' : language === 'fr' ? 'Lien copié' : 'Link copied');
-                            }}
-                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
-                          >
-                            <Copy className="h-4 w-4" />
-                            {language === 'ar' ? 'نسخ' : 'Copy'}
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.08 }}
-                            whileTap={{ scale: 0.92 }}
-                            onClick={() => window.open('/website-shop/offers', '_blank')}
-                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
-                          >
-                            <Eye className="h-4 w-4" />
-                            {language === 'ar' ? 'عرض' : 'View'}
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.08 }}
-                            whileTap={{ scale: 0.92 }}
-                            onClick={() => {
-                              alert(language === 'ar' ? 'تحديث المنتج يتم من صفحة المخزون' : language === 'fr' ? 'Mise a jour du produit a partir de la page d\'inventaire' : 'Update product from Inventory page');
-                            }}
-                            className="flex-1 bg-success hover:bg-success/90 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                            {language === 'ar' ? 'تحديث' : 'Edit'}
-                          </motion.button>
+                        <div className="mt-auto pt-4">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{language === 'fr' ? 'Prix boutique' : language === 'ar' ? 'السعر' : 'Store price'}</p>
+                          <p className="font-sora text-xl font-bold tabular-nums text-foreground">{formatDA(product.selling_price)}</p>
+                          <div className="mt-4 grid grid-cols-3 gap-1.5 border-t border-border pt-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const boutiquUrl = window.location.origin + '/website-shop/offers#product-' + product.id;
+                                navigator.clipboard.writeText(boutiquUrl);
+                                toast({ title: language === 'ar' ? 'تم نسخ الرابط' : language === 'fr' ? 'Lien copié' : 'Link copied' });
+                              }}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-surface-2 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                            >
+                              <Copy className="h-4 w-4" />{language === 'ar' ? 'نسخ' : language === 'fr' ? 'Lien' : 'Link'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => window.open('/website-shop/offers', '_blank')}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-electric/10 text-xs font-semibold text-electric transition-colors hover:bg-electric hover:text-white"
+                            >
+                              <Eye className="h-4 w-4" />{language === 'ar' ? 'عرض' : language === 'fr' ? 'Voir' : 'View'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { window.location.href = '/inventory'; }}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-volt text-xs font-semibold text-volt-foreground transition-colors hover:brightness-95"
+                            >
+                              <Edit2 className="h-4 w-4" />{language === 'ar' ? 'تحديث' : language === 'fr' ? 'Modifier' : 'Edit'}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -1432,9 +1351,9 @@ export default function Website_Enhanced() {
               className="space-y-4 sm:space-y-6"
             >
               {/* Header */}
-              <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-primary-foreground shadow-sm sm:shadow-xl bg-primary">
-                <h2 className="text-2xl sm:text-4xl font-black mb-2">{language === 'ar' ? 'الباقات والحزم' : language === 'fr' ? 'Gestion des Packs' : 'Package Management'}</h2>
-                <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? 'إنشء حزم منتجات مخصصة بأسعار جذابة' : language === 'fr' ? 'Créez des bundles de produits personnalisés' : 'Create custom product bundles'}</p>
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                <h2 className="text-lg font-semibold text-foreground">{language === 'ar' ? 'الباقات والحزم' : language === 'fr' ? 'Gestion des Packs' : 'Package Management'}</h2>
+                <p className="text-sm text-muted-foreground">{language === 'ar' ? 'إنشء حزم منتجات مخصصة بأسعار جذابة' : language === 'fr' ? 'Créez des bundles de produits personnalisés' : 'Create custom product bundles'}</p>
               </div>
 
               {/* Create Package Button */}
@@ -1449,7 +1368,7 @@ export default function Website_Enhanced() {
                   setPackageDescription('');
                   setSelectedProductsPackage([]);
                 }}
-                className="w-full text-primary-foreground font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-sm flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all bg-primary"
+                className="w-full text-primary-foreground font-bold text-sm sm:text-lg h-12 sm:h-12 rounded-xl sm:rounded-2xl shadow-sm flex items-center justify-center gap-2 sm:gap-3 border-0 transition-all bg-primary"
               >
                 <Plus className="h-5 sm:h-7 w-5 sm:w-7" />
                 <span className="hidden sm:inline">+ {language === 'ar' ? 'حزمة جديدة' : language === 'fr' ? 'Nouveau Pack' : 'New Package'}</span>
@@ -1462,7 +1381,7 @@ export default function Website_Enhanced() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-12 sm:py-24 rounded-2xl sm:rounded-3xl border-4 border-dashed border-border bg-card"
+                  className="text-center py-12 sm:py-24 rounded-2xl sm:rounded-2xl border-2 border-dashed border-border bg-card"
                 >
                   <motion.div
                     animate={{ y: [0, -10, 0] }}
@@ -1471,7 +1390,7 @@ export default function Website_Enhanced() {
                   >
                     <PackageIcon className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-success" />
                   </motion.div>
-                  <p className="text-xl sm:text-3xl font-black text-foreground mb-2">
+                  <p className="text-xl sm:text-3xl font-bold text-foreground mb-2">
                     {language === 'ar' ? 'لا توجد حزم حالياً' : language === 'fr' ? 'Aucun pack créé' : 'No packages yet'}
                   </p>
                   <p className="text-sm sm:text-lg text-muted-foreground">
@@ -1495,7 +1414,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
                       whileHover={{ y: -4 }}
-                      className={`relative rounded-2xl sm:rounded-3xl border-2 sm:border-3 overflow-hidden shadow-sm sm:shadow-lg hover:shadow-md transition-all ${
+                      className={`relative rounded-2xl sm:rounded-2xl border-2 sm:border-3 overflow-hidden shadow-sm sm:shadow-lg hover:shadow-md transition-all ${
                         !pkg.is_visible
                           ? 'opacity-50 border-border bg-surface-2'
                           : 'border-border bg-card'
@@ -1512,7 +1431,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           animate={{ rotate: [0, 5, -5, 0] }}
                           transition={{ duration: 3, repeat: Infinity }}
-                          className="absolute top-10 sm:top-12 right-2 sm:right-3 text-primary-foreground px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-black z-10 shadow-sm border-2 border-white bg-primary"
+                          className="absolute top-10 sm:top-12 right-2 sm:right-3 text-primary-foreground px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-bold z-10 shadow-sm border-2 border-white bg-primary"
                         >
                           -{pkg.discount_percentage}%
                         </motion.div>
@@ -1526,7 +1445,7 @@ export default function Website_Enhanced() {
                           </div>
                         ) : (
                           <div className="h-32 sm:h-40 flex items-center justify-center bg-card">
-                            <PackageIcon className="h-12 sm:h-16 w-12 sm:w-16 text-success" />
+                            <PackageIcon className="h-12 sm:h-12 w-12 sm:w-16 text-success" />
                           </div>
                         )}
                       </div>
@@ -1534,7 +1453,7 @@ export default function Website_Enhanced() {
                       {/* Content */}
                       <div className="p-4 sm:p-6">
                         {/* Name */}
-                        <h3 className="text-lg sm:text-2xl font-black text-foreground mb-1 line-clamp-2">{pkg.name}</h3>
+                        <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-1 line-clamp-2">{pkg.name}</h3>
 
                         {/* Product Count Badge */}
                         <div className="inline-block bg-success/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-bold text-success mb-3">
@@ -1545,9 +1464,9 @@ export default function Website_Enhanced() {
                         <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 line-clamp-2">{pkg.description || '—'}</p>
 
                         {/* Price Section */}
-                        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 border-2 border-border bg-card">
+                        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 border border-border bg-card">
                           <div className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">{language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}</div>
-                          <div className="text-2xl sm:text-3xl font-black text-success">
+                          <div className="text-2xl sm:text-3xl font-bold text-success">
                             {pkg.package_price?.toFixed(2) || '0.00'} DZD
                           </div>
                         </div>
@@ -1561,7 +1480,7 @@ export default function Website_Enhanced() {
                               setSelectedPackageDetails(pkg);
                               setShowPackageDetails(true);
                             }}
-                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-border bg-primary"
+                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border border-border bg-primary"
                             title="View details"
                           >
                             
@@ -1572,7 +1491,7 @@ export default function Website_Enhanced() {
                             whileHover={{ scale: 1.08, y: -3 }}
                             whileTap={{ scale: 0.92 }}
                             onClick={() => handleEditPackage(pkg)}
-                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-border bg-primary"
+                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border border-border bg-primary"
                             title="Edit package"
                           >
                             
@@ -1601,7 +1520,7 @@ export default function Website_Enhanced() {
                               setSelectedPackageDelete(pkg.id);
                               setShowDeletePackageDialog(true);
                             }}
-                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-border bg-primary"
+                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border border-border bg-primary"
                             title="Delete package"
                           >
                             
@@ -1616,9 +1535,9 @@ export default function Website_Enhanced() {
 
               {/* Create Package Dialog */}
               <Dialog open={showCreatePackageDialog} onOpenChange={setShowCreatePackageDialog}>
-                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col bg-card">
+                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] border-2 sm:border-3 border-border rounded-2xl sm:rounded-2xl shadow-sm sm:shadow-md p-4 sm:p-6 overflow-y-auto flex flex-col bg-card">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-success font-black">
+                    <DialogTitle className="text-2xl sm:text-2xl flex items-center gap-2 sm:gap-3 text-success font-bold">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                         
                       </motion.div>
@@ -1631,8 +1550,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
-                    <div className="bg-surface-2 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
-                      <h3 className="text-lg sm:text-xl font-black text-success mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-border">
+                      <h3 className="text-lg sm:text-xl font-bold text-success mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
                         {/* Package Name */}
@@ -1644,7 +1563,7 @@ export default function Website_Enhanced() {
                             value={packageName}
                             onChange={(e) => setPackageName(e.target.value)}
                             placeholder={language === 'ar' ? 'أدخل اسم الحزمة' : language === 'fr' ? 'Nom du pack' : 'Package name'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1658,7 +1577,7 @@ export default function Website_Enhanced() {
                             value={packagePrice}
                             onChange={(e) => setPackagePrice(e.target.value)}
                             placeholder="0.00"
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1671,7 +1590,7 @@ export default function Website_Enhanced() {
                             value={packageDescription}
                             onChange={(e) => setPackageDescription(e.target.value)}
                             placeholder={language === 'ar' ? 'وصف الحزمة' : language === 'fr' ? 'Description du pack' : 'Package description'}
-                            className="w-full p-3 sm:p-4 border-2 border-border rounded-lg sm:rounded-xl text-sm sm:text-base h-20 sm:h-24 resize-none font-semibold"
+                            className="w-full p-3 sm:p-4 border border-border rounded-lg sm:rounded-xl text-sm sm:text-base h-20 sm:h-24 resize-none font-semibold"
                           />
                         </div>
 
@@ -1693,7 +1612,7 @@ export default function Website_Enhanced() {
                                 alt="Package preview"
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="h-12 sm:h-16 w-12 sm:w-16 rounded-lg object-cover border-2 border-border"
+                                className="h-12 sm:h-12 w-12 sm:w-16 rounded-lg object-cover border border-border"
                               />
                             )}
                           </div>
@@ -1702,8 +1621,8 @@ export default function Website_Enhanced() {
                     </div>
 
                     {/* Step 2: Search and Add Products */}
-                    <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
-                      <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">{language === 'ar' ? 'اختر المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
+                    <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border">
+                      <h3 className="text-lg sm:text-xl font-bold text-electric mb-3 sm:mb-4">{language === 'ar' ? 'اختر المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
                       
                       <div className="space-y-3">
                         <Input
@@ -1711,7 +1630,7 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'ابحث عن منتج...' : language === 'fr' ? 'Rechercher un produit' : 'Search product...'}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
+                          className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl"
                         />
 
                         {/* Product Selection */}
@@ -1737,7 +1656,7 @@ export default function Website_Enhanced() {
                                     key={product.id}
                                     onClick={() => handleSelectProductForPackage(product)}
                                     whileHover={{ x: 5, scale: 1.02 }}
-                                    className="w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl transition-all border-2 border-border bg-card"
+                                    className="w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl transition-all border border-border bg-card"
                                   >
                                     <div className="font-bold text-sm sm:text-base text-electric">
                                       {product.name}
@@ -1755,8 +1674,8 @@ export default function Website_Enhanced() {
 
                     {/* Step 3: Selected Products */}
                     {selectedProductsPackage.length > 0 && (
-                      <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
-                        <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">
+                      <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border">
+                        <h3 className="text-lg sm:text-xl font-bold text-electric mb-3 sm:mb-4">
                           {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
                         <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -1766,7 +1685,7 @@ export default function Website_Enhanced() {
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.1 }}
-                              className="p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 border-border shadow-sm bg-card"
+                              className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border shadow-sm bg-card"
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex-1 min-w-0">
@@ -1798,7 +1717,7 @@ export default function Website_Enhanced() {
                                     min="1"
                                     value={item.quantity}
                                     onChange={(e) => handleUpdateProductQuantity(item.product.id, parseInt(e.target.value))}
-                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border border-border rounded-lg"
                                   />
                                 </div>
                                 <div>
@@ -1810,7 +1729,7 @@ export default function Website_Enhanced() {
                                     step="0.01"
                                     value={item.customPrice}
                                     onChange={(e) => handleUpdateProductPrice(item.product.id, e.target.value)}
-                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border border-border rounded-lg"
                                   />
                                 </div>
                               </div>
@@ -1830,7 +1749,7 @@ export default function Website_Enhanced() {
                     </Button>
                     <Button
                       onClick={handleCreatePackage}
-                      className="flex-1 text-primary-foreground font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 bg-primary"
+                      className="flex-1 text-primary-foreground font-bold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 bg-primary"
                     >
                       <Plus className="h-5 sm:h-6 w-5 sm:w-6" />
                       <span className="hidden sm:inline">{language === 'ar' ? 'إنشاء الحزمة' : language === 'fr' ? 'Créer le Pack' : 'Create Package'}</span>
@@ -1842,9 +1761,9 @@ export default function Website_Enhanced() {
 
               {/* Edit Package Dialog */}
               <Dialog open={showEditPackageDialog} onOpenChange={setShowEditPackageDialog}>
-                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col bg-card">
+                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] border-2 sm:border-3 border-border rounded-2xl sm:rounded-2xl shadow-sm sm:shadow-md p-4 sm:p-6 overflow-y-auto flex flex-col bg-card">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-warning font-black">
+                    <DialogTitle className="text-2xl sm:text-2xl flex items-center gap-2 sm:gap-3 text-warning font-bold">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                         
                       </motion.div>
@@ -1857,8 +1776,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
-                    <div className="bg-surface-2 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
-                      <h3 className="text-lg sm:text-xl font-black text-warning mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-border">
+                      <h3 className="text-lg sm:text-xl font-bold text-warning mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
                         {/* Package Name */}
@@ -1870,7 +1789,7 @@ export default function Website_Enhanced() {
                             value={packageName}
                             onChange={(e) => setPackageName(e.target.value)}
                             placeholder={language === 'ar' ? 'أدخل اسم الحزمة' : language === 'fr' ? 'Nom du pack' : 'Package name'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1884,7 +1803,7 @@ export default function Website_Enhanced() {
                             value={packagePrice}
                             onChange={(e) => setPackagePrice(e.target.value)}
                             placeholder="0.00"
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1897,15 +1816,15 @@ export default function Website_Enhanced() {
                             value={packageDescription}
                             onChange={(e) => setPackageDescription(e.target.value)}
                             placeholder={language === 'ar' ? 'أدخل وصف الحزمة' : language === 'fr' ? 'Description du pack' : 'Package description'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Step 2: Product Selection */}
-                    <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
-                      <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">{language === 'ar' ? 'اختيار المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
+                    <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border">
+                      <h3 className="text-lg sm:text-xl font-bold text-electric mb-3 sm:mb-4">{language === 'ar' ? 'اختيار المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
                       
                       {/* Search Field */}
                       <div className="mb-4">
@@ -1914,7 +1833,7 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'ابحث عن منتج...' : language === 'fr' ? 'Rechercher un produit' : 'Search product name...'}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl w-full"
+                          className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl w-full"
                         />
                       </div>
 
@@ -1957,8 +1876,8 @@ export default function Website_Enhanced() {
 
                     {/* Step 3: Selected Products */}
                     {selectedProductsPackage.length > 0 && (
-                      <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
-                        <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">
+                      <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-border">
+                        <h3 className="text-lg sm:text-xl font-bold text-electric mb-3 sm:mb-4">
                           {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
                         <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -1968,7 +1887,7 @@ export default function Website_Enhanced() {
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.1 }}
-                              className="p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 border-border shadow-sm bg-card"
+                              className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border shadow-sm bg-card"
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex-1 min-w-0">
@@ -2000,7 +1919,7 @@ export default function Website_Enhanced() {
                                     min="1"
                                     value={item.quantity}
                                     onChange={(e) => handleUpdateProductQuantity(item.product.id, parseInt(e.target.value))}
-                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border border-border rounded-lg"
                                   />
                                 </div>
                                 <div>
@@ -2012,7 +1931,7 @@ export default function Website_Enhanced() {
                                     step="0.01"
                                     value={item.customPrice}
                                     onChange={(e) => handleUpdateProductPrice(item.product.id, e.target.value)}
-                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border border-border rounded-lg"
                                   />
                                 </div>
                               </div>
@@ -2032,7 +1951,7 @@ export default function Website_Enhanced() {
                     </Button>
                     <Button
                       onClick={handleUpdatePackage}
-                      className="flex-1 text-primary-foreground font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 bg-primary"
+                      className="flex-1 text-primary-foreground font-bold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 bg-primary"
                     >
                       <Check className="h-5 sm:h-6 w-5 sm:w-6" />
                       <span className="hidden sm:inline">{language === 'ar' ? 'حفظ التغييرات' : language === 'fr' ? 'Sauvegarder' : 'Save Changes'}</span>
@@ -2045,7 +1964,7 @@ export default function Website_Enhanced() {
               {/* Package Details Dialog */}
               {selectedPackageDetails && (
                 <Dialog open={showPackageDetails} onOpenChange={setShowPackageDetails}>
-                  <DialogContent className="max-w-2xl bg-card border-2 border-border rounded-2xl">
+                  <DialogContent className="max-w-2xl bg-card border border-border rounded-2xl">
                     <DialogHeader>
                       <DialogTitle className="text-3xl flex items-center gap-2 text-success">
                         <PackageIcon className="h-8 w-8" />
@@ -2078,7 +1997,7 @@ export default function Website_Enhanced() {
                                 key={item.id} 
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="p-4 rounded-xl border-2 border-border flex gap-4 items-start hover:shadow-md transition-all bg-card"
+                                className="p-4 rounded-xl border border-border flex gap-4 items-start hover:shadow-md transition-all bg-card"
                               >
                                 {item.product_image && (
                                   <img src={item.product_image} alt={item.product_name} className="h-20 w-20 object-cover rounded-lg flex-shrink-0" />
@@ -2127,7 +2046,7 @@ export default function Website_Enhanced() {
 
               {/* Delete Package Dialog */}
               <Dialog open={showDeletePackageDialog} onOpenChange={setShowDeletePackageDialog}>
-                <DialogContent className="bg-surface-2 border-2 border-border">
+                <DialogContent className="bg-surface-2 border border-border">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-destructive text-2xl">
                       <AlertCircle className="h-7 w-7" />
@@ -2182,7 +2101,7 @@ export default function Website_Enhanced() {
                   setSearchQuery('');
                   setOriginalPriceSpecial(0);
                 }}
-                className="w-full text-primary-foreground font-bold text-lg h-14 rounded-2xl shadow-sm flex items-center justify-center gap-3 bg-primary"
+                className="w-full text-primary-foreground font-bold text-lg h-12 rounded-[12px] shadow-sm flex items-center justify-center gap-3 bg-primary"
               >
                 <Plus className="h-6 w-6" />
                 {t.special.create}
@@ -2261,7 +2180,7 @@ export default function Website_Enhanced() {
                             href={offer.whatsapp_link || '#'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             className="w-full bg-success hover:bg-success/90 text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2 mb-3 transition-colors"
                           >
                             <MessageCircle className="h-5 w-5" />
@@ -2272,7 +2191,7 @@ export default function Website_Enhanced() {
                         {/* Actions */}
                         <div className="flex gap-2">
                           <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => {
                               setSelectedSpecialDetails(offer);
                               setShowSpecialDetails(true);
@@ -2282,7 +2201,7 @@ export default function Website_Enhanced() {
                             {t.common.view}
                           </motion.button>
                           <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => {
                               setEditingSpecialOffer(offer);
                               setSelectedProductSpecial(undefined as any);
@@ -2297,7 +2216,7 @@ export default function Website_Enhanced() {
                             
                           </motion.button>
                           <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => {
                               setSelectedSpecialDelete(offer.id);
                               setShowDeleteSpecialDialog(true);
@@ -2315,7 +2234,7 @@ export default function Website_Enhanced() {
 
               {/* Create Special Offer Dialog with Price Visibility */}
               <Dialog open={showCreateSpecialDialog} onOpenChange={setShowCreateSpecialDialog}>
-                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] bg-card border-2 border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 overflow-y-auto flex flex-col">
+                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] bg-card border border-border rounded-2xl sm:rounded-2xl p-4 sm:p-6 overflow-y-auto flex flex-col">
                   <DialogHeader>
                     <DialogTitle className="text-3xl flex items-center gap-2 text-electric">
                       <Tag className="h-8 w-8" />
@@ -2340,7 +2259,7 @@ export default function Website_Enhanced() {
 
                         {/* Products Search Results */}
                         {searchQuery && (
-                          <div className="max-h-48 overflow-y-auto border-2 border-border rounded-xl p-3 space-y-2">
+                          <div className="max-h-48 overflow-y-auto border border-border rounded-xl p-3 space-y-2">
                             {products
                               .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.mark?.name.toLowerCase().includes(searchQuery.toLowerCase()))
                               .map((product) => (
@@ -2358,7 +2277,7 @@ export default function Website_Enhanced() {
                         )}
 
                         {selectedProductSpecial && (
-                          <div className="p-4 bg-surface-2 rounded-xl border-2 border-border">
+                          <div className="p-4 bg-surface-2 rounded-xl border border-border">
                             <p className="font-bold text-electric">
                               {selectedProductSpecial.name}
                             </p>
@@ -2372,7 +2291,7 @@ export default function Website_Enhanced() {
                       <Label className="text-lg font-bold">{t.special.price_toggle}</Label>
                       <div className="grid grid-cols-2 gap-4">
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
+                          whileHover={{ y: -2 }}
                           onClick={() => setShowSpecialPrice(true)}
                           className={`p-4 rounded-xl border-2 font-bold transition-all ${
                             showSpecialPrice
@@ -2383,7 +2302,7 @@ export default function Website_Enhanced() {
                           {t.special.display}
                         </motion.button>
                         <motion.button
-                          whileHover={{ scale: 1.05 }}
+                          whileHover={{ y: -2 }}
                           onClick={() => setShowSpecialPrice(false)}
                           className={`p-4 rounded-xl border-2 font-bold transition-all ${
                             !showSpecialPrice
@@ -2428,7 +2347,7 @@ export default function Website_Enhanced() {
                         value={specialOfferDescription}
                         onChange={(e) => setSpecialOfferDescription(e.target.value)}
                         placeholder={!showSpecialPrice ? t.special.description_req : 'Optional description...'}
-                        className="w-full p-3 border-2 border-border rounded-xl text-base h-24 resize-none"
+                        className="w-full p-3 border border-border rounded-xl text-base h-24 resize-none"
                       />
                     </div>
                   </div>
@@ -2450,7 +2369,7 @@ export default function Website_Enhanced() {
               {/* Special Offer Details Dialog */}
               {selectedSpecialDetails && (
                 <Dialog open={showSpecialDetails} onOpenChange={setShowSpecialDetails}>
-                  <DialogContent className="max-w-2xl bg-card border-2 border-border rounded-2xl">
+                  <DialogContent className="max-w-2xl bg-card border border-border rounded-2xl">
                     <DialogHeader>
                       <DialogTitle className="text-3xl flex items-center gap-2 text-electric">
                         <Tag className="h-8 w-8" />
@@ -2474,13 +2393,13 @@ export default function Website_Enhanced() {
                       )}
 
                       {!selectedSpecialDetails.show_price && (
-                        <div className="bg-surface-2 border-2 border-border p-4 rounded-xl">
+                        <div className="bg-surface-2 border border-border p-4 rounded-xl">
                           <p className="font-bold text-warning mb-3">Price Hidden - Contact via WhatsApp</p>
                           <motion.a
                             href={selectedSpecialDetails.whatsapp_link || '#'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             className="block w-full bg-success hover:bg-success/90 text-white font-bold py-3 rounded-lg text-center"
                           >
                             Contact on WhatsApp
@@ -2507,7 +2426,7 @@ export default function Website_Enhanced() {
 
               {/* Delete Special Offer Dialog */}
               <Dialog open={showDeleteSpecialDialog} onOpenChange={setShowDeleteSpecialDialog}>
-                <DialogContent className="bg-surface-2 border-2 border-border">
+                <DialogContent className="bg-surface-2 border border-border">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-destructive text-2xl">
                       <AlertCircle className="h-7 w-7" />
@@ -2566,7 +2485,7 @@ export default function Website_Enhanced() {
                     <Globe className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-4xl font-black text-foreground">
+                    <h2 className="text-4xl font-bold text-foreground">
                       {language === 'ar' ? 'إدارة جهات الاتصال' : 'Gestion des Contacts'}
                     </h2>
                     <p className="text-muted-foreground mt-2">
@@ -2605,7 +2524,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.25 }}
                     >
-                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                      <div className="bg-card rounded-2xl p-5 border border-border hover:border-electric hover:shadow-md transition-all duration-300">
                         <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <Facebook className="h-5 w-5" />
                           <span>Facebook</span>
@@ -2615,7 +2534,7 @@ export default function Website_Enhanced() {
                           placeholder="https://facebook.com/yourpage"
                           value={settings.facebook_url || ''}
                           onChange={(e) => setSettings({ ...settings, facebook_url: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2626,7 +2545,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 }}
                     >
-                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                      <div className="bg-card rounded-2xl p-5 border border-border hover:border-electric hover:shadow-md transition-all duration-300">
                         <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <Instagram className="h-5 w-5" />
                           <span>Instagram</span>
@@ -2636,7 +2555,7 @@ export default function Website_Enhanced() {
                           placeholder="https://instagram.com/yourprofile"
                           value={settings.instagram_url || ''}
                           onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2657,7 +2576,7 @@ export default function Website_Enhanced() {
                           placeholder="https://tiktok.com/@yourprofile"
                           value={settings.tiktok_url || ''}
                           onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-border bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-border bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2668,7 +2587,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 }}
                     >
-                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-destructive hover:shadow-md transition-all duration-300">
+                      <div className="bg-card rounded-2xl p-5 border border-border hover:border-destructive hover:shadow-md transition-all duration-300">
                         <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-destructive">
                           <Map className="h-5 w-5" />
                           <span>{language === 'ar' ? 'خرائط Google' : 'Google Maps'}</span>
@@ -2678,7 +2597,7 @@ export default function Website_Enhanced() {
                           placeholder="https://maps.google.com/..."
                           value={settings.location || ''}
                           onChange={(e) => setSettings({ ...settings, location: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-destructive bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-destructive bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2715,7 +2634,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 }}
                     >
-                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-success hover:shadow-md transition-all duration-300">
+                      <div className="bg-card rounded-2xl p-5 border border-border hover:border-success hover:shadow-md transition-all duration-300">
                         <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-success">
                           <Phone className="h-5 w-5" />
                           <span>{language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}</span>
@@ -2725,7 +2644,7 @@ export default function Website_Enhanced() {
                           placeholder="+213 5XX XX XX XX"
                           value={settings.phone_number || ''}
                           onChange={(e) => setSettings({ ...settings, phone_number: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-success bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-success bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2736,7 +2655,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.55 }}
                     >
-                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-success hover:shadow-md transition-all duration-300">
+                      <div className="bg-card rounded-2xl p-5 border border-border hover:border-success hover:shadow-md transition-all duration-300">
                         <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-success">
                           <MessageCircle className="h-5 w-5" />
                           <span>WhatsApp</span>
@@ -2746,7 +2665,7 @@ export default function Website_Enhanced() {
                           placeholder="+213 5XX XX XX XX"
                           value={settings.whatsapp_number || ''}
                           onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-success bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-success bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2757,7 +2676,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.6 }}
                     >
-                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                      <div className="bg-card rounded-2xl p-5 border border-border hover:border-electric hover:shadow-md transition-all duration-300">
                         <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <Send className="h-5 w-5" />
                           <span>Telegram</span>
@@ -2767,7 +2686,7 @@ export default function Website_Enhanced() {
                           placeholder="@yourusername or +213..."
                           value={settings.telegram_number || ''}
                           onChange={(e) => setSettings({ ...settings, telegram_number: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2778,7 +2697,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.65 }}
                     >
-                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                      <div className="bg-card rounded-2xl p-5 border border-border hover:border-electric hover:shadow-md transition-all duration-300">
                         <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <MapPin className="h-5 w-5" />
                           <span>{language === 'ar' ? 'العنوان' : 'Adresse'}</span>
@@ -2788,7 +2707,7 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'أدخل العنوان الكامل' : 'Entrez l\'adresse complète'}
                           value={settings.location || ''}
                           onChange={(e) => setSettings({ ...settings, location: e.target.value })}
-                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
+                          className="border border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2847,8 +2766,8 @@ export default function Website_Enhanced() {
               className="space-y-6"
             >
               {/* Header */}
-              <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-primary-foreground shadow-sm sm:shadow-xl bg-primary">
-                <h2 className="text-2xl sm:text-4xl font-black mb-2">{language === 'ar' ? 'إدارة التوصيل' : language === 'fr' ? 'Gestion de la Livraison' : 'Delivery Management'}</h2>
+              <div className="rounded-2xl sm:rounded-2xl p-4 sm:p-8 text-primary-foreground shadow-sm sm:shadow-md bg-primary">
+                <h2 className="text-2xl sm:text-2xl font-bold mb-2">{language === 'ar' ? 'إدارة التوصيل' : language === 'fr' ? 'Gestion de la Livraison' : 'Delivery Management'}</h2>
                 <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? 'إضافة وإدارة شركات التوصيل والأسعار' : language === 'fr' ? 'Ajoutez et gérez les agences de livraison' : 'Manage delivery agencies and prices'}</p>
               </div>
 
@@ -2866,7 +2785,7 @@ export default function Website_Enhanced() {
                   setPriceDomicile('');
                   setPriceBureau('');
                 }}
-                className="w-full text-primary-foreground font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-sm flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all bg-primary"
+                className="w-full text-primary-foreground font-bold text-sm sm:text-lg h-12 sm:h-12 rounded-xl sm:rounded-2xl shadow-sm flex items-center justify-center gap-2 sm:gap-3 border-0 transition-all bg-primary"
               >
                 <Plus className="h-5 sm:h-7 w-5 sm:w-7" />
                 <span className="hidden sm:inline">+ {language === 'ar' ? 'شركة توصيل جديدة' : language === 'fr' ? 'Nouvelle Agence' : 'New Agency'}</span>
@@ -2878,7 +2797,7 @@ export default function Website_Enhanced() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-12 sm:py-24 rounded-2xl sm:rounded-3xl border-4 border-dashed border-border bg-card"
+                  className="text-center py-12 sm:py-24 rounded-2xl sm:rounded-2xl border-2 border-dashed border-border bg-card"
                 >
                   <motion.div
                     animate={{ y: [0, -10, 0] }}
@@ -2887,7 +2806,7 @@ export default function Website_Enhanced() {
                   >
                     <Truck className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-warning" />
                   </motion.div>
-                  <p className="text-xl sm:text-3xl font-black text-foreground mb-2">
+                  <p className="text-xl sm:text-3xl font-bold text-foreground mb-2">
                     {language === 'ar' ? 'لا توجد شركات توصيل حالياً' : language === 'fr' ? 'Aucune agence de livraison' : 'No delivery agencies yet'}
                   </p>
                   <p className="text-sm sm:text-lg text-muted-foreground">
@@ -2903,7 +2822,7 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
                       whileHover={{ y: -4 }}
-                      className={`relative rounded-2xl sm:rounded-3xl border-2 sm:border-3 overflow-hidden shadow-sm sm:shadow-lg hover:shadow-md transition-all p-4 sm:p-6 ${
+                      className={`relative rounded-2xl sm:rounded-2xl border-2 sm:border-3 overflow-hidden shadow-sm sm:shadow-lg hover:shadow-md transition-all p-4 sm:p-6 ${
                         !agency.is_visible
                           ? 'opacity-50 border-border bg-surface-2'
                           : 'border-border bg-card'
@@ -2941,7 +2860,7 @@ export default function Website_Enhanced() {
                         {/* Actions */}
                         <div className="grid grid-cols-4 gap-2 pt-3 sm:pt-4">
                           <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => handleOpenWilayaPricingDialog(agency)}
                             className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Manage Prices"
@@ -2949,7 +2868,7 @@ export default function Website_Enhanced() {
                             
                           </motion.button>
                           <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => handleEditDeliveryAgency(agency)}
                             className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Edit"
@@ -2957,7 +2876,7 @@ export default function Website_Enhanced() {
                             
                           </motion.button>
                           <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => handleToggleDeliveryVisibility(agency)}
                             className={`font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl ${
                               agency.is_visible
@@ -2969,7 +2888,7 @@ export default function Website_Enhanced() {
                             {agency.is_visible ? '' : ''}
                           </motion.button>
                           <motion.button
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => {
                               setSelectedDeliveryDelete(agency.id);
                               setShowDeleteDeliveryDialog(true);
@@ -2988,9 +2907,9 @@ export default function Website_Enhanced() {
 
               {/* Create/Edit Delivery Agency Dialog */}
               <Dialog open={showCreateDeliveryDialog} onOpenChange={setShowCreateDeliveryDialog}>
-                <DialogContent className="max-w-full w-full sm:max-w-2xl mx-auto border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto bg-card">
+                <DialogContent className="max-w-full w-full sm:max-w-2xl mx-auto border-2 sm:border-3 border-border rounded-2xl sm:rounded-2xl shadow-sm sm:shadow-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto bg-card">
                   <DialogHeader className="mb-4 sm:mb-6">
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-warning font-black line-clamp-2">
+                    <DialogTitle className="text-2xl sm:text-2xl flex items-center gap-2 sm:gap-3 text-warning font-bold line-clamp-2">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex-shrink-0">
                         
                       </motion.div>
@@ -3005,8 +2924,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-3 sm:space-y-6 py-2 sm:py-4">
                     {/* Section 1: Basic Info */}
-                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-border">
-                      <h3 className="text-base sm:text-lg font-black text-warning mb-3 sm:mb-4">{language === 'ar' ? 'المعلومات الأساسية' : language === 'fr' ? 'Informations de Base' : 'Basic Info'}</h3>
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border border-border">
+                      <h3 className="text-base sm:text-lg font-bold text-warning mb-3 sm:mb-4">{language === 'ar' ? 'المعلومات الأساسية' : language === 'fr' ? 'Informations de Base' : 'Basic Info'}</h3>
                       
                       <div className="space-y-2 sm:space-y-3">
                         {/* Agency Name */}
@@ -3018,7 +2937,7 @@ export default function Website_Enhanced() {
                             value={agencyName}
                             onChange={(e) => setAgencyName(e.target.value)}
                             placeholder={language === 'ar' ? 'مثل: Yassir' : language === 'fr' ? 'Ex: Yassir' : 'E.g: Yassir'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl font-semibold"
+                            className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl font-semibold"
                           />
                         </div>
 
@@ -3031,7 +2950,7 @@ export default function Website_Enhanced() {
                             value={agencyDescription}
                             onChange={(e) => setAgencyDescription(e.target.value)}
                             placeholder={language === 'ar' ? 'وصف الخدمة' : language === 'fr' ? 'Description du service' : 'Service description'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl font-semibold"
+                            className="h-10 sm:h-12 text-sm sm:text-base border border-border rounded-lg sm:rounded-xl font-semibold"
                           />
                         </div>
                       </div>
@@ -3076,7 +2995,7 @@ export default function Website_Enhanced() {
 
               {/* Delete Delivery Agency Dialog */}
               <Dialog open={showDeleteDeliveryDialog} onOpenChange={setShowDeleteDeliveryDialog}>
-                <DialogContent className="bg-surface-2 border-2 border-border rounded-2xl">
+                <DialogContent className="bg-surface-2 border border-border rounded-2xl">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-destructive text-2xl">
                       <AlertCircle className="h-7 w-7" />
@@ -3108,9 +3027,9 @@ export default function Website_Enhanced() {
 
               {/* Wilaya Pricing Management Dialog */}
               <Dialog open={showWilayaPricingDialog} onOpenChange={setShowWilayaPricingDialog}>
-                <DialogContent className="max-w-full w-full sm:max-w-4xl mx-auto border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto bg-card">
+                <DialogContent className="max-w-full w-full sm:max-w-4xl mx-auto border-2 sm:border-3 border-border rounded-2xl sm:rounded-2xl shadow-sm sm:shadow-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto bg-card">
                   <DialogHeader className="mb-4 sm:mb-6">
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-electric font-black line-clamp-2">
+                    <DialogTitle className="text-2xl sm:text-2xl flex items-center gap-2 sm:gap-3 text-electric font-bold line-clamp-2">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex-shrink-0">
                         
                       </motion.div>
@@ -3122,8 +3041,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-3 sm:space-y-6 py-2 sm:py-4">
                     {/* Section 1: Add/Edit Wilaya Price */}
-                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-border">
-                      <h3 className="text-base sm:text-lg font-black text-electric mb-3 sm:mb-4">
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border border-border">
+                      <h3 className="text-base sm:text-lg font-bold text-electric mb-3 sm:mb-4">
                         {editingWilayaPriceId ? '' : ''} {language === 'ar' ? 'إضافة أو تعديل سعر ولاية' : language === 'fr' ? 'Ajouter ou Modifier un Prix' : 'Add or Edit Wilaya Price'}
                       </h3>
 
@@ -3141,7 +3060,7 @@ export default function Website_Enhanced() {
                               value={selectedWilayaForEdit}
                               onChange={(e) => setSelectedWilayaForEdit(e.target.value)}
                               disabled={editingWilayaPriceId !== null}
-                              className="w-full border-2 border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
+                              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
                               list="wilaya-options"
                             />
                             <datalist id="wilaya-options">
@@ -3166,7 +3085,7 @@ export default function Website_Enhanced() {
                               placeholder="0.00"
                               value={wilayaPriceDomicile}
                               onChange={(e) => setWilayaPriceDomicile(e.target.value)}
-                              className="w-full border-2 border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
+                              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
                             />
                           </div>
                           <div>
@@ -3179,7 +3098,7 @@ export default function Website_Enhanced() {
                               placeholder="0.00"
                               value={wilayaPriceBureau}
                               onChange={(e) => setWilayaPriceBureau(e.target.value)}
-                              className="w-full border-2 border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
+                              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
                             />
                           </div>
                         </div>
@@ -3210,8 +3129,8 @@ export default function Website_Enhanced() {
                     </div>
 
                     {/* Section 2: Configured Wilayas */}
-                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-border">
-                      <h3 className="text-base sm:text-lg font-black text-electric mb-3 sm:mb-4">
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border border-border">
+                      <h3 className="text-base sm:text-lg font-bold text-electric mb-3 sm:mb-4">
                         {language === 'ar' ? 'الولايات المُعدّة' : language === 'fr' ? 'Wilayas Configurées' : 'Configured Wilayas'} ({wilayaPrices.length})
                       </h3>
 
@@ -3299,7 +3218,7 @@ export default function Website_Enhanced() {
                           <div className="p-3 rounded-2xl shadow-sm bg-primary text-primary-foreground">
                             <Settings className="h-8 w-8 text-white" />
                           </div>
-                          <h2 className="text-4xl font-black text-foreground">
+                          <h2 className="text-4xl font-bold text-foreground">
                             {language === 'ar' ? 'إعدادات الموقع' : language === 'fr' ? 'Paramètres du Site' : 'Website Settings'}
                           </h2>
                         </div>
@@ -3313,7 +3232,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           initial={{ scale: 0.9, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          className="w-32 h-32 rounded-2xl overflow-hidden border-2 border-border shadow-sm backdrop-blur-sm"
+                          className="w-32 h-32 rounded-2xl overflow-hidden border border-border shadow-sm backdrop-blur-sm"
                         >
                           <img
                             src={websiteSettings.logo_url}
@@ -3417,7 +3336,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           initial={{ scale: 0.8 }}
                           animate={{ scale: 1 }}
-                          className="h-64 rounded-2xl overflow-hidden border-2 border-border shadow-sm flex items-center justify-center bg-primary text-primary-foreground"
+                          className="h-64 rounded-2xl overflow-hidden border border-border shadow-sm flex items-center justify-center bg-primary text-primary-foreground"
                         >
                           <img
                             src={websiteSettings.logo_url}
@@ -3498,7 +3417,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           initial={{ scale: 0.8 }}
                           animate={{ scale: 1 }}
-                          className="h-64 rounded-2xl overflow-hidden border-2 border-border shadow-sm flex items-center justify-center bg-primary text-primary-foreground"
+                          className="h-64 rounded-2xl overflow-hidden border border-border shadow-sm flex items-center justify-center bg-primary text-primary-foreground"
                         >
                           <img
                             src={websiteSettings.landing_page_image_url}

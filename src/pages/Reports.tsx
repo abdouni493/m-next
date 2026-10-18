@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
+import { StatCard } from '@/admin/ui';
 
 // --- Type Definitions ---
 interface ReportStats {
@@ -90,45 +91,50 @@ interface CaisseTransaction {
 }
 
 // Helper Components
-const ReportSection = ({ icon, title, children, delay = 0 }: { icon: string; title: string; children: React.ReactNode; delay?: number }) => (
+const ReportSection = ({ title, description, children, delay = 0 }: { icon?: string; title: string; description?: string; children: React.ReactNode; delay?: number }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
+    initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay }}
+    transition={{ duration: 0.35, delay }}
   >
-    <Card className="border border-border shadow-sm overflow-hidden hover:shadow-md transition-shadow bg-card">
-      <CardHeader className="pb-4 border-b border-border">
-        <CardTitle className="flex items-center gap-3">
-          <span className="text-3xl">{icon}</span>
-          <span className="text-xl font-bold">{title}</span>
-        </CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="border-b border-border px-5 pb-4 pt-5">
+        <CardTitle className="text-base font-semibold">{title}</CardTitle>
+        {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
       </CardHeader>
-      <CardContent className="pt-8">
+      <CardContent className="p-5">
         {children}
       </CardContent>
     </Card>
   </motion.div>
 );
 
-const StatBox = ({ icon, label, value, color = 'blue', subtext = '' }: { icon: string; label: string; value: string; color?: string; subtext?: string }) => {
-  const colorMap = {
-    blue: '',
-    green: '',
-    orange: '',
-    red: '',
-    purple: '',
-  };
+const TONE: Record<string, string> = {
+  blue: 'bg-electric/10 text-electric',
+  green: 'bg-success/15 text-success',
+  orange: 'bg-warning/15 text-warning',
+  red: 'bg-destructive/10 text-destructive',
+  purple: 'bg-volt text-volt-foreground',
+};
 
+const StatBox = ({ label, value, color = 'blue', subtext = '' }: { icon?: string; label: string; value: string; color?: string; subtext?: string }) => (
+  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE[color] || TONE.blue}`}>{label}</span>
+    <p className="mt-3 font-sora text-2xl font-bold tabular-nums text-foreground">{value}</p>
+    {subtext && <p className="mt-1 text-xs text-muted-foreground">{subtext}</p>}
+  </div>
+);
+
+const Meter = ({ label, value, total, tone = 'bg-primary', right }: { label: string; value: number; total: number; tone?: string; right?: React.ReactNode }) => {
+  const pct = total > 0 ? Math.max(0, Math.min(100, (value / total) * 100)) : 0;
   return (
-    <motion.div
-      whileHover={{ y: -8, scale: 1.02 }}
-      className={`bg-card ${colorMap[color as keyof typeof colorMap]} text-white p-8 rounded-xl shadow-sm border-2 border-white/20`}
-    >
-      <p className="text-5xl mb-3">{icon}</p>
-      <p className="text-sm text-white/80 mb-3 font-semibold">{label}</p>
-      <p className="text-4xl font-bold mb-2">{value}</p>
-      {subtext && <p className="text-xs text-white/70">{subtext}</p>}
-    </motion.div>
+    <div>
+      <div className="flex items-center justify-between gap-2 text-sm">
+        <span className="truncate text-muted-foreground">{label}</span>
+        <span className="font-semibold tabular-nums">{right ?? `${pct.toFixed(0)}%`}</span>
+      </div>
+      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-2"><div className={`h-full rounded-full ${tone}`} style={{ width: `${pct}%` }} /></div>
+    </div>
   );
 };
 
@@ -300,7 +306,7 @@ export default function Reports() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
+        className="admin-hero !mb-0 space-y-1"
       >
         <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">
           {getText('reports')}
@@ -325,25 +331,25 @@ export default function Reports() {
             <CardContent className="pt-8 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <motion.div whileHover={{ scale: 1.02 }} className="space-y-3">
-                  <Label className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
                     {getText('startDate')}
                   </Label>
                   <Input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="border-2 border-border focus:border-electric h-12 rounded-lg text-base bg-card"
+                    className="border border-border focus:border-electric h-12 rounded-lg text-base bg-card"
                   />
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.02 }} className="space-y-3">
-                  <Label className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
                     {getText('endDate')}
                   </Label>
                   <Input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="border-2 border-border focus:border-electric h-12 rounded-lg text-base bg-card"
+                    className="border border-border focus:border-electric h-12 rounded-lg text-base bg-card"
                   />
                 </motion.div>
               </div>
@@ -378,7 +384,7 @@ export default function Reports() {
               {getText('newReport')}
             </Button>
             <Button
-              className="text-primary-foreground font-bold px-8 py-6 text-lg rounded-lg shadow-sm hover:shadow-md transition-all bg-primary"
+              className="h-11 rounded-[10px] bg-primary px-5 font-semibold text-primary-foreground"
             >
               <Download className={`${isRTL ? 'ml-3' : 'mr-3'} h-5 w-5`} />
               {getText('download')}
@@ -388,79 +394,131 @@ export default function Reports() {
           {reportData && (
             <>
               {/* Financial Summary Cards - Main KPIs */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6"
-              >
-                <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 bg-primary text-primary-foreground"></div>
-                  <div className="relative text-primary-foreground p-8 rounded-2xl shadow-sm border-2 border-white/20 bg-primary">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-5xl"></span>
-                      <ArrowUpRight className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <p className="text-primary-foreground text-sm font-semibold mb-2">{getText('totalSales')}</p>
-                    <p className="text-4xl font-bold">{formatCurrency(reportData.totalSales)}</p>
-                    <p className="text-xs text-primary-foreground mt-3">{reportData.salesCount} {language === 'ar' ? 'معاملة بيع' : 'transactions'}</p>
-                  </div>
-                </motion.div>
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <StatCard label={getText('totalSales')} value={formatCurrency(reportData.totalSales)} hint={`${reportData.salesCount} ${language === 'ar' ? 'معاملة' : 'ventes'}`} icon={ArrowUpRight} />
+                <StatCard label={getText('totalPurchases')} value={formatCurrency(reportData.totalPurchases)} hint={`${reportData.purchasesCount} ${language === 'ar' ? 'فاتورة' : 'factures'}`} icon={ArrowDownLeft} />
+                <StatCard label={getText('profit')} value={<span className={reportData.netProfit >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(reportData.netProfit)}</span>}
+                  hint={`${((reportData.netProfit / (reportData.totalSales || 1)) * 100).toFixed(1)}% ${language === 'ar' ? 'هامش' : 'de marge'}`} icon={TrendingUp} />
+                <StatCard label={language === 'ar' ? 'نسبة التحصيل' : 'Taux d\'encaissement'}
+                  value={`${(((reportData.totalPaid) / ((reportData.totalPaid + reportData.totalUnpaid) || 1)) * 100).toFixed(0)}%`}
+                  hint={`${formatCurrency(reportData.totalUnpaid)} ${language === 'ar' ? 'غير مدفوع' : 'impayés'}`} icon={DollarSign} />
+              </div>
 
-                <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 bg-primary text-primary-foreground"></div>
-                  <div className="relative text-primary-foreground p-8 rounded-2xl shadow-sm border-2 border-white/20 bg-primary">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-5xl"></span>
-                      <ArrowDownLeft className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <p className="text-primary-foreground text-sm font-semibold mb-2">{getText('totalPurchases')}</p>
-                    <p className="text-4xl font-bold">{formatCurrency(reportData.totalPurchases)}</p>
-                    <p className="text-xs text-primary-foreground mt-3">{reportData.purchasesCount} {language === 'ar' ? 'فاتورة شراء' : 'factures'}</p>
-                  </div>
-                </motion.div>
+              {/* Detailed analysis */}
+              {(() => {
+                const sales = invoices.filter((i) => i.type !== 'purchase');
+                const purchases = invoices.filter((i) => i.type === 'purchase');
+                // daily series across the period
+                const days: string[] = [];
+                const start = new Date(startDate), end = new Date(endDate);
+                for (let d = new Date(start); d <= end && days.length < 92; d.setDate(d.getDate() + 1)) days.push(d.toISOString().split('T')[0]);
+                const byDay = days.map((day) => ({
+                  day,
+                  sales: sales.filter((i) => i.invoice_date?.startsWith(day)).reduce((s, i) => s + (i.total_amount || 0), 0),
+                  purchases: purchases.filter((i) => i.invoice_date?.startsWith(day)).reduce((s, i) => s + (i.total_amount || 0), 0),
+                }));
+                const maxDay = Math.max(1, ...byDay.map((d) => Math.max(d.sales, d.purchases)));
+                const bestDay = byDay.reduce((m, d) => (d.sales > m.sales ? d : m), byDay[0] || { day: '', sales: 0, purchases: 0 });
+                const activeDays = byDay.filter((d) => d.sales > 0).length;
+                const cashIn = caisseTransactions.filter((c) => c.transaction_type === 'encaissement').reduce((s, c) => s + (c.amount || 0), 0);
+                const cashOut = caisseTransactions.filter((c) => c.transaction_type === 'decaissement').reduce((s, c) => s + (c.amount || 0), 0);
+                const payroll = payments.reduce((s, p) => s + (p.amount || 0), 0);
+                const qty = (p: Product) => Number(p.current_quantity ?? (p as unknown as { quantity_actual?: number }).quantity_actual) || 0;
+                const cost = (p: Product) => Number(p.buying_price ?? (p as unknown as { purchase_price?: number }).purchase_price) || 0;
+                const stockCost = products.reduce((s, p) => s + qty(p) * cost(p), 0);
+                const stockRetail = products.reduce((s, p) => s + qty(p) * (Number(p.selling_price) || 0), 0);
+                const outOfStock = products.filter((p) => qty(p) <= 0).length;
+                const supplierTotals = Object.entries(purchases.reduce<Record<string, number>>((acc, i) => {
+                  const k = i.supplier_name || '—';
+                  acc[k] = (acc[k] || 0) + (i.total_amount || 0);
+                  return acc;
+                }, {})).sort((x, y) => y[1] - x[1]).slice(0, 5);
+                const topSupplier = supplierTotals[0]?.[1] || 1;
+                const statusCounts = invoices.reduce<Record<string, number>>((acc, i) => { acc[i.status || 'unknown'] = (acc[i.status || 'unknown'] || 0) + 1; return acc; }, {});
+                const statusLabel = (s: string) => ({ paid: language === 'ar' ? 'مدفوعة' : 'Payées', partial: language === 'ar' ? 'جزئية' : 'Partielles', unpaid: language === 'ar' ? 'غير مدفوعة' : 'Impayées', pending: language === 'ar' ? 'معلقة' : 'En attente' } as Record<string, string>)[s] || s;
+                return (
+                  <div className="grid gap-4 lg:grid-cols-3">
+                    <Card className="lg:col-span-2">
+                      <CardHeader className="px-5 pb-2 pt-5">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div>
+                            <CardTitle className="text-base font-semibold">{language === 'ar' ? 'المبيعات والمشتريات اليومية' : 'Ventes et achats par jour'}</CardTitle>
+                            <p className="mt-0.5 text-xs text-muted-foreground">{formatDate(startDate)} → {formatDate(endDate)}</p>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary" />{language === 'ar' ? 'مبيعات' : 'Ventes'}</span>
+                            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-electric/60" />{language === 'ar' ? 'مشتريات' : 'Achats'}</span>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="px-5 pb-5">
+                        <div className="flex h-48 items-end gap-[3px] overflow-hidden">
+                          {byDay.map((d) => (
+                            <div key={d.day} className="group relative flex h-full min-w-[4px] flex-1 items-end gap-px" title={`${formatDate(d.day)} · ${formatCurrency(d.sales)} / ${formatCurrency(d.purchases)}`}>
+                              <div className="flex-1 rounded-t-sm bg-primary transition-opacity group-hover:opacity-80" style={{ height: `${(d.sales / maxDay) * 100}%` }} />
+                              <div className="flex-1 rounded-t-sm bg-electric/60 transition-opacity group-hover:opacity-80" style={{ height: `${(d.purchases / maxDay) * 100}%` }} />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4 sm:grid-cols-4">
+                          <div><p className="text-xs text-muted-foreground">{language === 'ar' ? 'أفضل يوم' : 'Meilleur jour'}</p><p className="font-semibold tabular-nums">{bestDay?.sales ? formatDate(bestDay.day) : '—'}</p></div>
+                          <div><p className="text-xs text-muted-foreground">{language === 'ar' ? 'مبيعات أفضل يوم' : 'CA du meilleur jour'}</p><p className="font-semibold tabular-nums">{formatCurrency(bestDay?.sales || 0)}</p></div>
+                          <div><p className="text-xs text-muted-foreground">{language === 'ar' ? 'أيام نشطة' : 'Jours actifs'}</p><p className="font-semibold tabular-nums">{activeDays} / {byDay.length}</p></div>
+                          <div><p className="text-xs text-muted-foreground">{language === 'ar' ? 'متوسط يومي' : 'Moyenne / jour'}</p><p className="font-semibold tabular-nums">{formatCurrency(reportData.totalSales / (byDay.length || 1))}</p></div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 bg-primary text-primary-foreground"></div>
-                  <div className="relative text-primary-foreground p-8 rounded-2xl shadow-sm border-2 border-white/20 bg-primary">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-5xl"></span>
-                      <TrendingUp className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <p className="text-primary-foreground text-sm font-semibold mb-2">{getText('profit')}</p>
-                    <p className="text-4xl font-bold">{formatCurrency(reportData.netProfit)}</p>
-                    <p className="text-xs text-primary-foreground mt-3">{((reportData.netProfit / (reportData.totalSales || 1)) * 100).toFixed(1)}% {language === 'ar' ? 'هامش ربح' : 'marge'}</p>
-                  </div>
-                </motion.div>
-              </motion.div>
+                    <Card>
+                      <CardHeader className="px-5 pb-2 pt-5"><CardTitle className="text-base font-semibold">{language === 'ar' ? 'حالة الفواتير' : 'Encaissement des factures'}</CardTitle></CardHeader>
+                      <CardContent className="space-y-4 px-5 pb-5">
+                        <Meter label={language === 'ar' ? 'المدفوع' : 'Payé'} value={reportData.totalPaid} total={reportData.totalPaid + reportData.totalUnpaid} tone="bg-success" right={formatCurrency(reportData.totalPaid)} />
+                        <Meter label={language === 'ar' ? 'غير مدفوع' : 'Non payé'} value={reportData.totalUnpaid} total={reportData.totalPaid + reportData.totalUnpaid} tone="bg-destructive" right={formatCurrency(reportData.totalUnpaid)} />
+                        <div className="flex flex-wrap gap-1.5 border-t border-border pt-4">
+                          {Object.entries(statusCounts).map(([s, n]) => (
+                            <span key={s} className="rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold">{statusLabel(s)} · {n}</span>
+                          ))}
+                          {!Object.keys(statusCounts).length && <span className="text-xs text-muted-foreground">—</span>}
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              {/* Payment Status Cards */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-              >
-                <motion.div whileHover={{ scale: 1.02 }} className="p-8 rounded-2xl border-2 border-border bg-card">
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className="text-4xl"></span>
-                    <div>
-                      <p className="text-sm font-semibold text-electric">{language === 'ar' ? 'المدفوع' : 'Payé'}</p>
-                      <p className="text-3xl font-bold text-electric">{formatCurrency(reportData.totalPaid)}</p>
-                    </div>
-                  </div>
-                </motion.div>
+                    <Card>
+                      <CardHeader className="px-5 pb-2 pt-5"><CardTitle className="text-base font-semibold">{language === 'ar' ? 'الصندوق والرواتب' : 'Caisse & paiements'}</CardTitle></CardHeader>
+                      <CardContent className="space-y-3 px-5 pb-5 text-sm">
+                        <div className="flex justify-between"><span className="text-muted-foreground">{language === 'ar' ? 'مداخيل' : 'Encaissements'}</span><span className="font-semibold tabular-nums text-success">+{formatCurrency(cashIn)}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">{language === 'ar' ? 'مصاريف' : 'Décaissements'}</span><span className="font-semibold tabular-nums text-destructive">−{formatCurrency(cashOut)}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">{language === 'ar' ? 'رواتب' : 'Paiements employés'}</span><span className="font-semibold tabular-nums">{formatCurrency(payroll)}</span></div>
+                        <div className="flex justify-between border-t border-border pt-3"><span className="font-semibold">{language === 'ar' ? 'الرصيد' : 'Solde caisse'}</span><span className={`font-sora text-lg font-bold tabular-nums ${cashIn - cashOut >= 0 ? 'text-foreground' : 'text-destructive'}`}>{formatCurrency(cashIn - cashOut)}</span></div>
+                        <p className="text-xs text-muted-foreground">{caisseTransactions.length} {language === 'ar' ? 'عملية' : 'opérations de caisse'} · {payments.length} {language === 'ar' ? 'دفعة' : 'paiements'}</p>
+                      </CardContent>
+                    </Card>
 
-                <motion.div whileHover={{ scale: 1.02 }} className="p-8 rounded-2xl border-2 border-border bg-card">
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className="text-4xl"></span>
-                    <div>
-                      <p className="text-sm font-semibold text-destructive">{language === 'ar' ? 'غير مدفوع' : 'Non payé'}</p>
-                      <p className="text-3xl font-bold text-destructive">{formatCurrency(reportData.totalUnpaid)}</p>
-                    </div>
+                    <Card>
+                      <CardHeader className="px-5 pb-2 pt-5"><CardTitle className="text-base font-semibold">{language === 'ar' ? 'قيمة المخزون' : 'Valeur du stock'}</CardTitle></CardHeader>
+                      <CardContent className="space-y-3 px-5 pb-5 text-sm">
+                        <div className="flex justify-between"><span className="text-muted-foreground">{language === 'ar' ? 'بسعر الشراء' : "Au prix d'achat"}</span><span className="font-semibold tabular-nums">{formatCurrency(stockCost)}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">{language === 'ar' ? 'بسعر البيع' : 'Au prix de vente'}</span><span className="font-semibold tabular-nums">{formatCurrency(stockRetail)}</span></div>
+                        <div className="flex justify-between border-t border-border pt-3"><span className="font-semibold">{language === 'ar' ? 'ربح محتمل' : 'Marge potentielle'}</span><span className="font-sora text-lg font-bold tabular-nums text-success">{formatCurrency(stockRetail - stockCost)}</span></div>
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold">{reportData.productsCount} {language === 'ar' ? 'منتج' : 'produits'}</span>
+                          <span className="rounded-full bg-warning/15 px-2.5 py-1 text-xs font-semibold text-warning">{reportData.lowStockCount} {language === 'ar' ? 'منخفض' : 'stock faible'}</span>
+                          <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-semibold text-destructive">{outOfStock} {language === 'ar' ? 'نفد' : 'rupture'}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="px-5 pb-2 pt-5"><CardTitle className="text-base font-semibold">{language === 'ar' ? 'أهم الموردين' : 'Top fournisseurs (achats)'}</CardTitle></CardHeader>
+                      <CardContent className="space-y-3 px-5 pb-5">
+                        {supplierTotals.length ? supplierTotals.map(([name, total]) => (
+                          <Meter key={name} label={name} value={total} total={topSupplier} tone="bg-electric" right={formatCurrency(total)} />
+                        )) : <p className="text-sm text-muted-foreground">{language === 'ar' ? 'لا توجد مشتريات' : 'Aucun achat sur la période'}</p>}
+                      </CardContent>
+                    </Card>
                   </div>
-                </motion.div>
-              </motion.div>
+                );
+              })()}
 
               {/* Report Sections */}
               <div className="space-y-10">
@@ -498,7 +556,7 @@ export default function Reports() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="border-2 border-border rounded-2xl p-6 bg-card"
+                        className="border border-border rounded-2xl p-6 bg-card"
                       >
                         <div className="flex items-center gap-3 mb-6">
                           <span className="text-4xl"></span>
@@ -549,15 +607,15 @@ export default function Reports() {
                 <ReportSection icon="" title={getText('purchases')} delay={0.4}>
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                         <p className="text-sm text-electric mb-2">{language === 'ar' ? 'إجمالي الفواتير' : 'Nombre de factures'}</p>
                         <p className="text-4xl font-bold text-electric">{reportData.purchasesCount}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                         <p className="text-sm text-warning mb-2">{language === 'ar' ? 'إجمالي المشتريات' : 'Montant total'}</p>
                         <p className="text-3xl font-bold text-warning">{formatCurrency(reportData.totalPurchases)}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                         <p className="text-sm text-success mb-2">{language === 'ar' ? 'المتوسط لكل فاتورة' : 'Montant moyen'}</p>
                         <p className="text-3xl font-bold text-success">{formatCurrency((reportData.totalPurchases || 0) / (reportData.purchasesCount || 1))}</p>
                       </motion.div>
@@ -611,15 +669,15 @@ export default function Reports() {
                 <ReportSection icon="" title={getText('sales')} delay={0.5}>
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                         <p className="text-sm text-success mb-2">{language === 'ar' ? 'عدد المبيعات' : 'Nombre de ventes'}</p>
                         <p className="text-4xl font-bold text-success">{reportData.salesCount}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                         <p className="text-sm text-success mb-2">{language === 'ar' ? 'إجمالي المبيعات' : 'Montant total'}</p>
                         <p className="text-3xl font-bold text-success">{formatCurrency(reportData.totalSales)}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                         <p className="text-sm text-electric mb-2">{language === 'ar' ? 'المتوسط لكل بيع' : 'Montant moyen'}</p>
                         <p className="text-3xl font-bold text-electric">{formatCurrency((reportData.totalSales || 0) / (reportData.salesCount || 1))}</p>
                       </motion.div>
@@ -682,7 +740,7 @@ export default function Reports() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="p-6 rounded-2xl border-2 border-border hover:shadow-md transition-all bg-card"
+                            className="p-6 rounded-2xl border border-border hover:shadow-md transition-all bg-card"
                           >
                             <div className="flex items-start justify-between mb-4">
                               <div>
@@ -800,19 +858,19 @@ export default function Reports() {
                   <ReportSection icon="" title={language === 'ar' ? 'ملخص الصندوق' : 'Résumé Caisse'} delay={0.8}>
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                           <p className="text-sm text-success mb-2">{language === 'ar' ? 'إجمالي الإيداعات' : 'Dépôts'}</p>
                           <p className="text-3xl font-bold text-success">
                             {formatCurrency(caisseTransactions.filter(t => t.transaction_type === 'encaissement').reduce((sum, t) => sum + t.amount, 0))}
                           </p>
                         </motion.div>
-                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                           <p className="text-sm text-destructive mb-2">{language === 'ar' ? 'إجمالي السحوبات' : 'Retraits'}</p>
                           <p className="text-3xl font-bold text-destructive">
                             {formatCurrency(caisseTransactions.filter(t => t.transaction_type === 'decaissement').reduce((sum, t) => sum + t.amount, 0))}
                           </p>
                         </motion.div>
-                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border border-border">
                           <p className="text-sm text-electric mb-2">{language === 'ar' ? 'الرصيد' : 'Solde'}</p>
                           <p className="text-3xl font-bold text-electric">
                             {formatCurrency(

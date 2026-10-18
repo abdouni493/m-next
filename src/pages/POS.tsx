@@ -751,18 +751,17 @@ export default function POS() {
   };
 
   return (
-    <div className={`min-h-screen p-6 bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="flex flex-col gap-6 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between gap-6 flex-wrap"
+          className="admin-hero !mb-0 flex items-center justify-between gap-6 flex-wrap"
         >
           <div>
             <h1 className="text-2xl md:text-[28px] tracking-tight font-bold mb-2 flex items-center gap-3">
-              <span className="text-5xl"></span>
-              <span className="text-foreground">
+                            <span className="text-foreground">
                 {language === 'ar' ? 'نقطة البيع' : 'Point de Vente'}
               </span>
             </h1>
@@ -783,9 +782,9 @@ export default function POS() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="border-2 border-border shadow-sm hover:shadow-md transition-all bg-card">
+              <Card className="border border-border shadow-sm hover:shadow-md transition-all bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg text-electric">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
                     <Search className="w-6 h-6" />
                     {language === 'ar' ? 'ابحث عن المنتجات' : 'Recherche'}
                   </CardTitle>
@@ -795,7 +794,7 @@ export default function POS() {
                     animate={{
                       scale: searchFocused ? 1.02 : 1,
                       boxShadow: searchFocused 
-                        ? '0 0 0 3px rgba(59, 130, 246, 0.5)'
+                        ? '0 0 0 3px hsl(var(--electric) / 0.25)'
                         : 'none'
                     }}
                     className="relative"
@@ -809,7 +808,7 @@ export default function POS() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onFocus={() => setSearchFocused(true)}
                       onBlur={() => setSearchFocused(false)}
-                      className={`${isRTL ? 'pr-10' : 'pl-10'} h-12 text-lg bg-white dark:bg-slate-700 border-2 transition-all duration-200 ${
+                      className={`${isRTL ? 'pr-10' : 'pl-10'} h-12 text-lg bg-card border-2 transition-all duration-200 ${
                         searchFocused
                           ? 'border-electric ring-2 ring-ring'
                           : 'border-border'
@@ -826,10 +825,10 @@ export default function POS() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-2 border-border shadow-sm bg-card">
+              <Card className="border border-border shadow-sm bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-xl text-electric flex items-center gap-2">
-                    �️ {language === 'ar' ? `الشواحن (${filteredProducts.length})` : `Chargeurs (${filteredProducts.length})`}
+                  <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <Package className="h-5 w-5 text-electric" /> {language === 'ar' ? `الشواحن (${filteredProducts.length})` : `Chargeurs (${filteredProducts.length})`}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -848,122 +847,78 @@ export default function POS() {
                       </p>
                     </motion.div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
                       <AnimatePresence>
                         {filteredProducts.map((product, idx) => {
-                          const isLowStock = product.quantity_actual < product.quantity_minimal;
+                          const qty = Number(product.quantity_actual) || 0;
+                          const isOut = qty <= 0;
+                          const isLowStock = !isOut && qty <= (Number(product.quantity_minimal) || 0);
+                          const tiers = [
+                            { label: 'P1', value: parseFloat(product.selling_price_1 || product.selling_price || 0), cls: 'bg-primary text-primary-foreground' },
+                            { label: 'P2', value: parseFloat(product.selling_price_2 || product.selling_price || 0), cls: 'bg-surface-2 text-foreground' },
+                            { label: 'P3', value: parseFloat(product.selling_price_3 || product.selling_price || 0), cls: 'bg-volt text-volt-foreground' },
+                          ];
                           return (
                             <motion.div
                               key={product.id}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.9 }}
-                              transition={{ delay: idx * 0.05 }}
-                              whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)' }}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.97 }}
+                              transition={{ delay: Math.min(idx, 12) * 0.02 }}
                               onClick={() => addToCart(product)}
-                              className="cursor-pointer"
+                              className="group cursor-pointer"
                             >
-                              <div className={`h-full rounded-xl border-2 overflow-hidden bg-white dark:bg-slate-700 transition-all ${
-                                isLowStock 
-                                  ? 'border-border' 
-                                  : 'border-border hover:border-border'
-                              }`}>
-                                {/* Image */}
-                                <div className="relative h-40 overflow-hidden flex items-center justify-center bg-card">
+                              <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:border-electric/40 hover:shadow-md">
+                                <div className="relative aspect-[4/3] overflow-hidden bg-surface-2">
                                   {product.primary_image ? (
                                     <img
                                       src={product.primary_image}
                                       alt={product.name}
-                                      className="w-full h-full object-cover"
-                                      onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/default-product.png';
-                                      }}
+                                      loading="lazy"
+                                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
                                   ) : (
-                                    <div className="text-center">
-                                      <Package className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                                      <p className="text-xs text-muted-foreground">{language === 'ar' ? 'بدون صورة' : 'Pas d\'image'}</p>
+                                    <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-muted-foreground">
+                                      <Package className="h-10 w-10" />
+                                      <span className="text-xs">{language === 'ar' ? 'بدون صورة' : "Pas d'image"}</span>
                                     </div>
                                   )}
-                                  
-                                  {/* Stock Badge */}
-                                  <div className="absolute top-2 right-2">
-                                    <Badge 
-                                      className={`${
-                                        isLowStock
-                                          ? 'bg-destructive text-white'
-                                          : 'bg-success text-white'
-                                      }`}
-                                    >
-                                      {product.quantity_actual}
-                                    </Badge>
-                                  </div>
+                                  <span className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-card/95 px-2.5 py-1 text-[11px] font-semibold shadow-sm backdrop-blur ${isOut ? 'text-destructive' : isLowStock ? 'text-warning' : 'text-success'}`}>
+                                    <span className={`h-1.5 w-1.5 rounded-full ${isOut ? 'bg-destructive' : isLowStock ? 'bg-warning' : 'bg-success'}`} />
+                                    {qty} {language === 'ar' ? 'في المخزون' : 'en stock'}
+                                  </span>
+                                  {product.mark && (
+                                    <span className="absolute right-3 top-3 rounded-full bg-[#0B1220]/85 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">{product.mark.name}</span>
+                                  )}
                                 </div>
-
-                                {/* Content */}
-                                <div className="p-3 space-y-2">
-                                  <div>
-                                    <h3 className="font-bold text-sm text-foreground truncate">{product.name}</h3>
-                                    {product.mark && (
-                                      <p className="text-xs text-muted-foreground">
-                                        {product.mark.name}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  {/* Charger Details */}
-                                  <div className="text-xs text-muted-foreground space-y-1">
-                                    {product.voltage && (
-                                      <div className="flex items-center gap-1">
-                                        <span></span>
-                                        <span>{product.voltage}V</span>
-                                      </div>
-                                    )}
-                                    {product.wattage && (
-                                      <div className="flex items-center gap-1">
-                                        <span></span>
-                                        <span>{product.wattage}W</span>
-                                      </div>
-                                    )}
-                                    {product.amperage && (
-                                      <div className="flex items-center gap-1">
-                                        <span></span>
-                                        <span>{product.amperage}A</span>
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* Three-Tier Prices */}
-                                  <div className="space-y-2 pt-2 border-t border-border">
-                                    <div className="grid grid-cols-3 gap-2">
-                                      <div className="bg-surface-2 rounded p-2">
-                                        <p className="text-xs text-electric font-bold"></p>
-                                        <p className="text-xs text-electric font-bold">
-                                          {formatCurrencyLocal(parseFloat(product.selling_price_1 || product.selling_price || 0), language)}
-                                        </p>
-                                      </div>
-                                      <div className="bg-surface-2 rounded p-2">
-                                        <p className="text-xs text-warning font-bold"></p>
-                                        <p className="text-xs text-warning font-bold">
-                                          {formatCurrencyLocal(parseFloat(product.selling_price_2 || product.selling_price || 0), language)}
-                                        </p>
-                                      </div>
-                                      <div className="bg-surface-2 rounded p-2">
-                                        <p className="text-xs text-success font-bold"></p>
-                                        <p className="text-xs text-success font-bold">
-                                          {formatCurrencyLocal(parseFloat(product.selling_price_3 || product.selling_price || 0), language)}
-                                        </p>
-                                      </div>
+                                <div className="flex flex-1 flex-col p-4">
+                                  <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-tight text-foreground">{product.name}</h3>
+                                  {(product.voltage || product.wattage || product.amperage) && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                      {product.voltage ? <span className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] font-semibold tabular-nums">{product.voltage}V</span> : null}
+                                      {product.wattage ? <span className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] font-semibold tabular-nums">{product.wattage}W</span> : null}
+                                      {product.amperage ? <span className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] font-semibold tabular-nums">{product.amperage}A</span> : null}
+                                    </div>
+                                  )}
+                                  <div className="mt-auto pt-3">
+                                    <div className="grid grid-cols-3 gap-1.5">
+                                      {tiers.map((tier) => (
+                                        <div key={tier.label} className={`rounded-[10px] px-2 py-1.5 text-center ${tier.cls}`}>
+                                          <p className="text-[10px] font-semibold opacity-70">{tier.label}</p>
+                                          <p className="truncate text-xs font-bold tabular-nums">{formatCurrencyLocal(tier.value, language)}</p>
+                                        </div>
+                                      ))}
                                     </div>
                                     <Button
                                       size="sm"
-                                      className="w-full text-primary-foreground rounded-lg bg-primary"
+                                      className="mt-3 h-9 w-full rounded-[10px] bg-primary font-semibold text-primary-foreground"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         addToCart(product);
                                       }}
                                     >
-                                      <Plus className="h-4 w-4 mr-1" /> {language === 'ar' ? 'إضافة' : 'Ajouter'}
+                                      <Plus className="mr-1 h-4 w-4" /> {language === 'ar' ? 'إضافة' : 'Ajouter'}
                                     </Button>
                                   </div>
                                 </div>
@@ -987,7 +942,7 @@ export default function POS() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="border-2 border-border shadow-sm sticky top-6 bg-card">
+              <Card className="border border-border shadow-sm sticky top-6 bg-card">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2 text-lg text-warning">
@@ -1032,7 +987,7 @@ export default function POS() {
                           setShowClientDropdown(true);
                         }}
                         onFocus={() => setShowClientDropdown(true)}
-                        className="pl-10 border-2 border-border focus:border-border"
+                        className="pl-10 border border-border focus:border-border"
                       />
                     </div>
                     
@@ -1041,7 +996,7 @@ export default function POS() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="absolute top-full left-0 right-0 mt-1 bg-card border-2 border-border rounded-lg shadow-sm z-50 max-h-48 overflow-y-auto"
+                        className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-sm z-50 max-h-48 overflow-y-auto"
                       >
                         {filteredClients.length === 0 ? (
                           <div className="p-3 text-center text-muted-foreground">
@@ -1296,7 +1251,7 @@ export default function POS() {
                       })
                     }
                     placeholder={language === 'ar' ? 'أدخل الاسم' : 'Entrez le nom'}
-                    className="mt-2 border-2 border-border focus:border-electric focus:ring-0 h-11 text-base"
+                    className="mt-2 border border-border focus:border-electric focus:ring-0 h-11 text-base"
                   />
                 </motion.div>
 
@@ -1318,7 +1273,7 @@ export default function POS() {
                       })
                     }
                     placeholder={language === 'ar' ? 'أدخل رقم الهاتف' : 'Entrez le téléphone'}
-                    className="mt-2 border-2 border-border focus:border-electric focus:ring-0 h-11 text-base"
+                    className="mt-2 border border-border focus:border-electric focus:ring-0 h-11 text-base"
                   />
                 </motion.div>
 
@@ -1382,7 +1337,7 @@ export default function POS() {
                       })
                     }
                     placeholder={language === 'ar' ? 'أدخل ملاحظات اختيارية' : 'Entrez des notes optionnelles'}
-                    className="mt-2 border-2 border-border focus:border-electric focus:ring-0 h-24 p-2 rounded-lg text-sm"
+                    className="mt-2 border border-border focus:border-electric focus:ring-0 h-24 p-2 rounded-lg text-sm"
                   />
                 </motion.div>
               </div>
@@ -1441,7 +1396,7 @@ export default function POS() {
                 value={editableTotal}
                 onChange={(e) => setEditableTotal(Number(e.target.value))}
                 placeholder={language === 'ar' ? 'المبلغ الإجمالي' : 'Total à payer'}
-                className="mt-2 border-2 border-border focus:border-electric h-12 text-lg font-bold"
+                className="mt-2 border border-border focus:border-electric h-12 text-lg font-bold"
               />
             </div>
 
@@ -1453,14 +1408,14 @@ export default function POS() {
                 value={receivedAmount}
                 onChange={(e) => setReceivedAmount(Number(e.target.value))}
                 placeholder={language === 'ar' ? 'المبلغ نقدا' : 'Montant en espèces'}
-                className="mt-2 border-2 border-border focus:border-success h-12 text-lg"
+                className="mt-2 border border-border focus:border-success h-12 text-lg"
               />
             </div>
             
             <Button
               onClick={() => setReceivedAmount(editableTotal)}
               variant="outline"
-              className="w-full border-2 border-border hover:bg-surface-2 h-12 font-bold"
+              className="w-full border border-border hover:bg-surface-2 h-12 font-bold"
             >
               <DollarSign className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
               {language === 'ar' ? 'العميل دفع الكل' : 'Paiement complet'}

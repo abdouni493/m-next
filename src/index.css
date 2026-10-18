@@ -478,3 +478,86 @@ All colors MUST be HSL.
   /* Comfortable touch targets */
   .admin-main button, .admin-main [role='button'] { min-height: 40px; }
 }
+
+/* ---------- Admin polish: hero actions + tables + inputs share the dashboard/login look ---------- */
+.hero-actions .bg-primary,
+.hero-actions button.bg-primary {
+  background-color: #C6F432 !important;
+  color: #0B1220 !important;
+  font-weight: 700;
+}
+.hero-actions .bg-primary:hover { filter: brightness(1.04); }
+.hero-actions [class*='variant-outline'],
+.hero-actions button.border:not(.bg-primary) {
+  background-color: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.15);
+  color: #fff;
+}
+.admin-main table thead th {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.admin-main table thead tr { background-color: hsl(var(--surface-2)); }
+.admin-main table tbody tr { transition: background-color 0.15s ease; }
+.admin-main table tbody tr:hover { background-color: hsl(var(--surface-2) / 0.6); }
+.admin-main input:not([type='checkbox']):not([type='radio']):not([type='range']):focus-visible,
+.admin-main select:focus-visible,
+.admin-main textarea:focus-visible {
+  outline: none;
+  border-color: hsl(var(--electric));
+  box-shadow: 0 0 0 3px hsl(var(--electric) / 0.2);
+}
+
+/* Ink hero header (login brand panel look) applied to existing page headers */
+.admin-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 1rem;
+  background-color: #0B1220;
+  color: #fff;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgb(11 18 32 / 0.08);
+}
+@media (min-width: 768px) { .admin-hero { padding: 2rem; } }
+.admin-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: -6rem; top: -6rem;
+  width: 18rem; height: 18rem;
+  border-radius: 9999px;
+  background: rgb(198 244 50 / 0.15);
+  filter: blur(64px);
+  pointer-events: none;
+}
+.admin-hero::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 33%; bottom: -8rem;
+  width: 16rem; height: 16rem;
+  border-radius: 9999px;
+  background: rgb(31 111 255 / 0.1);
+  filter: blur(64px);
+  pointer-events: none;
+}
+.admin-hero h1 { color: #fff !important; font-family: Sora, Inter, sans-serif; margin-bottom: 0.25rem; }
+.admin-hero h1 .text-foreground { color: #fff !important; }
+.admin-hero p, .admin-hero .text-muted-foreground { color: #9AA3B5 !important; font-size: 0.875rem; }
+.admin-hero svg.text-electric { color: #C6F432; }
+.admin-hero .bg-primary, .admin-hero button.bg-primary {
+  background-color: #C6F432 !important;
+  color: #0B1220 !important;
+  font-weight: 700;
+}
+.admin-hero button:not(.bg-primary), .admin-hero a.border {
+  background-color: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.15) !important;
+  color: #fff;
+}
+.admin-hero button:not(.bg-primary):hover { background-color: rgb(255 255 255 / 0.1) !important; }

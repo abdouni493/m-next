@@ -24,6 +24,7 @@ import {
   MoreVertical,
   Package
 } from 'lucide-react';
+import { StatCard } from '@/admin/ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -680,7 +681,7 @@ function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
 
         <div className="space-y-6">
           {/* Client Information */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="border border-border rounded-lg p-6 bg-surface-2">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-electric">
               <User className="h-5 w-5" />
               {language === 'ar' ? 'معلومات العميل' : 'Informations Client'}
@@ -698,7 +699,7 @@ function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
           </motion.div>
 
           {/* Products Section */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="border border-border rounded-lg p-6 bg-surface-2">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-warning">
               <Package className="h-5 w-5" />
               {language === 'ar' ? 'المنتجات / الأجهزة' : 'Produits / Chargeurs'}
@@ -734,7 +735,7 @@ function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
           </motion.div>
 
           {/* Payment Section */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="border border-border rounded-lg p-6 bg-surface-2">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-success">
               <DollarSign className="h-5 w-5" />
               {language === 'ar' ? 'معلومات الدفع' : 'Informations de Paiement'}
@@ -760,7 +761,7 @@ function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
           </motion.div>
 
           {/* Summary */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="border border-border rounded-lg p-6 bg-surface-2">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-electric">
               <Receipt className="h-5 w-5" />
               {language === 'ar' ? 'ملخص' : 'Résumé'}
@@ -1115,7 +1116,7 @@ export default function Sales() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="admin-hero flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">
             {language === 'ar' ? 'المبيعات' : 'Ventes'}
@@ -1152,67 +1153,11 @@ export default function Sales() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {language === 'ar' ? 'إجمالي المبيعات' : 'Chiffre d\'Affaires'}
-            </CardTitle>
-            <DollarSign className="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {salesStats ? formatCurrencyLocal(salesStats.totalSalesAmount, language) : '0.00 DA'}
-            </div>
-            <p className="text-xs mt-1 opacity-90">
-              {language === 'ar' ? 'إجمالي الإيرادات' : 'Revenu total'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {language === 'ar' ? 'عدد المعاملات' : 'Transactions'}
-            </CardTitle>
-            <ShoppingCart className="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{salesStats?.totalTransactions || 0}</div>
-            <p className="text-xs mt-1 opacity-90">
-              {language === 'ar' ? 'إجمالي الفواتير' : 'Total des factures'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {language === 'ar' ? 'متوسط الفاتورة' : 'Moyenne par Commande'}
-            </CardTitle>
-            <TrendingUp className="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {salesStats ? formatCurrencyLocal(salesStats.averageOrder, language) : '0.00 DA'}
-            </div>
-            <p className="text-xs mt-1 opacity-90">
-              {language === 'ar' ? 'متوسط قيمة الفاتورة' : 'Valeur moyenne par facture'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {language === 'ar' ? 'الفواتير المدفوعة' : 'Factures Payées'}
-            </CardTitle>
-            <Check className="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{salesStats?.paidTransactions || 0}</div>
-            <p className="text-xs mt-1 opacity-90">
-              {language === 'ar' ? 'فواتير مدفوعة بالكامل' : 'Factures entièrement payées'}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label={language === 'ar' ? 'إجمالي المبيعات' : "Chiffre d'affaires"} value={salesStats ? formatCurrencyLocal(salesStats.totalSalesAmount, language) : '0 DA'} hint={language === 'ar' ? 'إجمالي الإيرادات' : 'Revenu total'} icon={DollarSign} />
+        <StatCard label={language === 'ar' ? 'عدد المعاملات' : 'Transactions'} value={salesStats?.totalTransactions || 0} hint={language === 'ar' ? 'إجمالي الفواتير' : 'Total des factures'} icon={ShoppingCart} />
+        <StatCard label={language === 'ar' ? 'متوسط الفاتورة' : 'Panier moyen'} value={salesStats ? formatCurrencyLocal(salesStats.averageOrder, language) : '0 DA'} hint={language === 'ar' ? 'متوسط قيمة الفاتورة' : 'Valeur moyenne par facture'} icon={TrendingUp} />
+        <StatCard label={language === 'ar' ? 'الفواتير المدفوعة' : 'Factures payées'} value={<span className="text-success">{salesStats?.paidTransactions || 0}</span>} hint={salesStats?.totalTransactions ? `${Math.round(((salesStats.paidTransactions || 0) / salesStats.totalTransactions) * 100)}% ${language === 'ar' ? '' : 'du total'}` : undefined} icon={Check} />
       </div>
 
       {/* Filters and Search */}

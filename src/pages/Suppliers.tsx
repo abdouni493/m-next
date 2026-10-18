@@ -199,7 +199,7 @@ const SuppliersPage = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8 flex justify-between items-center"
+        className="admin-hero flex flex-wrap gap-4 justify-between items-end"
       >
         <div>
           <h1 className="text-2xl md:text-[28px] tracking-tight font-bold mb-2 text-foreground">

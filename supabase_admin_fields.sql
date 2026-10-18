@@ -61,3 +61,6 @@ alter table public.stock_movements enable row level security;
 drop policy if exists "stock_movements_staff" on public.stock_movements;
 create policy "stock_movements_staff" on public.stock_movements for all to authenticated using (true) with check (true);
 revoke all on public.stock_movements from anon;
+
+-- Make the API see the new columns/table immediately
+notify pgrst, 'reload schema';

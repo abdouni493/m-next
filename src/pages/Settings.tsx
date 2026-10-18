@@ -459,7 +459,7 @@ export default function Settings() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-8"
+          className="admin-hero"
         >
           <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground mb-2">
             {t('settings_title', language)}
@@ -706,7 +706,7 @@ export default function Settings() {
                         type="file"
                         accept="image/*"
                         onChange={handleLogoUpload}
-                        className="h-12 bg-card border-border rounded-xl hover:border-border focus:border-electric transition-colors cursor-pointer file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300 file:border-0 file:rounded-lg file:px-3 file:py-1 file:mr-3 file:font-semibold"
+                        className="h-12 bg-card border-border rounded-xl hover:border-border focus:border-electric transition-colors cursor-pointer file:bg-surface-2 file:text-foreground file:border-0 file:rounded-lg file:px-3 file:py-1 file:mr-3 file:font-semibold"
                       />
                       <p className="text-xs text-muted-foreground mt-1">
                         {language === 'ar' ? 'JPG, PNG, GIF. Max: 15MB' : 'JPG, PNG, GIF. Max: 15MB'}
@@ -880,7 +880,7 @@ export default function Settings() {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.4, delay: 0.1 }}
                   >
-                    <Card className="border-2 border-border hover:shadow-md transition-all duration-300 rounded-xl overflow-hidden bg-card">
+                    <Card className="border border-border hover:shadow-md transition-all duration-300 rounded-xl overflow-hidden bg-card">
                       <CardContent className="p-8 text-center">
                         <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Download className="h-8 w-8 text-success" />
@@ -908,7 +908,7 @@ export default function Settings() {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.4, delay: 0.2 }}
                   >
-                    <Card className="border-2 border-border hover:shadow-md transition-all duration-300 rounded-xl overflow-hidden bg-card">
+                    <Card className="border border-border hover:shadow-md transition-all duration-300 rounded-xl overflow-hidden bg-card">
                       <CardContent className="p-8 text-center">
                         <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Upload className="h-8 w-8 text-warning" />

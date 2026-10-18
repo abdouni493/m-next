@@ -33,6 +33,41 @@ export function PageHeader({ title, description, actions, className }: { title: 
   );
 }
 
+/** Ink hero banner with the volt glow — same look as the login brand panel. */
+export function PageHero({ eyebrow, icon: Icon, title, description, actions, stats, className }: {
+  eyebrow?: string; icon?: React.ElementType; title: React.ReactNode; description?: React.ReactNode; actions?: React.ReactNode;
+  stats?: { label: string; value: React.ReactNode }[]; className?: string;
+}) {
+  return (
+    <section className={cn('relative mb-6 overflow-hidden rounded-2xl bg-[#0B1220] p-6 text-white shadow-sm md:p-8', className)}>
+      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#C6F432]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-[#1F6FFF]/10 blur-3xl" />
+      <div className="relative flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          {(eyebrow || Icon) && (
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1 text-xs font-medium text-[#9AA3B5]">
+              {Icon && <Icon className="h-4 w-4 text-[#C6F432]" />}{eyebrow}
+            </span>
+          )}
+          <h1 className="mt-3 font-sora text-2xl font-bold tracking-tight text-white md:text-[30px]">{title}</h1>
+          {description && <p className="mt-1 max-w-2xl text-sm text-[#9AA3B5]">{description}</p>}
+        </div>
+        {actions && <div className="hero-actions flex flex-wrap items-center gap-2">{actions}</div>}
+      </div>
+      {stats && stats.length > 0 && (
+        <div className="relative mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-[#9AA3B5]">{s.label}</p>
+              <p className="mt-1 font-sora text-lg font-bold tabular-nums text-white">{s.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 /* ---------------- Cards ---------------- */
 export const Panel = ({ title, description, actions, children, className, bodyClassName }: {
   title?: React.ReactNode; description?: string; actions?: React.ReactNode; children: React.ReactNode; className?: string; bodyClassName?: string;

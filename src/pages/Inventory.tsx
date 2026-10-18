@@ -9,7 +9,24 @@ import {
   AlertCircle,
   ChevronDown,
   X,
+  Eye,
+  LayoutGrid,
+  List,
+  RefreshCw,
+  BatteryCharging,
+  Boxes,
+  Package,
+  Banknote,
+  AlertTriangle,
+  Zap,
+  Plug,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  Loader2,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { StatCard, EmptyState, formatDA, formatCompactDA } from '@/admin/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -82,6 +99,15 @@ const Inventory = () => {
   const [primaryImageId, setPrimaryImageId] = useState<number | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [deletingImageIndex, setDeletingImageIndex] = useState<number | null>(null);
+  const [stockFilter, setStockFilter] = useState<'all' | 'ok' | 'low' | 'out'>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>(() => {
+    try { return localStorage.getItem('inventory:view') === 'table' ? 'table' : 'grid'; } catch { return 'grid'; }
+  });
+  const [sortKey, setSortKey] = useState<'name' | 'quantity_actual' | 'purchase_price' | 'selling_price' | 'margin'>('name');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { try { localStorage.setItem('inventory:view', viewMode); } catch { /* ignore */ } }, [viewMode]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -387,14 +413,14 @@ const Inventory = () => {
         .eq('id', selectedBrand);
 
       if (error) throw error;
-      alert(language === 'en' ? 'Brand deleted successfully!' : 'Marque supprimée avec succès!');
+      toast(language === 'en' ? 'Brand deleted successfully!' : 'Marque supprimée avec succès!');
       setMarks(marks.filter((m) => m.id !== selectedBrand));
       setSelectedBrand('');
       setFormData({ ...formData, mark_id: '' });
       setShowBrandOptionsModal(false);
     } catch (error) {
       console.error('Error deleting brand:', error);
-      alert(language === 'en' ? 'Error deleting brand' : 'Erreur lors de la suppression de la marque');
+      toast(language === 'en' ? 'Error deleting brand' : 'Erreur lors de la suppression de la marque');
     }
   };
 
@@ -415,18 +441,18 @@ const Inventory = () => {
         .eq('id', connectorId);
 
       if (error) throw error;
-      alert(language === 'en' ? 'Connector type deleted successfully!' : 'Type de connecteur supprimé avec succès!');
+      toast(language === 'en' ? 'Connector type deleted successfully!' : 'Type de connecteur supprimé avec succès!');
       setConnectorTypes(connectorTypes.filter((c) => c.id !== connectorId));
       setFormData({ ...formData, connector_type_id: '' });
     } catch (error) {
       console.error('Error deleting connector type:', error);
-      alert(language === 'en' ? 'Error deleting connector type' : 'Erreur lors de la suppression du type de connecteur');
+      toast(language === 'en' ? 'Error deleting connector type' : 'Erreur lors de la suppression du type de connecteur');
     }
   };
 
   const handleSaveNewMark = async () => {
     if (!newMarkName.trim()) {
-      alert(language === 'en' ? 'Please enter a mark name' : 'Veuillez entrer le nom de la marque');
+      toast(language === 'en' ? 'Please enter a mark name' : 'Veuillez entrer le nom de la marque');
       return;
     }
 
@@ -498,13 +524,13 @@ const Inventory = () => {
       setShowAddMarkModal(false);
     } catch (error) {
       console.error('Error saving mark:', error);
-      alert(language === 'en' ? 'Error saving mark' : 'Erreur lors de l\'enregistrement de la marque');
+      toast(language === 'en' ? 'Error saving mark' : 'Erreur lors de l\'enregistrement de la marque');
     }
   };
 
   const handleSaveNewConnector = async () => {
     if (!newConnectorName.trim()) {
-      alert('Please enter a connector type name');
+      toast('Please enter a connector type name');
       return;
     }
 
@@ -520,27 +546,35 @@ const Inventory = () => {
       setFormData({ ...formData, connector_type_id: data.id });
       setNewConnectorName('');
       setShowAddConnectorModal(false);
-      alert('Connector type added successfully!');
+      toast('Connector type added successfully!');
     } catch (error) {
       console.error('Error adding connector type:', error);
-      alert('Error adding connector type');
+      toast('Error adding connector type');
     }
   };
 
   const handleDeleteCharger = async (chargerId: string) => {
+    setDeleting(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', chargerId);
-
-      if (error) throw error;
-      alert(language === 'en' ? 'Product deleted successfully!' : 'Produit supprimé avec succès!');
+      const { error } = await supabase.from('products').delete().eq('id', chargerId);
+      if (error) {
+        // Referenced by sales / invoices / orders (FK 23503) or blocked by RLS: archive instead so history stays intact.
+        const { error: archiveError } = await supabase.from('products').update({ is_active: false }).eq('id', chargerId);
+        if (archiveError) throw archiveError;
+        toast.success(language === 'en' ? 'Product archived (it is used in sales history)' : "Produit archivé (il est utilisé dans l'historique des ventes)");
+      } else {
+        toast.success(language === 'en' ? 'Product deleted' : 'Produit supprimé');
+      }
+      setChargers((prev) => prev.filter((c) => c.id !== chargerId));
       setSelectedCharger(null);
+      setShowDeleteConfirm(false);
+      setChargerToDelete(null);
       loadChargers();
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert(language === 'en' ? 'Error deleting product' : 'Erreur lors de la suppression du produit');
+      toast.error(language === 'en' ? 'Could not delete the product' : 'Suppression impossible', { description: (error as { message?: string })?.message });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -629,7 +663,7 @@ const Inventory = () => {
       console.log('Image deleted successfully');
     } catch (error) {
       console.error('Error deleting image:', error);
-      alert(language === 'en' ? 'Error deleting image' : 'Erreur lors de la suppression de l\'image');
+      toast(language === 'en' ? 'Error deleting image' : 'Erreur lors de la suppression de l\'image');
     } finally {
       setDeletingImageIndex(null);
     }
@@ -682,12 +716,33 @@ const Inventory = () => {
     }
   };
 
-  const handleSaveCharger = async () => {
-    try {
-      if (!formData.name) {
-        alert('Product name is required');
-        return;
+  /** Insert/update that drops columns the database does not have (PGRST204) instead of failing. */
+  const writeProduct = async (payload: Record<string, unknown>, id?: string) => {
+    let body = { ...payload };
+    for (let i = 0; i < 6; i++) {
+      const res = id
+        ? await supabase.from('products').update(body).eq('id', id).select()
+        : await supabase.from('products').insert([body]).select().single();
+      const missing = res.error?.message?.match(/'([^']+)' column/)?.[1];
+      if (res.error && missing && missing in body) {
+        delete (body as Record<string, unknown>)[missing];
+        continue;
       }
+      return res;
+    }
+    return id
+      ? await supabase.from('products').update(body).eq('id', id).select()
+      : await supabase.from('products').insert([body]).select().single();
+  };
+
+  const handleSaveCharger = async () => {
+    if (saving) return;
+    if (!formData.name.trim()) {
+      toast.error(language === 'en' ? 'Product name is required' : 'Le nom du produit est obligatoire');
+      return;
+    }
+    setSaving(true);
+    try {
 
       // If editing mode, update existing product
       if (isEditingMode && editingChargerId) {
@@ -729,7 +784,7 @@ const Inventory = () => {
             console.log('All new images uploaded successfully!');
           } catch (imageError) {
             console.error('Image upload failed:', imageError);
-            alert(`Image upload failed: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`);
+            toast(`Image upload failed: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`);
             return;
           }
         }
@@ -756,12 +811,10 @@ const Inventory = () => {
           updateData.primary_image = primaryImageUrl;
         }
 
-        const { error } = await supabase
-          .from('products')
-          .update(updateData)
-          .eq('id', editingChargerId);
+        const { error } = await writeProduct(updateData, editingChargerId);
 
         if (error) throw error;
+        toast.success(language === 'en' ? 'Charger updated' : 'Chargeur mis à jour');
 
         setIsEditingMode(false);
         setEditingChargerId(null);
@@ -789,10 +842,7 @@ const Inventory = () => {
       }
 
       // Otherwise, create new product
-      const { data, error } = await supabase
-        .from('products')
-        .insert([
-          {
+      const { data, error } = await writeProduct({
             name: formData.name,
             description: formData.description,
             mark_id: formData.mark_id || null,
@@ -810,10 +860,7 @@ const Inventory = () => {
             selling_price_2: parseFloat(formData.selling_price_2) || 0,
             selling_price_3: parseFloat(formData.selling_price_3) || 0,
             is_active: true,
-          },
-        ])
-        .select()
-        .single();
+          });
 
       if (error) throw error;
 
@@ -842,7 +889,7 @@ const Inventory = () => {
         } catch (imageError) {
           console.error('Image upload failed:', imageError);
           // Product was saved, but images failed - show warning
-          alert(`Charger saved but image upload failed: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`);
+          toast(`Charger saved but image upload failed: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`);
           setShowAddModal(false);
           loadChargers();
           return;
@@ -866,329 +913,349 @@ const Inventory = () => {
         images: [],
       });
 
+      toast.success(language === 'en' ? 'Charger created' : 'Chargeur créé');
       setShowAddModal(false);
       loadChargers();
     } catch (error) {
       console.error('Error saving charger:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Error saving charger: ${errorMessage}`);
+      const errorMessage = (error as { message?: string })?.message || 'Unknown error';
+      toast.error(language === 'en' ? 'Could not save the charger' : "Impossible d'enregistrer le chargeur", { description: errorMessage });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const filteredChargers = chargers.filter((charger) => {
-    const matchesSearch =
-      charger.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      charger.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      charger.mark?.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const resetForm = () => {
+    setIsEditingMode(false);
+    setEditingChargerId(null);
+    setSelectedImageIndex(null);
+    setDeletingImageIndex(null);
+    setChargerImages([]);
+    setPrimaryImageId(null);
+    setFormData({
+      name: '', description: '', mark_id: '', connector_type_id: '', voltage: '', wattage: '', amperage: '', model_number: '',
+      purchase_price: '', selling_price: '', selling_price_1: '', selling_price_2: '', selling_price_3: '', images: [],
+    });
+  };
 
-    const matchesFilter = !filterMark || charger.mark?.name === filterMark;
+  const openCreate = () => {
+    resetForm();
+    setShowAddModal(true);
+  };
 
-    return matchesSearch && matchesFilter;
-  });
+  const openDetails = (charger: Charger) => {
+    refreshChargerData(charger.id);
+    setSelectedCharger(charger);
+    supabase
+      .from('product_images')
+      .select('id, image_url, file_path, display_order, is_primary')
+      .eq('product_id', charger.id)
+      .order('display_order', { ascending: true })
+      .then(({ data }) => { if (data) setChargerImages(data); });
+  };
 
-  const lowStockChargers = chargers.filter(
-    (c) => c.quantity_actual <= c.quantity_minimal
-  ).length;
+  const openEdit = async (charger: Charger) => {
+    setIsEditingMode(true);
+    setEditingChargerId(charger.id);
+    setSelectedImageIndex(null);
+    setDeletingImageIndex(null);
+    setFormData({
+      name: charger.name,
+      description: charger.description || '',
+      mark_id: charger.mark_id || '',
+      connector_type_id: charger.connector_type_id || '',
+      voltage: String(charger.voltage ?? ''),
+      wattage: String(charger.wattage ?? ''),
+      amperage: String(charger.amperage ?? ''),
+      model_number: charger.model_number || '',
+      purchase_price: String(charger.purchase_price ?? ''),
+      selling_price: String(charger.selling_price ?? ''),
+      selling_price_1: String(charger.selling_price ?? ''),
+      selling_price_2: String(charger.selling_price ?? ''),
+      selling_price_3: String(charger.selling_price ?? ''),
+      images: [],
+    });
+    setShowAddModal(true);
+    const { data: existingImages } = await supabase
+      .from('product_images')
+      .select('id, image_url, file_path, display_order, is_primary')
+      .eq('product_id', charger.id)
+      .order('display_order', { ascending: true });
+    if (existingImages && existingImages.length > 0) {
+      setChargerImages(existingImages);
+      const primaryIdx = existingImages.findIndex((img) => img.is_primary);
+      setPrimaryImageId(primaryIdx !== -1 ? primaryIdx : 0);
+    } else {
+      setChargerImages([]);
+      setPrimaryImageId(null);
+    }
+  };
+
+  const askDelete = (charger: Charger) => {
+    setChargerToDelete(charger.id);
+    setShowDeleteConfirm(true);
+  };
+
+  const q = searchTerm.trim().toLowerCase();
+  const filteredChargers = chargers
+    .filter((charger) => {
+      const matchesSearch = !q ||
+        (charger.name || '').toLowerCase().includes(q) ||
+        (charger.description || '').toLowerCase().includes(q) ||
+        (charger.model_number || '').toLowerCase().includes(q) ||
+        (charger.mark?.name || '').toLowerCase().includes(q);
+      const matchesFilter = !filterMark || charger.mark?.name === filterMark;
+      const qty = Number(charger.quantity_actual) || 0;
+      const min = Number(charger.quantity_minimal) || 0;
+      const matchesStock = stockFilter === 'all'
+        || (stockFilter === 'out' && qty <= 0)
+        || (stockFilter === 'low' && qty > 0 && qty <= min)
+        || (stockFilter === 'ok' && qty > min);
+      return matchesSearch && matchesFilter && matchesStock;
+    })
+    .sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1;
+      if (sortKey === 'name') return (a.name || '').localeCompare(b.name || '') * dir;
+      return ((Number(a[sortKey]) || 0) - (Number(b[sortKey]) || 0)) * dir;
+    });
+
+  const toggleSort = (key: typeof sortKey) => {
+    if (sortKey === key) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir(key === 'name' ? 'asc' : 'desc'); }
+  };
+
+  const lowStockChargers = chargers.filter((c) => (Number(c.quantity_actual) || 0) > 0 && c.quantity_actual <= c.quantity_minimal).length;
+  const outOfStockChargers = chargers.filter((c) => (Number(c.quantity_actual) || 0) <= 0).length;
+  const totalUnits = chargers.reduce((s, c) => s + (Number(c.quantity_actual) || 0), 0);
+  const stockValue = chargers.reduce((s, c) => s + (Number(c.quantity_actual) || 0) * (Number(c.purchase_price) || 0), 0);
+  const stockStatus = (c: Charger) => {
+    const qty = Number(c.quantity_actual) || 0;
+    if (qty <= 0) return { label: language === 'en' ? 'Out of stock' : 'Rupture', cls: 'bg-destructive/10 text-destructive', text: 'text-destructive', dot: 'bg-destructive' };
+    if (qty <= (Number(c.quantity_minimal) || 0)) return { label: language === 'en' ? 'Low stock' : 'Stock faible', cls: 'bg-warning/15 text-warning', text: 'text-warning', dot: 'bg-warning' };
+    return { label: language === 'en' ? 'In stock' : 'En stock', cls: 'bg-success/15 text-success', text: 'text-success', dot: 'bg-success' };
+  };
+  const SortIcon = ({ k }: { k: typeof sortKey }) => (sortKey === k ? (sortDir === 'asc' ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />) : <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />);
+
+  const renderActions = (charger: Charger, compact?: boolean) => (
+    <div className={compact ? 'flex items-center justify-end gap-1' : 'grid grid-cols-3 gap-1.5'}>
+      <button type="button" onClick={() => openDetails(charger)} title={language === 'en' ? 'View details' : 'Voir les détails'}
+        className={compact ? 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-surface-2 hover:text-foreground' : 'inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-surface-2 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground'}>
+        <Eye className="h-4 w-4" />{!compact && (language === 'en' ? 'View' : 'Voir')}
+      </button>
+      <button type="button" onClick={() => openEdit(charger)} title={language === 'en' ? 'Edit' : 'Modifier'}
+        className={compact ? 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-electric/10 hover:text-electric' : 'inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-electric/10 text-xs font-semibold text-electric transition-colors hover:bg-electric hover:text-white'}>
+        <Edit2 className="h-4 w-4" />{!compact && (language === 'en' ? 'Edit' : 'Modifier')}
+      </button>
+      <button type="button" onClick={() => askDelete(charger)} title={language === 'en' ? 'Delete' : 'Supprimer'}
+        className={compact ? 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive' : 'inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-destructive/10 text-xs font-semibold text-destructive transition-colors hover:bg-destructive hover:text-white'}>
+        <Trash2 className="h-4 w-4" />{!compact && (language === 'en' ? 'Delete' : 'Suppr.')}
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground mb-2">
-          {language === 'en' ? 'Charger Inventory' : 'Gestion du Stock Chargeurs'}
-        </h1>
-        <p className="text-muted-foreground">
-          {language === 'en'
-            ? `${filteredChargers.length} products available • ${lowStockChargers} low stock alerts`
-            : `${filteredChargers.length} produits disponibles • ${lowStockChargers} alertes de rupture`}
-        </p>
-      </motion.div>
-
-      {/* Search & Filter Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4"
-      >
-        <div className="relative">
-          <Search className="absolute left-3 top-3 text-muted-foreground w-5 h-5" />
-          <input
-            type="text"
-            placeholder={
-              language === 'en'
-                ? 'Search products...'
-                : 'Rechercher les produits...'
-            }
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-ring focus:border-transparent bg-card shadow-sm hover:shadow-md transition-shadow text-foreground"
-          />
+      {/* Hero header — same ink panel as the login screen */}
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl bg-[#0B1220] p-6 text-white shadow-sm md:p-8">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#C6F432]/15 blur-3xl" />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-1 text-xs font-medium text-[#9AA3B5]">
+              <BatteryCharging className="h-4 w-4 text-[#C6F432]" /> Catalogue
+            </span>
+            <h1 className="mt-3 font-sora text-2xl font-bold tracking-tight md:text-[30px]">
+              {language === 'en' ? 'Charger Inventory' : 'Gestion du Stock Chargeurs'}
+            </h1>
+            <p className="mt-1 text-sm text-[#9AA3B5]">
+              {language === 'en'
+                ? `${chargers.length} products • ${lowStockChargers + outOfStockChargers} stock alerts`
+                : `${chargers.length} produits • ${lowStockChargers + outOfStockChargers} alertes de stock`}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={loadChargers}
+              className="inline-flex h-11 items-center gap-2 rounded-[10px] border border-white/15 bg-white/[0.04] px-4 text-sm font-semibold text-white transition-colors hover:bg-white/10">
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> {language === 'en' ? 'Refresh' : 'Actualiser'}
+            </button>
+            <button type="button" onClick={openCreate}
+              className="inline-flex h-11 items-center gap-2 rounded-[10px] bg-[#C6F432] px-5 text-sm font-bold text-[#0B1220] transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="h-4 w-4" /> {language === 'en' ? 'New charger' : 'Nouveau chargeur'}
+            </button>
+          </div>
         </div>
-
-        <select
-          value={filterMark}
-          onChange={(e) => setFilterMark(e.target.value)}
-          className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-ring bg-card shadow-sm hover:shadow-md transition-shadow appearance-none text-foreground"
-          style={{backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '16px 12px', paddingRight: '2.5rem'}}
-        >
-          <option value="">{language === 'en' ? 'All Marks' : 'Toutes les Marques'}</option>
-          {marks.map((mark) => (
-            <option key={mark.id} value={mark.name}>
-              {mark.name}
-            </option>
-          ))}
-        </select>
-
-        <div className="col-span-1 md:col-span-1"></div>
-
-        <Button
-          onClick={() => setShowAddModal(true)}
-          className="h-[46px] text-primary-foreground rounded-xl shadow-sm hover:shadow-md transition-all text-base font-semibold bg-primary"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          {language === 'en' ? 'Add Charger' : 'Ajouter'}
-        </Button>
       </motion.div>
 
-      {/* Chargers Grid */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-electric mx-auto"></div>
-          <p className="text-muted-foreground mt-4">{language === 'en' ? 'Loading chargers...' : 'Chargement des chargeurs...'}</p>
+      {/* KPIs */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label={language === 'en' ? 'Products' : 'Produits'} value={chargers.length} icon={Boxes} loading={loading && !chargers.length} />
+        <StatCard label={language === 'en' ? 'Units in stock' : 'Unités en stock'} value={totalUnits.toLocaleString('fr-FR')} icon={Package} loading={loading && !chargers.length} />
+        <StatCard label={language === 'en' ? 'Stock value (cost)' : 'Valeur du stock (achat)'} value={formatCompactDA(stockValue)} icon={Banknote} loading={loading && !chargers.length} />
+        <StatCard label={language === 'en' ? 'Alerts' : 'Alertes'} value={<span className={lowStockChargers + outOfStockChargers ? 'text-destructive' : ''}>{lowStockChargers + outOfStockChargers}</span>}
+          hint={`${outOfStockChargers} ${language === 'en' ? 'out' : 'rupture'} · ${lowStockChargers} ${language === 'en' ? 'low' : 'faible'}`} icon={AlertTriangle} loading={loading && !chargers.length} />
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm lg:flex-row lg:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={language === 'en' ? 'Search by name, brand, model…' : 'Rechercher par nom, marque, modèle…'}
+            className="h-10 w-full rounded-[10px] border border-border bg-background pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/30" />
+          {searchTerm && <button type="button" onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>}
+        </div>
+        <select value={filterMark} onChange={(e) => setFilterMark(e.target.value)}
+          className="h-10 rounded-[10px] border border-border bg-background px-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/30 lg:w-48">
+          <option value="">{language === 'en' ? 'All brands' : 'Toutes les marques'}</option>
+          {marks.map((mark) => <option key={mark.id} value={mark.name}>{mark.name}</option>)}
+        </select>
+        <div className="flex flex-wrap gap-1 rounded-[12px] border border-border bg-background p-1">
+          {([
+            ['all', language === 'en' ? 'All' : 'Tous'],
+            ['ok', language === 'en' ? 'In stock' : 'En stock'],
+            ['low', language === 'en' ? 'Low' : 'Faible'],
+            ['out', language === 'en' ? 'Out' : 'Rupture'],
+          ] as const).map(([k, label]) => (
+            <button key={k} type="button" onClick={() => setStockFilter(k)}
+              className={`h-8 rounded-[8px] px-3 text-xs font-semibold transition-colors ${stockFilter === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'}`}>{label}</button>
+          ))}
+        </div>
+        <div className="flex gap-1 rounded-[12px] border border-border bg-background p-1" role="tablist" aria-label="Affichage">
+          <button type="button" role="tab" onClick={() => setViewMode('grid')} aria-selected={viewMode === 'grid'}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-[8px] px-3 text-xs font-semibold ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-surface-2'}`}><LayoutGrid className="h-4 w-4" />{language === 'en' ? 'Cards' : 'Cartes'}</button>
+          <button type="button" role="tab" onClick={() => setViewMode('table')} aria-selected={viewMode === 'table'}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-[8px] px-3 text-xs font-semibold ${viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-surface-2'}`}><List className="h-4 w-4" />{language === 'en' ? 'Table' : 'Tableau'}</button>
+        </div>
+      </div>
+
+      {loading && chargers.length === 0 ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-80 animate-pulse rounded-2xl bg-muted" />)}
         </div>
       ) : filteredChargers.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-16"
-        >
-          <ImageIcon className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground text-lg">
-            {language === 'en' ? 'No chargers found' : 'Aucun chargeur trouvé'}
-          </p>
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
-        >
+        <div className="rounded-2xl border border-dashed border-border bg-card">
+          <EmptyState icon={BatteryCharging} title={language === 'en' ? 'No chargers found' : 'Aucun chargeur trouvé'}
+            text={language === 'en' ? 'Change the filters or add a new charger.' : 'Modifiez les filtres ou ajoutez un nouveau chargeur.'}
+            action={<Button onClick={openCreate}><Plus className="h-4 w-4" /> {language === 'en' ? 'New charger' : 'Nouveau chargeur'}</Button>} />
+        </div>
+      ) : viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredChargers.map((charger) => {
-            const lowStock = charger.quantity_actual <= charger.quantity_minimal;
-            const outOfStock = charger.quantity_actual === 0;
-            
+            const st = stockStatus(charger);
+            const margin = Number(charger.margin) || 0;
+            const min = Number(charger.quantity_minimal) || 0;
+            const qty = Number(charger.quantity_actual) || 0;
+            const fill = Math.min(100, min > 0 ? (qty / (min * 3)) * 100 : qty > 0 ? 100 : 0);
             return (
-              <motion.div
-                key={charger.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.02, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
-                className="group"
-              >
-                <Card className="h-full border border-border shadow-sm hover:shadow-md transition-all bg-white/80 backdrop-blur-sm overflow-hidden">
-                  {/* Image Section */}
-                  <div className="relative h-28 flex items-center justify-center overflow-hidden group bg-card">
-                    {charger.primary_image ? (
-                      <img
-                        src={charger.primary_image}
-                        alt={charger.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">{language === 'en' ? 'No image' : 'Pas d\'image'}</p>
-                      </div>
-                    )}
-
-                    {/* Stock Badge */}
-                    {outOfStock ? (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="absolute top-2 right-2 bg-destructive text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-sm"
-                      >
-                        <AlertCircle className="w-4 h-4" />
-                        Out of Stock
-                      </motion.div>
-                    ) : lowStock ? (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="absolute top-2 right-2 bg-warning text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-sm"
-                      >
-                        <AlertCircle className="w-4 h-4" />
-                        Low Stock
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="absolute top-2 right-2 bg-success text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 shadow-sm"
-                      >
-                        In Stock
-                      </motion.div>
-                    )}
+              <motion.div key={charger.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <button type="button" onClick={() => openDetails(charger)} className="relative block aspect-[4/3] overflow-hidden bg-surface-2">
+                  {charger.primary_image ? (
+                    <img src={charger.primary_image} alt={charger.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <BatteryCharging className="h-10 w-10" /><span className="text-xs">{language === 'en' ? 'No image' : "Pas d'image"}</span>
+                    </div>
+                  )}
+                  <span className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-card/95 px-2.5 py-1 text-[11px] font-semibold shadow-sm backdrop-blur ${st.text}`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${st.dot}`} />{st.label}
+                  </span>
+                  {charger.mark && <span className="absolute right-3 top-3 rounded-full bg-[#0B1220]/85 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">{charger.mark.name}</span>}
+                </button>
+                <div className="flex flex-1 flex-col p-4">
+                  <h3 className="line-clamp-2 min-h-[2.5rem] text-[15px] font-semibold leading-tight text-foreground">{charger.name}</h3>
+                  {charger.model_number && <p className="mt-0.5 truncate text-xs text-muted-foreground">{charger.model_number}</p>}
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {([['V', charger.voltage], ['W', charger.wattage], ['A', charger.amperage]] as const).map(([u, v]) => (
+                      <span key={u} className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-semibold tabular-nums text-foreground"><Zap className="h-3 w-3 text-electric" />{v || 0}{u}</span>
+                    ))}
+                    {charger.connector_type && <span className="inline-flex items-center gap-1 rounded-md bg-electric/10 px-2 py-1 text-xs font-semibold text-electric"><Plug className="h-3 w-3" />{charger.connector_type.name}</span>}
                   </div>
-
-                  {/* Content Section */}
-                  <CardContent className="pt-4 pb-4">
-                    {/* Product Name */}
-                    <h3 className="text-base font-bold text-foreground mb-2 line-clamp-2">
-                      {charger.name}
-                    </h3>
-
-                    {/* Mark Badge */}
-                    {charger.mark && (
-                      <div className="mb-3 inline-block">
-                        <span className="px-3 py-1 bg-surface-2 text-electric rounded-full text-sm font-semibold">
-                          {charger.mark.name}
-                        </span>
+                  <div className="mt-auto pt-4">
+                    <div className="flex items-end justify-between gap-2">
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Price' : 'Prix de vente'}</p>
+                        <p className="font-sora text-xl font-bold tabular-nums text-foreground">{formatDA(charger.selling_price)}</p>
+                        <p className="text-xs tabular-nums text-muted-foreground">{language === 'en' ? 'Cost' : 'Achat'} {formatDA(charger.purchase_price)}</p>
                       </div>
-                    )}
-
-                    {/* Specs Grid */}
-                    <div className="grid grid-cols-2 gap-2 mb-3 p-2 rounded-lg bg-card">
-                      <div className="text-center">
-                        <p className="text-xs text-muted-foreground font-semibold">V</p>
-                        <p className="text-sm font-bold text-foreground">{charger.voltage}V</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-muted-foreground font-semibold">W</p>
-                        <p className="text-sm font-bold text-foreground">{charger.wattage}W</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-muted-foreground font-semibold">A</p>
-                        <p className="text-sm font-bold text-foreground">{charger.amperage}A</p>
-                      </div>
-                      {charger.connector_type && (
-                        <div className="text-center col-span-2">
-                          <p className="text-xs text-muted-foreground font-semibold">{charger.connector_type.name}</p>
-                        </div>
-                      )}
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-bold tabular-nums ${margin >= 0 ? 'bg-volt text-volt-foreground' : 'bg-destructive/10 text-destructive'}`}>{margin >= 0 ? '+' : ''}{margin.toFixed(0)}%</span>
                     </div>
-
-                    {/* Stock & Pricing */}
-                    <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                      <div className="p-2 bg-surface-2 rounded-lg">
-                        <p className="text-xs text-electric font-bold"></p>
-                        <p className="text-base font-bold text-electric">{charger.quantity_actual}</p>
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Stock</span>
+                        <span className="font-semibold tabular-nums">{qty} <span className="font-normal text-muted-foreground">/ min {min}</span></span>
                       </div>
-                      <div className="p-2 bg-surface-2 rounded-lg">
-                        <p className="text-xs text-electric font-bold"></p>
-                        <p className="text-sm font-bold text-electric">{charger.purchase_price.toFixed(0)}</p>
-                      </div>
-                      <div className="p-2 bg-surface-2 rounded-lg">
-                        <p className="text-xs text-success font-bold"></p>
-                        <p className="text-sm font-bold text-success">{charger.selling_price.toFixed(0)}</p>
-                      </div>
+                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2"><div className={`h-full rounded-full ${st.dot}`} style={{ width: `${fill}%` }} /></div>
                     </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-1 pt-2 border-t border-border">
-                      <button
-                        onClick={() => {
-                          // Refresh charger data and then show details
-                          refreshChargerData(charger.id);
-                          setSelectedCharger(charger);
-                          // Fetch all images for this charger with full metadata
-                          supabase
-                            .from('product_images')
-                            .select('id, image_url, file_path, display_order, is_primary')
-                            .eq('product_id', charger.id)
-                            .order('display_order', { ascending: true })
-                            .then(({ data }) => {
-                              if (data) {
-                                setChargerImages(data);
-                              }
-                            });
-                        }}
-                        className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center"
-                        title={language === 'en' ? 'View details' : 'Voir les détails'}
-                      >
-                        
-                      </button>
-                      <button
-                        onClick={async () => {
-                          setIsEditingMode(true);
-                          setEditingChargerId(charger.id);
-                          setSelectedImageIndex(null);
-                          setDeletingImageIndex(null);
-                          setFormData({
-                            name: charger.name,
-                            description: charger.description || '',
-                            mark_id: charger.mark_id || '',
-                            connector_type_id: charger.connector_type_id || '',
-                            voltage: charger.voltage.toString(),
-                            wattage: charger.wattage.toString(),
-                            amperage: charger.amperage.toString(),
-                            model_number: charger.model_number || '',
-                            purchase_price: charger.purchase_price.toString(),
-                            selling_price: charger.selling_price.toString(),
-                            selling_price_1: charger.selling_price.toString(),
-                            selling_price_2: charger.selling_price.toString(),
-                            selling_price_3: charger.selling_price.toString(),
-                            images: [],
-                          });
-                          // Load existing images for this product
-                          const { data: existingImages } = await supabase
-                            .from('product_images')
-                            .select('id, image_url, file_path, display_order, is_primary')
-                            .eq('product_id', charger.id)
-                            .order('display_order', { ascending: true });
-                          if (existingImages && existingImages.length > 0) {
-                            setChargerImages(existingImages);
-                            // Find and set the primary image ID
-                            const primaryIdx = existingImages.findIndex(img => img.is_primary);
-                            if (primaryIdx !== -1) {
-                              setPrimaryImageId(primaryIdx);
-                            } else {
-                              setPrimaryImageId(0);
-                            }
-                          } else {
-                            setChargerImages([]);
-                            setPrimaryImageId(null);
-                          }
-                          setShowAddModal(true);
-                        }}
-                        className="flex-1 bg-success hover:bg-success/90 text-white py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center"
-                        title={language === 'en' ? 'Edit' : 'Modifier'}
-                      >
-                        
-                      </button>
-                      <button
-                        onClick={() => {
-                          setChargerToDelete(charger.id);
-                          setShowDeleteConfirm(true);
-                        }}
-                        className="flex-1 bg-destructive hover:bg-destructive/90 text-white py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center"
-                        title={language === 'en' ? 'Delete' : 'Supprimer'}
-                      >
-                        
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <div className="mt-4 border-t border-border pt-3">{renderActions(charger)}</div>
+                  </div>
+                </div>
               </motion.div>
             );
           })}
-        </motion.div>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] text-sm">
+              <thead className="bg-surface-2 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3"><button type="button" onClick={() => toggleSort('name')} className="inline-flex items-center gap-1 hover:text-foreground">{language === 'en' ? 'Product' : 'Produit'}<SortIcon k="name" /></button></th>
+                  <th className="px-4 py-3">{language === 'en' ? 'Brand' : 'Marque'}</th>
+                  <th className="px-4 py-3">{language === 'en' ? 'Specs' : 'Caractéristiques'}</th>
+                  <th className="px-4 py-3 text-right"><button type="button" onClick={() => toggleSort('quantity_actual')} className="inline-flex items-center gap-1 hover:text-foreground">Stock<SortIcon k="quantity_actual" /></button></th>
+                  <th className="px-4 py-3 text-right"><button type="button" onClick={() => toggleSort('purchase_price')} className="inline-flex items-center gap-1 hover:text-foreground">{language === 'en' ? 'Cost' : 'Achat'}<SortIcon k="purchase_price" /></button></th>
+                  <th className="px-4 py-3 text-right"><button type="button" onClick={() => toggleSort('selling_price')} className="inline-flex items-center gap-1 hover:text-foreground">{language === 'en' ? 'Price' : 'Vente'}<SortIcon k="selling_price" /></button></th>
+                  <th className="px-4 py-3 text-right"><button type="button" onClick={() => toggleSort('margin')} className="inline-flex items-center gap-1 hover:text-foreground">Marge<SortIcon k="margin" /></button></th>
+                  <th className="px-4 py-3">Statut</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredChargers.map((charger) => {
+                  const st = stockStatus(charger);
+                  const margin = Number(charger.margin) || 0;
+                  return (
+                    <tr key={charger.id} className="transition-colors hover:bg-surface-2/60">
+                      <td className="px-4 py-3">
+                        <button type="button" onClick={() => openDetails(charger)} className="flex items-center gap-3 text-left">
+                          <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-surface-2">
+                            {charger.primary_image ? <img src={charger.primary_image} alt="" loading="lazy" className="h-full w-full object-cover" /> : <BatteryCharging className="h-5 w-5 text-muted-foreground" />}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block max-w-[260px] truncate font-semibold text-foreground">{charger.name}</span>
+                            {charger.model_number && <span className="block truncate text-xs text-muted-foreground">{charger.model_number}</span>}
+                          </span>
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">{charger.mark ? <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-semibold">{charger.mark.name}</span> : <span className="text-muted-foreground">—</span>}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs tabular-nums text-muted-foreground">{charger.voltage || 0}V · {charger.wattage || 0}W · {charger.amperage || 0}A{charger.connector_type ? ` · ${charger.connector_type.name}` : ''}</td>
+                      <td className="px-4 py-3 text-right font-semibold tabular-nums">{charger.quantity_actual ?? 0}<span className="font-normal text-muted-foreground"> / {charger.quantity_minimal ?? 0}</span></td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right tabular-nums text-muted-foreground">{formatDA(charger.purchase_price)}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right font-semibold tabular-nums">{formatDA(charger.selling_price)}</td>
+                      <td className={`px-4 py-3 text-right font-semibold tabular-nums ${margin >= 0 ? 'text-success' : 'text-destructive'}`}>{margin.toFixed(0)}%</td>
+                      <td className="px-4 py-3"><span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${st.cls}`}><span className={`h-1.5 w-1.5 rounded-full ${st.dot}`} />{st.label}</span></td>
+                      <td className="px-4 py-3">{renderActions(charger, true)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="border-t border-border px-4 py-3 text-xs text-muted-foreground">{filteredChargers.length} / {chargers.length} {language === 'en' ? 'products' : 'produits'}</div>
+        </div>
       )}
 
       {/* Add Charger Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-card rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-sm"
           >
             <div className="sticky top-0 p-6 border-b border-border flex justify-between items-center bg-card">
-              <h2 className="text-3xl font-bold text-foreground">
+              <h2 className="font-sora text-2xl font-bold text-foreground">
                 {isEditingMode 
                   ? (language === 'en' ? 'Edit Charger' : 'Modifier Chargeur')
                   : (language === 'en' ? 'Add New Charger' : 'Ajouter Nouveau Chargeur')}
@@ -1686,8 +1753,10 @@ const Inventory = () => {
               <div className="flex gap-3 pt-4 border-t border-border">
                 <Button
                   onClick={handleSaveCharger}
-                  className="flex-1 text-primary-foreground rounded-lg h-12 font-bold text-base bg-primary"
+                  disabled={saving}
+                  className="flex-1 text-primary-foreground rounded-[10px] h-12 font-bold text-base bg-primary"
                 >
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {isEditingMode 
                     ? (language === 'en' ? 'Update' : 'Mettre à Jour')
                     : (language === 'en' ? 'Save Charger' : 'Enregistrer')}
@@ -1726,7 +1795,7 @@ const Inventory = () => {
 
       {/* Detail Modal */}
       {selectedCharger && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1734,7 +1803,7 @@ const Inventory = () => {
           >
             {/* Header */}
             <div className="sticky top-0 p-6 border-b border-border flex justify-between items-center bg-card">
-              <h2 className="text-3xl font-bold text-foreground">
+              <h2 className="font-sora text-2xl font-bold text-foreground">
                 {selectedCharger.name}
               </h2>
               <button
@@ -1961,7 +2030,7 @@ const Inventory = () => {
 
       {/* Add Mark Modal */}
       {showAddMarkModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -2092,7 +2161,7 @@ const Inventory = () => {
 
       {/* Add Connector Type Modal */}
       {showAddConnectorModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -2153,7 +2222,7 @@ const Inventory = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && chargerToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999] p-4">
+        <div className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -2171,10 +2240,10 @@ const Inventory = () => {
                 {language === 'en' 
                   ? `Are you sure you want to delete "${
                       chargers.find(c => c.id === chargerToDelete)?.name || ''
-                    }"? This action cannot be undone.`
+                    }"? If it appears in past sales it will be archived instead.`
                   : `Êtes-vous sûr de vouloir supprimer "${
                       chargers.find(c => c.id === chargerToDelete)?.name || ''
-                    }"? Cette action ne peut pas être annulée.`}
+                    }"? S'il figure dans des ventes passées, il sera archivé à la place.`}
               </p>
               <div className="flex gap-3">
                 <button
@@ -2182,21 +2251,18 @@ const Inventory = () => {
                     setShowDeleteConfirm(false);
                     setChargerToDelete(null);
                   }}
-                  className="flex-1 bg-muted-foreground hover:bg-muted-foreground text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                  type="button"
+                  className="flex-1 border border-border bg-card hover:bg-surface-2 text-foreground font-bold h-11 px-4 rounded-[10px] transition-colors"
                 >
                   {language === 'en' ? 'Cancel' : 'Annuler'}
                 </button>
                 <button
-                  onClick={() => {
-                    if (chargerToDelete) {
-                      handleDeleteCharger(chargerToDelete);
-                      setShowDeleteConfirm(false);
-                      setChargerToDelete(null);
-                    }
-                  }}
-                  className="flex-1 bg-destructive hover:bg-destructive/90 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  type="button"
+                  disabled={deleting}
+                  onClick={() => { if (chargerToDelete) handleDeleteCharger(chargerToDelete); }}
+                  className="flex-1 bg-destructive hover:bg-destructive/90 disabled:opacity-60 text-white font-bold h-11 px-4 rounded-[10px] transition-colors flex items-center justify-center gap-2"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   {language === 'en' ? 'Delete' : 'Supprimer'}
                 </button>
               </div>

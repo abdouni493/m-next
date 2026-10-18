@@ -632,14 +632,14 @@ export default function PurchaseInvoices() {
   const restToPay = Math.max(0, totalPrice - amountPaid);
 
   return (
-    <div className={`min-h-screen p-6 bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header with Statistics */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+        <div className="admin-hero flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
           <div>
             <h1 className="text-2xl md:text-[28px] tracking-tight font-bold mb-2 text-foreground">
               {getText('title')}
@@ -779,7 +779,7 @@ export default function PurchaseInvoices() {
                         {searchResults.map((product) => (
                           <motion.div
                             key={product.id}
-                            className="border-2 border-border rounded-lg p-4 hover:border-electric hover:shadow-md transition-all cursor-pointer"
+                            className="border border-border rounded-lg p-4 hover:border-electric hover:shadow-md transition-all cursor-pointer"
                             onClick={() => handleSelectProduct(product)}
                             whileHover={{ scale: 1.02 }}
                           >
@@ -820,7 +820,7 @@ export default function PurchaseInvoices() {
                   // Form Step
                   <div className="space-y-6">
                     {selectedProduct && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-surface-2 rounded-lg border-2 border-border">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-surface-2 rounded-lg border border-border">
                         <p className="font-bold text-lg">
                           {language === 'ar' ? 'تم تحديد' : 'Selected'}: <span className="text-electric">{selectedProduct.name}</span>
                         </p>
@@ -1157,7 +1157,7 @@ export default function PurchaseInvoices() {
                       </div>
 
                       {/* Payment Summary */}
-                      <div className="border-2 border-border bg-surface-2 p-4 rounded-lg mb-4">
+                      <div className="border border-border bg-surface-2 p-4 rounded-lg mb-4">
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
                             <p className="text-sm text-muted-foreground mb-1">{language === 'ar' ? 'السعر الإجمالي' : 'Total Price'}</p>

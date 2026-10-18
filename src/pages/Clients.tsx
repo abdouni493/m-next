@@ -269,7 +269,7 @@ const Clients = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="admin-hero flex flex-wrap gap-4 justify-between items-end">
         <div>
           <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">Clients</h1>
           <p className="text-muted-foreground">
