@@ -368,14 +368,17 @@ const SuppliersPage = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-sm"
+            className="admin-modal max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
-            <div className="sticky top-0 p-6 border-b border-border flex justify-between items-center bg-card">
-              <h2 className="text-3xl font-bold text-foreground">
-                {editingSupplier
-                  ? '' + (language === 'en' ? 'Edit Supplier' : 'Modifier Fournisseur')
-                  : '' + (language === 'en' ? 'Add New Supplier' : 'Ajouter Nouveau Fournisseur')}
-              </h2>
+            <div className="admin-modal-head sticky top-0 z-10 px-6 py-5 flex justify-between items-start">
+              <div>
+                <span className="admin-modal-eyebrow">{language === 'en' ? 'Supplier' : 'Fournisseur'}</span>
+                <h2 className="font-bold">
+                  {editingSupplier
+                    ? (language === 'en' ? 'Edit supplier' : 'Modifier le fournisseur')
+                    : (language === 'en' ? 'New supplier' : 'Nouveau fournisseur')}
+                </h2>
+              </div>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="text-muted-foreground hover:text-foreground hover:bg-surface-2 rounded-lg p-2 transition"

@@ -519,13 +519,15 @@ const Caisse = () => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-card rounded-xl shadow-sm max-w-md w-full p-8"
+            className="admin-modal max-w-md w-full max-h-[90vh] overflow-y-auto p-8"
           >
-            <div className={`flex justify-between items-start mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <h2 className="text-2xl font-bold text-foreground">
-                {isEditingMode ? '' : ''}
-                {isEditingMode ? 'Edit Transaction' : 'New Transaction'}
-              </h2>
+            <div className={`admin-modal-head -mx-8 -mt-8 mb-6 px-6 py-5 flex justify-between items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div>
+                <span className="admin-modal-eyebrow">Caisse</span>
+                <h2 className="font-bold">
+                  {isEditingMode ? 'Modifier la transaction' : 'Nouvelle transaction'}
+                </h2>
+              </div>
               <button
                 onClick={() => {
                   resetForm();

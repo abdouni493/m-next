@@ -1252,14 +1252,22 @@ const Inventory = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-card rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-sm"
+            className="admin-modal max-w-3xl w-full max-h-[90vh] overflow-y-auto"
           >
-            <div className="sticky top-0 p-6 border-b border-border flex justify-between items-center bg-card">
-              <h2 className="font-sora text-2xl font-bold text-foreground">
-                {isEditingMode 
-                  ? (language === 'en' ? 'Edit Charger' : 'Modifier Chargeur')
-                  : (language === 'en' ? 'Add New Charger' : 'Ajouter Nouveau Chargeur')}
-              </h2>
+            <div className="admin-modal-head sticky top-0 z-10 px-6 py-5 flex justify-between items-start gap-4">
+              <div>
+                <span className="admin-modal-eyebrow"><BatteryCharging className="h-3.5 w-3.5" />{isEditingMode ? (language === 'en' ? 'Edit' : 'Modification') : (language === 'en' ? 'New product' : 'Nouveau produit')}</span>
+                <h2 className="font-bold">
+                  {isEditingMode
+                    ? (language === 'en' ? 'Edit charger' : 'Modifier le chargeur')
+                    : (language === 'en' ? 'New charger' : 'Nouveau chargeur')}
+                </h2>
+                <p className="mt-1 text-sm">
+                  {isEditingMode
+                    ? (formData.name || (language === 'en' ? 'Update the product details' : 'Mettez à jour les informations du produit'))
+                    : (language === 'en' ? 'Photos, brand, specs and prices' : 'Photos, marque, caractéristiques et prix')}
+                </p>
+              </div>
               <button
                 onClick={() => {
                   setShowAddModal(false);
@@ -1300,7 +1308,7 @@ const Inventory = () => {
                 transition={{ delay: 0 }}
                 className="p-4 rounded-xl border border-border bg-card"
               >
-                <h3 className="text-lg font-bold text-electric mb-4">{language === 'en' ? 'Product Images' : 'Images du Produit'}</h3>
+                <h3 className="mb-4">{language === 'en' ? 'Product Images' : 'Images du Produit'}</h3>
                 
                 {/* Existing Images Gallery (when editing) */}
                 {isEditingMode && editingChargerId && chargerImages.length > 0 && (
@@ -1466,10 +1474,10 @@ const Inventory = () => {
                 transition={{ delay: 0.05 }}
                 className="p-4 rounded-xl border border-border bg-card"
               >
-                <h3 className="text-lg font-bold text-electric mb-4">{language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
+                <h3 className="mb-4">{language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-electric">
+                    <label className="block text-sm font-semibold mb-2">
                       {language === 'en' ? 'Product Name' : 'Nom du Produit'} *
                     </label>
                     <input
@@ -1484,7 +1492,7 @@ const Inventory = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-electric">
+                    <label className="block text-sm font-semibold mb-2">
                       {language === 'en' ? 'Description' : 'Description'}
                     </label>
                     <textarea
@@ -1507,14 +1515,14 @@ const Inventory = () => {
                 transition={{ delay: 0.1 }}
                 className="p-4 rounded-xl border border-border bg-card"
               >
-                <h3 className="text-lg font-bold text-electric mb-5">{language === 'en' ? 'Brand & Connector' : 'Marque & Connecteur'}</h3>
+                <h3 className="mb-4">{language === 'en' ? 'Brand & Connector' : 'Marque & Connecteur'}</h3>
                 
                 {/* Streamlined Grid: 1 column on mobile, 2 columns on tablet+ */}
                 <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
                   
                   {/* Brand / Mark Field */}
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-electric">
+                    <label className="block text-sm font-semibold mb-2">
                       {language === 'en' ? 'Mark / Brand' : 'Marque'} *
                     </label>
                     <div className="flex gap-2">
@@ -1569,7 +1577,7 @@ const Inventory = () => {
 
                   {/* Connector Type Field */}
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-electric">
+                    <label className="block text-sm font-semibold mb-2">
                       {language === 'en' ? 'Connector Type' : 'Type de Connecteur'} *
                     </label>
                     <div className="flex gap-2">
@@ -1627,10 +1635,10 @@ const Inventory = () => {
                 transition={{ delay: 0.2 }}
                 className="p-4 rounded-xl border border-border bg-card"
               >
-                <h3 className="text-lg font-bold text-warning mb-4">{language === 'en' ? 'Electrical Specs' : 'Spécifications Électriques'}</h3>
+                <h3 className="mb-4">{language === 'en' ? 'Electrical Specs' : 'Spécifications Électriques'}</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-warning">Voltage</label>
+                    <label className="block text-sm font-semibold mb-2">Voltage</label>
                     <input
                       type="number"
                       step="0.1"
@@ -1643,7 +1651,7 @@ const Inventory = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-warning">Wattage</label>
+                    <label className="block text-sm font-semibold mb-2">Wattage</label>
                     <input
                       type="number"
                       step="0.1"
@@ -1656,7 +1664,7 @@ const Inventory = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2 text-warning">Amperage</label>
+                    <label className="block text-sm font-semibold mb-2">Amperage</label>
                     <input
                       type="number"
                       step="0.1"
@@ -1670,7 +1678,7 @@ const Inventory = () => {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <label className="block text-sm font-semibold mb-2 text-warning">{language === 'en' ? 'Model Number' : 'Numéro de Modèle'}</label>
+                  <label className="block text-sm font-semibold mb-2">{language === 'en' ? 'Model Number' : 'Numéro de Modèle'}</label>
                   <input
                     type="text"
                     placeholder="Optional"
@@ -1690,7 +1698,7 @@ const Inventory = () => {
                 transition={{ delay: 0.5 }}
                 className="p-4 rounded-xl border border-border bg-card"
               >
-                <h3 className="text-lg font-bold text-destructive mb-4">{language === 'en' ? 'Selling Prices' : 'Prix de Vente'}</h3>
+                <h3 className="mb-4">{language === 'en' ? 'Selling Prices' : 'Prix de Vente'}</h3>
                 <p className="text-sm text-destructive mb-4">{language === 'en' ? 'Set different prices for different customer types' : 'Définissez des prix différents pour les différents types de clients'}</p>
                 
                 {/* Selling Prices - Three Tier System */}
@@ -1711,7 +1719,7 @@ const Inventory = () => {
                           selling_price: e.target.value // Keep in sync for backward compatibility
                         })
                       }}
-                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card font-bold text-sm text-foreground"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-card font-semibold text-sm tabular-nums text-foreground"
                     />
                   </div>
 
@@ -1727,7 +1735,7 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, selling_price_2: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card font-bold text-sm text-foreground"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-card font-semibold text-sm tabular-nums text-foreground"
                     />
                   </div>
 
@@ -1743,14 +1751,14 @@ const Inventory = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, selling_price_3: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card font-bold text-sm text-foreground"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-card font-semibold text-sm tabular-nums text-foreground"
                     />
                   </div>
                 </div>
               </motion.div>
 
               {/* Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-border">
+              <div className="admin-modal-foot -mx-6 -mb-6 flex gap-3 px-6 py-4">
                 <Button
                   onClick={handleSaveCharger}
                   disabled={saving}
@@ -1783,7 +1791,7 @@ const Inventory = () => {
                     });
                   }}
                   variant="outline"
-                  className="flex-1 rounded-lg h-12 font-bold text-base"
+                  className="flex-1 rounded-[10px] h-12 font-semibold text-base"
                 >
                   {language === 'en' ? 'Cancel' : 'Annuler'}
                 </Button>
@@ -1799,13 +1807,14 @@ const Inventory = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-sm"
+            className="admin-modal max-w-4xl w-full max-h-[90vh] overflow-y-auto"
           >
             {/* Header */}
-            <div className="sticky top-0 p-6 border-b border-border flex justify-between items-center bg-card">
-              <h2 className="font-sora text-2xl font-bold text-foreground">
-                {selectedCharger.name}
-              </h2>
+            <div className="admin-modal-head sticky top-0 z-10 px-6 py-5 flex justify-between items-start gap-4">
+              <div className="min-w-0">
+                <span className="admin-modal-eyebrow"><Eye className="h-3.5 w-3.5" />{selectedCharger.mark?.name || (language === 'en' ? 'Charger' : 'Chargeur')}</span>
+                <h2 className="font-bold">{selectedCharger.name}</h2>
+              </div>
               <button
                 onClick={() => setSelectedCharger(null)}
                 className="text-muted-foreground hover:text-foreground hover:bg-surface-2 rounded-lg p-2 transition"
@@ -1824,7 +1833,7 @@ const Inventory = () => {
                   transition={{ delay: 0 }}
                   className="p-4 rounded-xl border border-border bg-card"
                 >
-                  <h3 className="text-lg font-bold text-electric mb-4">{language === 'en' ? 'Product Images' : 'Images du Produit'} ({chargerImages.length})</h3>
+                  <h3 className="mb-4">{language === 'en' ? 'Product Images' : 'Images du Produit'} ({chargerImages.length})</h3>
                   {chargerImages.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {chargerImages.map((imageObj, index) => {
@@ -1869,7 +1878,7 @@ const Inventory = () => {
                 transition={{ delay: 0.05 }}
                 className="p-4 rounded-xl border border-border bg-card"
               >
-                <h3 className="text-lg font-bold text-electric mb-4">{language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
+                <h3 className="mb-4">{language === 'en' ? 'Product Information' : 'Informations du Produit'}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-3 bg-card rounded-lg">
                     <label className="block text-xs font-semibold text-electric mb-1">{language === 'en' ? 'Product Name' : 'Nom du Produit'}</label>
@@ -1907,7 +1916,7 @@ const Inventory = () => {
                 transition={{ delay: 0.1 }}
                 className="p-4 rounded-xl border border-border bg-card"
               >
-                <h3 className="text-lg font-bold text-electric mb-4">{language === 'en' ? 'Technical Specifications' : 'Spécifications Techniques'}</h3>
+                <h3 className="mb-4">{language === 'en' ? 'Technical Specifications' : 'Spécifications Techniques'}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="p-3 bg-card rounded-lg text-center">
                     <p className="text-xs font-semibold text-electric">Voltage</p>
@@ -2035,14 +2044,15 @@ const Inventory = () => {
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-card rounded-2xl max-w-lg w-full shadow-sm max-h-[90vh] overflow-y-auto"
+            className="admin-modal max-w-lg w-full max-h-[90vh] overflow-y-auto"
           >
             {/* Header */}
-            <div className="p-6 border-b border-border rounded-t-2xl sticky top-0 z-10 bg-primary text-primary-foreground">
-              <h2 className="text-3xl font-bold text-white flex items-center gap-2">
+            <div className="admin-modal-head px-6 py-5 sticky top-0 z-10">
+              <span className="admin-modal-eyebrow">{language === 'en' ? 'Brand' : 'Marque'}</span>
+              <h2 className="font-bold flex items-center gap-2">
                 {language === 'en' ? (isEditingBrand ? 'Edit Brand' : 'Add New Brand') : (isEditingBrand ? 'Modifier Marque' : 'Ajouter Nouvelle Marque')}
               </h2>
-              <p className="text-primary-foreground text-sm mt-2">
+              <p className="text-sm mt-1">
                 {language === 'en' ? 'Create or edit a charger brand with logo' : 'Créez ou modifiez une marque avec logo'}
               </p>
             </div>
@@ -2165,20 +2175,21 @@ const Inventory = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-card rounded-2xl max-w-md w-full shadow-sm"
+            className="admin-modal max-w-md w-full overflow-hidden"
           >
-            <div className="p-6 border-b border-border rounded-t-2xl bg-card">
-              <h2 className="text-2xl font-bold text-electric">
+            <div className="admin-modal-head px-6 py-5">
+              <span className="admin-modal-eyebrow">{language === 'en' ? 'Connector' : 'Connecteur'}</span>
+              <h2 className="font-bold">
                 {language === 'en' ? 'Add Connector Type' : 'Ajouter Type de Connecteur'}
               </h2>
-              <p className="text-electric text-sm mt-1">
+              <p className="text-sm mt-1">
                 {language === 'en' ? 'Create a new connector type' : 'Créez un nouveau type de connecteur'}
               </p>
             </div>
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-2 text-electric">
+                <label className="block text-sm font-semibold mb-2">
                   {language === 'en' ? 'Connector Name' : 'Nom du Connecteur'} *
                 </label>
                 <input

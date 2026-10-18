@@ -457,12 +457,13 @@ const Clients = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.4 }}
-            className="rounded-xl shadow-sm max-w-lg w-full p-8 border border-border bg-card"
+            className="admin-modal max-w-lg w-full max-h-[90vh] overflow-y-auto p-8"
           >
             {/* Header */}
-            <div className="flex justify-between items-start mb-8">
+            <div className="admin-modal-head -mx-8 -mt-8 mb-6 px-6 py-5 flex justify-between items-start">
               <div>
-                <h2 className="text-3xl font-bold text-foreground">
+                <span className="admin-modal-eyebrow">{isEditingMode ? 'Modification' : 'Nouveau client'}</span>
+                <h2 className="font-bold">
                   {isEditingMode ? 'Edit Client' : 'Add New Client'}
                 </h2>
                 <p className="text-muted-foreground text-sm mt-1">

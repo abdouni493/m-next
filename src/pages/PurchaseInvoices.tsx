@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -745,18 +746,22 @@ export default function PurchaseInvoices() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-card rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              className="admin-modal max-w-4xl w-full max-h-[90vh] overflow-y-auto"
             >
-              <div className="sticky top-0 text-primary-foreground p-6 flex items-center justify-between z-10 bg-primary">
-                <h2 className="text-2xl font-bold">{getText('new_purchase')}</h2>
+              <div className="admin-modal-head sticky top-0 px-6 py-5 flex items-start justify-between z-10">
+                <div>
+                  <span className="admin-modal-eyebrow">{language === 'ar' ? 'شراء' : 'Achat'}</span>
+                  <h2 className="font-bold">{getText('new_purchase')}</h2>
+                </div>
                 <button
                   onClick={() => {
                     setShowCreateDialog(false);
                     setStep('search');
                   }}
-                  className="text-2xl hover:scale-110 transition-transform"
+                  className="p-2"
+                aria-label="Fermer"
                 >
-                  
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 

@@ -561,3 +561,98 @@ All colors MUST be HSL.
   color: #fff;
 }
 .admin-hero button:not(.bg-primary):hover { background-color: rgb(255 255 255 / 0.1) !important; }
+
+/* ---------- Create / edit modals: login-panel header + dashboard form controls ---------- */
+.admin-modal {
+  border-radius: 1rem !important;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  box-shadow: 0 24px 64px -16px rgb(11 18 32 / 0.45) !important;
+}
+.admin-modal-head {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #0B1220 !important;
+  color: #fff !important;
+  border-bottom: 0 !important;
+}
+.admin-modal-head::before {
+  content: '';
+  position: absolute; z-index: -1;
+  right: -4rem; top: -5rem;
+  width: 14rem; height: 14rem;
+  border-radius: 9999px;
+  background: rgb(198 244 50 / 0.18);
+  filter: blur(56px);
+}
+.admin-modal-head h2 { color: #fff !important; font-family: Sora, Inter, sans-serif; font-size: 1.375rem !important; line-height: 1.75rem; }
+.admin-modal-head p, .admin-modal-head .text-muted-foreground { color: #9AA3B5 !important; }
+.admin-modal-head button {
+  color: #fff !important;
+  background-color: rgb(255 255 255 / 0.06) !important;
+  border-radius: 10px;
+}
+.admin-modal-head button:hover { background-color: rgb(255 255 255 / 0.14) !important; }
+.admin-modal-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  border-radius: 9999px; background: rgb(255 255 255 / 0.06);
+  padding: 0.125rem 0.625rem; margin-bottom: 0.5rem;
+  font-size: 0.7rem; font-weight: 600; color: #C6F432;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* form controls inside modals and dialogs */
+.admin-modal input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']),
+.admin-modal select,
+.admin-modal textarea,
+[role='dialog'] input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']),
+[role='dialog'] select,
+[role='dialog'] textarea {
+  border-radius: 10px !important;
+  border: 1px solid hsl(var(--border)) !important;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground));
+  font-size: 0.9rem;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.admin-modal input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']),
+.admin-modal select,
+[role='dialog'] input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']) { min-height: 2.75rem; }
+.admin-modal input:focus, .admin-modal select:focus, .admin-modal textarea:focus,
+[role='dialog'] input:focus, [role='dialog'] select:focus, [role='dialog'] textarea:focus {
+  outline: none !important;
+  border-color: hsl(var(--electric)) !important;
+  box-shadow: 0 0 0 3px hsl(var(--electric) / 0.2) !important;
+}
+.admin-modal label, [role='dialog'] label {
+  color: hsl(var(--foreground)) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+}
+/* section titles: plain ink text with a volt marker instead of coloured headings */
+.admin-modal h3 {
+  display: flex; align-items: center; gap: 0.5rem;
+  color: hsl(var(--foreground)) !important;
+  font-size: 0.95rem !important; font-weight: 700 !important;
+}
+.admin-modal h3::before {
+  content: ''; width: 4px; height: 1rem; border-radius: 9999px; background: #C6F432; flex-shrink: 0;
+}
+.admin-modal .rounded-xl.border.border-border,
+.admin-modal .rounded-lg.border.border-border.bg-card {
+  border-radius: 1rem;
+  background-color: hsl(var(--surface-2) / 0.45);
+}
+.admin-modal .border-dashed { border-radius: 1rem; background-color: hsl(var(--background)); }
+.admin-modal .border-dashed:hover { border-color: hsl(var(--electric)); }
+.admin-modal-foot {
+  position: sticky; bottom: 0; z-index: 5;
+  background-color: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+}
+.admin-modal .bg-primary:not(.admin-modal-head *) { border-radius: 10px; }
+
+/* shadcn dialogs (admin create/edit forms) */
+[role='dialog'].fixed { border-radius: 1rem; }
+[role='dialog'] h2 { font-family: Sora, Inter, sans-serif; }
