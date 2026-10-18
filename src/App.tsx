@@ -1,104 +1,118 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UploadProgressBar } from "@/components/UploadProgressBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AppLayout } from "@/components/Layout/AppLayout";
-import Dashboard from "./pages/Dashboard";
-import Inventory from "./pages/Inventory";
-import Sales from "./pages/Sales";
-import FactureDuStock from "./pages/FactureDuStock";
-import PurchaseInvoices from "./pages/PurchaseInvoices";
-import Suppliers from "./pages/Suppliers";
-import Employees from "./pages/Employees";
-import Reports from "./pages/Reports";
-import POS from "./pages/POS";
-import Caisse from "./pages/Caisse";
-import Barcodes from "./pages/Barcodes";
-import Settings from "./pages/Settings";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-import Website_Enhanced from "./pages/Website_Enhanced";
-import Commands from "./pages/Commands";
-import Clients from "./pages/Clients";
-import { WebsiteLayout } from "./components/Layout/WebsiteLayout";
-import WebsiteLanding from "./pages/WebsiteLanding";
-import WebsiteOffers from "./pages/WebsiteOffers";
-import WebsiteSpecialOffers from "./pages/WebsiteSpecialOffers";
-import WebsitePackages from "./pages/WebsitePackages";
-import WebsiteContacts from "./pages/WebsiteContacts";
-import WebsiteCart from "./pages/WebsiteCart";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { lazy, Suspense } from "react";
+import { HelmetProvider } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
+
+// Route-level code splitting: the storefront never downloads admin code and vice-versa.
+const AppLayout = lazy(() => import("@/components/Layout/AppLayout").then((m) => ({ default: m.AppLayout })));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Inventory = lazy(() => import("./pages/Inventory"));
+const Sales = lazy(() => import("./pages/Sales"));
+const FactureDuStock = lazy(() => import("./pages/FactureDuStock"));
+const PurchaseInvoices = lazy(() => import("./pages/PurchaseInvoices"));
+const Suppliers = lazy(() => import("./pages/Suppliers"));
+const Employees = lazy(() => import("./pages/Employees"));
+const Reports = lazy(() => import("./pages/Reports"));
+const POS = lazy(() => import("./pages/POS"));
+const Caisse = lazy(() => import("./pages/Caisse"));
+const Barcodes = lazy(() => import("./pages/Barcodes"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Login = lazy(() => import("./pages/Login"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Website_Enhanced = lazy(() => import("./pages/Website_Enhanced"));
+const Commands = lazy(() => import("./pages/Commands"));
+const Orders = lazy(() => import("./pages/Orders"));
+const Catalogue = lazy(() => import("./pages/Catalogue"));
+const Clients = lazy(() => import("./pages/Clients"));
+const AccessDenied = lazy(() => import("./pages/AccessDenied"));
+
+const ShopLayout = lazy(() => import("@/shop/components/ShopLayout").then((m) => ({ default: m.ShopLayout })));
+const ShopHome = lazy(() => import("@/shop/pages/Home"));
+const ShopCatalog = lazy(() => import("@/shop/pages/Catalog"));
+const ShopProduct = lazy(() => import("@/shop/pages/Product"));
+const ShopPromotions = lazy(() => import("@/shop/pages/Promotions"));
+const ShopPacks = lazy(() => import("@/shop/pages/Packs"));
+const ShopContact = lazy(() => import("@/shop/pages/Contact"));
+const ShopCheckout = lazy(() => import("@/shop/pages/Checkout"));
+import { AuthProvider, useAuth, isAdminRole, homeForRole } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import NotFound from "./pages/NotFound";
 import { CommandPalette, useCommandPalette } from "./components/CommandPalette";
-import WorkerSettings from "@/workers/WorkerSettings";
+const WorkerSettings = lazy(() => import("@/workers/WorkerSettings"));
 
 // ✅ import worker layout + worker dashboard
-import WorkerDashboard from "@/workers/WorkerDashboard";
-import { WorkerLayout } from "@/workers/WorkerLayout";
+const WorkerDashboard = lazy(() => import("@/workers/WorkerDashboard"));
+const WorkerLayout = lazy(() => import("@/workers/WorkerLayout").then((m) => ({ default: m.WorkerLayout })));
 
 const queryClient = new QueryClient();
 
-// Protected Route Component
-const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
+const FullScreenLoader = () => (
+  <div className="flex h-dvh w-screen items-center justify-center bg-background" role="status" aria-label="Chargement">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
+  </div>
+);
+
+// Protected Route Component — waits for the Supabase session to be restored before deciding.
+const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: "admin" | "employee" }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
-  
-  // Don't redirect while checking auth status
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/login" replace />;
-  }
-  
+  const location = useLocation();
+
+  if (isLoading) return <FullScreenLoader />;
+  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  const allowed = requiredRole === "admin" ? isAdminRole(user?.role) : requiredRole ? user?.role === requiredRole : true;
+  if (!allowed) return <Navigate to={homeForRole(user?.role)} replace />;
   return <>{children}</>;
 };
 
-const AppContent = () => {
-  const { isAuthenticated, login, user, isLoading } = useAuth();
-  const { open, setOpen } = useCommandPalette();
+/** /login: already signed-in users go straight to their home page. */
+const LoginRoute = () => {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  if (isLoading) return <FullScreenLoader />;
+  if (isAuthenticated) return <Navigate to={homeForRole(user?.role)} replace />;
+  return <Login />;
+};
 
-  // Show loading screen while checking authentication
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading application...</p>
-        </div>
-      </div>
-    );
-  }
+const RouteFallback = () => (
+  <div className="flex min-h-[60vh] items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+  </div>
+);
+
+const AppContent = () => {
+  const { isLoading } = useAuth();
+  const { open, setOpen } = useCommandPalette();
+  const { pathname } = useLocation();
+  const isShop = pathname.startsWith("/website-shop");
+
+  // Each guard (ProtectedRoute / LoginRoute) shows its own loader while the session is restored.
+  void isLoading;
 
   return (
     <>
-      <CommandPalette open={open} onOpenChange={setOpen} />
+      {!isShop && <CommandPalette open={open} onOpenChange={setOpen} />}
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
         {/* LOGIN ROUTE */}
-        <Route path="/login" element={<Login onLogin={login} />} />
+        <Route path="/login" element={<LoginRoute />} />
+        <Route path="/acces-refuse" element={<AccessDenied />} />
 
-        {/* WEBSITE SHOP - PUBLIC ROUTE (FIRST) */}
-        <Route element={<WebsiteLayout />}>
-          <Route path="/website-shop" element={<WebsiteLanding />} />
-          <Route path="/website-shop/offers" element={<WebsiteOffers />} />
-          <Route path="/website-shop/special-offers" element={<WebsiteSpecialOffers />} />
-          <Route path="/website-shop/packages" element={<WebsitePackages />} />
-          <Route path="/website-shop/contacts" element={<WebsiteContacts />} />
-          <Route path="/website-shop/order" element={<WebsiteCart />} />
+        {/* WEBSITE SHOP - PUBLIC ROUTES */}
+        <Route element={<ShopLayout />}>
+          <Route path="/website-shop" element={<ShopHome />} />
+          <Route path="/website-shop/offers" element={<ShopCatalog />} />
+          <Route path="/website-shop/product/:slug" element={<ShopProduct />} />
+          <Route path="/website-shop/special-offers" element={<ShopPromotions />} />
+          <Route path="/website-shop/packages" element={<ShopPacks />} />
+          <Route path="/website-shop/contacts" element={<ShopContact />} />
+          <Route path="/website-shop/order" element={<ShopCheckout />} />
+          <Route path="/website-shop/checkout" element={<Navigate to="/website-shop/order" replace />} />
         </Route>
+        <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
 
         {/* DEFAULT ROUTE - REDIRECT TO WEBSITE SHOP */}
         <Route path="/" element={<Navigate to="/website-shop" replace />} />
@@ -112,7 +126,8 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="clients" element={<Clients />} />
           <Route path="facturedustock" element={<FactureDuStock />} />
@@ -127,7 +142,9 @@ const AppContent = () => {
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           <Route path="website" element={<Website_Enhanced />} />
-          <Route path="commands" element={<Commands />} />
+          <Route path="commands" element={<Orders />} />
+          <Route path="commands/classique" element={<Commands />} />
+          <Route path="catalogue" element={<Catalogue />} />
         </Route>
 
         {/* EMPLOYEE ROUTES */}
@@ -148,11 +165,13 @@ const AppContent = () => {
         {/* 404 ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </>
   );
 };
 
 const App = () => (
+  <HelmetProvider>
   <QueryClientProvider client={queryClient}>
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <LanguageProvider>
@@ -160,6 +179,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <UploadProgressBar />
             <div className="min-h-screen bg-background transition-colors duration-300">
               <AppContent />
             </div>
@@ -168,6 +188,7 @@ const App = () => (
       </LanguageProvider>
     </BrowserRouter>
   </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
