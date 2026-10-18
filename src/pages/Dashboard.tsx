@@ -1,616 +1,297 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Package, 
-  Users, 
-  AlertTriangle,
-  DollarSign,
-  ShoppingCart,
-  Truck,
-  Plus,
-  ClipboardList,
-  RefreshCw,
-  Clock,
-  Briefcase,
-  AlertCircle,
-  BarChart3,
-  Zap,
-  CheckCircle2,
-  PieChart,
-  ArrowUpRight,
-  ArrowDownLeft
+import { lazy, Suspense, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { formatDistanceToNowStrict, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import {
+  Banknote, TrendingUp, ShoppingBag, ReceiptText, Package, BadgeCheck, Undo2, Warehouse, RefreshCw, Plus, Download, Phone,
+  MessageCircle, Check, X, AlertTriangle, Moon as Dead, Star, PackageCheck, ScanLine, Truck, Info,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from "@/contexts/AuthContext";
-import { formatCurrency } from '@/lib/utils';
-import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
-import { ArrowRight } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/contexts/AuthContext';
+import { confirmOrder, cancelOrder } from '@/lib/supabaseClient';
+import { EmptyState, ErrorState, Panel, StatCard, StatusBadge, formatCompactDA, formatDA, SkeletonRows, ConfirmDialog } from '@/admin/ui';
+import { RANGE_LABELS, makeRange, useDashboard, exportSeriesCsv, type RangeKey } from '@/admin/dashboard/data';
 
-// Enhanced StatCard with more details
-const StatCard = ({ 
-  title, 
-  value, 
-  change, 
-  changeType, 
-  icon: Icon,
-  subtitle,
-  className = "",
-  bgGradient = ""
-}: {
-  title: string;
-  value: string | number;
-  change?: string;
-  changeType?: 'increase' | 'decrease';
-  icon: React.ElementType;
-  subtitle?: string;
-  className?: string;
-  bgGradient?: string;
-}) => (
-  <motion.div
-    whileHover={{ y: -8, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.15)" }}
-    className={`rounded-2xl p-6 ${bgGradient} shadow-lg border border-white/20 dark:border-white/10 backdrop-blur-sm overflow-hidden group ${className}`}
-  >
-    <div className="relative z-10">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-sm font-medium text-white/70 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-white">{value}</p>
-        </div>
-        <div className="p-3 rounded-xl bg-white/20 group-hover:bg-white/30 transition-all">
-          <Icon className="h-6 w-6 text-white" />
-        </div>
-      </div>
-      {subtitle && <p className="text-xs text-white/60 mb-3">{subtitle}</p>}
-      {change && (
-        <div className={`flex items-center gap-1 text-sm font-semibold ${
-          changeType === 'increase' ? 'text-green-200' : 'text-red-200'
-        }`}>
-          {changeType === 'increase' ? (
-            <ArrowUpRight className="h-4 w-4" />
-          ) : (
-            <ArrowDownLeft className="h-4 w-4" />
-          )}
-          {change}
-        </div>
-      )}
-    </div>
-  </motion.div>
-);
-
-// Component for showing low stock alerts
-const LowStockAlert = ({ lowStockCount }: { lowStockCount: number }) => {
-  const isAlert = lowStockCount > 0;
-  return (
-    <Card className="animate-fade-in h-full flex flex-col border-0 shadow-md bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl flex items-center gap-2">
-            <AlertTriangle className="h-6 w-6 text-red-600" />
-            Alertes Stock Bas
-          </CardTitle>
-          <Badge className="bg-red-600 hover:bg-red-700 text-white text-lg px-3 py-1">{lowStockCount}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow flex flex-col p-4 justify-center">
-        {isAlert ? (
-          <div className="text-center py-10">
-            <p className="font-semibold text-xl text-red-700 dark:text-red-400">Attention : {lowStockCount} article(s) en stock bas !</p>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">Pensez à faire le point sur ces produits et à renouveler votre stock.</p>
-          </div>
-        ) : (
-          <div className="text-center py-10">
-            <p className="text-2xl"></p>
-            <p className="text-lg font-semibold text-green-700 dark:text-green-400 mt-2">Pas d'alertes de stock bas. Tout est en ordre !</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+const Charts = {
+  Revenue: lazy(() => import('@/admin/dashboard/Charts').then((m) => ({ default: m.RevenueChart }))),
+  HBar: lazy(() => import('@/admin/dashboard/Charts').then((m) => ({ default: m.HBarChart }))),
+  Column: lazy(() => import('@/admin/dashboard/Charts').then((m) => ({ default: m.ColumnChart }))),
 };
+const ChartFallback = ({ h = 240 }: { h?: number }) => <div className="animate-pulse rounded-xl bg-muted" style={{ height: h }} />;
 
-// Component for displaying recent activity
-const RecentActivity = ({ activity }: { activity: any[] }) => (
-  <Card className="h-full animate-fade-in border-0 shadow-md bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
-    <CardHeader>
-      <CardTitle className="text-2xl flex items-center gap-2">
-        <Clock className="h-6 w-6 text-blue-600" />
-        Activité Récente
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <ul className="space-y-4">
-        {activity.length > 0 ? (
-          activity.map((item, index) => (
-            <li key={item.id} className="flex items-start gap-4 p-3 bg-white dark:bg-slate-800 rounded-lg hover:shadow-md transition-all">
-              <div className="flex-shrink-0">
-                <div className={`p-2 rounded-full ${item.type === 'sale' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
-                  {item.type === 'sale' ? <ShoppingCart className="h-5 w-5" /> : <Package className="h-5 w-5" />}
-                </div>
-              </div>
-              <div className="flex-grow">
-                <p className="font-medium">{item.description}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{new Date(item.created_at).toLocaleString('fr-FR')} par {item.createdBy}</p>
-              </div>
-            </li>
-          ))
-        ) : (
-          <div className="text-center text-gray-500 py-10">
-            <p className="text-lg">Aucune activité récente à afficher.</p>
-          </div>
-        )}
-      </ul>
-    </CardContent>
-  </Card>
-);
-
-// Component for displaying product alerts
-const ProductAlerts = ({ products }: { products: any[] }) => {
-  const alertProducts = products.filter(p => p.current_quantity <= p.min_quantity).slice(0, 5);
-  const criticalProducts = alertProducts.filter(p => p.current_quantity === 0);
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.5 },
-    },
-  };
-
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="space-y-3"
-    >
-      {alertProducts.length > 0 ? (
-        alertProducts.map((product, index) => (
-          <motion.div
-            key={product.id}
-            variants={itemVariants}
-            className={`p-4 rounded-lg flex items-center justify-between border-2 transition-all duration-300 ${
-              product.current_quantity === 0
-                ? 'bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700'
-                : 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700'
-            }`}
-          >
-            <div className="flex items-center gap-3 flex-1">
-              <div className={`p-2 rounded-full ${
-                product.current_quantity === 0 
-                  ? 'bg-red-200 dark:bg-red-800' 
-                  : 'bg-yellow-200 dark:bg-yellow-800'
-              }`}>
-                <AlertCircle className={`h-5 w-5 ${
-                  product.current_quantity === 0
-                    ? 'text-red-600'
-                    : 'text-yellow-600'
-                }`} />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-sm md:text-base">{product.name}</p>
-                <p className="text-xs md:text-sm text-gray-700 dark:text-gray-300">
-                  En stock: <span className="font-bold">{product.current_quantity}</span> / Minimum: <span className="font-bold">{product.min_quantity}</span>
-                </p>
-              </div>
-            </div>
-            <Badge className={`${
-              product.current_quantity === 0
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-yellow-600 hover:bg-yellow-700'
-            } text-white whitespace-nowrap ml-2`}>
-              {product.current_quantity === 0 ? 'RUPTURE' : 'BAS'}
-            </Badge>
-          </motion.div>
-        ))
-      ) : (
-        <motion.div
-          variants={itemVariants}
-          className="p-8 rounded-lg bg-green-100 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 text-center"
-        >
-          <p className="text-2xl mb-2"></p>
-          <p className="font-semibold text-green-700 dark:text-green-400">
-            Aucun produit en stock bas - Inventaire optimal!
-          </p>
-        </motion.div>
-      )}
-    </motion.div>
-  );
-};
+const pct = (v: number | null) => (v === null ? '—' : `${v.toLocaleString('fr-FR', { maximumFractionDigits: 1 })}%`);
+const waLink = (phone: string) => `https://wa.me/${phone.replace(/\D/g, '').replace(/^0/, '213')}`;
 
 export default function Dashboard() {
-  const { language } = useLanguage();
   const { user } = useAuth();
-  const [stats, setStats] = useState<any>(null);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  const [storeName, setStoreName] = useState('chargers');
-  const [storeDisplayName, setStoreDisplayName] = useState('');
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [rangeKey, setRangeKey] = useState<RangeKey>('30d');
+  const [custom, setCustom] = useState(() => ({ from: format(new Date(Date.now() - 29 * 864e5), 'yyyy-MM-dd'), to: format(new Date(), 'yyyy-MM-dd') }));
+  const [compare, setCompare] = useState(true);
+  const [topBy, setTopBy] = useState<'revenue' | 'units'>('revenue');
+  const [cancelId, setCancelId] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    setHasError(false);
+  const range = useMemo(() => makeRange(rangeKey, { from: new Date(custom.from), to: new Date(custom.to) }), [rangeKey, custom]);
+  const { data: d, isLoading, isError, refetch, isFetching } = useDashboard(range);
+
+  const hour = new Date().getHours();
+  const greeting = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour';
+  const delta = (v: number | null | undefined) => (compare ? v ?? null : undefined);
+
+  const act = async (id: string, kind: 'confirm' | 'cancel') => {
     try {
-      // Fetch data from Supabase
-      const [productsRes, suppliersRes, customersRes, ordersRes, invoicesRes] = await Promise.all([
-        supabase.from('products').select('*').eq('is_active', true),
-        supabase.from('suppliers').select('*').eq('is_active', true),
-        supabase.from('customers').select('*'),
-        supabase.from('orders').select('*'),
-        supabase.from('invoices').select('*')
-      ]);
-
-      // Get low stock products
-      const lowStock = (productsRes.data || [])
-        .filter(p => p.current_quantity <= p.min_quantity)
-        .sort((a, b) => a.current_quantity - b.current_quantity);
-      setLowStockProducts(lowStock);
-
-      // Count products with low stock
-      const lowStockCount = lowStock.length;
-
-      // Calculate sales stats
-      const saleInvoices = (invoicesRes.data || []).filter(inv => inv.type === 'sale' && inv.status === 'paid');
-      const totalSales = saleInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
-
-      // Calculate order stats
-      const orders = ordersRes.data || [];
-      const pendingOrders = orders.filter(o => o.status === 'pending').length;
-      const acceptedOrders = orders.filter(o => o.status === 'accepted').length;
-      const finalizedOrders = orders.filter(o => o.status === 'finalized' || o.status === 'completed').length;
-
-      // Create stats object
-      const dashboardStats = {
-        totalProducts: productsRes.data?.length || 0,
-        lowStockItems: lowStockCount,
-        completedSales: saleInvoices.length,
-        totalSuppliers: suppliersRes.data?.length || 0,
-        totalCustomers: customersRes.data?.length || 0,
-        totalSales: totalSales,
-        pendingOrders: pendingOrders,
-        acceptedOrders: acceptedOrders,
-        finalizedOrders: finalizedOrders,
-        totalOrders: orders.length
-      };
-
-      setStats(dashboardStats);
-      setRecentActivity([]);
-    } catch (err) {
-      console.error("Failed to fetch dashboard data:", err);
-      setStats(null);
-      setRecentActivity([]);
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
+      if (kind === 'confirm') await confirmOrder(id); else await cancelOrder(id, 'Annulée depuis le tableau de bord');
+      toast.success(kind === 'confirm' ? 'Commande confirmée' : 'Commande annulée');
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['admin-alerts'] });
+    } catch {
+      toast.error("L'action a échoué. Réessayez.");
     }
   };
 
-  useEffect(() => {
-    // Load store name from localStorage
-    const localStoreName = localStorage.getItem('storeName');
-    const localStoreDisplayName = localStorage.getItem('storeDisplayName');
-    if (localStoreName) setStoreName(localStoreName);
-    if (localStoreDisplayName) setStoreDisplayName(localStoreDisplayName);
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <h2 className="text-xl font-semibold mb-4 text-muted-foreground">Chargement des données...</h2>
-        <Progress value={50} className="w-64" />
-      </div>
-    );
-  }
-
-  const quickActions = [
-    {
-      title: "Nouvelle Vente",
-      description: "Enregistrer une nouvelle transaction de vente.",
-      icon: ShoppingCart,
-      href: "/sales",
-      color: "text-green-500"
-    },
-    {
-      title: "Ajouter Produit",
-      description: "Ajouter un nouveau produit à l'inventaire.",
-      icon: Plus,
-      href: "/inventory",
-      color: "text-blue-500"
-    },
-    {
-      title: "Nouveau Fournisseur",
-      description: "Ajouter un nouveau fournisseur.",
-      icon: Truck,
-      href: "/suppliers",
-      color: "text-orange-500"
-    },
-    {
-      title: "Point de Vente",
-      description: "Lancer l'interface de point de vente.",
-      icon: DollarSign,
-      href: "/pos",
-      color: "text-rose-500"
-    },
-    {
-      title: "Rapports",
-      description: "Consulter les rapports financiers et de stock.",
-      icon: ClipboardList,
-      href: "/reports",
-      color: "text-purple-500"
-    },
-    {
-      title: "Gestion des Commandes",
-      description: "Gérer les commandes en attente.",
-      icon: ShoppingCart,
-      href: "/commands",
-      color: "text-yellow-500"
-    }
-  ];
+  const top = useMemo(() => (d ? [...d.topProducts].sort((a, b) => (topBy === 'revenue' ? b.revenue - a.revenue : b.units - a.units)).slice(0, 10) : []), [d, topBy]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 space-y-8 py-8 px-4 md:px-6 lg:px-8">
-      {/* Modern Header with Premium Design */}
-      
-      {/* Error Message */}
-      {hasError && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-4 flex items-center gap-3 text-red-700 dark:text-red-300"
-        >
-          <AlertTriangle className="h-5 w-5 flex-shrink-0" />
-          <p className="font-medium">Impossible de récupérer les statistiques. Affichage des valeurs par défaut.</p>
-        </motion.div>
-      )}
-
-      {/* Product Alerts - Premium Section */}
-      {lowStockProducts.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="relative overflow-hidden rounded-3xl backdrop-blur-xl border-2 border-red-300 dark:border-red-800 shadow-2xl"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-orange-500/20" />
-          <div className="relative p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-red-500/20">
-                <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-red-700 dark:text-red-300">
-                  Alertes Produits Critiques
-                </h2>
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {lowStockProducts.length} produit(s) nécessitant une action immédiate
-                </p>
-              </div>
-              <Badge className="ml-auto bg-red-600 dark:bg-red-700 text-white text-lg px-4 py-2">
-                {lowStockProducts.length}
-              </Badge>
-            </div>
-            <ProductAlerts products={lowStockProducts} />
-            <Link to="/inventory" className="block mt-6">
-              <Button className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold py-3 text-base">
-                Gérer l'inventaire <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </motion.section>
-      )}
-
-      {/* Main Stats Grid - New Design */}
-      <section className="space-y-4">
-        <h2 className="text-3xl font-bold flex items-center gap-3">
-          <BarChart3 className="h-8 w-8 text-blue-600" />
-          Statistiques en Temps Réel
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Ventes Totales"
-            value={formatCurrency(stats?.totalSales || 0)}
-            subtitle={`${stats?.completedSales || 0} transactions complétées`}
-            change={`+${Math.round((stats?.completedSales || 0) * 1.2)}% ce mois`}
-            changeType="increase"
-            icon={DollarSign}
-            bgGradient="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600"
-          />
-          <StatCard
-            title="Produits en Stock"
-            value={stats?.totalProducts || 0}
-            subtitle={`${stats?.lowStockItems || 0} en alerte`}
-            change={stats?.lowStockItems ? `-${stats.lowStockItems} en alerte` : 'Inventaire optimal'}
-            changeType={stats?.lowStockItems ? 'decrease' : 'increase'}
-            icon={Package}
-            bgGradient="bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-600"
-          />
-          <StatCard
-            title="Fournisseurs Actifs"
-            value={stats?.totalSuppliers || 0}
-            subtitle="Partenaires de confiance"
-            change="+2 nouveaux ce trimestre"
-            changeType="increase"
-            icon={Truck}
-            bgGradient="bg-gradient-to-br from-purple-500 via-pink-500 to-rose-600"
-          />
-          <StatCard
-            title="Base Clients"
-            value={stats?.totalCustomers || 0}
-            subtitle="Clients enregistrés"
-            change="+12% croissance"
-            changeType="increase"
-            icon={Users}
-            bgGradient="bg-gradient-to-br from-orange-500 via-red-500 to-pink-600"
-          />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight md:text-[28px]">{greeting}, {user?.name?.split(' ')[0] || 'admin'}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Activité du {format(range.from, 'd MMM', { locale: fr })} au {format(range.to, 'd MMM yyyy', { locale: fr })}{compare && ' · comparée à la période précédente'}
+          </p>
         </div>
-      </section>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/inventory')}><Plus className="h-4 w-4" /> Produit</Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/pos')}><Plus className="h-4 w-4" /> Vente</Button>
+          <Button variant="outline" size="sm" disabled={!d} onClick={() => d && exportSeriesCsv(d, range)}><Download className="h-4 w-4" /> Exporter</Button>
+        </div>
+      </div>
 
-      {/* Secondary Stats Section - Order Statistics */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          title="Commandes En Attente"
-          value={stats?.pendingOrders || 0}
-          subtitle="À traiter"
-          change={stats?.pendingOrders ? `${stats.pendingOrders} action requise` : 'À jour'}
-          changeType={stats?.pendingOrders ? 'decrease' : 'increase'}
-          icon={Clock}
-          bgGradient="bg-gradient-to-br from-amber-500 to-orange-600"
-        />
-        <StatCard
-          title="Commandes Acceptées"
-          value={stats?.acceptedOrders || 0}
-          subtitle="En cours de traitement"
-          change={stats?.acceptedOrders ? `${stats.acceptedOrders} en cours` : 'Aucune'}
-          changeType="increase"
-          icon={CheckCircle2}
-          bgGradient="bg-gradient-to-br from-blue-500 to-cyan-600"
-        />
-        <StatCard
-          title="Commandes Finalisées"
-          value={stats?.finalizedOrders || 0}
-          subtitle="Complétées avec succès"
-          change={stats?.finalizedOrders ? `+${Math.round((stats.finalizedOrders / (stats.totalOrders || 1)) * 100)}% du total` : 'Aucune'}
-          changeType="increase"
-          icon={ShoppingCart}
-          bgGradient="bg-gradient-to-br from-emerald-500 to-green-600"
-        />
-      </section>
-
-      {/* Quick Actions Section - Modern Grid */}
-      <section className="space-y-4">
-        <h2 className="text-3xl font-bold flex items-center gap-3">
-          <Zap className="h-8 w-8 text-yellow-500" />
-          Actions Rapides
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {quickActions.map((action) => (
-            <motion.div
-              key={action.title}
-              whileHover={{ y: -8 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Link to={action.href}>
-                <div className="relative overflow-hidden rounded-2xl backdrop-blur-xl border border-white/20 dark:border-white/10 p-6 shadow-lg hover:shadow-2xl transition-all duration-300 group bg-gradient-to-br from-white/40 dark:from-white/5 to-white/20 dark:to-white/10">
-                  <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{
-                    backgroundImage: `linear-gradient(to bottom right, ${action.color === 'text-green-500' ? 'rgba(34, 197, 94, 0.1)' : action.color === 'text-blue-500' ? 'rgba(59, 130, 246, 0.1)' : action.color === 'text-orange-500' ? 'rgba(249, 115, 22, 0.1)' : action.color === 'text-rose-500' ? 'rgba(244, 63, 94, 0.1)' : action.color === 'text-purple-500' ? 'rgba(168, 85, 247, 0.1)' : 'rgba(234, 179, 8, 0.1)'}, transparent)`
-                  }} />
-                  <div className="relative z-10">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${
-                      action.color === 'text-green-500' ? 'from-green-100/40 to-green-50/40 dark:from-green-900/40' :
-                      action.color === 'text-blue-500' ? 'from-blue-100/40 to-blue-50/40 dark:from-blue-900/40' :
-                      action.color === 'text-orange-500' ? 'from-orange-100/40 to-orange-50/40 dark:from-orange-900/40' :
-                      action.color === 'text-rose-500' ? 'from-rose-100/40 to-rose-50/40 dark:from-rose-900/40' :
-                      action.color === 'text-purple-500' ? 'from-purple-100/40 to-purple-50/40 dark:from-purple-900/40' :
-                      'from-yellow-100/40 to-yellow-50/40 dark:from-yellow-900/40'
-                    } p-3 mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                      <action.icon className={`h-7 w-7 ${action.color}`} />
-                    </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{action.title}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{action.description}</p>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
+      {/* Range controls */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap gap-1 rounded-[12px] border border-border bg-card p-1" role="tablist" aria-label="Période">
+          {(Object.keys(RANGE_LABELS) as RangeKey[]).map((k) => (
+            <button key={k} role="tab" aria-selected={rangeKey === k} onClick={() => setRangeKey(k)}
+              className={cn('h-8 rounded-[8px] px-3 text-xs font-semibold transition-colors', rangeKey === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground')}>
+              {RANGE_LABELS[k]}
+            </button>
           ))}
         </div>
-      </section>
-
-      {/* Summary Cards Section */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Business Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="rounded-2xl backdrop-blur-xl border border-white/20 dark:border-white/10 p-8 shadow-lg bg-gradient-to-br from-white/40 dark:from-white/5 to-white/20 dark:to-white/10"
-        >
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <PieChart className="h-6 w-6 text-cyan-600" />
-            Résumé Métier
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/10">
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="h-5 w-5 text-emerald-600" />
-                <span className="font-medium">Ventes Complétées</span>
-              </div>
-              <span className="text-lg font-bold text-emerald-600">{stats?.completedSales || 0}</span>
-            </div>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/10">
-              <div className="flex items-center gap-3">
-                <Package className="h-5 w-5 text-blue-600" />
-                <span className="font-medium">Références Produits</span>
-              </div>
-              <span className="text-lg font-bold text-blue-600">{stats?.totalProducts || 0}</span>
-            </div>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/10">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
-                <span className="font-medium">Produits en Alerte</span>
-              </div>
-              <span className="text-lg font-bold text-orange-600">{stats?.lowStockItems || 0}</span>
-            </div>
+        {rangeKey === 'custom' && (
+          <div className="flex items-center gap-1.5 text-sm">
+            <input type="date" value={custom.from} max={custom.to} onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))} className="h-9 rounded-[10px] border border-input bg-card px-2 text-sm" aria-label="Du" />
+            <span className="text-muted-foreground">→</span>
+            <input type="date" value={custom.to} min={custom.from} onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))} className="h-9 rounded-[10px] border border-input bg-card px-2 text-sm" aria-label="Au" />
           </div>
-        </motion.div>
+        )}
+        <label className="ml-auto flex cursor-pointer items-center gap-2 text-sm">
+          <input type="checkbox" checked={compare} onChange={(e) => setCompare(e.target.checked)} className="h-4 w-4 accent-[hsl(var(--primary))]" />
+          vs période précédente
+        </label>
+        <Button variant="ghost" size="icon" onClick={() => refetch()} aria-label="Actualiser" className={cn(isFetching && 'animate-spin')}><RefreshCw className="h-4 w-4" /></Button>
+      </div>
 
-        {/* Performance Indicator */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="rounded-2xl backdrop-blur-xl border border-white/20 dark:border-white/10 p-8 shadow-lg bg-gradient-to-br from-white/40 dark:from-white/5 to-white/20 dark:to-white/10"
-        >
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-green-600" />
-            Indicateurs de Performance
-          </h3>
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">Taux de Stock Optimal</span>
-                <span className="text-sm font-bold text-green-600">{Math.max(0, Math.round(((stats?.totalProducts || 0) - (stats?.lowStockItems || 0)) / (stats?.totalProducts || 1) * 100))}%</span>
-              </div>
-              <Progress value={Math.max(0, Math.round(((stats?.totalProducts || 0) - (stats?.lowStockItems || 0)) / (stats?.totalProducts || 1) * 100))} className="h-3" />
+      {isError ? <Panel><ErrorState onRetry={() => refetch()} /></Panel> : (
+        <>
+          {d && !d.hasCostData && (
+            <div className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 text-sm">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+              <span>Aucun prix d'achat n'est renseigné sur les produits : le bénéfice et la valeur du stock ne peuvent pas être calculés. Ajoutez le « prix d'achat » dans Chargeurs.</span>
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">Santé Inventaire</span>
-                <span className="text-sm font-bold text-blue-600">{stats?.totalProducts ? Math.round((stats.totalProducts / (stats.totalProducts + 10)) * 100) : 0}%</span>
-              </div>
-              <Progress value={stats?.totalProducts ? Math.round((stats.totalProducts / (stats.totalProducts + 10)) * 100) : 0} className="h-3" />
-            </div>
+          )}
+
+          {/* Row 1 — KPIs */}
+          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+            <StatCard loading={isLoading} label="Chiffre d'affaires" icon={Banknote} value={d && formatCompactDA(d.kpi.revenue)} delta={delta(d?.deltas.revenue)} spark={d?.spark.revenue} />
+            <StatCard loading={isLoading} label="Bénéfice brut" icon={TrendingUp} value={d && formatCompactDA(d.kpi.profit)} delta={delta(d?.deltas.profit)} hint={d && `marge ${pct(d.kpi.margin)}`} spark={d?.spark.profit} />
+            <StatCard loading={isLoading} label="Commandes" icon={ShoppingBag} value={d?.kpi.orders.toLocaleString('fr-FR')} delta={delta(d?.deltas.orders)} hint={d && `${d.kpi.webOrders} web · ${d.kpi.posSales} caisse`} spark={d?.spark.orders} />
+            <StatCard loading={isLoading} label="Panier moyen" icon={ReceiptText} value={d && formatDA(d.kpi.aov)} delta={delta(d?.deltas.aov)} />
+            <StatCard loading={isLoading} label="Unités vendues" icon={Package} value={d?.kpi.units.toLocaleString('fr-FR')} delta={delta(d?.deltas.units)} />
+            <StatCard loading={isLoading} label="Taux de confirmation" icon={BadgeCheck} value={d && pct(d.kpi.confirmRate)} delta={delta(d?.deltas.confirmRate)} hint="commandes web" />
+            <StatCard loading={isLoading} label="Retours / annulations" icon={Undo2} value={d && pct(d.kpi.cancelRate)} delta={delta(d?.deltas.cancelRate)} invertDelta />
+            <StatCard loading={isLoading} label="Valeur du stock" icon={Warehouse} value={d && formatCompactDA(d.stock.value)} hint={d && (d.stock.lowCount ? <span className="font-medium text-warning">{d.stock.lowCount} sous le seuil</span> : 'au prix d’achat')} />
           </div>
-        </motion.div>
-      </section>
 
-      {/* Recent Activity */}
-      <RecentActivity activity={recentActivity} />
+          {/* Row 2 */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Panel className="lg:col-span-2" title="Chiffre d'affaires & bénéfice" description={`Par ${d?.gran === 'week' ? 'semaine' : d?.gran === 'month' ? 'mois' : 'jour'} · commandes en barres`}>
+              {isLoading ? <ChartFallback h={300} /> : d && d.hasOrders ? <Suspense fallback={<ChartFallback h={300} />}><Charts.Revenue data={d.series} /></Suspense>
+                : <EmptyState title="Pas encore de ventes sur cette période" text="Les ventes caisse et les commandes de la boutique apparaîtront ici." />}
+            </Panel>
+            <Panel title="Commandes par statut" description="Boutique en ligne">
+              {isLoading ? <SkeletonRows rows={5} /> : d && d.funnel[0].value > 0 ? (
+                <div className="space-y-3">
+                  {d.funnel.map((f, i) => {
+                    const max = d.funnel[0].value || 1;
+                    return (
+                      <div key={f.key}>
+                        <div className="mb-1 flex justify-between text-sm"><span>{f.label}</span><span className="font-semibold tabular-nums">{f.value} <span className="text-xs font-normal text-muted-foreground">{i > 0 && `(${Math.round((f.value / max) * 100)}%)`}</span></span></div>
+                        <div className="h-2.5 overflow-hidden rounded-full bg-surface-2"><div className={cn('h-full rounded-full', i === 3 ? 'bg-success' : i === 1 ? 'bg-volt' : i === 0 ? 'bg-primary' : 'bg-electric')} style={{ width: `${(f.value / max) * 100}%` }} /></div>
+                      </div>
+                    );
+                  })}
+                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4">
+                    {d.lost.map((l) => <div key={l.key} className="rounded-xl bg-destructive/10 p-3"><p className="text-xs text-destructive">{l.label}</p><p className="font-sora text-lg font-bold tabular-nums">{l.value}</p></div>)}
+                  </div>
+                </div>
+              ) : <EmptyState compact icon={PackageCheck} title="Aucune commande web" text="Les commandes passées sur la boutique s'afficheront ici." />}
+            </Panel>
+          </div>
+
+          {/* Row 3 */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Panel title="Top 10 chargeurs" actions={
+              <div className="flex rounded-[10px] border border-border p-0.5 text-xs">
+                {(['revenue', 'units'] as const).map((k) => <button key={k} onClick={() => setTopBy(k)} className={cn('rounded-[8px] px-2.5 py-1 font-semibold', topBy === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>{k === 'revenue' ? 'CA' : 'Unités'}</button>)}
+              </div>
+            }>
+              {isLoading ? <SkeletonRows /> : top.length ? (
+                <ol className="space-y-2.5">
+                  {top.map((p, i) => (
+                    <li key={p.id} className="flex items-center gap-3">
+                      <span className="w-4 text-xs font-semibold tabular-nums text-muted-foreground">{i + 1}</span>
+                      <span className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-surface-2">{p.image ? <img src={p.image} alt="" className="h-full w-full object-contain" loading="lazy" /> : <Package className="m-2.5 h-4 w-4 text-muted-foreground" />}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium">{p.name}</span>
+                        <span className="block text-xs text-muted-foreground tabular-nums">{p.units} vendus · stock {p.stock}</span>
+                      </span>
+                      <span className="text-sm font-semibold tabular-nums">{topBy === 'revenue' ? formatCompactDA(p.revenue) : p.units}</span>
+                    </li>
+                  ))}
+                </ol>
+              ) : <EmptyState compact title="Aucune vente" />}
+            </Panel>
+            <Panel title="Ventes par marque">
+              {isLoading ? <ChartFallback /> : d?.byBrand.length ? <Suspense fallback={<ChartFallback />}><Charts.HBar data={d.byBrand} dataKey="revenue" money /></Suspense> : <EmptyState compact title="Aucune vente" />}
+            </Panel>
+            <Panel title="Ventes par puissance" description="Pour décider quoi réapprovisionner">
+              {isLoading ? <ChartFallback /> : d?.byPower.length ? <Suspense fallback={<ChartFallback />}><Charts.Column data={d.byPower} dataKey="units" /></Suspense> : <EmptyState compact title="Aucune vente" />}
+            </Panel>
+          </div>
+
+          {/* Row 4 */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Panel className="lg:col-span-2" title="Ventes par wilaya" description="Top 15 · commandes de la boutique">
+              {isLoading ? <SkeletonRows /> : d?.byWilaya.length ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[460px] text-sm">
+                    <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="pb-2 font-semibold">Wilaya</th><th className="pb-2 font-semibold">Commandes</th><th className="pb-2 text-right font-semibold">CA</th><th className="pb-2 text-right font-semibold">Retours</th></tr></thead>
+                    <tbody>
+                      {d.byWilaya.map((w) => {
+                        const max = d.byWilaya[0].orders || 1;
+                        return (
+                          <tr key={w.name} className="border-t border-border">
+                            <td className="py-2 pr-3 font-medium">{w.name}</td>
+                            <td className="py-2 pr-3"><div className="flex items-center gap-2"><div className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-2"><div className="h-full rounded-full bg-primary" style={{ width: `${(w.orders / max) * 100}%` }} /></div><span className="tabular-nums">{w.orders}</span></div></td>
+                            <td className="py-2 text-right tabular-nums">{formatCompactDA(w.revenue)}</td>
+                            <td className={cn('py-2 text-right tabular-nums', w.lost / w.orders > 0.25 && 'font-semibold text-destructive')}>{pct((w.lost / w.orders) * 100)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : <EmptyState compact title="Aucune commande web" />}
+            </Panel>
+            <Panel title="Mode de livraison">
+              {isLoading ? <SkeletonRows rows={2} /> : d && d.delivery.some((x) => x.value) ? (
+                <div className="space-y-4">
+                  {d.delivery.map((x, i) => {
+                    const total = d.delivery.reduce((s, y) => s + y.value, 0) || 1;
+                    return (
+                      <div key={x.name}>
+                        <div className="mb-1 flex justify-between text-sm"><span className="flex items-center gap-2"><Truck className="h-4 w-4" />{x.name}</span><span className="font-semibold tabular-nums">{x.value} · {Math.round((x.value / total) * 100)}%</span></div>
+                        <div className="h-2.5 overflow-hidden rounded-full bg-surface-2"><div className={cn('h-full rounded-full', i ? 'bg-electric' : 'bg-primary')} style={{ width: `${(x.value / total) * 100}%` }} /></div>
+                      </div>
+                    );
+                  })}
+                  <p className="text-xs text-muted-foreground">Délai moyen de livraison : non disponible (les dates de livraison ne sont pas enregistrées).</p>
+                </div>
+              ) : <EmptyState compact icon={Truck} title="Aucune livraison" />}
+            </Panel>
+          </div>
+
+          {/* Row 5 — action lists */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Panel title="Commandes à confirmer" actions={<Button variant="ghost" size="sm" onClick={() => navigate('/commands')}>Tout voir</Button>}>
+              {isLoading ? <SkeletonRows /> : d?.pendingOrders.length ? (
+                <ul className="divide-y divide-border">
+                  {d.pendingOrders.map((o) => (
+                    <li key={o.id} className="flex flex-wrap items-center gap-3 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold">{o.customer_name} <span className="font-mono text-xs font-normal text-muted-foreground">#{o.id.slice(0, 8).toUpperCase()}</span></p>
+                        <p className="text-xs text-muted-foreground">{o.customer_wilaya || '—'} · <span className="tabular-nums">{formatDA(o.total_price)}</span> · {formatDistanceToNowStrict(new Date(o.created_at), { locale: fr, addSuffix: true })}</p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" asChild className="h-9 w-9"><a href={`tel:${o.customer_phone}`} aria-label={`Appeler ${o.customer_name}`}><Phone className="h-4 w-4" /></a></Button>
+                        <Button variant="ghost" size="icon" asChild className="h-9 w-9"><a href={waLink(o.customer_phone)} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><MessageCircle className="h-4 w-4" /></a></Button>
+                        <Button size="sm" className="h-9 bg-volt text-volt-foreground hover:bg-volt/90" onClick={() => act(o.id, 'confirm')}><Check className="h-4 w-4" /> Confirmer</Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => setCancelId(o.id)} aria-label="Annuler la commande"><X className="h-4 w-4" /></Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : <EmptyState compact icon={BadgeCheck} title="Tout est confirmé" text="Aucune nouvelle commande en attente." />}
+            </Panel>
+
+            <Panel title="Alertes de stock" description="Produits au niveau ou sous leur seuil" actions={<Button variant="ghost" size="sm" onClick={() => navigate('/purchase-invoices')}>Réapprovisionner</Button>}>
+              {isLoading ? <SkeletonRows /> : d?.stock.alerts.length ? (
+                <ul className="divide-y divide-border">
+                  {d.stock.alerts.slice(0, 8).map((p) => (
+                    <li key={p.id} className="flex items-center gap-3 py-2.5">
+                      <AlertTriangle className={cn('h-4 w-4 shrink-0', p.stock <= 0 ? 'text-destructive' : 'text-warning')} />
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">{p.name}</span>
+                      <span className="text-xs tabular-nums text-muted-foreground">{p.stock}/{p.threshold}{p.daysLeft !== null && ` · ~${p.daysLeft} j`}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : <EmptyState compact icon={Warehouse} title="Aucune alerte" text="Définissez un « stock minimal » sur vos produits pour recevoir des alertes." />}
+            </Panel>
+
+            <Panel title="Produits sans ventes" description="Aucune vente sur les 30 derniers jours">
+              {isLoading ? <SkeletonRows /> : d?.stock.dead.length ? (
+                <ul className="max-h-72 divide-y divide-border overflow-y-auto">
+                  {d.stock.dead.slice(0, 20).map((p) => (
+                    <li key={p.id} className="flex items-center gap-3 py-2">
+                      <Dead className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate text-sm">{p.name}</span>
+                      <span className="text-xs tabular-nums text-muted-foreground">{formatDA(p.price)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : <EmptyState compact title="Tous vos produits se vendent" />}
+            </Panel>
+
+            <Panel title="Dernières activités">
+              {isLoading ? <SkeletonRows /> : d?.activity.length ? (
+                <ul className="space-y-3">
+                  {d.activity.map((a) => (
+                    <li key={a.id} className="flex items-center gap-3">
+                      <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', a.kind === 'order' ? 'bg-electric/10 text-electric' : a.kind === 'sale' ? 'bg-success/15 text-success' : 'bg-volt-soft')}>
+                        {a.kind === 'order' ? <PackageCheck className="h-4 w-4" /> : a.kind === 'sale' ? <ScanLine className="h-4 w-4" /> : <Star className="h-4 w-4" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm">{a.text}</span>
+                        <span className="block text-xs text-muted-foreground">{formatDistanceToNowStrict(new Date(a.at), { locale: fr, addSuffix: true })}{a.sub && ` · ${a.sub}`}</span>
+                      </span>
+                      {a.status && <StatusBadge status={a.status} />}
+                      {a.amount > 0 && <span className="text-sm font-semibold tabular-nums">{formatCompactDA(a.amount)}</span>}
+                    </li>
+                  ))}
+                </ul>
+              ) : <EmptyState compact title="Aucune activité récente" />}
+            </Panel>
+          </div>
+        </>
+      )}
+
+      <ConfirmDialog open={!!cancelId} onOpenChange={(o) => !o && setCancelId(null)} title="Annuler cette commande ?" description="Le client ne sera pas livré. Cette action est visible dans l'historique de la commande."
+        confirmLabel="Annuler la commande" destructive onConfirm={() => { if (cancelId) act(cancelId, 'cancel'); setCancelId(null); }} />
     </div>
   );
 }
