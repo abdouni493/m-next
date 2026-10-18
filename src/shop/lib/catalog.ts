@@ -42,7 +42,25 @@ const num = (v: unknown): number | undefined => {
   return Number.isFinite(n) && n > 0 ? n : undefined;
 };
 
-const canonicalBrand = (raw?: string): string => {
+/** Maps free-form connector names (DB or product title) onto storeConfig.connectors labels. */
+export const detectConnector = (...sources: (string | undefined)[]): string | undefined => {
+  const t = sources.filter(Boolean).join(' ').toLowerCase();
+  if (!t) return undefined;
+  if (/usb[\s-]?c|type[\s-]?c/.test(t)) return 'USB-C';
+  if (/blue\s?pin|4\.5\s*(mm)?\s*[x×]\s*3/.test(t)) return 'Blue Pin 4.5×3.0';
+  if (/big\s?pin|7\.4\s*(mm)?\s*[x×]\s*5/.test(t)) return 'Big Pin 7.4×5.0';
+  if (/\bxps\b|slim/.test(t)) return 'Slim tip 4.5×3.0 (XPS)';
+  if (/surface/.test(t)) return 'Surface Connect';
+  if (/magsafe/.test(t)) return 'MagSafe';
+  if (/micro[\s-]?usb/.test(t)) return 'Micro USB';
+  return undefined;
+};
+
+const canonicalBrand = (raw?: string, name?: string): string => {
+  if (!raw && name) {
+    const hit = storeConfig.brands.find((b) => new RegExp(`\\b${b}\\b`, 'i').test(name));
+    if (hit) return hit;
+  }
   if (!raw) return 'Autre';
   const r = raw.trim();
   const hit = storeConfig.brands.find((b) => b.toLowerCase() === r.toLowerCase());
@@ -54,17 +72,20 @@ const canonicalBrand = (raw?: string): string => {
 /** "Chargeur {Marque} {Connecteur} {Puissance}" (+ V/A when known) */
 export const cleanTitle = (p: { brand: string; connector?: string; wattage?: number; voltage?: number; amperage?: number; rawName: string }) => {
   if (!p.wattage && !p.connector) return p.rawName.replace(/\s{2,}/g, ' ').trim();
-  const parts = ['Chargeur', p.brand !== 'Autre' ? p.brand : '', p.connector || '', p.wattage ? `${p.wattage}W` : ''].filter(Boolean);
+  const shortConnector = p.connector && !p.connector.toLowerCase().includes(p.brand.toLowerCase())
+    ? p.connector.replace(/\s*\d.*$/, '').replace(/\s*\(.*\)$/, '')
+    : '';
+  const parts = ['Chargeur', p.brand !== 'Autre' ? p.brand : '', shortConnector, p.wattage ? `${p.wattage}W` : ''].filter(Boolean);
   const va = p.voltage && p.amperage ? ` (${p.voltage}V ${p.amperage}A)` : '';
   return parts.join(' ') + va;
 };
 
 function normalize(row: any, images: string[], promo?: any): ShopProduct {
-  const brand = canonicalBrand(row.product_mark || row.marks?.name);
+  const brand = canonicalBrand(row.product_mark || row.marks?.name, row.name);
   const parsed = parseDescription(row.description);
   const base = {
     brand,
-    connector: row.connection_type || row.connector_types?.name || undefined,
+    connector: detectConnector(row.name) || detectConnector(row.connection_type || row.connector_types?.name) || row.connection_type || undefined,
     wattage: num(row.wattage),
     voltage: num(row.voltage),
     amperage: num(row.amperage),
@@ -93,7 +114,8 @@ function normalize(row: any, images: string[], promo?: any): ShopProduct {
     description: row.description || '',
     parsed,
     compatibleModels: compat,
-    stock: typeof row.quantity_on_hand === 'number' ? row.quantity_on_hand : typeof row.current_quantity === 'number' ? row.current_quantity : undefined,
+    // Stock is only shown when actually tracked (> 0); 0 means "not tracked" in this database.
+    stock: Number(row.quantity_on_hand) > 0 ? Number(row.quantity_on_hand) : undefined,
     featured: Boolean(row.featured ?? row.is_featured),
     createdAt: row.created_at,
     searchText: [title, row.name, brand, base.connector, base.wattage && `${base.wattage}w`, base.voltage && `${base.voltage}v`, ...compat]

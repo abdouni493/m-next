@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /website-shop
+Disallow: /login
+Disallow: /admin
+Disallow: /employee
+Disallow: /inventory
+Disallow: /settings
+Disallow: /website
+Disallow: /pos
+Sitemap: https://m-next-tech.vercel.app/sitemap.xml

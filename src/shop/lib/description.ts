@@ -73,11 +73,26 @@ export function parseDescription(raw?: string | null): ParsedDescription {
   const compat = result.sections.filter((s) => s.kind === 'compat');
   result.compatibleModels = compat
     .flatMap((s) => [...s.items, ...s.text])
-    .flatMap((l) => l.split(/[,;/]| et /))
-    .map((m) => m.trim())
+    .flatMap(expandModels)
     .filter((m) => m.length > 1 && m.length < 60);
 
   return result;
+}
+
+/** "Dell Latitude 5280 / 5480" → ["Dell Latitude 5280", "Dell Latitude 5480"] */
+function expandModels(line: string): string[] {
+  const clean = line.replace(/\(.*?\)/g, '').trim();
+  const parts = clean.split(/\s*[,;/]\s*|\s+et\s+/).map((p) => p.trim()).filter(Boolean);
+  const out: string[] = [];
+  let prefix = '';
+  for (const part of parts) {
+    if (/^[A-Za-z]?\d[\w-]*$/.test(part) && prefix) out.push(`${prefix} ${part}`);
+    else {
+      out.push(part);
+      prefix = part.split(/\s+/).slice(0, -1).join(' ');
+    }
+  }
+  return out;
 }
 
 /** First meaningful sentence, for meta descriptions. */

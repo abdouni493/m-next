@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "node server.js",
-    "start": "npm-run-all --parallel server dev"
+    "start": "npm-run-all --parallel server dev",
+    "prebuild": "node scripts/generate-sitemap.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

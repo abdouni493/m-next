@@ -14,8 +14,8 @@ export const storeConfig = {
   ogImage: '/og-image.svg',
 
   contact: {
-    phone: '0555 00 00 00',
-    whatsapp: '213555000000', // international format, no "+" — edit here or in admin settings
+    phone: '0654 72 03 98',
+    whatsapp: '213654720398', // international format, no "+" — edit here or in admin settings
     email: 'contact@m-next.dz',
     address: 'Algérie',
     mapsQuery: 'M Next Tech DZ Algérie',
@@ -40,7 +40,7 @@ export const storeConfig = {
 
   brands: ['HP', 'Dell', 'Lenovo', 'Apple', 'Asus', 'ROG', 'Acer', 'Surface', 'Toshiba'],
   powers: [45, 65, 90, 120, 135, 150, 200, 230, 330],
-  connectors: ['USB-C', 'Blue Pin 4.5×3.0', 'Slim tip', 'Barrel 7.4×5.0', 'MagSafe'],
+  connectors: ['USB-C', 'Blue Pin 4.5×3.0', 'Big Pin 7.4×5.0', 'Slim tip 4.5×3.0 (XPS)', 'Surface Connect', 'MagSafe'],
 
   features: {
     promoCode: false, // no backend support yet
