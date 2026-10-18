@@ -45,7 +45,7 @@ function CardTooltip({ active, payload, label, money = true }: { active?: boolea
 /** Legend items toggle their series. */
 function useHidden() {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
-  const toggle = (key: string) => setHidden((h) => { const n = new Set(h); n.has(key) ? n.delete(key) : n.add(key); return n; });
+  const toggle = (key: string) => setHidden((h) => { const n = new Set(h); if (n.has(key)) n.delete(key); else n.add(key); return n; });
   return { hidden, toggle };
 }
 

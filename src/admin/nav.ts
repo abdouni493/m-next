@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, LineChart, PackageCheck, Receipt, ScanLine, Wallet, UsersRound, Boxes, Globe2, Barcode,
-  Truck, Store, UserCog, Settings2, type LucideIcon,
+  Truck, Store, UserCog, Settings2, Warehouse, type LucideIcon,
 } from 'lucide-react';
 
 export type BadgeKey = 'pendingOrders' | 'lowStock';
@@ -36,7 +36,7 @@ export const ADMIN_NAV: NavGroup[] = [
   {
     label: 'Catalogue',
     items: [
-      { title: 'Chargeurs', href: '/inventory', icon: Boxes, badge: 'lowStock', keywords: ['produits', 'inventaire', 'stock', 'products'] },
+      { title: 'Chargeurs', href: '/inventory', icon: Boxes, keywords: ['produits', 'inventaire', 'products', 'ajouter'] },
       { title: 'Boutique en ligne', href: '/website', icon: Globe2, keywords: ['site', 'offres', 'packs', 'avis', 'promotions'] },
       { title: 'Codes-barres', href: '/barcodes', icon: Barcode, keywords: ['barcode', 'étiquettes'] },
     ],
@@ -44,6 +44,7 @@ export const ADMIN_NAV: NavGroup[] = [
   {
     label: 'Stock',
     items: [
+      { title: 'Catalogue & stock', href: '/catalogue', icon: Warehouse, badge: 'lowStock', keywords: ['stock', 'mouvements', 'seuil', 'marge', 'vedette', 'images', 'slug'] },
       { title: "Factures d'achat", href: '/purchase-invoices', icon: Truck, keywords: ['achats', 'purchases', 'réapprovisionnement'] },
       { title: 'Fournisseurs', href: '/suppliers', icon: Store, keywords: ['suppliers', 'vendors'] },
     ],

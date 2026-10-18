@@ -2,7 +2,7 @@ const nf = new Intl.NumberFormat('fr-DZ', { maximumFractionDigits: 0 });
 
 /** 12500 → "12 500 DA" */
 export const formatDA = (value: number | null | undefined): string =>
-  `${nf.format(Math.round(Number(value) || 0)).replace(/ | /g, ' ')} DA`;
+  `${nf.format(Math.round(Number(value) || 0)).replace(/\u202f|\u00a0/g, ' ')} DA`;
 
 export const hasPrice = (value: number | null | undefined): boolean => Number(value) > 0;
 

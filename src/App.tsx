@@ -26,6 +26,8 @@ const Login = lazy(() => import("./pages/Login"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Website_Enhanced = lazy(() => import("./pages/Website_Enhanced"));
 const Commands = lazy(() => import("./pages/Commands"));
+const Orders = lazy(() => import("./pages/Orders"));
+const Catalogue = lazy(() => import("./pages/Catalogue"));
 const Clients = lazy(() => import("./pages/Clients"));
 const AccessDenied = lazy(() => import("./pages/AccessDenied"));
 
@@ -140,7 +142,9 @@ const AppContent = () => {
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
           <Route path="website" element={<Website_Enhanced />} />
-          <Route path="commands" element={<Commands />} />
+          <Route path="commands" element={<Orders />} />
+          <Route path="commands/classique" element={<Commands />} />
+          <Route path="catalogue" element={<Catalogue />} />
         </Route>
 
         {/* EMPLOYEE ROUTES */}

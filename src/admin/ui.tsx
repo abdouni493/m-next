@@ -8,7 +8,7 @@ import {
 
 /* ---------------- Money ---------------- */
 const nf = new Intl.NumberFormat('fr-DZ', { maximumFractionDigits: 0 });
-export const formatDA = (v: number | null | undefined) => `${nf.format(Math.round(Number(v) || 0)).replace(/ | /g, ' ')} DA`;
+export const formatDA = (v: number | null | undefined) => `${nf.format(Math.round(Number(v) || 0)).replace(/\u202f|\u00a0/g, ' ')} DA`;
 /** 1 250 000 → "1,3 M DA", 850 000 → "850 k DA" (charts / KPI) */
 export const formatCompactDA = (v: number) => {
   const a = Math.abs(v);
@@ -277,7 +277,7 @@ export function DataTable<T extends { id: string }>({
                 {selectable && (
                   <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                     <input type="checkbox" aria-label="Sélectionner" checked={selected.has(r.id)} onChange={() => {
-                      const next = new Set(selected); next.has(r.id) ? next.delete(r.id) : next.add(r.id); setSelected(next);
+                      const next = new Set(selected); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); setSelected(next);
                     }} className="h-4 w-4 accent-[hsl(var(--primary))]" />
                   </td>
                 )}
