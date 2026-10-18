@@ -127,7 +127,7 @@ export default function Settings() {
       }
       setFetchError(null);
     } catch (err) {
-      console.error("❌ Failed to fetch user info:", err);
+      console.error("Failed to fetch user info:", err);
       setFetchError('Impossible de charger le profil utilisateur.');
       const savedName = localStorage.getItem('username');
       const savedEmail = localStorage.getItem('userEmail');
@@ -462,7 +462,7 @@ export default function Settings() {
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-            ⚙️ {t('settings_title', language)}
+            {t('settings_title', language)}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
             {language === 'ar'
@@ -482,14 +482,14 @@ export default function Settings() {
             onClick={handleBackup}
             className="h-11 bg-white hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-blue-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-slate-500 text-blue-700 dark:text-blue-400 rounded-xl shadow-sm hover:shadow-md transition-all"
           >
-            💾 {language === 'ar' ? 'نسخ احتياطي' : 'Sauvegarde'}
+            {language === 'ar' ? 'نسخ احتياطي' : 'Sauvegarde'}
           </Button>
           <Button
             variant="outline"
             className="h-11 bg-white hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-slate-700 border-emerald-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-slate-500 text-emerald-700 dark:text-emerald-400 rounded-xl shadow-sm hover:shadow-md transition-all"
           >
             <label htmlFor="file-upload" className="cursor-pointer flex items-center">
-              📁 {language === 'ar' ? 'استعادة' : 'Restaurer'}
+              {language === 'ar' ? 'استعادة' : 'Restaurer'}
             </label>
             <Input id="file-upload" type="file" className="hidden" onChange={handleRestore} />
           </Button>
@@ -501,7 +501,7 @@ export default function Settings() {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950 p-4 text-sm text-red-700 dark:text-red-400 mb-6"
           >
-            ⚠️ {fetchError}
+            {fetchError}
           </motion.div>
         )}
 
@@ -517,19 +517,19 @@ export default function Settings() {
                 value="general"
                 className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all"
               >
-                🌐 {language === 'ar' ? 'عام' : 'Général'}
+                {language === 'ar' ? 'عام' : 'Général'}
               </TabsTrigger>
               <TabsTrigger
                 value="account"
                 className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all"
               >
-                👤 {language === 'ar' ? 'الحساب' : 'Compte'}
+                {language === 'ar' ? 'الحساب' : 'Compte'}
               </TabsTrigger>
               <TabsTrigger
                 value="backup"
                 className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white transition-all"
               >
-                💽 {language === 'ar' ? 'النسخ الاحتياطي' : 'Sauvegarde'}
+                {language === 'ar' ? 'النسخ الاحتياطي' : 'Sauvegarde'}
               </TabsTrigger>
               <TabsTrigger
                 value="about"
@@ -549,7 +549,7 @@ export default function Settings() {
             <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-slate-700 dark:to-slate-700 border-b border-slate-100 dark:border-slate-700">
                 <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
-                  🌐 {language === 'ar' ? 'إعدادات اللغة' : 'Paramètres de Langue'}
+                  {language === 'ar' ? 'إعدادات اللغة' : 'Paramètres de Langue'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -591,14 +591,14 @@ export default function Settings() {
             <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-slate-700 dark:to-slate-700 border-b border-slate-100 dark:border-slate-700">
                 <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
-                  🔔 {language === 'ar' ? 'إعدادات الإشعارات' : 'Paramètres de Notifications'}
+                  {language === 'ar' ? 'إعدادات الإشعارات' : 'Paramètres de Notifications'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
                   <div className="space-y-1">
                     <Label className="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                      📢 {language === 'ar' ? 'إشعارات النظام' : 'Notifications système'}
+                      {language === 'ar' ? 'إشعارات النظام' : 'Notifications système'}
                     </Label>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
                       {language === 'ar'
@@ -616,7 +616,7 @@ export default function Settings() {
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
                   <div className="space-y-1">
                     <Label className="text-base font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                      🔄 {language === 'ar' ? 'النسخ الاحتياطي التلقائي' : 'Sauvegarde automatique'}
+                      {language === 'ar' ? 'النسخ الاحتياطي التلقائي' : 'Sauvegarde automatique'}
                     </Label>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
                       {language === 'ar'
@@ -645,14 +645,14 @@ export default function Settings() {
             <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-700 border-b border-slate-100 dark:border-slate-700">
                 <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
-                  👤 {language === 'ar' ? 'معلومات الحساب' : 'Informations du Compte'}
+                  {language === 'ar' ? 'معلومات الحساب' : 'Informations du Compte'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div className="space-y-2">
                     <Label htmlFor="username" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      👤 {language === 'ar' ? 'اسم المستخدم' : 'Nom d\'utilisateur'}
+                      {language === 'ar' ? 'اسم المستخدم' : 'Nom d\'utilisateur'}
                     </Label>
                     <Input
                       id="username"
@@ -664,7 +664,7 @@ export default function Settings() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      📧 {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                      {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                     </Label>
                     <Input
                       id="email"
@@ -680,13 +680,13 @@ export default function Settings() {
                 {/* Store Logo and Name from website_settings */}
                 <div className="space-y-4 mb-6">
                   <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 block">
-                    🏪 {language === 'ar' ? 'شعار وإعدادات المتجر' : 'Logo et Paramètres du Magasin'}
+                    {language === 'ar' ? 'شعار وإعدادات المتجر' : 'Logo et Paramètres du Magasin'}
                   </Label>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="storeName" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                        🏷️ {language === 'ar' ? 'اسم المتجر' : 'Nom du Magasin'}
+                        {language === 'ar' ? 'اسم المتجر' : 'Nom du Magasin'}
                       </Label>
                       <Input
                         id="storeName"
@@ -699,7 +699,7 @@ export default function Settings() {
 
                     <div className="space-y-2">
                       <Label htmlFor="storeLogoFile" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                        🖼️ {language === 'ar' ? 'شعار المتجر' : 'Logo du Magasin'}
+                        {language === 'ar' ? 'شعار المتجر' : 'Logo du Magasin'}
                       </Label>
                       <Input
                         id="storeLogoFile"
@@ -709,7 +709,7 @@ export default function Settings() {
                         className="h-12 bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl hover:border-blue-300 focus:border-blue-500 dark:text-slate-100 transition-colors cursor-pointer file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300 file:border-0 file:rounded-lg file:px-3 file:py-1 file:mr-3 file:font-semibold"
                       />
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        📎 {language === 'ar' ? 'JPG, PNG, GIF. Max: 15MB' : 'JPG, PNG, GIF. Max: 15MB'}
+                        {language === 'ar' ? 'JPG, PNG, GIF. Max: 15MB' : 'JPG, PNG, GIF. Max: 15MB'}
                       </p>
                     </div>
                   </div>
@@ -726,7 +726,7 @@ export default function Settings() {
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-3xl border-2 border-white shadow-md">
-                        🏪
+                        
                       </div>
                     )}
                     <div className="space-y-1 flex-1">
@@ -745,13 +745,13 @@ export default function Settings() {
                     onClick={handleAccountUpdate}
                     className="h-12 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold"
                   >
-                    💾 {language === 'ar' ? 'حفظ بيانات الحساب' : 'Sauvegarder le Compte'}
+                    {language === 'ar' ? 'حفظ بيانات الحساب' : 'Sauvegarder le Compte'}
                   </Button>
                   <Button
                     onClick={handleWebsiteSettingsUpdate}
                     className="h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold"
                   >
-                    💾 {language === 'ar' ? 'حفظ إعدادات المتجر' : 'Sauvegarder le Magasin'}
+                    {language === 'ar' ? 'حفظ إعدادات المتجر' : 'Sauvegarder le Magasin'}
                   </Button>
                 </div>
               </CardContent>
@@ -767,14 +767,14 @@ export default function Settings() {
             <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-700 dark:to-slate-700 border-b border-slate-100 dark:border-slate-700">
                 <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
-                  🔐 {language === 'ar' ? 'تغيير كلمة المرور' : 'Changer le Mot de Passe'}
+                  {language === 'ar' ? 'تغيير كلمة المرور' : 'Changer le Mot de Passe'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="currentPassword" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      🔑 {language === 'ar' ? 'كلمة المرور الحالية' : 'Mot de passe actuel'}
+                      {language === 'ar' ? 'كلمة المرور الحالية' : 'Mot de passe actuel'}
                     </Label>
                     <div className="relative">
                       <Input
@@ -800,7 +800,7 @@ export default function Settings() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="newPassword" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                        ✨ {language === 'ar' ? 'كلمة المرور الجديدة' : 'Nouveau mot de passe'}
+                        {language === 'ar' ? 'كلمة المرور الجديدة' : 'Nouveau mot de passe'}
                       </Label>
                       <div className="relative">
                         <Input
@@ -824,7 +824,7 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                        🔄 {language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}
+                        {language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}
                       </Label>
                       <div className="relative">
                         <Input
@@ -852,7 +852,7 @@ export default function Settings() {
                     onClick={handlePasswordChange}
                     className="h-12 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold w-full"
                   >
-                    🔐 {language === 'ar' ? 'تغيير كلمة المرور' : 'Changer le Mot de Passe'}
+                    {language === 'ar' ? 'تغيير كلمة المرور' : 'Changer le Mot de Passe'}
                   </Button>
                 </div>
               </CardContent>
@@ -870,7 +870,7 @@ export default function Settings() {
             <Card className="bg-white dark:bg-slate-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-700 dark:to-slate-700 border-b border-slate-100 dark:border-slate-700">
                 <CardTitle className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
-                  💽 {language === 'ar' ? 'إدارة النسخ الاحتياطية' : 'Gestion des Sauvegardes'}
+                  {language === 'ar' ? 'إدارة النسخ الاحتياطية' : 'Gestion des Sauvegardes'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -897,7 +897,7 @@ export default function Settings() {
                           onClick={handleBackup}
                           className="h-12 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold w-full"
                         >
-                          💾 {language === 'ar' ? 'إنشاء نسخة احتياطية' : 'Créer Sauvegarde'}
+                          {language === 'ar' ? 'إنشاء نسخة احتياطية' : 'Créer Sauvegarde'}
                         </Button>
                       </CardContent>
                     </Card>
@@ -926,7 +926,7 @@ export default function Settings() {
                           className="h-12 bg-white hover:bg-amber-50 dark:bg-slate-700 dark:hover:bg-slate-600 border-amber-200 dark:border-slate-600 hover:border-amber-300 dark:hover:border-slate-500 text-amber-700 dark:text-amber-400 rounded-xl shadow-sm hover:shadow-md transition-all font-semibold w-full"
                           onClick={() => document.getElementById('file-upload-restore')?.click()}
                         >
-                          📁 {language === 'ar' ? 'اختر ملف' : 'Choisir Fichier'}
+                          {language === 'ar' ? 'اختر ملف' : 'Choisir Fichier'}
                         </Button>
                         <Input
                           id="file-upload-restore"
@@ -942,7 +942,7 @@ export default function Settings() {
 
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-8">
                   <h3 className="font-bold text-xl mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    📚 {language === 'ar' ? 'سجل النسخ الاحتياطية' : 'Historique des Sauvegardes'}
+                    {language === 'ar' ? 'سجل النسخ الاحتياطية' : 'Historique des Sauvegardes'}
                   </h3>
                   <div className="space-y-4">
                     {backupHistory.length > 0 ? (
@@ -983,7 +983,7 @@ export default function Settings() {
                     ) : (
                       <div className="text-center py-12">
                         <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                          📂
+                          
                         </div>
                         <p className="text-slate-600 dark:text-slate-400 font-medium">
                           {language === 'ar' ? 'لا توجد نسخ احتياطية' : 'Aucune sauvegarde trouvée.'}
@@ -1015,17 +1015,17 @@ export default function Settings() {
                     className="space-y-4"
                   >
                     <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                      <span className="text-3xl">🚗</span>
+                      <span className="text-3xl"></span>
                     </div>
                     <div>
                       <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
-                        🚀 chargers  
+                        chargers  
                       </h2>
                       <p className="text-slate-600 dark:text-slate-400 text-lg">
                         {language === 'ar' ? 'نظام إدارة تجاري شامل' : 'Système de Gestion Commercial'}
                       </p>
                       <Badge variant="outline" className="mt-3 px-4 py-1 text-sm font-semibold bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-slate-700 dark:to-slate-700 border-blue-200 dark:border-slate-600 dark:text-slate-100">
-                        📱 {language === 'ar' ? 'الإصدار' : 'Version'} {systemInfo.version}
+                        {language === 'ar' ? 'الإصدار' : 'Version'} {systemInfo.version}
                       </Badge>
                     </div>
                   </motion.div>
@@ -1041,25 +1041,25 @@ export default function Settings() {
                       className="space-y-4"
                     >
                       <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        💻 {language === 'ar' ? 'معلومات النظام' : 'Informations Système'}
+                        {language === 'ar' ? 'معلومات النظام' : 'Informations Système'}
                       </h3>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
-                          <span className="text-slate-600 dark:text-slate-400">🗄️ {language === 'ar' ? 'قاعدة البيانات' : 'Base de données'}:</span>
+                          <span className="text-slate-600 dark:text-slate-400">{language === 'ar' ? 'قاعدة البيانات' : 'Base de données'}:</span>
                           <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300">{systemInfo.database}</Badge>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
-                          <span className="text-slate-600 dark:text-slate-400">💾 {language === 'ar' ? 'حجم الملف' : 'Taille du fichier'}:</span>
+                          <span className="text-slate-600 dark:text-slate-400">{language === 'ar' ? 'حجم الملف' : 'Taille du fichier'}:</span>
                           <Badge className="bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300">{systemInfo.diskSpace}</Badge>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
-                          <span className="text-slate-600 dark:text-slate-400">⏱️ {language === 'ar' ? 'وقت التشغيل' : 'Temps de fonctionnement'}:</span>
+                          <span className="text-slate-600 dark:text-slate-400">{language === 'ar' ? 'وقت التشغيل' : 'Temps de fonctionnement'}:</span>
                           <Badge className="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300">{systemInfo.uptime}</Badge>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
-                          <span className="text-slate-600 dark:text-slate-400">🌐 {language === 'ar' ? 'حالة الشبكة' : 'Statut du réseau'}:</span>
+                          <span className="text-slate-600 dark:text-slate-400">{language === 'ar' ? 'حالة الشبكة' : 'Statut du réseau'}:</span>
                           <Badge variant={systemInfo.networkStatus === 'connected' ? "default" : "destructive"} className={systemInfo.networkStatus === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300' : ''}>
-                            {systemInfo.networkStatus === 'connected' ? '✅ Connecté' : '❌ Déconnecté'}
+                            {systemInfo.networkStatus === 'connected' ? 'Connecté' : 'Déconnecté'}
                           </Badge>
                         </div>
                       </div>
@@ -1072,17 +1072,17 @@ export default function Settings() {
                       className="space-y-4"
                     >
                       <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        📞 {language === 'ar' ? 'معلومات الاتصال' : 'Détails de Contact'}
+                        {language === 'ar' ? 'معلومات الاتصال' : 'Détails de Contact'}
                       </h3>
                       <div className="space-y-3">
                         <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-700 rounded-xl">
-                          <p className="text-slate-700 dark:text-slate-100 font-semibold">👨‍💻 {language === 'ar' ? 'مطور بواسطة' : 'Développé par'}: Youssef Abdouni</p>
+                          <p className="text-slate-700 dark:text-slate-100 font-semibold">{language === 'ar' ? 'مطور بواسطة' : 'Développé par'}: Youssef Abdouni</p>
                         </div>
                         <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-700 dark:to-slate-700 rounded-xl">
-                          <p className="text-slate-700 dark:text-slate-100">📧 {language === 'ar' ? 'الدعم' : 'Support'}: youssefabdouni44@gmail.com</p>
+                          <p className="text-slate-700 dark:text-slate-100">{language === 'ar' ? 'الدعم' : 'Support'}: youssefabdouni44@gmail.com</p>
                         </div>
                         <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-700 rounded-xl">
-                          <p className="text-slate-700 dark:text-slate-100">📱 WhatsApp: 0791366612</p>
+                          <p className="text-slate-700 dark:text-slate-100">WhatsApp: 0791366612</p>
                         </div>
                       </div>
                     </motion.div>
@@ -1098,18 +1098,18 @@ export default function Settings() {
                     className="space-y-4"
                   >
                     <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2">
-                      ✨ {language === 'ar' ? 'الميزات' : 'Fonctionnalités'}
+                      {language === 'ar' ? 'الميزات' : 'Fonctionnalités'}
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {[
-                        { icon: '📦', text: language === 'ar' ? 'إدارة المخزون' : 'Gestion des stocks' },
-                        { icon: '🧾', text: language === 'ar' ? 'الفوترة الكاملة' : 'Facturation complète' },
-                        { icon: '📊', text: language === 'ar' ? 'تتبع المبيعات' : 'Suivi des ventes' },
-                        { icon: '🚚', text: language === 'ar' ? 'إدارة الموردين' : 'Gestion fournisseurs' },
-                        { icon: '📈', text: language === 'ar' ? 'تقارير مفصلة' : 'Rapports détaillés' },
-                        { icon: '📱', text: language === 'ar' ? 'رموز الباركود' : 'Codes-barres' },
-                        { icon: '💰', text: language === 'ar' ? 'نقطة البيع' : 'Caisse POS' },
-                        { icon: '🔒', text: language === 'ar' ? 'نسخ احتياطي آمن' : 'Sauvegarde sécurisée' }
+                        { icon: '', text: language === 'ar' ? 'إدارة المخزون' : 'Gestion des stocks' },
+                        { icon: '', text: language === 'ar' ? 'الفوترة الكاملة' : 'Facturation complète' },
+                        { icon: '', text: language === 'ar' ? 'تتبع المبيعات' : 'Suivi des ventes' },
+                        { icon: '', text: language === 'ar' ? 'إدارة الموردين' : 'Gestion fournisseurs' },
+                        { icon: '', text: language === 'ar' ? 'تقارير مفصلة' : 'Rapports détaillés' },
+                        { icon: '', text: language === 'ar' ? 'رموز الباركود' : 'Codes-barres' },
+                        { icon: '', text: language === 'ar' ? 'نقطة البيع' : 'Caisse POS' },
+                        { icon: '', text: language === 'ar' ? 'نسخ احتياطي آمن' : 'Sauvegarde sécurisée' }
                       ].map((feature, index) => (
                         <motion.div
                           key={index}

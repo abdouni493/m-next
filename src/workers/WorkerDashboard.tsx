@@ -14,7 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { ArrowRight } from 'lucide-react';
 
-// ✅ Quick Action Component (POS, Sales, Settings)
+// Quick Action Component (POS, Sales, Settings)
 const QuickActions = () => {
   const actions = [
     {
@@ -67,7 +67,7 @@ const QuickActions = () => {
   );
 };
 
-// ✅ Stock Alert Component (just like admin but simplified)
+// Stock Alert Component (just like admin but simplified)
 const LowStockAlert = ({ lowStockCount }: { lowStockCount: number }) => {
   const isAlert = lowStockCount > 0;
   return (
@@ -84,12 +84,12 @@ const LowStockAlert = ({ lowStockCount }: { lowStockCount: number }) => {
       <CardContent className="flex-grow flex flex-col p-4">
         {isAlert ? (
           <div className="text-center text-warning-foreground py-10">
-            <p className="font-semibold">⚠️ Attention : {lowStockCount} article(s) en stock bas !</p>
+            <p className="font-semibold">Attention : {lowStockCount} article(s) en stock bas !</p>
             <p className="text-sm text-muted-foreground mt-2">Prévenez l’administrateur pour réapprovisionnement.</p>
           </div>
         ) : (
           <div className="text-center text-muted-foreground py-10">
-            <p>🎉 Aucun produit critique. Tout est en ordre !</p>
+            <p>Aucun produit critique. Tout est en ordre !</p>
           </div>
         )}
       </CardContent>
@@ -114,7 +114,7 @@ export default function WorkerDashboard() {
         setLowStockCount(data.generalStats.lowStockCount || 0);
       }
     } catch (err) {
-      console.error("❌ Failed to fetch worker dashboard data:", err);
+      console.error("Failed to fetch worker dashboard data:", err);
       setLowStockCount(0);
     } finally {
       setLoading(false);
@@ -154,7 +154,7 @@ export default function WorkerDashboard() {
             <p className="font-semibold text-base">{new Date().toLocaleString('fr-FR')}</p>
           </div>
           <Button variant="outline" size="icon" onClick={fetchData}>
-            🔄
+            
           </Button>
         </div>
       </div>

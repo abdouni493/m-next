@@ -222,7 +222,7 @@ export function ProductFormDialog({
         setAddCategoryOpen(false);
         setNewCategoryName("");
         toast({
-          title: language === "ar" ? "✅ تم" : "✅ Succès",
+          title: language === "ar" ? "تم" : "Succès",
           description: language === "ar" ? "تم إضافة الفئة" : "Catégorie ajoutée",
         });
       }
@@ -251,7 +251,7 @@ export function ProductFormDialog({
         setAddShelvingOpen(false);
         setNewShelvingData({ name: "", number_of_lines: 0 });
         toast({
-          title: language === "ar" ? "✅ تم" : "✅ Succès",
+          title: language === "ar" ? "تم" : "Succès",
           description: language === "ar" ? "تم إضافة الرف" : "Étagère ajoutée",
         });
       }
@@ -280,7 +280,7 @@ export function ProductFormDialog({
         setAddStoreOpen(false);
         setNewStoreData({ name: "", address: "" });
         toast({
-          title: language === "ar" ? "✅ تم" : "✅ Succès",
+          title: language === "ar" ? "تم" : "Succès",
           description: language === "ar" ? "تم إضافة المتجر" : "Magasin ajouté",
         });
       }
@@ -428,7 +428,7 @@ export function ProductFormDialog({
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 w-full">
                   <div className="w-full">
-                    <Label>{language === "ar" ? "سعر الشراء" : "💵 Prix achat"}</Label>
+                    <Label>{language === "ar" ? "سعر الشراء" : "Prix achat"}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -438,7 +438,7 @@ export function ProductFormDialog({
                     />
                   </div>
                   <div className="w-full">
-                    <Label>{language === "ar" ? "هامش %" : "📈 Marge %"}</Label>
+                    <Label>{language === "ar" ? "هامش %" : "Marge %"}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -448,7 +448,7 @@ export function ProductFormDialog({
                     />
                   </div>
                   <div className="w-full">
-                    <Label>{language === "ar" ? "سعر البيع" : "💰 Prix vente"}</Label>
+                    <Label>{language === "ar" ? "سعر البيع" : "Prix vente"}</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -458,7 +458,7 @@ export function ProductFormDialog({
                     />
                   </div>
                   <div className="w-full p-3 border-2 border-purple-200 dark:border-purple-700 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                    <Label className="text-purple-700 dark:text-purple-300">{language === "ar" ? "⏱️ آخر سعر بيع" : "⏱️ Dernier Prix Vente"}</Label>
+                    <Label className="text-purple-700 dark:text-purple-300">{language === "ar" ? "آخر سعر بيع" : "Dernier Prix Vente"}</Label>
                     <Input
                       type="number"
                       step="0.01"

@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// ✅ import real contexts
+// import real contexts
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -38,7 +38,7 @@ const API_URL = "http://localhost:5000/api"; // adjust if your server runs elsew
 
 function WorkerSettings() {
   const { toast } = useToast();
-  const { user } = useAuth(); // ✅ get logged in worker
+  const { user } = useAuth(); // get logged in worker
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
@@ -59,7 +59,7 @@ function WorkerSettings() {
     networkStatus: 'connected',
   };
 
-  // ✅ Load worker profile
+  // Load worker profile
   useEffect(() => {
     if (user) {
       axios
@@ -83,7 +83,7 @@ function WorkerSettings() {
     setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  // ✅ Update profile
+  // Update profile
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -107,7 +107,7 @@ function WorkerSettings() {
     }
   };
 
-  // ✅ Change password
+  // Change password
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     const { currentPassword, newPassword, confirmPassword } = settings;

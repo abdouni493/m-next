@@ -1,210 +1,108 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  LayoutDashboard, Boxes, UsersRound, Truck, Receipt, Store, LineChart, PackageCheck,
-  Globe2, ScanLine, Wallet, Barcode, Settings2, Zap, Crown, UserRound, X, type LucideIcon,
-} from 'lucide-react';
+import { Zap, X, LogOut, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { getWebsiteSettingsREST } from '@/lib/supabaseClient';
+import { ADMIN_NAV } from '@/admin/nav';
+import { useAdminAlerts } from '@/admin/alerts';
 
 interface SidebarProps {
   /** Present when rendered as the mobile drawer. */
   onClose?: () => void;
 }
 
-type NavItem = { title: string; href: string; icon: LucideIcon };
-
 export const Sidebar = ({ onClose }: SidebarProps) => {
-  // The parent layout fully shows/hides the sidebar, so it always renders expanded.
-  const isOpen = true;
   const location = useLocation();
-  const { t, isRTL } = useLanguage();
-  const { user } = useAuth();
-
-  const [storeName, setStoreName] = useState('Chargers');
-  const [storeDisplayName, setStoreDisplayName] = useState('Chargers');
+  const navigate = useNavigate();
+  const { isRTL } = useLanguage();
+  const { user, logout } = useAuth();
+  const { data: alerts } = useAdminAlerts();
+  const [storeName, setStoreName] = useState('M NEXT');
   const [storeLogoUrl, setStoreLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const settings = await getWebsiteSettingsREST();
-        if (settings) {
-          if (settings.store_name) {
-            setStoreName(settings.store_name);
-            setStoreDisplayName(settings.store_name);
-          }
-          if (settings.logo_url) {
-            setStoreLogoUrl(settings.logo_url);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching website settings:', error);
-        // Fallback to defaults
-        const localStoreName = localStorage.getItem('storeName');
-        const localDisplayName = localStorage.getItem('storeDisplayName');
-        const localLogoData = localStorage.getItem('storeLogoData');
-
-        if (localStoreName) setStoreName(localStoreName);
-        if (localDisplayName) setStoreDisplayName(localDisplayName);
-        if (localLogoData) setStoreLogoUrl(localLogoData);
-      }
-    };
-
-    fetchSettings();
+    getWebsiteSettingsREST().then((s) => {
+      if (s?.store_name) setStoreName(String(s.store_name).trim());
+      if (s?.logo_url) setStoreLogoUrl(s.logo_url);
+    }).catch(() => {});
   }, []);
 
-  const navigationItems: NavItem[] = [
-    { title: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
-    { title: t('nav.inventory'), href: '/inventory', icon: Boxes },
-    { title: 'Clients', href: '/clients', icon: UsersRound },
-    { title: "Factures d'Achat", href: '/purchase-invoices', icon: Truck },
-    { title: t('nav.sales'), href: '/sales', icon: Receipt },
-    { title: t('nav.suppliers'), href: '/suppliers', icon: Store },
-    { title: t('nav.reports'), href: '/reports', icon: LineChart },
-    { title: 'Commandes', href: '/commands', icon: PackageCheck },
-  ];
-
-  const toolItems: NavItem[] = [
-    { title: 'Gestion du Site', href: '/website', icon: Globe2 },
-    { title: t('nav.pos'), href: '/pos', icon: ScanLine },
-    { title: 'Caisse', href: '/caisse', icon: Wallet },
-    { title: t('nav.barcodes'), href: '/barcodes', icon: Barcode },
-    { title: t('nav.settings'), href: '/settings', icon: Settings2 },
-  ];
-
-  const isActiveRoute = (href: string) => {
-    if (href === '/') return location.pathname === '/';
-    return location.pathname.startsWith(href);
-  };
-
-  const initials = (user?.name || user?.username || 'U')
-    .split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-  const renderSection = (label: string, items: NavItem[], offset: number) => (
-    <div className="space-y-1">
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.p
-            initial={{ opacity: 0, x: isRTL ? 8 : -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className={cn('px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/50', isRTL && 'text-right')}
-          >
-            {label}
-          </motion.p>
-        )}
-      </AnimatePresence>
-      {items.map((item, index) => {
-        const isActive = isActiveRoute(item.href);
-        const Icon = item.icon;
-        return (
-          <motion.div
-            key={item.href}
-            initial={{ opacity: 0, x: isRTL ? 12 : -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: (index + offset) * 0.03, type: 'spring', stiffness: 400, damping: 32 }}
-          >
-            <NavLink
-              to={item.href}
-              title={!isOpen ? item.title : undefined}
-              aria-label={item.title}
-              className={cn(
-                'group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-sidebar-ring',
-                isRTL && 'flex-row-reverse',
-                !isOpen && 'justify-center px-0',
-                isActive
-                  ? 'text-white'
-                  : 'text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-              )}
-            >
-              {isActive && (
-                <motion.span
-                  layoutId="sidebar-active"
-                  className="absolute inset-0 rounded-xl bg-gradient-primary shadow-primary"
-                  transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                />
-              )}
-              <Icon className="relative z-10 h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110" strokeWidth={2} />
-              {isOpen && (
-                <span className={cn('relative z-10 flex-1 truncate', isRTL && 'text-right')}>{item.title}</span>
-              )}
-            </NavLink>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
+  const badges = { pendingOrders: alerts?.pendingOrders.length || 0, lowStock: alerts?.lowStock.length || 0 };
+  const isActive = (href: string) => location.pathname === href || location.pathname.startsWith(href + '/');
+  const initials = (user?.name || user?.username || 'U').split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <aside
-      className={cn(
-        'relative z-20 flex h-full w-[272px] max-w-full flex-col overflow-hidden bg-sidebar text-sidebar-foreground',
-        isRTL ? 'border-l border-sidebar-border' : 'border-r border-sidebar-border'
-      )}
-    >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.28),transparent_70%)]" />
-
+    <aside className={cn('flex h-full w-[248px] max-w-full flex-col bg-sidebar text-sidebar-foreground', isRTL ? 'border-l border-sidebar-border' : 'border-r border-sidebar-border')}>
       {/* Brand */}
-      <div className={cn('relative flex h-[72px] items-center gap-3 px-5', isRTL && 'flex-row-reverse', !isOpen && 'justify-center px-0')}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-primary shadow-primary ring-1 ring-white/10">
-          {storeLogoUrl ? (
-            <img src={storeLogoUrl} alt="Logo" className="h-full w-full object-cover" />
-          ) : (
-            <Zap className="h-5 w-5 text-white" fill="currentColor" />
-          )}
+      <div className={cn('flex h-16 shrink-0 items-center gap-2.5 px-4', isRTL && 'flex-row-reverse')}>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-primary">
+          {storeLogoUrl ? <img src={storeLogoUrl} alt="" className="h-full w-full object-cover" /> : <Zap className="h-5 w-5 text-volt" fill="currentColor" />}
         </div>
-        <AnimatePresence initial={false}>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: isRTL ? 10 : -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: isRTL ? 10 : -10 }}
-              transition={{ duration: 0.2 }}
-              className={cn('min-w-0', isRTL && 'text-right')}
-            >
-              <h1 className="truncate font-display text-lg font-bold leading-tight text-white">{storeDisplayName || storeName}</h1>
-              <p className="truncate text-xs text-sidebar-foreground/55">Admin console</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className={cn('min-w-0 flex-1', isRTL && 'text-right')}>
+          <p className="truncate font-sora text-[15px] font-bold leading-tight">{storeName}</p>
+          <p className="truncate text-[11px] text-muted-foreground">Administration</p>
+        </div>
         {onClose && (
-          <button
-            onClick={onClose}
-            className={cn('ms-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white', isRTL && 'me-auto ms-0')}
-            aria-label="Fermer le menu"
-          >
+          <button onClick={onClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-muted-foreground hover:bg-sidebar-accent hover:text-foreground" aria-label="Fermer le menu">
             <X className="h-5 w-5" />
           </button>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="custom-scrollbar relative flex-1 space-y-6 overflow-y-auto px-3 py-4">
-        {renderSection('Navigation', navigationItems, 0)}
-        <div className="mx-3 h-px bg-sidebar-border" />
-        {renderSection('Tools', toolItems, navigationItems.length)}
+      <nav className="custom-scrollbar flex-1 space-y-5 overflow-y-auto px-3 py-3" aria-label="Navigation administration">
+        {ADMIN_NAV.map((group) => (
+          <div key={group.label}>
+            <p className={cn('mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground', isRTL && 'text-right')}>{group.label}</p>
+            <ul className="space-y-0.5">
+              {group.items.map((item) => {
+                const active = isActive(item.href);
+                const Icon = item.icon;
+                const count = item.badge ? badges[item.badge] : 0;
+                return (
+                  <li key={item.href}>
+                    <NavLink
+                      to={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={cn(
+                        'group relative flex h-10 items-center gap-3 rounded-[10px] px-3 text-sm font-medium transition-colors duration-150',
+                        isRTL && 'flex-row-reverse',
+                        active ? 'bg-volt-soft text-foreground' : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground',
+                      )}
+                    >
+                      {active && <span className={cn('absolute bottom-2 top-2 w-[3px] rounded-full bg-volt', isRTL ? 'right-0' : 'left-0')} aria-hidden />}
+                      <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.25 : 1.9} />
+                      <span className={cn('flex-1 truncate', isRTL && 'text-right')}>{item.title}</span>
+                      {count > 0 && (
+                        <span className={cn('min-w-[22px] rounded-full px-1.5 text-center text-[11px] font-bold leading-5 tabular-nums',
+                          item.badge === 'lowStock' ? 'bg-warning/15 text-warning' : 'bg-primary text-primary-foreground')}>
+                          {count > 99 ? '99+' : count}
+                        </span>
+                      )}
+                    </NavLink>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
 
-      {/* User */}
-      <div className="relative border-t border-sidebar-border p-3">
-        <div className={cn('flex items-center gap-3 rounded-xl bg-sidebar-accent/60 p-2.5', isRTL && 'flex-row-reverse', !isOpen && 'justify-center bg-transparent p-0')}>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-accent text-sm font-bold text-white">
-            {initials}
+      <div className="border-t border-sidebar-border p-3">
+        <a href="/website-shop" target="_blank" rel="noopener noreferrer" className="mb-2 flex h-9 items-center gap-2 rounded-[10px] px-3 text-sm font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground">
+          <ExternalLink className="h-4 w-4" /> Voir la boutique
+        </a>
+        <div className={cn('flex items-center gap-2.5 rounded-xl bg-sidebar-accent p-2', isRTL && 'flex-row-reverse')}>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-volt text-sm font-bold text-volt-foreground">{initials}</div>
+          <div className={cn('min-w-0 flex-1', isRTL && 'text-right')}>
+            <p className="truncate text-sm font-semibold">{user?.name || 'Utilisateur'}</p>
+            <p className="truncate text-[11px] text-muted-foreground">{user?.role === 'manager' ? 'Gérant' : user?.role === 'employee' ? 'Employé' : 'Administrateur'}</p>
           </div>
-          {isOpen && (
-            <div className={cn('min-w-0 flex-1', isRTL && 'text-right')}>
-              <p className="truncate text-sm font-semibold text-white">{user?.name || user?.username || 'User'}</p>
-              <p className={cn('flex items-center gap-1 text-xs text-sidebar-foreground/60', isRTL && 'flex-row-reverse')}>
-                {user?.role === 'admin' ? <Crown className="h-3 w-3 text-amber-400" /> : <UserRound className="h-3 w-3" />}
-                {user?.role === 'admin' ? 'Admin' : 'User'}
-              </p>
-            </div>
-          )}
+          <button onClick={async () => { await logout(); navigate('/login', { replace: true }); }} className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-card hover:text-destructive" aria-label="Se déconnecter">
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </aside>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,132 +8,129 @@
 All colors MUST be HSL.
 */
 
+/* ====================================================================
+   VOLT design tokens — single source of truth for the admin panel AND the
+   storefront (src/shop/shop.css aliases these). All values are HSL channels.
+   ==================================================================== */
 @layer base {
   :root {
-    --background: 228 33% 97%;
-    --foreground: 230 35% 12%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 230 35% 12%;
-
+    --background: 220 23% 97.5%;      /* #F7F8FA bg */
+    --foreground: 220 49% 8.4%;       /* #0B1220 text */
+    --card: 0 0% 100%;                /* #FFFFFF surface */
+    --card-foreground: 220 49% 8.4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 230 35% 12%;
+    --popover-foreground: 220 49% 8.4%;
+    --surface-2: 214 26% 95%;         /* #EEF1F5 */
 
-    --primary: 243 75% 59%;
+    --primary: 220 49% 8.4%;          /* ink buttons */
     --primary-foreground: 0 0% 100%;
-    --primary-light: 243 90% 72%;
-    --primary-dark: 245 58% 48%;
+    --primary-light: 220 30% 22%;
+    --primary-dark: 220 49% 5%;
 
-    --secondary: 230 30% 94%;
-    --secondary-foreground: 230 35% 18%;
+    --secondary: 214 26% 95%;
+    --secondary-foreground: 220 49% 8.4%;
+    --muted: 214 26% 95%;
+    --muted-foreground: 219 13% 41%;  /* #5B6475 */
+    --accent: 214 26% 95%;
+    --accent-foreground: 220 49% 8.4%;
 
-    --muted: 230 25% 94%;
-    --muted-foreground: 230 12% 44%;
+    --volt: 75 90% 58%;               /* #C6F432 — always with ink text */
+    --volt-foreground: 220 49% 8.4%;
+    --volt-soft: 75 89% 90%;          /* #F1FCD0 */
+    --electric: 219 100% 56%;         /* #1F6FFF links/focus/info */
 
-    --accent: 246 80% 96%;
-    --accent-foreground: 245 58% 40%;
-
-    --success: 158 64% 38%;
+    --success: 152 82% 39%;           /* #12B76A */
     --success-foreground: 0 0% 100%;
-    --success-light: 158 64% 52%;
-
-    --warning: 35 92% 50%;
+    --success-light: 152 60% 92%;
+    --warning: 35 93% 50%;            /* #F79009 */
     --warning-foreground: 0 0% 100%;
-    --warning-light: 38 92% 66%;
-
-    --destructive: 350 80% 55%;
+    --warning-light: 35 93% 92%;
+    --destructive: 358 75% 59%;       /* #E5484D */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 230 22% 88%;
-    --input: 230 22% 86%;
-    --ring: 243 75% 59%;
+    --border: 216 20% 90.6%;          /* #E2E6EC */
+    --input: 216 20% 90.6%;
+    --ring: 219 100% 56%;
+    --radius: 0.625rem;               /* 10px controls; cards use rounded-2xl (16px) */
 
-    --radius: 0.875rem;
+    /* No multicolour gradients in Volt: legacy gradient utilities render solid. */
+    --gradient-primary: linear-gradient(hsl(var(--primary)), hsl(var(--primary)));
+    --gradient-accent: linear-gradient(hsl(var(--volt)), hsl(var(--volt)));
+    --gradient-success: linear-gradient(hsl(var(--success)), hsl(var(--success)));
+    --gradient-warning: linear-gradient(hsl(var(--warning)), hsl(var(--warning)));
+    --gradient-card: linear-gradient(hsl(var(--card)), hsl(var(--card)));
 
-    --gradient-primary: linear-gradient(135deg, hsl(243 75% 59%), hsl(271 81% 60%));
-    --gradient-accent: linear-gradient(135deg, hsl(158 64% 42%), hsl(186 72% 44%));
-    --gradient-success: linear-gradient(135deg, hsl(158 64% 38%), hsl(158 64% 52%));
-    --gradient-warning: linear-gradient(135deg, hsl(35 92% 50%), hsl(20 90% 58%));
-    --gradient-card: linear-gradient(160deg, hsl(0 0% 100%), hsl(230 40% 98.5%));
-
-    --shadow-sm: 0 1px 2px 0 hsl(230 35% 12% / 0.05);
-    --shadow-md: 0 4px 12px -2px hsl(230 35% 12% / 0.08), 0 2px 4px -2px hsl(230 35% 12% / 0.05);
-    --shadow-lg: 0 16px 32px -8px hsl(230 35% 12% / 0.14);
-    --shadow-primary: 0 8px 24px -6px hsl(243 75% 59% / 0.45);
-    --shadow-elegant: 0 24px 48px -12px hsl(230 35% 12% / 0.25);
+    --shadow-sm: 0 1px 2px rgb(16 24 40 / .06);
+    --shadow-md: 0 1px 2px rgb(16 24 40 / .06), 0 8px 24px rgb(16 24 40 / .06);
+    --shadow-lg: 0 2px 4px rgb(16 24 40 / .06), 0 16px 32px rgb(16 24 40 / .10);
+    --shadow-primary: 0 1px 2px rgb(16 24 40 / .10);
+    --shadow-elegant: 0 24px 48px -12px rgb(16 24 40 / .22);
 
     --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
     --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
 
-    --sidebar-background: 232 38% 11%;
-    --sidebar-foreground: 228 30% 86%;
-    --sidebar-primary: 243 75% 59%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 49% 8.4%;
+    --sidebar-primary: 220 49% 8.4%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 232 30% 18%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 232 28% 19%;
-    --sidebar-ring: 243 90% 72%;
+    --sidebar-accent: 214 26% 95%;
+    --sidebar-accent-foreground: 220 49% 8.4%;
+    --sidebar-border: 216 20% 90.6%;
+    --sidebar-ring: 219 100% 56%;
   }
 
   .dark {
-    --background: 232 38% 7%;
-    --foreground: 228 30% 95%;
+    --background: 222 33% 6%;         /* #0A0D14 */
+    --foreground: 220 33% 96%;        /* #F2F4F8 */
+    --card: 221 31% 10.2%;            /* #121722 */
+    --card-foreground: 220 33% 96%;
+    --popover: 221 31% 10.2%;
+    --popover-foreground: 220 33% 96%;
+    --surface-2: 224 30% 14.5%;       /* #1A2030 */
 
-    --card: 232 32% 11%;
-    --card-foreground: 228 30% 95%;
+    --primary: 220 33% 96%;
+    --primary-foreground: 220 49% 8.4%;
+    --primary-light: 220 20% 80%;
+    --primary-dark: 220 33% 100%;
 
-    --popover: 232 32% 11%;
-    --popover-foreground: 228 30% 95%;
+    --secondary: 224 30% 14.5%;
+    --secondary-foreground: 220 33% 96%;
+    --muted: 224 30% 14.5%;
+    --muted-foreground: 220 15% 66%;  /* #9AA3B5 */
+    --accent: 224 30% 14.5%;
+    --accent-foreground: 220 33% 96%;
 
-    --primary: 243 90% 70%;
-    --primary-foreground: 232 38% 8%;
-    --primary-light: 243 95% 78%;
-    --primary-dark: 243 75% 62%;
+    --volt-soft: 75 90% 58% / 0.12;
+    --electric: 219 100% 68%;         /* #5B93FF */
 
-    --secondary: 232 26% 16%;
-    --secondary-foreground: 228 30% 95%;
+    --success: 150 66% 52%;
+    --success-foreground: 220 49% 8.4%;
+    --success-light: 150 40% 16%;
+    --warning: 39 98% 56%;
+    --warning-foreground: 220 49% 8.4%;
+    --warning-light: 39 50% 16%;
+    --destructive: 358 100% 69%;
+    --destructive-foreground: 220 49% 8.4%;
 
-    --muted: 232 26% 15%;
-    --muted-foreground: 230 16% 66%;
+    --border: 222 23% 19.4%;          /* #262D3D */
+    --input: 222 23% 19.4%;
+    --ring: 219 100% 68%;
 
-    --accent: 243 40% 20%;
-    --accent-foreground: 243 95% 86%;
+    /* Dark mode: borders instead of shadows */
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-primary: none;
+    --shadow-elegant: 0 24px 48px -12px rgb(0 0 0 / .6);
 
-    --success: 158 60% 50%;
-    --success-foreground: 232 38% 8%;
-    --success-light: 158 60% 62%;
-
-    --warning: 38 92% 62%;
-    --warning-foreground: 232 38% 8%;
-    --warning-light: 38 92% 74%;
-
-    --destructive: 350 85% 64%;
-    --destructive-foreground: 232 38% 8%;
-
-    --border: 232 24% 19%;
-    --input: 232 24% 21%;
-    --ring: 243 90% 70%;
-
-    --gradient-primary: linear-gradient(135deg, hsl(243 85% 64%), hsl(271 85% 66%));
-    --gradient-accent: linear-gradient(135deg, hsl(158 60% 46%), hsl(186 72% 50%));
-    --gradient-success: linear-gradient(135deg, hsl(158 60% 46%), hsl(158 60% 60%));
-    --gradient-warning: linear-gradient(135deg, hsl(38 92% 58%), hsl(20 90% 62%));
-    --gradient-card: linear-gradient(160deg, hsl(232 32% 11%), hsl(232 30% 13%));
-
-    --shadow-sm: 0 1px 2px 0 hsl(232 50% 2% / 0.4);
-    --shadow-md: 0 4px 12px -2px hsl(232 50% 2% / 0.5);
-    --shadow-lg: 0 16px 32px -8px hsl(232 50% 2% / 0.6);
-    --shadow-primary: 0 8px 28px -6px hsl(243 90% 70% / 0.45);
-    --shadow-elegant: 0 24px 48px -12px hsl(232 50% 2% / 0.7);
-
-    --sidebar-background: 232 40% 6%;
-    --sidebar-foreground: 228 30% 86%;
-    --sidebar-primary: 243 90% 70%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 232 30% 13%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 232 28% 14%;
-    --sidebar-ring: 243 95% 78%;
+    --sidebar-background: 221 31% 10.2%;
+    --sidebar-foreground: 220 33% 96%;
+    --sidebar-primary: 220 33% 96%;
+    --sidebar-primary-foreground: 220 49% 8.4%;
+    --sidebar-accent: 224 30% 14.5%;
+    --sidebar-accent-foreground: 220 33% 96%;
+    --sidebar-border: 222 23% 19.4%;
+    --sidebar-ring: 219 100% 68%;
   }
 }
 
@@ -149,9 +146,14 @@ All colors MUST be HSL.
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-    letter-spacing: -0.015em;
+    font-family: 'Sora', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
   }
+
+  /* Numbers line up everywhere (prices, quantities, tables) */
+  table, input[type='number'], .tabular-nums { font-variant-numeric: tabular-nums; }
+
+  :focus-visible { outline: 2px solid hsl(var(--electric)); outline-offset: 2px; }
 
   ::selection {
     background: hsl(var(--primary) / 0.22);

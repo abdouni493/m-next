@@ -271,7 +271,7 @@ const Clients = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">👥 Clients</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Clients</h1>
           <p className="text-slate-600 dark:text-slate-400">
             {clients.length} clients registered
           </p>
@@ -361,9 +361,9 @@ const Clients = () => {
                       className="text-center"
                     >
                       <span className="inline-block px-3 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-900/40 dark:to-blue-900/40 text-cyan-700 dark:text-cyan-300 shadow-sm">
-                        {getPriceTierName(client.price_tier) === 'Normal' && '💙'}
-                        {getPriceTierName(client.price_tier) === 'Revendeur' && '🟨'}
-                        {getPriceTierName(client.price_tier) === 'Gros' && '📦'}
+                        {getPriceTierName(client.price_tier) === 'Normal' && ''}
+                        {getPriceTierName(client.price_tier) === 'Revendeur' && ''}
+                        {getPriceTierName(client.price_tier) === 'Gros' && ''}
                         {' '}{getPriceTierName(client.price_tier)}
                       </span>
                     </motion.div>
@@ -376,20 +376,20 @@ const Clients = () => {
                     className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg p-4 mb-4 space-y-2 border border-cyan-200 dark:border-cyan-800"
                   >
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-600 dark:text-slate-400 font-medium">📊 Purchases:</span>
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">Purchases:</span>
                       <span className="font-bold text-cyan-700 dark:text-cyan-300">
                         {client.total_purchases || 0}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-600 dark:text-slate-400 font-medium">💰 Total Spent:</span>
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">Total Spent:</span>
                       <span className="font-bold text-green-600 dark:text-green-400">
                         {(client.total_spent || 0).toFixed(2)} DZD
                       </span>
                     </div>
                     {client.last_purchase_date && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-600 dark:text-slate-400 font-medium">📅 Last Purchase:</span>
+                        <span className="text-slate-600 dark:text-slate-400 font-medium">Last Purchase:</span>
                         <span className="font-bold text-slate-900 dark:text-slate-200">
                           {new Date(client.last_purchase_date).toLocaleDateString()}
                         </span>
@@ -400,7 +400,7 @@ const Clients = () => {
                   {/* Notes */}
                   {client.notes && (
                     <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 line-clamp-2 italic bg-slate-100 dark:bg-slate-700 p-2 rounded">
-                      📝 {client.notes}
+                      {client.notes}
                     </p>
                   )}
 
@@ -414,7 +414,7 @@ const Clients = () => {
                         className="w-full gap-2 border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20"
                       >
                         <History className="w-4 h-4" />
-                        📜
+                        
                       </Button>
                     </motion.div>
                     <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -425,7 +425,7 @@ const Clients = () => {
                         className="w-full gap-2 border-amber-300 text-amber-600 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20"
                       >
                         <Edit2 className="w-4 h-4" />
-                        ✏️
+                        
                       </Button>
                     </motion.div>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -438,7 +438,7 @@ const Clients = () => {
                         className="gap-2 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white shadow-md"
                       >
                         <Trash2 className="w-4 h-4" />
-                        🗑️
+                        
                       </Button>
                     </motion.div>
                   </div>
@@ -463,7 +463,7 @@ const Clients = () => {
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                  {isEditingMode ? '✏️ Edit Client' : '👤 Add New Client'}
+                  {isEditingMode ? 'Edit Client' : 'Add New Client'}
                 </h2>
                 <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
                   {isEditingMode ? 'Update client information' : 'Register a new customer'}
@@ -489,7 +489,7 @@ const Clients = () => {
                 transition={{ delay: 0.05 }}
               >
                 <label className="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-200">
-                  👤 {language === 'en' ? 'Full Name' : 'Nom Complet'} *
+                  {language === 'en' ? 'Full Name' : 'Nom Complet'} *
                 </label>
                 <input
                   type="text"
@@ -509,7 +509,7 @@ const Clients = () => {
                 transition={{ delay: 0.1 }}
               >
                 <label className="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-200">
-                  📞 {language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'} *
+                  {language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'} *
                 </label>
                 <input
                   type="tel"
@@ -529,13 +529,13 @@ const Clients = () => {
                 transition={{ delay: 0.15 }}
               >
                 <label className="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-200">
-                  💰 {language === 'en' ? 'Price Tier' : 'Niveau de Prix'} *
+                  {language === 'en' ? 'Price Tier' : 'Niveau de Prix'} *
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { value: 1, label: '💙 Normal', color: 'blue' },
-                    { value: 2, label: '🟨 Revendeur', color: 'amber' },
-                    { value: 3, label: '📦 Gros', color: 'green' }
+                    { value: 1, label: 'Normal', color: 'blue' },
+                    { value: 2, label: 'Revendeur', color: 'amber' },
+                    { value: 3, label: 'Gros', color: 'green' }
                   ].map((tier) => (
                     <button
                       key={tier.value}
@@ -565,7 +565,7 @@ const Clients = () => {
                 transition={{ delay: 0.2 }}
               >
                 <label className="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-200">
-                  📝 {language === 'en' ? 'Notes' : 'Remarques'}
+                  {language === 'en' ? 'Notes' : 'Remarques'}
                 </label>
                 <textarea
                   value={formData.notes}
@@ -596,7 +596,7 @@ const Clients = () => {
                   }}
                   className="w-full border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
-                  ✕ {language === 'en' ? 'Cancel' : 'Annuler'}
+                  {language === 'en' ? 'Cancel' : 'Annuler'}
                 </Button>
               </motion.div>
               <motion.div
@@ -611,7 +611,7 @@ const Clients = () => {
                   }
                   className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
                 >
-                  {isEditingMode ? '💾 Update' : '✚ Create'}
+                  {isEditingMode ? 'Update' : 'Create'}
                 </Button>
               </motion.div>
             </div>
@@ -633,7 +633,7 @@ const Clients = () => {
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  📜 Purchase History
+                  Purchase History
                 </h2>
                 <p className="text-slate-600 dark:text-slate-400 mt-2">
                   {selectedClient.name}
@@ -656,7 +656,7 @@ const Clients = () => {
                 transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                 className="text-center py-12"
               >
-                <div className="text-5xl mb-4">⏳</div>
+                <div className="text-5xl mb-4"></div>
                 <p className="text-slate-600 dark:text-slate-400">
                   {language === 'en' ? 'Loading purchase history...' : 'Chargement de l\'historique...'}
                 </p>
@@ -667,7 +667,7 @@ const Clients = () => {
                 animate={{ opacity: 1 }}
                 className="text-center py-12"
               >
-                <p className="text-5xl mb-4">📭</p>
+                <p className="text-5xl mb-4"></p>
                 <p className="text-slate-600 dark:text-slate-400 font-semibold text-lg">
                   {language === 'en' ? 'No purchase history' : 'Aucun historique d\'achat'}
                 </p>
@@ -688,10 +688,10 @@ const Clients = () => {
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <p className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                          <span>🧾</span> Invoice: {purchase.invoice_number}
+                          <span></span> Invoice: {purchase.invoice_number}
                         </p>
                         <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                          <span className="inline-block">📅 {new Date(purchase.invoice_date).toLocaleDateString()}</span>
+                          <span className="inline-block">{new Date(purchase.invoice_date).toLocaleDateString()}</span>
                         </p>
                       </div>
                       <motion.span
@@ -702,13 +702,13 @@ const Clients = () => {
                             : 'bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 text-yellow-700 dark:text-yellow-300'
                         }`}
                       >
-                        {purchase.status === 'paid' ? '✅ Paid' : '⏳ Pending'}
+                        {purchase.status === 'paid' ? 'Paid' : 'Pending'}
                       </motion.span>
                     </div>
                     <div className="text-right pt-2 border-t border-slate-200 dark:border-slate-600">
                       <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Total Amount</p>
                       <p className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        💰 {purchase.total_amount.toFixed(2)} DZD
+                        {purchase.total_amount.toFixed(2)} DZD
                       </p>
                     </div>
                   </motion.div>

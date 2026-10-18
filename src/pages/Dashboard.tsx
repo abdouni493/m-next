@@ -93,7 +93,7 @@ const LowStockAlert = ({ lowStockCount }: { lowStockCount: number }) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-2xl flex items-center gap-2">
             <AlertTriangle className="h-6 w-6 text-red-600" />
-            ⚠️ Alertes Stock Bas
+            Alertes Stock Bas
           </CardTitle>
           <Badge className="bg-red-600 hover:bg-red-700 text-white text-lg px-3 py-1">{lowStockCount}</Badge>
         </div>
@@ -101,12 +101,12 @@ const LowStockAlert = ({ lowStockCount }: { lowStockCount: number }) => {
       <CardContent className="flex-grow flex flex-col p-4 justify-center">
         {isAlert ? (
           <div className="text-center py-10">
-            <p className="font-semibold text-xl text-red-700 dark:text-red-400">⚠️ Attention : {lowStockCount} article(s) en stock bas !</p>
+            <p className="font-semibold text-xl text-red-700 dark:text-red-400">Attention : {lowStockCount} article(s) en stock bas !</p>
             <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">Pensez à faire le point sur ces produits et à renouveler votre stock.</p>
           </div>
         ) : (
           <div className="text-center py-10">
-            <p className="text-2xl">🎉</p>
+            <p className="text-2xl"></p>
             <p className="text-lg font-semibold text-green-700 dark:text-green-400 mt-2">Pas d'alertes de stock bas. Tout est en ordre !</p>
           </div>
         )}
@@ -121,7 +121,7 @@ const RecentActivity = ({ activity }: { activity: any[] }) => (
     <CardHeader>
       <CardTitle className="text-2xl flex items-center gap-2">
         <Clock className="h-6 w-6 text-blue-600" />
-        🕐 Activité Récente
+        Activité Récente
       </CardTitle>
     </CardHeader>
     <CardContent>
@@ -142,7 +142,7 @@ const RecentActivity = ({ activity }: { activity: any[] }) => (
           ))
         ) : (
           <div className="text-center text-gray-500 py-10">
-            <p className="text-lg">📭 Aucune activité récente à afficher.</p>
+            <p className="text-lg">Aucune activité récente à afficher.</p>
           </div>
         )}
       </ul>
@@ -217,7 +217,7 @@ const ProductAlerts = ({ products }: { products: any[] }) => {
                 ? 'bg-red-600 hover:bg-red-700'
                 : 'bg-yellow-600 hover:bg-yellow-700'
             } text-white whitespace-nowrap ml-2`}>
-              {product.current_quantity === 0 ? '❌ RUPTURE' : '⚠️ BAS'}
+              {product.current_quantity === 0 ? 'RUPTURE' : 'BAS'}
             </Badge>
           </motion.div>
         ))
@@ -226,7 +226,7 @@ const ProductAlerts = ({ products }: { products: any[] }) => {
           variants={itemVariants}
           className="p-8 rounded-lg bg-green-100 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 text-center"
         >
-          <p className="text-2xl mb-2">✅</p>
+          <p className="text-2xl mb-2"></p>
           <p className="font-semibold text-green-700 dark:text-green-400">
             Aucun produit en stock bas - Inventaire optimal!
           </p>
@@ -296,7 +296,7 @@ export default function Dashboard() {
       setStats(dashboardStats);
       setRecentActivity([]);
     } catch (err) {
-      console.error("❌ Failed to fetch dashboard data:", err);
+      console.error("Failed to fetch dashboard data:", err);
       setStats(null);
       setRecentActivity([]);
       setHasError(true);
@@ -418,7 +418,7 @@ export default function Dashboard() {
             <ProductAlerts products={lowStockProducts} />
             <Link to="/inventory" className="block mt-6">
               <Button className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold py-3 text-base">
-                📦 Gérer l'inventaire <ArrowRight className="ml-2 h-4 w-4" />
+                Gérer l'inventaire <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -433,7 +433,7 @@ export default function Dashboard() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
-            title="💰 Ventes Totales"
+            title="Ventes Totales"
             value={formatCurrency(stats?.totalSales || 0)}
             subtitle={`${stats?.completedSales || 0} transactions complétées`}
             change={`+${Math.round((stats?.completedSales || 0) * 1.2)}% ce mois`}
@@ -442,7 +442,7 @@ export default function Dashboard() {
             bgGradient="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600"
           />
           <StatCard
-            title="📦 Produits en Stock"
+            title="Produits en Stock"
             value={stats?.totalProducts || 0}
             subtitle={`${stats?.lowStockItems || 0} en alerte`}
             change={stats?.lowStockItems ? `-${stats.lowStockItems} en alerte` : 'Inventaire optimal'}
@@ -451,7 +451,7 @@ export default function Dashboard() {
             bgGradient="bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-600"
           />
           <StatCard
-            title="🚚 Fournisseurs Actifs"
+            title="Fournisseurs Actifs"
             value={stats?.totalSuppliers || 0}
             subtitle="Partenaires de confiance"
             change="+2 nouveaux ce trimestre"
@@ -460,7 +460,7 @@ export default function Dashboard() {
             bgGradient="bg-gradient-to-br from-purple-500 via-pink-500 to-rose-600"
           />
           <StatCard
-            title="👥 Base Clients"
+            title="Base Clients"
             value={stats?.totalCustomers || 0}
             subtitle="Clients enregistrés"
             change="+12% croissance"
@@ -474,7 +474,7 @@ export default function Dashboard() {
       {/* Secondary Stats Section - Order Statistics */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
-          title="⏳ Commandes En Attente"
+          title="Commandes En Attente"
           value={stats?.pendingOrders || 0}
           subtitle="À traiter"
           change={stats?.pendingOrders ? `${stats.pendingOrders} action requise` : 'À jour'}
@@ -483,7 +483,7 @@ export default function Dashboard() {
           bgGradient="bg-gradient-to-br from-amber-500 to-orange-600"
         />
         <StatCard
-          title="✅ Commandes Acceptées"
+          title="Commandes Acceptées"
           value={stats?.acceptedOrders || 0}
           subtitle="En cours de traitement"
           change={stats?.acceptedOrders ? `${stats.acceptedOrders} en cours` : 'Aucune'}
@@ -492,7 +492,7 @@ export default function Dashboard() {
           bgGradient="bg-gradient-to-br from-blue-500 to-cyan-600"
         />
         <StatCard
-          title="🎉 Commandes Finalisées"
+          title="Commandes Finalisées"
           value={stats?.finalizedOrders || 0}
           subtitle="Complétées avec succès"
           change={stats?.finalizedOrders ? `+${Math.round((stats.finalizedOrders / (stats.totalOrders || 1)) * 100)}% du total` : 'Aucune'}

@@ -206,7 +206,7 @@ interface WebsiteSettings {
 
 const translations = {
   en: {
-    tabs: { offers: '🛍️ Boutique', special: 'Special Offers', packages: 'Packages', contacts: 'Contacts', settings: 'Settings' },
+    tabs: { offers: 'Boutique', special: 'Special Offers', packages: 'Packages', contacts: 'Contacts', settings: 'Settings' },
     offers: { create: 'Manage Products', search: 'Search products...', price: 'Offer Price', description: 'Description', create_btn: 'Create Offer' },
     special: { 
       create: 'Create New Special Offer',
@@ -234,7 +234,7 @@ const translations = {
     common: { save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', close: 'Close', view: 'View Details', success: 'Success', error: 'Error' },
   },
   fr: {
-    tabs: { offers: '🛍️ Boutique', special: 'Offres Spéciales', packages: 'Paquets', contacts: 'Contacts', settings: 'Paramètres' },
+    tabs: { offers: 'Boutique', special: 'Offres Spéciales', packages: 'Paquets', contacts: 'Contacts', settings: 'Paramètres' },
     offers: { create: 'Gérer les Produits', search: 'Recherchez des produits...', price: 'Prix de l\'offre', description: 'Description', create_btn: 'Créer l\'offre' },
     special: {
       create: 'Créer une nouvelle offre spéciale',
@@ -262,7 +262,7 @@ const translations = {
     common: { save: 'Enregistrer', cancel: 'Annuler', delete: 'Supprimer', edit: 'Modifier', close: 'Fermer', view: 'Voir les détails', success: 'Succès', error: 'Erreur' },
   },
   ar: {
-    tabs: { offers: '🛍️ المتجر', special: 'عروض خاصة', packages: 'الحزم', contacts: 'جهات الاتصال', settings: 'الإعدادات' },
+    tabs: { offers: 'المتجر', special: 'عروض خاصة', packages: 'الحزم', contacts: 'جهات الاتصال', settings: 'الإعدادات' },
     offers: { create: 'إدارة المنتجات', search: 'ابحث عن المنتجات...', price: 'سعر العرض', description: 'الوصف', create_btn: 'إنشاء عرض' },
     special: {
       create: 'إنشاء عرض خاص جديد',
@@ -1202,7 +1202,7 @@ export default function Website_Enhanced() {
           </div>
           <div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {language === 'ar' ? '🌐 إدارة الموقع' : language === 'fr' ? '🌐 Gestion Web' : '🌐 Website Manager'}
+              {language === 'ar' ? 'إدارة الموقع' : language === 'fr' ? 'Gestion Web' : 'Website Manager'}
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mt-1">
               {language === 'ar' ? 'تحكم كامل في عروضك والتواصل' : language === 'fr' ? 'Contrôle complet de vos offres' : 'Complete control over your offers'}
@@ -1226,7 +1226,7 @@ export default function Website_Enhanced() {
                 : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-emerald-400'
             }`}
           >
-            🎁 {language === 'ar' ? 'عروض' : language === 'fr' ? 'Offres' : 'Offers'}
+            {language === 'ar' ? 'عروض' : language === 'fr' ? 'Offres' : 'Offers'}
           </motion.button>
 
           <motion.button
@@ -1239,7 +1239,7 @@ export default function Website_Enhanced() {
                 : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-purple-400'
             }`}
           >
-            ⭐ {language === 'ar' ? 'عروض خاصة' : language === 'fr' ? 'Spéciales' : 'Special'}
+            {language === 'ar' ? 'عروض خاصة' : language === 'fr' ? 'Spéciales' : 'Special'}
           </motion.button>
 
           <motion.button
@@ -1252,7 +1252,7 @@ export default function Website_Enhanced() {
                 : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-cyan-400'
             }`}
           >
-            📦 {language === 'ar' ? 'باقات' : language === 'fr' ? 'Packs' : 'Packages'}
+            {language === 'ar' ? 'باقات' : language === 'fr' ? 'Packs' : 'Packages'}
           </motion.button>
 
           <motion.button
@@ -1265,7 +1265,7 @@ export default function Website_Enhanced() {
                 : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-blue-400'
             }`}
           >
-            📱 {language === 'ar' ? 'جهات الاتصال' : language === 'fr' ? 'Contacts' : 'Contacts'}
+            {language === 'ar' ? 'جهات الاتصال' : language === 'fr' ? 'Contacts' : 'Contacts'}
           </motion.button>
 
           <motion.button
@@ -1278,7 +1278,7 @@ export default function Website_Enhanced() {
                 : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-orange-400'
             }`}
           >
-            🚚 {language === 'ar' ? 'التوصيل' : language === 'fr' ? 'Livraison' : 'Delivery'}
+            {language === 'ar' ? 'التوصيل' : language === 'fr' ? 'Livraison' : 'Delivery'}
           </motion.button>
 
           <motion.button
@@ -1291,7 +1291,7 @@ export default function Website_Enhanced() {
                 : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-400'
             }`}
           >
-            ⚙️ {language === 'ar' ? 'الإعدادات' : language === 'fr' ? 'Paramètres' : 'Settings'}
+            {language === 'ar' ? 'الإعدادات' : language === 'fr' ? 'Paramètres' : 'Settings'}
           </motion.button>
         </motion.div>
 
@@ -1311,7 +1311,7 @@ export default function Website_Enhanced() {
                 className="w-full bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 hover:from-blue-600 hover:via-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-xl"
               >
                 <ShoppingBag className="h-6 w-6" />
-                🛍️ {language === 'ar' ? 'جميع منتجات المتجر' : language === 'fr' ? 'Tous les Produits de la Boutique' : 'All Store Products'}
+                {language === 'ar' ? 'جميع منتجات المتجر' : language === 'fr' ? 'Tous les Produits de la Boutique' : 'All Store Products'}
               </motion.div>
 
               {products.length === 0 ? (
@@ -1351,7 +1351,7 @@ export default function Website_Enhanced() {
                         <div>
                           <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-2">{product.name}</h3>
                           {product.mark && (
-                            <p className="text-sm text-blue-600 dark:text-blue-400">🏷️ {product.mark.name}</p>
+                            <p className="text-sm text-blue-600 dark:text-blue-400">{product.mark.name}</p>
                           )}
                         </div>
                         
@@ -1359,24 +1359,24 @@ export default function Website_Enhanced() {
                           <div className="grid grid-cols-3 gap-2 text-xs">
                             {product.voltage && (
                               <div className="bg-blue-50 dark:bg-blue-900/30 rounded p-2 text-center">
-                                <span className="font-bold text-blue-600 dark:text-blue-400">⚡ {product.voltage}V</span>
+                                <span className="font-bold text-blue-600 dark:text-blue-400">{product.voltage}V</span>
                               </div>
                             )}
                             {product.wattage && (
                               <div className="bg-purple-50 dark:bg-purple-900/30 rounded p-2 text-center">
-                                <span className="font-bold text-purple-600 dark:text-purple-400">🔌 {product.wattage}W</span>
+                                <span className="font-bold text-purple-600 dark:text-purple-400">{product.wattage}W</span>
                               </div>
                             )}
                             {product.amperage && (
                               <div className="bg-pink-50 dark:bg-pink-900/30 rounded p-2 text-center">
-                                <span className="font-bold text-pink-600 dark:text-pink-400">⚙️ {product.amperage}A</span>
+                                <span className="font-bold text-pink-600 dark:text-pink-400">{product.amperage}A</span>
                               </div>
                             )}
                           </div>
                         )}
 
                         <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 p-3 rounded-xl">
-                          <span className="text-2xl font-bold text-green-600">💰 {product.selling_price?.toFixed(2) || 0} DZD</span>
+                          <span className="text-2xl font-bold text-green-600">{product.selling_price?.toFixed(2) || 0} DZD</span>
                         </div>
 
                         <div className="flex gap-2">
@@ -1386,7 +1386,7 @@ export default function Website_Enhanced() {
                             onClick={() => {
                               const boutiquUrl = window.location.origin + '/website-shop/offers#product-' + product.id;
                               navigator.clipboard.writeText(boutiquUrl);
-                              alert(language === 'ar' ? '✅ تم نسخ الرابط' : language === 'fr' ? '✅ Lien copié' : '✅ Link copied');
+                              alert(language === 'ar' ? 'تم نسخ الرابط' : language === 'fr' ? 'Lien copié' : 'Link copied');
                             }}
                             className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
                           >
@@ -1433,8 +1433,8 @@ export default function Website_Enhanced() {
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-cyan-500 via-emerald-500 to-teal-500 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-lg sm:shadow-xl">
-                <h2 className="text-2xl sm:text-4xl font-black mb-2">📦 {language === 'ar' ? 'الباقات والحزم' : language === 'fr' ? 'Gestion des Packs' : 'Package Management'}</h2>
-                <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? '✨ إنشء حزم منتجات مخصصة بأسعار جذابة' : language === 'fr' ? '✨ Créez des bundles de produits personnalisés' : '✨ Create custom product bundles'}</p>
+                <h2 className="text-2xl sm:text-4xl font-black mb-2">{language === 'ar' ? 'الباقات والحزم' : language === 'fr' ? 'Gestion des Packs' : 'Package Management'}</h2>
+                <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? 'إنشء حزم منتجات مخصصة بأسعار جذابة' : language === 'fr' ? 'Créez des bundles de produits personnalisés' : 'Create custom product bundles'}</p>
               </div>
 
               {/* Create Package Button */}
@@ -1452,8 +1452,8 @@ export default function Website_Enhanced() {
                 className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all"
               >
                 <Plus className="h-5 sm:h-7 w-5 sm:w-7" />
-                <span className="hidden sm:inline">📦 + {language === 'ar' ? 'حزمة جديدة' : language === 'fr' ? 'Nouveau Pack' : 'New Package'}</span>
-                <span className="sm:hidden">📦 {language === 'ar' ? 'جديدة' : language === 'fr' ? 'Nouveau' : 'New'}</span>
+                <span className="hidden sm:inline">+ {language === 'ar' ? 'حزمة جديدة' : language === 'fr' ? 'Nouveau Pack' : 'New Package'}</span>
+                <span className="sm:hidden">{language === 'ar' ? 'جديدة' : language === 'fr' ? 'Nouveau' : 'New'}</span>
                 <Sparkles className="hidden sm:block h-7 w-7" />
               </motion.button>
 
@@ -1472,16 +1472,16 @@ export default function Website_Enhanced() {
                     <PackageIcon className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-emerald-400" />
                   </motion.div>
                   <p className="text-xl sm:text-3xl font-black text-slate-700 dark:text-slate-200 mb-2">
-                    {language === 'ar' ? '📦 لا توجد حزم حالياً' : language === 'fr' ? '📦 Aucun pack créé' : '📦 No packages yet'}
+                    {language === 'ar' ? 'لا توجد حزم حالياً' : language === 'fr' ? 'Aucun pack créé' : 'No packages yet'}
                   </p>
                   <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400">
-                    {language === 'ar' ? '👆 اضغط الزر أعلاه لإنشاء حزمة جديدة' : language === 'fr' ? '👆 Cliquez sur le bouton ci-dessus' : '👆 Click the button above'}
+                    {language === 'ar' ? 'اضغط الزر أعلاه لإنشاء حزمة جديدة' : language === 'fr' ? 'Cliquez sur le bouton ci-dessus' : 'Click the button above'}
                   </p>
                 </motion.div>
               ) : (
                 <div className="space-y-2 mb-4">
                   <p className="text-base sm:text-lg font-bold text-slate-700 dark:text-slate-300">
-                    📊 {language === 'ar' ? `إجمالي: ${packages.length} حزمة` : language === 'fr' ? `Total: ${packages.length} pack` : `Total: ${packages.length} packages`}
+                    {language === 'ar' ? `إجمالي: ${packages.length} حزمة` : language === 'fr' ? `Total: ${packages.length} pack` : `Total: ${packages.length} packages`}
                   </p>
                 </div>
               )}
@@ -1503,8 +1503,8 @@ export default function Website_Enhanced() {
                     >
                       {/* Top Badge */}
                       <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white px-3 sm:px-4 py-1 sm:py-2 flex justify-between items-center z-20 text-sm sm:text-base">
-                        <span className="font-bold">📦 {language === 'ar' ? 'حزمة' : language === 'fr' ? 'Pack' : 'Package'}</span>
-                        {!pkg.is_visible && <span className="text-xs sm:text-sm bg-red-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">🚫 Hidden</span>}
+                        <span className="font-bold">{language === 'ar' ? 'حزمة' : language === 'fr' ? 'Pack' : 'Package'}</span>
+                        {!pkg.is_visible && <span className="text-xs sm:text-sm bg-red-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">Hidden</span>}
                       </div>
 
                       {/* Discount Badge */}
@@ -1514,7 +1514,7 @@ export default function Website_Enhanced() {
                           transition={{ duration: 3, repeat: Infinity }}
                           className="absolute top-10 sm:top-12 right-2 sm:right-3 bg-gradient-to-br from-red-500 to-orange-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-black z-10 shadow-lg border-2 border-white"
                         >
-                          🔥 -{pkg.discount_percentage}%
+                          -{pkg.discount_percentage}%
                         </motion.div>
                       )}
 
@@ -1538,7 +1538,7 @@ export default function Website_Enhanced() {
 
                         {/* Product Count Badge */}
                         <div className="inline-block bg-emerald-100 dark:bg-emerald-900 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300 mb-3">
-                          📦 {language === 'ar' ? `${packages.filter(p => p.id === pkg.id).length} منتج` : language === 'fr' ? `${packages.filter(p => p.id === pkg.id).length} produit` : `1 package`}
+                          {language === 'ar' ? `${packages.filter(p => p.id === pkg.id).length} منتج` : language === 'fr' ? `${packages.filter(p => p.id === pkg.id).length} produit` : `1 package`}
                         </div>
 
                         {/* Description */}
@@ -1546,7 +1546,7 @@ export default function Website_Enhanced() {
 
                         {/* Price Section */}
                         <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 dark:from-emerald-900/30 dark:to-cyan-900/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 border-2 border-emerald-200 dark:border-emerald-700">
-                          <div className="text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 font-bold mb-1">💰 {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}</div>
+                          <div className="text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 font-bold mb-1">{language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}</div>
                           <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-300">
                             {pkg.package_price?.toFixed(2) || '0.00'} DZD
                           </div>
@@ -1564,7 +1564,7 @@ export default function Website_Enhanced() {
                             className="bg-gradient-to-br from-blue-500 via-blue-500 to-blue-600 hover:from-blue-600 hover:via-blue-600 hover:to-blue-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-blue-400"
                             title="View details"
                           >
-                            👁️
+                            
                             <span className="hidden sm:inline">{language === 'ar' ? 'عرض' : language === 'fr' ? 'Voir' : 'View'}</span>
                           </motion.button>
 
@@ -1575,7 +1575,7 @@ export default function Website_Enhanced() {
                             className="bg-gradient-to-br from-amber-500 via-amber-500 to-amber-600 hover:from-amber-600 hover:via-amber-600 hover:to-amber-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-amber-400"
                             title="Edit package"
                           >
-                            ✏️
+                            
                             <span className="hidden sm:inline">{language === 'ar' ? 'تعديل' : language === 'fr' ? 'Éditer' : 'Edit'}</span>
                           </motion.button>
 
@@ -1590,7 +1590,7 @@ export default function Website_Enhanced() {
                             }`}
                             title={pkg.is_visible ? 'Hide package' : 'Show package'}
                           >
-                            {pkg.is_visible ? '👁️‍🗨️' : '🚫'}
+                            {pkg.is_visible ? '' : ''}
                             <span className="hidden sm:inline">{pkg.is_visible ? (language === 'ar' ? 'إظهار' : language === 'fr' ? 'Afficher' : 'Show') : (language === 'ar' ? 'إخفاء' : language === 'fr' ? 'Masquer' : 'Hide')}</span>
                           </motion.button>
 
@@ -1604,7 +1604,7 @@ export default function Website_Enhanced() {
                             className="bg-gradient-to-br from-red-500 via-red-500 to-red-600 hover:from-red-600 hover:via-red-600 hover:to-red-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-red-400"
                             title="Delete package"
                           >
-                            🗑️
+                            
                             <span className="hidden sm:inline">{language === 'ar' ? 'حذف' : language === 'fr' ? 'Supprimer' : 'Delete'}</span>
                           </motion.button>
                         </div>
@@ -1620,7 +1620,7 @@ export default function Website_Enhanced() {
                   <DialogHeader>
                     <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-emerald-600 dark:text-emerald-400 font-black">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                        📦
+                        
                       </motion.div>
                       <span className="line-clamp-1">{language === 'ar' ? 'إنشاء حزمة جديدة' : language === 'fr' ? 'Créer un nouveau Pack' : 'Create New Package'}</span>
                     </DialogTitle>
@@ -1632,13 +1632,13 @@ export default function Website_Enhanced() {
                   <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
                     <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-emerald-300 dark:border-emerald-700">
-                      <h3 className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300 mb-3 sm:mb-4">📋 {language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
+                      <h3 className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300 mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
                         {/* Package Name */}
                         <div className="space-y-2">
                           <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            📝 {language === 'ar' ? 'اسم الحزمة' : language === 'fr' ? 'Nom du Pack' : 'Package Name'}
+                            {language === 'ar' ? 'اسم الحزمة' : language === 'fr' ? 'Nom du Pack' : 'Package Name'}
                           </Label>
                           <Input
                             value={packageName}
@@ -1651,7 +1651,7 @@ export default function Website_Enhanced() {
                         {/* Package Price */}
                         <div className="space-y-2">
                           <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            💰 {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}
+                            {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}
                           </Label>
                           <Input
                             type="number"
@@ -1665,7 +1665,7 @@ export default function Website_Enhanced() {
                         {/* Description */}
                         <div className="space-y-2">
                           <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            📖 {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
+                            {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
                           </Label>
                           <textarea
                             value={packageDescription}
@@ -1678,7 +1678,7 @@ export default function Website_Enhanced() {
                         {/* Package Image Upload */}
                         <div className="space-y-2">
                           <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            🖼️ {language === 'ar' ? 'صورة الحزمة' : language === 'fr' ? 'Image du Pack' : 'Package Image'}
+                            {language === 'ar' ? 'صورة الحزمة' : language === 'fr' ? 'Image du Pack' : 'Package Image'}
                           </Label>
                           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                             <input
@@ -1703,12 +1703,12 @@ export default function Website_Enhanced() {
 
                     {/* Step 2: Search and Add Products */}
                     <div className="bg-cyan-100 dark:bg-cyan-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-cyan-300 dark:border-cyan-700">
-                      <h3 className="text-lg sm:text-xl font-black text-cyan-700 dark:text-cyan-300 mb-3 sm:mb-4">🔍 {language === 'ar' ? 'اختر المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
+                      <h3 className="text-lg sm:text-xl font-black text-cyan-700 dark:text-cyan-300 mb-3 sm:mb-4">{language === 'ar' ? 'اختر المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
                       
                       <div className="space-y-3">
                         <Input
                           type="text"
-                          placeholder={language === 'ar' ? '🔍 ابحث عن منتج...' : language === 'fr' ? '🔍 Rechercher un produit' : '🔍 Search product...'}
+                          placeholder={language === 'ar' ? 'ابحث عن منتج...' : language === 'fr' ? 'Rechercher un produit' : 'Search product...'}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="h-10 sm:h-12 text-sm sm:text-base border-2 border-cyan-300 dark:border-cyan-600 rounded-lg sm:rounded-xl"
@@ -1724,7 +1724,7 @@ export default function Website_Enhanced() {
                                   p.mark?.name.toLowerCase().includes(searchQuery.toLowerCase())
                               )
                               .length === 0 ? (
-                              <p className="text-center text-slate-500 py-4 text-sm">❌ No products found</p>
+                              <p className="text-center text-slate-500 py-4 text-sm">No products found</p>
                             ) : (
                               products
                                 .filter(
@@ -1740,10 +1740,10 @@ export default function Website_Enhanced() {
                                     className="w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-100 to-emerald-100 dark:from-cyan-900 dark:to-emerald-900 hover:from-cyan-200 hover:to-emerald-200 dark:hover:from-cyan-800 dark:hover:to-emerald-800 transition-all border-2 border-cyan-300 dark:border-cyan-700"
                                   >
                                     <div className="font-bold text-sm sm:text-base text-cyan-900 dark:text-cyan-100">
-                                      ✅ {product.name}
+                                      {product.name}
                                     </div>
                                     <div className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-300">
-                                      {product.mark?.name || 'N/A'} • 💰 {product.selling_price} DZD
+                                      {product.mark?.name || 'N/A'} • {product.selling_price} DZD
                                     </div>
                                   </motion.button>
                                 ))
@@ -1757,7 +1757,7 @@ export default function Website_Enhanced() {
                     {selectedProductsPackage.length > 0 && (
                       <div className="bg-purple-100 dark:bg-purple-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-purple-300 dark:border-purple-700">
                         <h3 className="text-lg sm:text-xl font-black text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
-                          ✅ {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
+                          {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
                         <div className="space-y-3 max-h-64 overflow-y-auto">
                           {selectedProductsPackage.map((item, idx) => (
@@ -1771,10 +1771,10 @@ export default function Website_Enhanced() {
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex-1 min-w-0">
                                   <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
-                                    📦 {item.product.name}
+                                    {item.product.name}
                                   </div>
                                   <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
-                                    {item.product.mark?.name || 'N/A'} • 💰 {item.product.selling_price} DZD
+                                    {item.product.mark?.name || 'N/A'} • {item.product.selling_price} DZD
                                   </div>
                                 </div>
                                 <motion.button
@@ -1783,7 +1783,7 @@ export default function Website_Enhanced() {
                                   onClick={() => handleRemoveProductFromPackage(item.product.id)}
                                   className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
                                 >
-                                  ❌
+                                  
                                 </motion.button>
                               </div>
                               
@@ -1833,8 +1833,8 @@ export default function Website_Enhanced() {
                       className="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                     >
                       <Plus className="h-5 sm:h-6 w-5 sm:w-6" />
-                      <span className="hidden sm:inline">{language === 'ar' ? '✨ إنشاء الحزمة' : language === 'fr' ? '✨ Créer le Pack' : '✨ Create Package'}</span>
-                      <span className="sm:hidden">✨ {language === 'ar' ? 'إنشاء' : language === 'fr' ? 'Créer' : 'Create'}</span>
+                      <span className="hidden sm:inline">{language === 'ar' ? 'إنشاء الحزمة' : language === 'fr' ? 'Créer le Pack' : 'Create Package'}</span>
+                      <span className="sm:hidden">{language === 'ar' ? 'إنشاء' : language === 'fr' ? 'Créer' : 'Create'}</span>
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -1846,7 +1846,7 @@ export default function Website_Enhanced() {
                   <DialogHeader>
                     <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-amber-600 dark:text-amber-400 font-black">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                        ✏️
+                        
                       </motion.div>
                       <span className="line-clamp-1">{language === 'ar' ? 'تعديل الحزمة' : language === 'fr' ? 'Modifier le Pack' : 'Edit Package'}</span>
                     </DialogTitle>
@@ -1858,13 +1858,13 @@ export default function Website_Enhanced() {
                   <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
                     <div className="bg-amber-100 dark:bg-amber-900/30 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-amber-300 dark:border-amber-700">
-                      <h3 className="text-lg sm:text-xl font-black text-amber-700 dark:text-amber-300 mb-3 sm:mb-4">📋 {language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
+                      <h3 className="text-lg sm:text-xl font-black text-amber-700 dark:text-amber-300 mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
                         {/* Package Name */}
                         <div className="space-y-2">
                           <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            📝 {language === 'ar' ? 'اسم الحزمة' : language === 'fr' ? 'Nom du Pack' : 'Package Name'}
+                            {language === 'ar' ? 'اسم الحزمة' : language === 'fr' ? 'Nom du Pack' : 'Package Name'}
                           </Label>
                           <Input
                             value={packageName}
@@ -1877,7 +1877,7 @@ export default function Website_Enhanced() {
                         {/* Package Price */}
                         <div className="space-y-2">
                           <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            💰 {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}
+                            {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}
                           </Label>
                           <Input
                             type="number"
@@ -1891,7 +1891,7 @@ export default function Website_Enhanced() {
                         {/* Package Description */}
                         <div className="space-y-2">
                           <Label className="text-sm sm:text-base font-bold flex items-center gap-2">
-                            📝 {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
+                            {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
                           </Label>
                           <Input
                             value={packageDescription}
@@ -1905,13 +1905,13 @@ export default function Website_Enhanced() {
 
                     {/* Step 2: Product Selection */}
                     <div className="bg-cyan-100 dark:bg-cyan-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-cyan-300 dark:border-cyan-700">
-                      <h3 className="text-lg sm:text-xl font-black text-cyan-700 dark:text-cyan-300 mb-3 sm:mb-4">🔍 {language === 'ar' ? 'اختيار المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
+                      <h3 className="text-lg sm:text-xl font-black text-cyan-700 dark:text-cyan-300 mb-3 sm:mb-4">{language === 'ar' ? 'اختيار المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
                       
                       {/* Search Field */}
                       <div className="mb-4">
                         <Input
                           type="text"
-                          placeholder={language === 'ar' ? '🔍 ابحث عن منتج...' : language === 'fr' ? '🔍 Rechercher un produit' : '🔍 Search product name...'}
+                          placeholder={language === 'ar' ? 'ابحث عن منتج...' : language === 'fr' ? 'Rechercher un produit' : 'Search product name...'}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="h-10 sm:h-12 text-sm sm:text-base border-2 border-cyan-300 dark:border-cyan-600 rounded-lg sm:rounded-xl w-full"
@@ -1945,13 +1945,13 @@ export default function Website_Enhanced() {
                                 : 'bg-white dark:bg-slate-700 border-cyan-300 dark:border-cyan-600 text-slate-800 dark:text-white hover:border-cyan-500'
                             }`}
                           >
-                            <div className="font-bold text-xs sm:text-sm truncate">✅ {product.name}</div>
-                            <div className="text-xs text-slate-600 dark:text-slate-300 truncate">📦 {product.mark?.name || 'Charger'}</div>
+                            <div className="font-bold text-xs sm:text-sm truncate">{product.name}</div>
+                            <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{product.mark?.name || 'Charger'}</div>
                           </motion.button>
                         ))}
                       </div>
                       {products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-                        <p className="text-center text-slate-500 py-4 text-sm">❌ {language === 'ar' ? 'لا توجد منتجات' : language === 'fr' ? 'Aucun produit' : 'No products found'}</p>
+                        <p className="text-center text-slate-500 py-4 text-sm">{language === 'ar' ? 'لا توجد منتجات' : language === 'fr' ? 'Aucun produit' : 'No products found'}</p>
                       )}
                     </div>
 
@@ -1959,7 +1959,7 @@ export default function Website_Enhanced() {
                     {selectedProductsPackage.length > 0 && (
                       <div className="bg-purple-100 dark:bg-purple-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-purple-300 dark:border-purple-700">
                         <h3 className="text-lg sm:text-xl font-black text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
-                          ✅ {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
+                          {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
                         <div className="space-y-3 max-h-64 overflow-y-auto">
                           {selectedProductsPackage.map((item, idx) => (
@@ -1973,10 +1973,10 @@ export default function Website_Enhanced() {
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex-1 min-w-0">
                                   <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
-                                    📦 {item.product.name}
+                                    {item.product.name}
                                   </div>
                                   <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
-                                    {item.product.mark?.name || 'N/A'} • 💰 {item.product.selling_price} DZD
+                                    {item.product.mark?.name || 'N/A'} • {item.product.selling_price} DZD
                                   </div>
                                 </div>
                                 <motion.button
@@ -1985,7 +1985,7 @@ export default function Website_Enhanced() {
                                   onClick={() => handleRemoveProductFromPackage(item.product.id)}
                                   className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
                                 >
-                                  ❌
+                                  
                                 </motion.button>
                               </div>
                               
@@ -2035,8 +2035,8 @@ export default function Website_Enhanced() {
                       className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                     >
                       <Check className="h-5 sm:h-6 w-5 sm:w-6" />
-                      <span className="hidden sm:inline">{language === 'ar' ? '✨ حفظ التغييرات' : language === 'fr' ? '✨ Sauvegarder' : '✨ Save Changes'}</span>
-                      <span className="sm:hidden">✨ {language === 'ar' ? 'حفظ' : language === 'fr' ? 'Sauvegarder' : 'Save'}</span>
+                      <span className="hidden sm:inline">{language === 'ar' ? 'حفظ التغييرات' : language === 'fr' ? 'Sauvegarder' : 'Save Changes'}</span>
+                      <span className="sm:hidden">{language === 'ar' ? 'حفظ' : language === 'fr' ? 'Sauvegarder' : 'Save'}</span>
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -2064,12 +2064,12 @@ export default function Website_Enhanced() {
 
                       <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 p-4 rounded-xl">
                         <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">
-                          💰 {selectedPackageDetails.package_price} DZD
+                          {selectedPackageDetails.package_price} DZD
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="font-bold text-lg mb-3 flex items-center gap-2">📦 {t.packages.products_added}</h4>
+                        <h4 className="font-bold text-lg mb-3 flex items-center gap-2">{t.packages.products_added}</h4>
                         <div className="space-y-3 max-h-64 overflow-y-auto">
                           {packageItems
                             .filter((item) => item.package_id === selectedPackageDetails.id)
@@ -2099,13 +2099,13 @@ export default function Website_Enhanced() {
                                   {item.product_voltage && (
                                     <div className="flex gap-2 mt-2 flex-wrap">
                                       {item.product_voltage && (
-                                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded">⚡ {item.product_voltage}V</span>
+                                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded">{item.product_voltage}V</span>
                                       )}
                                       {item.product_amperage && (
-                                        <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 px-2 py-1 rounded">🔌 {item.product_amperage}A</span>
+                                        <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 px-2 py-1 rounded">{item.product_amperage}A</span>
                                       )}
                                       {item.product_wattage && (
-                                        <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100 px-2 py-1 rounded">⚙️ {item.product_wattage}W</span>
+                                        <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100 px-2 py-1 rounded">{item.product_wattage}W</span>
                                       )}
                                     </div>
                                   )}
@@ -2185,7 +2185,7 @@ export default function Website_Enhanced() {
                 className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg h-14 rounded-2xl shadow-lg flex items-center justify-center gap-3"
               >
                 <Plus className="h-6 w-6" />
-                👑 {t.special.create}
+                {t.special.create}
               </motion.button>
 
               {/* Special Offers Grid */}
@@ -2197,7 +2197,7 @@ export default function Website_Enhanced() {
                 >
                   <Tag className="h-20 w-20 mx-auto mb-4 text-purple-400" />
                   <p className="text-2xl text-slate-600 dark:text-slate-400 font-bold">
-                    {language === 'ar' ? '⭐ لا توجد عروض خاصة' : language === 'fr' ? '⭐ Aucune offre spéciale' : '⭐ No special offers'}
+                    {language === 'ar' ? 'لا توجد عروض خاصة' : language === 'fr' ? 'Aucune offre spéciale' : 'No special offers'}
                   </p>
                 </motion.div>
               ) : (
@@ -2234,7 +2234,7 @@ export default function Website_Enhanced() {
                         {/* Price Visibility Badge */}
                         <div className="mb-3">
                           <Badge className={`${offer.show_price ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'}`}>
-                            {offer.show_price ? '💰 ' + t.special.display : '🔒 ' + t.special.dont_display}
+                            {offer.show_price ? '' + t.special.display : '' + t.special.dont_display}
                           </Badge>
                         </div>
 
@@ -2294,7 +2294,7 @@ export default function Website_Enhanced() {
                             }}
                             className="flex-1 bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 rounded-lg transition-colors"
                           >
-                            ✏️
+                            
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -2304,7 +2304,7 @@ export default function Website_Enhanced() {
                             }}
                             className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition-colors"
                           >
-                            🗑️
+                            
                           </motion.button>
                         </div>
                       </div>
@@ -2360,7 +2360,7 @@ export default function Website_Enhanced() {
                         {selectedProductSpecial && (
                           <div className="p-4 bg-purple-50 dark:bg-purple-900 rounded-xl border-2 border-purple-300 dark:border-purple-600">
                             <p className="font-bold text-purple-900 dark:text-purple-100">
-                              ✅ {selectedProductSpecial.name}
+                              {selectedProductSpecial.name}
                             </p>
                           </div>
                         )}
@@ -2380,7 +2380,7 @@ export default function Website_Enhanced() {
                               : 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                           }`}
                         >
-                          💰 {t.special.display}
+                          {t.special.display}
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.05 }}
@@ -2391,7 +2391,7 @@ export default function Website_Enhanced() {
                               : 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                           }`}
                         >
-                          🔒 {t.special.dont_display}
+                          {t.special.dont_display}
                         </motion.button>
                       </div>
                     </div>
@@ -2410,7 +2410,7 @@ export default function Website_Enhanced() {
                         {discountAmountSpecial > 0 && (
                           <div className="bg-red-100 dark:bg-red-900 p-3 rounded-xl">
                             <p className="text-red-900 dark:text-red-100 font-bold">
-                              💰 {language === 'ar' ? 'الخصم' : language === 'fr' ? 'Remise' : 'Discount'}: {discountAmountSpecial} DZD ({discountPercentSpecial}%)
+                              {language === 'ar' ? 'الخصم' : language === 'fr' ? 'Remise' : 'Discount'}: {discountAmountSpecial} DZD ({discountPercentSpecial}%)
                             </p>
                           </div>
                         )}
@@ -2475,7 +2475,7 @@ export default function Website_Enhanced() {
 
                       {!selectedSpecialDetails.show_price && (
                         <div className="bg-yellow-50 dark:bg-yellow-900 border-2 border-yellow-300 dark:border-yellow-600 p-4 rounded-xl">
-                          <p className="font-bold text-yellow-900 dark:text-yellow-100 mb-3">🔒 Price Hidden - Contact via WhatsApp</p>
+                          <p className="font-bold text-yellow-900 dark:text-yellow-100 mb-3">Price Hidden - Contact via WhatsApp</p>
                           <motion.a
                             href={selectedSpecialDetails.whatsapp_link || '#'}
                             target="_blank"
@@ -2483,7 +2483,7 @@ export default function Website_Enhanced() {
                             whileHover={{ scale: 1.05 }}
                             className="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg text-center"
                           >
-                            📱 Contact on WhatsApp
+                            Contact on WhatsApp
                           </motion.a>
                         </div>
                       )}
@@ -2567,7 +2567,7 @@ export default function Website_Enhanced() {
                   </div>
                   <div>
                     <h2 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                      {language === 'ar' ? '📞 إدارة جهات الاتصال' : '📞 Gestion des Contacts'}
+                      {language === 'ar' ? 'إدارة جهات الاتصال' : 'Gestion des Contacts'}
                     </h2>
                     <p className="text-slate-400 mt-2">
                       {language === 'ar' ? 'أضف روابط وسائل التواصل الاجتماعي وبيانات الاتصال' : 'Ajoutez vos réseaux sociaux et informations de contact'}
@@ -2589,7 +2589,7 @@ export default function Website_Enhanced() {
                       <LinkIcon className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-white">
-                      {language === 'ar' ? '🔗 روابط وسائل التواصل الاجتماعي' : '🔗 Liens Réseaux Sociaux'}
+                      {language === 'ar' ? 'روابط وسائل التواصل الاجتماعي' : 'Liens Réseaux Sociaux'}
                     </h3>
                   </div>
                   <p className="text-blue-100 mt-2 ml-11">
@@ -2699,7 +2699,7 @@ export default function Website_Enhanced() {
                       <Phone className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-white">
-                      {language === 'ar' ? '☎️ أرقام الاتصال' : '☎️ Numéros de Contact'}
+                      {language === 'ar' ? 'أرقام الاتصال' : 'Numéros de Contact'}
                     </h3>
                   </div>
                   <p className="text-green-100 mt-2 ml-11">
@@ -2809,7 +2809,7 @@ export default function Website_Enhanced() {
                   className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl border-0 transition-all duration-300"
                 >
                   <Check className="h-6 w-6" />
-                  {language === 'ar' ? '✅ حفظ جميع معلومات الاتصال' : '✅ Sauvegarder tous les contacts'}
+                  {language === 'ar' ? 'حفظ جميع معلومات الاتصال' : 'Sauvegarder tous les contacts'}
                 </motion.button>
               </motion.div>
 
@@ -2824,7 +2824,7 @@ export default function Website_Enhanced() {
                   <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-2">
-                      {language === 'ar' ? '💡 نصيحة' : '💡 Conseil'}
+                      {language === 'ar' ? 'نصيحة' : 'Conseil'}
                     </h4>
                     <p className="text-blue-700 dark:text-blue-400 text-sm">
                       {language === 'ar' 
@@ -2848,8 +2848,8 @@ export default function Website_Enhanced() {
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-lg sm:shadow-xl">
-                <h2 className="text-2xl sm:text-4xl font-black mb-2">🚚 {language === 'ar' ? 'إدارة التوصيل' : language === 'fr' ? 'Gestion de la Livraison' : 'Delivery Management'}</h2>
-                <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? '✨ إضافة وإدارة شركات التوصيل والأسعار' : language === 'fr' ? '✨ Ajoutez et gérez les agences de livraison' : '✨ Manage delivery agencies and prices'}</p>
+                <h2 className="text-2xl sm:text-4xl font-black mb-2">{language === 'ar' ? 'إدارة التوصيل' : language === 'fr' ? 'Gestion de la Livraison' : 'Delivery Management'}</h2>
+                <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? 'إضافة وإدارة شركات التوصيل والأسعار' : language === 'fr' ? 'Ajoutez et gérez les agences de livraison' : 'Manage delivery agencies and prices'}</p>
               </div>
 
               {/* Create Delivery Agency Button */}
@@ -2869,8 +2869,8 @@ export default function Website_Enhanced() {
                 className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all"
               >
                 <Plus className="h-5 sm:h-7 w-5 sm:w-7" />
-                <span className="hidden sm:inline">🚚 + {language === 'ar' ? 'شركة توصيل جديدة' : language === 'fr' ? 'Nouvelle Agence' : 'New Agency'}</span>
-                <span className="sm:hidden">🚚 {language === 'ar' ? 'جديدة' : language === 'fr' ? 'Nouveau' : 'New'}</span>
+                <span className="hidden sm:inline">+ {language === 'ar' ? 'شركة توصيل جديدة' : language === 'fr' ? 'Nouvelle Agence' : 'New Agency'}</span>
+                <span className="sm:hidden">{language === 'ar' ? 'جديدة' : language === 'fr' ? 'Nouveau' : 'New'}</span>
               </motion.button>
 
               {/* Delivery Agencies Grid */}
@@ -2888,10 +2888,10 @@ export default function Website_Enhanced() {
                     <Truck className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-orange-400" />
                   </motion.div>
                   <p className="text-xl sm:text-3xl font-black text-slate-700 dark:text-slate-200 mb-2">
-                    {language === 'ar' ? '🚚 لا توجد شركات توصيل حالياً' : language === 'fr' ? '🚚 Aucune agence de livraison' : '🚚 No delivery agencies yet'}
+                    {language === 'ar' ? 'لا توجد شركات توصيل حالياً' : language === 'fr' ? 'Aucune agence de livraison' : 'No delivery agencies yet'}
                   </p>
                   <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400">
-                    {language === 'ar' ? '👆 اضغط الزر أعلاه لإضافة شركة توصيل' : language === 'fr' ? '👆 Cliquez sur le bouton ci-dessus' : '👆 Click the button above'}
+                    {language === 'ar' ? 'اضغط الزر أعلاه لإضافة شركة توصيل' : language === 'fr' ? 'Cliquez sur le bouton ci-dessus' : 'Click the button above'}
                   </p>
                 </motion.div>
               ) : (
@@ -2911,8 +2911,8 @@ export default function Website_Enhanced() {
                     >
                       {/* Header Badge */}
                       <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 sm:px-4 py-2 flex justify-between items-center z-20 text-xs sm:text-sm">
-                        <span className="font-bold">🚚 {agency.name}</span>
-                        {!agency.is_visible && <span className="text-xs bg-red-600 px-2 rounded-full">🚫 Hidden</span>}
+                        <span className="font-bold">{agency.name}</span>
+                        {!agency.is_visible && <span className="text-xs bg-red-600 px-2 rounded-full">Hidden</span>}
                       </div>
 
                       {/* Content */}
@@ -2926,13 +2926,13 @@ export default function Website_Enhanced() {
                         <div className="space-y-1 sm:space-y-2">
                           {agency.contact_phone && (
                             <div className="flex items-center gap-2 text-xs sm:text-sm">
-                              <span>📱</span>
+                              <span></span>
                               <span className="text-slate-700 dark:text-slate-300">{agency.contact_phone}</span>
                             </div>
                           )}
                           {agency.contact_email && (
                             <div className="flex items-center gap-2 text-xs sm:text-sm">
-                              <span>✉️</span>
+                              <span></span>
                               <span className="text-slate-700 dark:text-slate-300">{agency.contact_email}</span>
                             </div>
                           )}
@@ -2946,7 +2946,7 @@ export default function Website_Enhanced() {
                             className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Manage Prices"
                           >
-                            💰
+                            
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -2954,7 +2954,7 @@ export default function Website_Enhanced() {
                             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Edit"
                           >
-                            ✏️
+                            
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -2966,7 +2966,7 @@ export default function Website_Enhanced() {
                             }`}
                             title={agency.is_visible ? 'Hide' : 'Show'}
                           >
-                            {agency.is_visible ? '👁️' : '🚫'}
+                            {agency.is_visible ? '' : ''}
                           </motion.button>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -2977,7 +2977,7 @@ export default function Website_Enhanced() {
                             className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Delete"
                           >
-                            🗑️
+                            
                           </motion.button>
                         </div>
                       </div>
@@ -2992,10 +2992,10 @@ export default function Website_Enhanced() {
                   <DialogHeader className="mb-4 sm:mb-6">
                     <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-orange-600 dark:text-orange-400 font-black line-clamp-2">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex-shrink-0">
-                        🚚
+                        
                       </motion.div>
                       <span className="text-lg sm:text-3xl">
-                        {editingDeliveryAgency ? `✏️ ${language === 'ar' ? 'تعديل' : language === 'fr' ? 'Modifier' : 'Edit'}` : `${language === 'ar' ? 'شركة توصيل جديدة' : language === 'fr' ? 'Nouvelle Agence' : 'New Agency'}`}
+                        {editingDeliveryAgency ? `${language === 'ar' ? 'تعديل' : language === 'fr' ? 'Modifier' : 'Edit'}` : `${language === 'ar' ? 'شركة توصيل جديدة' : language === 'fr' ? 'Nouvelle Agence' : 'New Agency'}`}
                       </span>
                     </DialogTitle>
                     <DialogDescription className="hidden">
@@ -3006,13 +3006,13 @@ export default function Website_Enhanced() {
                   <div className="space-y-3 sm:space-y-6 py-2 sm:py-4">
                     {/* Section 1: Basic Info */}
                     <div className="bg-orange-100 dark:bg-orange-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-orange-300 dark:border-orange-700">
-                      <h3 className="text-base sm:text-lg font-black text-orange-700 dark:text-orange-300 mb-3 sm:mb-4">📋 {language === 'ar' ? 'المعلومات الأساسية' : language === 'fr' ? 'Informations de Base' : 'Basic Info'}</h3>
+                      <h3 className="text-base sm:text-lg font-black text-orange-700 dark:text-orange-300 mb-3 sm:mb-4">{language === 'ar' ? 'المعلومات الأساسية' : language === 'fr' ? 'Informations de Base' : 'Basic Info'}</h3>
                       
                       <div className="space-y-2 sm:space-y-3">
                         {/* Agency Name */}
                         <div className="space-y-1 sm:space-y-2">
                           <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2">
-                            🏢 {language === 'ar' ? 'اسم الشركة' : language === 'fr' ? 'Nom de l\'Agence' : 'Agency Name'}
+                            {language === 'ar' ? 'اسم الشركة' : language === 'fr' ? 'Nom de l\'Agence' : 'Agency Name'}
                           </Label>
                           <Input
                             value={agencyName}
@@ -3025,7 +3025,7 @@ export default function Website_Enhanced() {
                         {/* Description */}
                         <div className="space-y-1 sm:space-y-2">
                           <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2">
-                            📝 {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
+                            {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
                           </Label>
                           <Input
                             value={agencyDescription}
@@ -3066,9 +3066,9 @@ export default function Website_Enhanced() {
                       }}
                       className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-xs sm:text-base h-10 sm:h-12 rounded-lg sm:rounded-xl transition-all shadow-lg flex items-center justify-center gap-1 sm:gap-2"
                     >
-                      <span className="text-lg sm:text-xl">{editingDeliveryAgency ? '💾' : '✨'}</span>
+                      <span className="text-lg sm:text-xl">{editingDeliveryAgency ? '' : ''}</span>
                       <span className="hidden sm:inline">{editingDeliveryAgency ? language === 'ar' ? 'تحديث' : language === 'fr' ? 'Mettre à jour' : 'Update' : language === 'ar' ? 'إنشاء' : language === 'fr' ? 'Créer' : 'Create'}</span>
-                      <span className="sm:hidden">{editingDeliveryAgency ? '✏️' : '✨'}</span>
+                      <span className="sm:hidden">{editingDeliveryAgency ? '' : ''}</span>
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -3112,7 +3112,7 @@ export default function Website_Enhanced() {
                   <DialogHeader className="mb-4 sm:mb-6">
                     <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-indigo-600 dark:text-indigo-400 font-black line-clamp-2">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex-shrink-0">
-                        💰
+                        
                       </motion.div>
                       <span className="text-lg sm:text-3xl">
                         {language === 'ar' ? `تعديل الأسعار - ${wilayaPricingAgencyName}` : language === 'fr' ? `Gérer les Prix - ${wilayaPricingAgencyName}` : `Manage Prices - ${wilayaPricingAgencyName}`}
@@ -3124,7 +3124,7 @@ export default function Website_Enhanced() {
                     {/* Section 1: Add/Edit Wilaya Price */}
                     <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-indigo-300 dark:border-indigo-700">
                       <h3 className="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-300 mb-3 sm:mb-4">
-                        {editingWilayaPriceId ? '✏️' : '➕'} {language === 'ar' ? 'إضافة أو تعديل سعر ولاية' : language === 'fr' ? 'Ajouter ou Modifier un Prix' : 'Add or Edit Wilaya Price'}
+                        {editingWilayaPriceId ? '' : ''} {language === 'ar' ? 'إضافة أو تعديل سعر ولاية' : language === 'fr' ? 'Ajouter ou Modifier un Prix' : 'Add or Edit Wilaya Price'}
                       </h3>
 
                       <div className="space-y-2 sm:space-y-3">
@@ -3158,7 +3158,7 @@ export default function Website_Enhanced() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                           <div>
                             <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2 mb-2">
-                              🏠 {language === 'ar' ? 'سعر المنزل (DZD)' : language === 'fr' ? 'Prix Domicile (DZD)' : 'Home Delivery (DZD)'}
+                              {language === 'ar' ? 'سعر المنزل (DZD)' : language === 'fr' ? 'Prix Domicile (DZD)' : 'Home Delivery (DZD)'}
                             </Label>
                             <Input
                               type="number"
@@ -3171,7 +3171,7 @@ export default function Website_Enhanced() {
                           </div>
                           <div>
                             <Label className="text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2 mb-2">
-                              🏢 {language === 'ar' ? 'سعر المكتب (DZD)' : language === 'fr' ? 'Prix Bureau (DZD)' : 'Office Delivery (DZD)'}
+                              {language === 'ar' ? 'سعر المكتب (DZD)' : language === 'fr' ? 'Prix Bureau (DZD)' : 'Office Delivery (DZD)'}
                             </Label>
                             <Input
                               type="number"
@@ -3212,7 +3212,7 @@ export default function Website_Enhanced() {
                     {/* Section 2: Configured Wilayas */}
                     <div className="bg-blue-100 dark:bg-blue-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-blue-300 dark:border-blue-700">
                       <h3 className="text-base sm:text-lg font-black text-blue-700 dark:text-blue-300 mb-3 sm:mb-4">
-                        📍 {language === 'ar' ? 'الولايات المُعدّة' : language === 'fr' ? 'Wilayas Configurées' : 'Configured Wilayas'} ({wilayaPrices.length})
+                        {language === 'ar' ? 'الولايات المُعدّة' : language === 'fr' ? 'Wilayas Configurées' : 'Configured Wilayas'} ({wilayaPrices.length})
                       </h3>
 
                       {wilayaPrices.length === 0 ? (
@@ -3226,7 +3226,7 @@ export default function Website_Enhanced() {
                               <div className="flex-1 min-w-0">
                                 <p className="font-bold text-slate-700 dark:text-slate-200 text-sm sm:text-base">{price.wilaya_name}</p>
                                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-                                  🏠 {price.price_domicile.toFixed(2)} DZD | 🏢 {price.price_bureau.toFixed(2)} DZD
+                                  {price.price_domicile.toFixed(2)} DZD | {price.price_bureau.toFixed(2)} DZD
                                 </p>
                               </div>
                               <div className="flex gap-1 sm:gap-2 flex-shrink-0">
@@ -3235,14 +3235,14 @@ export default function Website_Enhanced() {
                                   className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
                                   title="Edit"
                                 >
-                                  ✏️
+                                  
                                 </Button>
                                 <Button
                                   onClick={() => handleDeleteWilayaPrice(price.wilaya_name)}
                                   className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
                                   title="Delete"
                                 >
-                                  🗑️
+                                  
                                 </Button>
                               </div>
                             </div>
@@ -3304,7 +3304,7 @@ export default function Website_Enhanced() {
                           </h2>
                         </div>
                         <p className="text-slate-400 text-lg">
-                          {language === 'ar' ? '⚙️ إدارة معلومات متجرك والصور' : language === 'fr' ? '⚙️ Gérez les informations de votre magasin' : '⚙️ Manage your store information'}
+                          {language === 'ar' ? 'إدارة معلومات متجرك والصور' : language === 'fr' ? 'Gérez les informations de votre magasin' : 'Manage your store information'}
                         </p>
                       </div>
                       
@@ -3337,7 +3337,7 @@ export default function Website_Enhanced() {
                     className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-cyan-500/30 shadow-lg"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                      <span className="text-3xl">🏪</span>
+                      <span className="text-3xl"></span>
                       {language === 'ar' ? 'هوية المتجر' : language === 'fr' ? 'Identité du Magasin' : 'Store Identity'}
                     </h3>
                     
@@ -3345,7 +3345,7 @@ export default function Website_Enhanced() {
                       {/* Store Name */}
                       <div className="space-y-3">
                         <Label className="text-white font-bold text-base flex items-center gap-2">
-                          <span>🏷️</span>
+                          <span></span>
                           {language === 'ar' ? 'اسم المتجر' : language === 'fr' ? 'Nom du Magasin' : 'Store Name'}
                         </Label>
                         <Input
@@ -3356,14 +3356,14 @@ export default function Website_Enhanced() {
                           className="h-12 bg-slate-900/50 border-2 border-cyan-500/50 text-white placeholder-slate-500 rounded-xl text-lg font-semibold hover:border-cyan-400/70 focus:border-cyan-400 transition-all"
                         />
                         {websiteSettings?.store_name && (
-                          <p className="text-sm text-cyan-400">✓ {language === 'ar' ? 'تم الإدخال' : language === 'fr' ? 'Rempli' : 'Filled'}</p>
+                          <p className="text-sm text-cyan-400">{language === 'ar' ? 'تم الإدخال' : language === 'fr' ? 'Rempli' : 'Filled'}</p>
                         )}
                       </div>
 
                       {/* Slogan */}
                       <div className="space-y-3">
                         <Label className="text-white font-bold text-base flex items-center gap-2">
-                          <span>✨</span>
+                          <span></span>
                           {language === 'ar' ? 'الشعار' : language === 'fr' ? 'Slogan' : 'Slogan'}
                         </Label>
                         <Input
@@ -3385,7 +3385,7 @@ export default function Website_Enhanced() {
                     className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-orange-500/30 shadow-lg"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                      <span className="text-3xl">🖼️</span>
+                      <span className="text-3xl"></span>
                       {language === 'ar' ? 'شعار المتجر' : language === 'fr' ? 'Logo du Magasin' : 'Store Logo'}
                     </h3>
                     
@@ -3400,7 +3400,7 @@ export default function Website_Enhanced() {
                             <Upload className="h-16 w-16 text-orange-400 group-hover:text-orange-300 transition-colors" />
                           </motion.div>
                           <p className="text-white font-bold text-lg text-center">
-                            {language === 'ar' ? '📤 اختر أو اسحب شعار المتجر' : language === 'fr' ? '📤 Choisir ou glisser le logo' : '📤 Choose or drag logo'}
+                            {language === 'ar' ? 'اختر أو اسحب شعار المتجر' : language === 'fr' ? 'Choisir ou glisser le logo' : 'Choose or drag logo'}
                           </p>
                           <p className="text-slate-400 text-sm mt-2">PNG, JPG, GIF</p>
                         </div>
@@ -3443,7 +3443,7 @@ export default function Website_Enhanced() {
                     className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-blue-500/30 shadow-lg"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                      <span className="text-3xl">📝</span>
+                      <span className="text-3xl"></span>
                       {language === 'ar' ? 'وصف الموقع' : language === 'fr' ? 'Description du Site' : 'Website Description'}
                     </h3>
                     
@@ -3454,7 +3454,7 @@ export default function Website_Enhanced() {
                       className="w-full h-40 bg-slate-900/50 border-2 border-blue-500/50 text-white placeholder-slate-500 rounded-xl p-4 text-lg font-semibold hover:border-blue-400/70 focus:border-blue-400 transition-all resize-none"
                     />
                     {websiteSettings?.description && (
-                      <p className="text-sm text-blue-400 mt-2">✓ {language === 'ar' ? 'تم إدخال الوصف' : language === 'fr' ? 'Description saisie' : 'Description added'} ({websiteSettings.description.length} {language === 'ar' ? 'حرف' : language === 'fr' ? 'caractères' : 'chars'})</p>
+                      <p className="text-sm text-blue-400 mt-2">{language === 'ar' ? 'تم إدخال الوصف' : language === 'fr' ? 'Description saisie' : 'Description added'} ({websiteSettings.description.length} {language === 'ar' ? 'حرف' : language === 'fr' ? 'caractères' : 'chars'})</p>
                     )}
                   </motion.div>
 
@@ -3466,7 +3466,7 @@ export default function Website_Enhanced() {
                     className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-pink-500/30 shadow-lg"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                      <span className="text-3xl">🎨</span>
+                      <span className="text-3xl"></span>
                       {language === 'ar' ? 'خلفية صفحة الهبوط' : language === 'fr' ? 'Fond Page Accueil' : 'Landing Page Background'}
                     </h3>
                     
@@ -3481,7 +3481,7 @@ export default function Website_Enhanced() {
                             <Upload className="h-16 w-16 text-pink-400 group-hover:text-pink-300 transition-colors" />
                           </motion.div>
                           <p className="text-white font-bold text-lg text-center">
-                            {language === 'ar' ? '📤 اختر أو اسحب صورة الخلفية' : language === 'fr' ? '📤 Choisir ou glisser le fond' : '📤 Choose or drag background'}
+                            {language === 'ar' ? 'اختر أو اسحب صورة الخلفية' : language === 'fr' ? 'Choisir ou glisser le fond' : 'Choose or drag background'}
                           </p>
                           <p className="text-slate-400 text-sm mt-2">PNG, JPG, GIF (Recommended: 1920x1080)</p>
                         </div>
@@ -3526,7 +3526,7 @@ export default function Website_Enhanced() {
                     <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }}>
                       <Check className="h-7 w-7" />
                     </motion.div>
-                    {language === 'ar' ? '💾 حفظ جميع الإعدادات' : language === 'fr' ? '💾 Enregistrer les Paramètres' : '💾 Save All Settings'}
+                    {language === 'ar' ? 'حفظ جميع الإعدادات' : language === 'fr' ? 'Enregistrer les Paramètres' : 'Save All Settings'}
                   </motion.button>
 
                   {/* Info Box */}

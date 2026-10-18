@@ -667,7 +667,7 @@ export default function POS() {
       setLastSaleInvoice(fetchedInvoice);
       
       toast({
-        title: language === 'ar' ? '✅ تمت الفاتورة' : '✅ Vente Complétée',
+        title: language === 'ar' ? 'تمت الفاتورة' : 'Vente Complétée',
         description: language === 'ar' ? 'تم إنشاء فاتورة البيع بنجاح.' : 'Facture de vente créée avec succès.',
       });
       
@@ -761,7 +761,7 @@ export default function POS() {
         >
           <div>
             <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <span className="text-5xl">🛒</span>
+              <span className="text-5xl"></span>
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {language === 'ar' ? 'نقطة البيع' : 'Point de Vente'}
               </span>
@@ -787,7 +787,7 @@ export default function POS() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-2xl text-blue-600 dark:text-blue-400">
                     <Search className="w-6 h-6" />
-                    {language === 'ar' ? '🔍 ابحث عن المنتجات' : '🔍 Recherche'}
+                    {language === 'ar' ? 'ابحث عن المنتجات' : 'Recherche'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -839,7 +839,7 @@ export default function POS() {
                       animate={{ opacity: 1 }}
                       className="text-center py-16"
                     >
-                      <p className="text-5xl mb-4">📭</p>
+                      <p className="text-5xl mb-4"></p>
                       <p className="text-slate-600 dark:text-slate-400 text-lg font-semibold">
                         {language === 'ar' ? 'لم يتم العثور على شواحن' : 'Aucun chargeur trouvé'}
                       </p>
@@ -915,19 +915,19 @@ export default function POS() {
                                   <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
                                     {product.voltage && (
                                       <div className="flex items-center gap-1">
-                                        <span>⚡</span>
+                                        <span></span>
                                         <span>{product.voltage}V</span>
                                       </div>
                                     )}
                                     {product.wattage && (
                                       <div className="flex items-center gap-1">
-                                        <span>🔌</span>
+                                        <span></span>
                                         <span>{product.wattage}W</span>
                                       </div>
                                     )}
                                     {product.amperage && (
                                       <div className="flex items-center gap-1">
-                                        <span>⚙️</span>
+                                        <span></span>
                                         <span>{product.amperage}A</span>
                                       </div>
                                     )}
@@ -937,19 +937,19 @@ export default function POS() {
                                   <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-600">
                                     <div className="grid grid-cols-3 gap-2">
                                       <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-2">
-                                        <p className="text-xs text-blue-600 dark:text-blue-300 font-bold">💙</p>
+                                        <p className="text-xs text-blue-600 dark:text-blue-300 font-bold"></p>
                                         <p className="text-xs text-blue-700 dark:text-blue-400 font-bold">
                                           {formatCurrencyLocal(parseFloat(product.selling_price_1 || product.selling_price || 0), language)}
                                         </p>
                                       </div>
                                       <div className="bg-amber-50 dark:bg-amber-900/20 rounded p-2">
-                                        <p className="text-xs text-amber-600 dark:text-amber-300 font-bold">🟨</p>
+                                        <p className="text-xs text-amber-600 dark:text-amber-300 font-bold"></p>
                                         <p className="text-xs text-amber-700 dark:text-amber-400 font-bold">
                                           {formatCurrencyLocal(parseFloat(product.selling_price_2 || product.selling_price || 0), language)}
                                         </p>
                                       </div>
                                       <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
-                                        <p className="text-xs text-green-600 dark:text-green-300 font-bold">📦</p>
+                                        <p className="text-xs text-green-600 dark:text-green-300 font-bold"></p>
                                         <p className="text-xs text-green-700 dark:text-green-400 font-bold">
                                           {formatCurrencyLocal(parseFloat(product.selling_price_3 || product.selling_price || 0), language)}
                                         </p>
@@ -992,7 +992,7 @@ export default function POS() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2 text-lg text-orange-600 dark:text-orange-400">
                       <ShoppingCart className="h-5 w-5" />
-                      🛒 {language === 'ar' ? `السلة (${cart.length})` : `Panier (${cart.length})`}
+                      {language === 'ar' ? `السلة (${cart.length})` : `Panier (${cart.length})`}
                     </CardTitle>
                     {cart.length > 0 && (
                       <Button variant="ghost" size="sm" onClick={clearCart} className="hover:bg-red-100 dark:hover:bg-red-900/30">
@@ -1006,10 +1006,10 @@ export default function POS() {
                   <div className="relative">
                     <div className="flex items-center justify-between mb-2">
                       <Label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                        👥 {language === 'en' ? 'Select Client' : 'Sélectionner Client'}
+                        {language === 'en' ? 'Select Client' : 'Sélectionner Client'}
                         {selectedClient && (
                           <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full font-bold">
-                            ✅ {selectedClient.name}
+                            {selectedClient.name}
                           </span>
                         )}
                       </Label>
@@ -1058,12 +1058,12 @@ export default function POS() {
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="font-semibold text-slate-900 dark:text-white">{client.name}</p>
-                                  <p className="text-xs text-slate-600 dark:text-slate-400">📞 {client.phone}</p>
+                                  <p className="text-xs text-slate-600 dark:text-slate-400">{client.phone}</p>
                                 </div>
                                 <span className="text-xs font-bold px-2 py-1 rounded bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">
-                                  {client.price_tier === 1 && '💙 Normal'}
-                                  {client.price_tier === 2 && '🟨 Revendeur'}
-                                  {client.price_tier === 3 && '📦 Gros'}
+                                  {client.price_tier === 1 && 'Normal'}
+                                  {client.price_tier === 2 && 'Revendeur'}
+                                  {client.price_tier === 3 && 'Gros'}
                                 </span>
                               </div>
                             </motion.button>
@@ -1082,7 +1082,7 @@ export default function POS() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedClient.name}</p>
-                            <p className="text-xs text-slate-600 dark:text-slate-400">📞 {selectedClient.phone}</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">{selectedClient.phone}</p>
                           </div>
                           <Button
                             size="sm"
@@ -1090,7 +1090,7 @@ export default function POS() {
                             onClick={handleClearClient}
                             className="text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20"
                           >
-                            ✕
+                            
                           </Button>
                         </div>
                       </motion.div>
@@ -1182,20 +1182,20 @@ export default function POS() {
                   <CardContent className="p-6 space-y-4">
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="font-semibold">{language === 'ar' ? '📊 المجموع' : '📊 Sous-total'}:</span>
+                        <span className="font-semibold">{language === 'ar' ? 'المجموع' : 'Sous-total'}:</span>
                         <span className="font-bold">{formatCurrencyLocal(subtotal, language)}</span>
                       </div>
                       
                       {totalDiscount > 0 && (
                         <div className="flex justify-between text-yellow-100">
-                          <span>{language === 'ar' ? '🏷️ خصم' : '🏷️ Remise'}:</span>
+                          <span>{language === 'ar' ? 'خصم' : 'Remise'}:</span>
                           <span>-{formatCurrencyLocal(totalDiscount, language)}</span>
                         </div>
                       )}
                       
                       <div className="bg-white/10 rounded-lg p-3 space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold">{language === 'ar' ? '💵 تخفيض إضافي' : '💵 Réduction'}:</span>
+                          <span className="text-sm font-semibold">{language === 'ar' ? 'تخفيض إضافي' : 'Réduction'}:</span>
                           <select 
                             value={globalDiscount.type}
                             onChange={(e) => setGlobalDiscount({
@@ -1223,7 +1223,7 @@ export default function POS() {
                       
                       <div className="border-t border-white/20 pt-3" />
                       <div className="flex justify-between text-lg font-bold">
-                        <span>💰 {language === 'ar' ? 'الإجمالي' : 'Total'}:</span>
+                        <span>{language === 'ar' ? 'الإجمالي' : 'Total'}:</span>
                         <span>{formatCurrencyLocal(total, language)}</span>
                       </div>
                     </div>
@@ -1237,7 +1237,7 @@ export default function POS() {
                       className="w-full bg-white text-emerald-600 hover:bg-white/90 font-bold text-base h-12 rounded-lg shadow-lg"
                     >
                       <CreditCard className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5`} />
-                      {language === 'ar' ? `💳 دفع الآن` : `💳 Payer maintenant`}
+                      {language === 'ar' ? `دفع الآن` : `Payer maintenant`}
                     </Button>
                   </CardContent>
                 </Card>
@@ -1267,7 +1267,7 @@ export default function POS() {
             >
               <div className="flex justify-between items-start mb-8">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                  👤 {language === 'ar' ? 'إضافة عميل جديد' : 'Ajouter un Client'}
+                  {language === 'ar' ? 'إضافة عميل جديد' : 'Ajouter un Client'}
                 </h2>
                 <button
                   onClick={() => setShowAddClientModal(false)}
@@ -1285,7 +1285,7 @@ export default function POS() {
                   transition={{ delay: 0.05 }}
                 >
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    👤 {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'}
+                    {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'}
                   </label>
                   <Input
                     value={newClientForm.name}
@@ -1307,7 +1307,7 @@ export default function POS() {
                   transition={{ delay: 0.1 }}
                 >
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    📱 {language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
+                    {language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
                   </label>
                   <Input
                     value={newClientForm.phone}
@@ -1329,13 +1329,13 @@ export default function POS() {
                   transition={{ delay: 0.15 }}
                 >
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    💰 {language === 'ar' ? 'مستوى السعر' : 'Niveau de Prix'}
+                    {language === 'ar' ? 'مستوى السعر' : 'Niveau de Prix'}
                   </label>
                   <div className="grid grid-cols-3 gap-3 mt-2">
                     {[
-                      { tier: 1, emoji: '💙', label: language === 'ar' ? 'عادي' : 'Normal' },
-                      { tier: 2, emoji: '🟨', label: language === 'ar' ? 'موزع' : 'Revendeur' },
-                      { tier: 3, emoji: '📦', label: language === 'ar' ? 'جملة' : 'Gros' },
+                      { tier: 1, emoji: '', label: language === 'ar' ? 'عادي' : 'Normal' },
+                      { tier: 2, emoji: '', label: language === 'ar' ? 'موزع' : 'Revendeur' },
+                      { tier: 3, emoji: '', label: language === 'ar' ? 'جملة' : 'Gros' },
                     ].map(({ tier, emoji, label }) => (
                       <motion.button
                         key={tier}
@@ -1371,7 +1371,7 @@ export default function POS() {
                   transition={{ delay: 0.2 }}
                 >
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    📝 {language === 'ar' ? 'ملاحظات' : 'Notes'}
+                    {language === 'ar' ? 'ملاحظات' : 'Notes'}
                   </label>
                   <textarea
                     value={newClientForm.notes}
@@ -1402,7 +1402,7 @@ export default function POS() {
                   onClick={handleAddNewClient}
                   className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-bold border-0 shadow-lg"
                 >
-                  ✚ {language === 'ar' ? 'إضافة' : 'Créer'}
+                  {language === 'ar' ? 'إضافة' : 'Créer'}
                 </Button>
               </div>
             </motion.div>
@@ -1415,7 +1415,7 @@ export default function POS() {
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
-              💵 {language === 'ar' ? 'إتمام الدفع' : 'Finaliser le Paiement'}
+              {language === 'ar' ? 'إتمام الدفع' : 'Finaliser le Paiement'}
             </DialogTitle>
             <DialogDescription>
               {language === 'ar' ? 'أدخل المبلغ الذي تم استلامه لإتمام عملية البيع' : 'Entrez le montant reçu pour finaliser la vente'}
@@ -1425,16 +1425,16 @@ export default function POS() {
                 {language === 'ar' ? 'العميل' : 'Client'}: <span className="font-bold text-slate-900 dark:text-white">{selectedClient.name}</span>
                 <br />
                 {language === 'ar' ? 'المستوى' : 'Tier'}: 
-                {selectedClient.price_tier === 1 && ' 💙 Normal'}
-                {selectedClient.price_tier === 2 && ' 🟨 Revendeur'}
-                {selectedClient.price_tier === 3 && ' 📦 Gros'}
+                {selectedClient.price_tier === 1 && ' Normal'}
+                {selectedClient.price_tier === 2 && ' Revendeur'}
+                {selectedClient.price_tier === 3 && ' Gros'}
               </div>
             )}
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="editableTotal" className="font-bold text-slate-700 dark:text-slate-300">{language === 'ar' ? '💰 المبلغ الإجمالي' : '💰 Total à payer'}</Label>
+              <Label htmlFor="editableTotal" className="font-bold text-slate-700 dark:text-slate-300">{language === 'ar' ? 'المبلغ الإجمالي' : 'Total à payer'}</Label>
               <Input
                 id="editableTotal"
                 type="number"
@@ -1446,7 +1446,7 @@ export default function POS() {
             </div>
 
             <div>
-              <Label htmlFor="receivedAmount" className="font-bold text-slate-700 dark:text-slate-300">{language === 'ar' ? '💳 المبلغ المستلم' : '💳 Montant reçu'}</Label>
+              <Label htmlFor="receivedAmount" className="font-bold text-slate-700 dark:text-slate-300">{language === 'ar' ? 'المبلغ المستلم' : 'Montant reçu'}</Label>
               <Input
                 id="receivedAmount"
                 type="number"
@@ -1463,7 +1463,7 @@ export default function POS() {
               className="w-full border-2 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 h-12 font-bold"
             >
               <DollarSign className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-              {language === 'ar' ? '✅ العميل دفع الكل' : '✅ Paiement complet'}
+              {language === 'ar' ? 'العميل دفع الكل' : 'Paiement complet'}
             </Button>
             
             {receivedAmount !== 0 && (
@@ -1478,12 +1478,12 @@ export default function POS() {
               >
                 {editableTotal - receivedAmount > 0 ? (
                   <>
-                    <p>{language === 'ar' ? '⚠️ المبلغ المتبقي' : '⚠️ Reste à payer'}</p>
+                    <p>{language === 'ar' ? 'المبلغ المتبقي' : 'Reste à payer'}</p>
                     <p className="text-2xl mt-1">{formatCurrencyLocal(editableTotal - receivedAmount, language)}</p>
                   </>
                 ) : (
                   <>
-                    <p>✅ {language === 'ar' ? 'الباقي' : 'Monnaie'}</p>
+                    <p>{language === 'ar' ? 'الباقي' : 'Monnaie'}</p>
                     <p className="text-2xl mt-1">{formatCurrencyLocal(Math.abs(receivedAmount - editableTotal), language)}</p>
                   </>
                 )}
@@ -1493,7 +1493,7 @@ export default function POS() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setPaymentDialog(false)} className="h-11 font-semibold">
-              ❌ {language === 'ar' ? 'إلغاء' : 'Annuler'}
+              {language === 'ar' ? 'إلغاء' : 'Annuler'}
             </Button>
             <Button 
               onClick={completeSale}
@@ -1501,7 +1501,7 @@ export default function POS() {
               className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold h-11"
             >
               <Check className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-              {language === 'ar' ? '✅ إتمام البيع' : '✅ Finaliser'}
+              {language === 'ar' ? 'إتمام البيع' : 'Finaliser'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1512,7 +1512,7 @@ export default function POS() {
         <DialogContent className="rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-2">
-              🖨️ {language === 'ar' ? 'هل تريد طباعة الفاتورة؟' : 'Imprimer la facture?'}
+              {language === 'ar' ? 'هل تريد طباعة الفاتورة؟' : 'Imprimer la facture?'}
             </DialogTitle>
             <DialogDescription>
               {language === 'ar' ? 'اختر ما إذا كنت تريد طباعة فاتورة البيع' : 'Choisissez si vous souhaitez imprimer la facture de vente'}
@@ -1520,14 +1520,14 @@ export default function POS() {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPrintConfirmationDialog(false)} className="h-11 font-semibold">
-              ❌ {language === 'ar' ? 'لا' : 'Non'}
+              {language === 'ar' ? 'لا' : 'Non'}
             </Button>
             <Button 
               onClick={() => { printSaleInvoice(); setPrintConfirmationDialog(false); }} 
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold h-11"
             >
               <Printer className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-              {language === 'ar' ? '✅ نعم، طباعة' : '✅ Oui, imprimer'}
+              {language === 'ar' ? 'نعم، طباعة' : 'Oui, imprimer'}
             </Button>
           </DialogFooter>
         </DialogContent>

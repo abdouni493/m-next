@@ -138,7 +138,7 @@ export default function Profile() {
       <Card className="card-elevated border-0 shadow-md">
         <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
           <CardTitle className="flex items-center gap-2">
-            👤 Mon Profil
+            Mon Profil
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -225,7 +225,7 @@ export default function Profile() {
       <Card className="card-elevated border-0 shadow-md">
         <CardHeader className="bg-gradient-to-r from-green-100 to-emerald-100">
           <CardTitle className="flex items-center gap-2">
-            💾 Sauvegarde
+            Sauvegarde
           </CardTitle>
         </CardHeader>
         <CardContent className="flex justify-between">

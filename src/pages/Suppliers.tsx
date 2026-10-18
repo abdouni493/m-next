@@ -59,7 +59,7 @@ const SuppliersPage = () => {
   const loadSuppliers = async () => {
     try {
       setLoading(true);
-      console.log('📦 Loading suppliers from database...');
+      console.log('Loading suppliers from database...');
       const { data, error } = await supabase
         .from('suppliers')
         .select('*')
@@ -67,15 +67,15 @@ const SuppliersPage = () => {
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('❌ Error loading suppliers:', error);
+        console.error('Error loading suppliers:', error);
         setSuppliers([]);
         return;
       }
       
-      console.log('✅ Suppliers loaded successfully:', data);
+      console.log('Suppliers loaded successfully:', data);
       setSuppliers(data || []);
     } catch (error) {
-      console.error('❌ Exception loading suppliers:', error);
+      console.error('Exception loading suppliers:', error);
       setSuppliers([]);
     } finally {
       setLoading(false);
@@ -203,12 +203,12 @@ const SuppliersPage = () => {
       >
         <div>
           <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2">
-            🏭 {language === 'en' ? 'Suppliers Management' : 'Gestion des Fournisseurs'}
+            {language === 'en' ? 'Suppliers Management' : 'Gestion des Fournisseurs'}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
             {language === 'en'
-              ? `📊 ${suppliers.length} suppliers in your network`
-              : `📊 ${suppliers.length} fournisseurs dans votre réseau`}
+              ? `${suppliers.length} suppliers in your network`
+              : `${suppliers.length} fournisseurs dans votre réseau`}
           </p>
         </div>
         <Button
@@ -216,7 +216,7 @@ const SuppliersPage = () => {
           className="h-[46px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all text-base font-semibold"
         >
           <Plus className="w-4 h-4 mr-2" />
-          ➕ {language === 'en' ? 'Add Supplier' : 'Ajouter Fournisseur'}
+          {language === 'en' ? 'Add Supplier' : 'Ajouter Fournisseur'}
         </Button>
       </motion.div>
 
@@ -233,8 +233,8 @@ const SuppliersPage = () => {
             type="text"
             placeholder={
               language === 'en'
-                ? '🔍 Search by name, phone, city...'
-                : '🔍 Rechercher par nom, téléphone, ville...'
+                ? 'Search by name, phone, city...'
+                : 'Rechercher par nom, téléphone, ville...'
             }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -268,7 +268,7 @@ const SuppliersPage = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2">
-                      🏭 {supplier.name}
+                      {supplier.name}
                     </h3>
                   </div>
                   <div className="flex gap-2">
@@ -277,7 +277,7 @@ const SuppliersPage = () => {
                       title={language === 'en' ? 'Purchase History' : 'Historique d\'Achats'}
                       className="p-2.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-700 rounded-lg hover:shadow-md transition-all"
                     >
-                      <span className="text-lg">📊</span>
+                      <span className="text-lg"></span>
                     </button>
                     <button
                       onClick={() => handleOpenEditModal(supplier)}
@@ -343,7 +343,7 @@ const SuppliersPage = () => {
                 onClick={() => handleOpenEditModal(supplier)}
                 className="mt-4 w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               >
-                <span>✏️</span>
+                <span></span>
                 {language === 'en' ? 'Edit Supplier' : 'Modifier'}
               </button>
             </motion.div>
@@ -373,8 +373,8 @@ const SuppliersPage = () => {
             <div className="sticky top-0 p-6 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-700 flex justify-between items-center">
               <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                 {editingSupplier
-                  ? '✏️ ' + (language === 'en' ? 'Edit Supplier' : 'Modifier Fournisseur')
-                  : '➕ ' + (language === 'en' ? 'Add New Supplier' : 'Ajouter Nouveau Fournisseur')}
+                  ? '' + (language === 'en' ? 'Edit Supplier' : 'Modifier Fournisseur')
+                  : '' + (language === 'en' ? 'Add New Supplier' : 'Ajouter Nouveau Fournisseur')}
               </h2>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -391,7 +391,7 @@ const SuppliersPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-blue-200 dark:border-blue-700"
               >
-                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4">🏭 {language === 'en' ? 'Supplier Name' : 'Nom du Fournisseur'}</h3>
+                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4">{language === 'en' ? 'Supplier Name' : 'Nom du Fournisseur'}</h3>
                 <input
                   type="text"
                   placeholder={language === 'en' ? 'e.g., Tech Supplies Inc.' : 'Ex: Tech Supplies Inc.'}
@@ -408,7 +408,7 @@ const SuppliersPage = () => {
                 transition={{ delay: 0.1 }}
                 className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-green-200 dark:border-green-700"
               >
-                <h3 className="text-lg font-bold text-green-900 dark:text-green-300 mb-4">📞 {language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'}</h3>
+                <h3 className="text-lg font-bold text-green-900 dark:text-green-300 mb-4">{language === 'en' ? 'Phone Number' : 'Numéro de Téléphone'}</h3>
                 <input
                   type="tel"
                   placeholder="+1 (555) 123-4567"
@@ -425,7 +425,7 @@ const SuppliersPage = () => {
                 transition={{ delay: 0.2 }}
                 className="p-4 bg-gradient-to-br from-red-50 to-red-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-red-200 dark:border-red-700"
               >
-                <h3 className="text-lg font-bold text-red-900 dark:text-red-300 mb-4">📍 {language === 'en' ? 'Address' : 'Adresse'}</h3>
+                <h3 className="text-lg font-bold text-red-900 dark:text-red-300 mb-4">{language === 'en' ? 'Address' : 'Adresse'}</h3>
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-red-900 dark:text-red-300">{language === 'en' ? 'Address' : 'Adresse'}</label>
                   <input
@@ -446,7 +446,7 @@ const SuppliersPage = () => {
                 className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-600 rounded-xl border border-gray-200 dark:border-slate-600"
               >
                 <p className="text-sm text-gray-600 dark:text-slate-400 italic">
-                  ✅ {language === 'en' ? 'All required information provided' : 'Toutes les informations requises fournies'}
+                  {language === 'en' ? 'All required information provided' : 'Toutes les informations requises fournies'}
                 </p>
               </motion.div>
 
@@ -456,14 +456,14 @@ const SuppliersPage = () => {
                   onClick={handleSaveSupplier}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg h-12 font-bold text-base"
                 >
-                  💾 {language === 'en' ? 'Save Supplier' : 'Enregistrer'}
+                  {language === 'en' ? 'Save Supplier' : 'Enregistrer'}
                 </Button>
                 <Button
                   onClick={() => setShowAddModal(false)}
                   variant="outline"
                   className="flex-1 rounded-lg h-12 font-bold text-base dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-600"
                 >
-                  ✖️ {language === 'en' ? 'Cancel' : 'Annuler'}
+                  {language === 'en' ? 'Cancel' : 'Annuler'}
                 </Button>
               </div>
             </div>

@@ -318,7 +318,7 @@ const Caisse = () => {
         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              💰 {getText('title')}
+              {getText('title')}
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mt-2">{getText('subtitle')}</p>
           </div>
@@ -349,10 +349,10 @@ const Caisse = () => {
                 <div>
                   <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('balance')}</p>
                   <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
-                    💵 {summary.balance.toFixed(2)} DZD
+                    {summary.balance.toFixed(2)} DZD
                   </p>
                 </div>
-                <div className="text-5xl opacity-50">📊</div>
+                <div className="text-5xl opacity-50"></div>
               </div>
             </motion.div>
 
@@ -370,7 +370,7 @@ const Caisse = () => {
                     ⬆️ {summary.total_encaissements.toFixed(2)} DZD
                   </p>
                 </div>
-                <div className="text-5xl opacity-50">📈</div>
+                <div className="text-5xl opacity-50"></div>
               </div>
             </motion.div>
 
@@ -388,7 +388,7 @@ const Caisse = () => {
                     ⬇️ {summary.total_decaissements.toFixed(2)} DZD
                   </p>
                 </div>
-                <div className="text-5xl opacity-50">📉</div>
+                <div className="text-5xl opacity-50"></div>
               </div>
             </motion.div>
 
@@ -401,12 +401,12 @@ const Caisse = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">📝 {language === 'en' ? 'Transactions' : language === 'fr' ? 'Transactions' : 'المعاملات'}</p>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{language === 'en' ? 'Transactions' : language === 'fr' ? 'Transactions' : 'المعاملات'}</p>
                   <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">
                     {summary.total_transactions}
                   </p>
                 </div>
-                <div className="text-5xl opacity-50">📋</div>
+                <div className="text-5xl opacity-50"></div>
               </div>
             </motion.div>
           </div>
@@ -431,7 +431,7 @@ const Caisse = () => {
           </div>
         ) : filteredTransactions.length === 0 ? (
           <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-xl">
-            <p className="text-5xl mb-4">📭</p>
+            <p className="text-5xl mb-4"></p>
             <p className="text-slate-600 dark:text-slate-400 font-semibold text-lg">{getText('no_transactions')}</p>
             <p className="text-slate-500 dark:text-slate-500 text-sm mt-2">{getText('start_transaction')}</p>
           </div>
@@ -455,7 +455,7 @@ const Caisse = () => {
                       <div className={isRTL ? 'text-right' : ''}>
                         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <span className="text-3xl">
-                            {transaction.transaction_type === 'encaissement' ? '💚' : '❤️'}
+                            {transaction.transaction_type === 'encaissement' ? '' : ''}
                           </span>
                           <h3 className="font-bold text-lg text-slate-900 dark:text-white">
                             {transaction.transaction_type === 'encaissement' ? getText('encaissement') : getText('decaissement')}
@@ -523,7 +523,7 @@ const Caisse = () => {
           >
             <div className={`flex justify-between items-start mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {isEditingMode ? '✏️ ' : '➕ '}
+                {isEditingMode ? '' : ''}
                 {isEditingMode ? 'Edit Transaction' : 'New Transaction'}
               </h2>
               <button
@@ -548,8 +548,8 @@ const Caisse = () => {
                   onChange={(e) => setFormData({ ...formData, transaction_type: e.target.value as 'encaissement' | 'decaissement' })}
                   className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 >
-                  <option value="encaissement">💚 {getText('encaissement')}</option>
-                  <option value="decaissement">❤️ {getText('decaissement')}</option>
+                  <option value="encaissement">{getText('encaissement')}</option>
+                  <option value="decaissement">{getText('decaissement')}</option>
                 </select>
               </div>
 
@@ -599,7 +599,7 @@ const Caisse = () => {
               {/* Discount Section */}
               <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-700">
                 <label className="block text-sm font-semibold mb-3 text-amber-900 dark:text-amber-100">
-                  💳 {getText('apply_discount')}
+                  {getText('apply_discount')}
                 </label>
                 
                 {/* Discount Percentage */}
@@ -695,7 +695,7 @@ const Caisse = () => {
             className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-sm w-full p-6"
           >
             <div className="flex justify-center mb-4">
-              <div className="text-5xl">⚠️</div>
+              <div className="text-5xl"></div>
             </div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">
               {getText('delete_confirm')}

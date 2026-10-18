@@ -16,8 +16,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';   // ✅ import AuthContext
-import { useNavigate } from 'react-router-dom';     // ✅ for redirec
+import { useAuth } from '@/contexts/AuthContext';   // import AuthContext
+import { useNavigate } from 'react-router-dom';     // for redirec
 
 interface WorkerHeaderProps {
   onMenuClick: () => void;
@@ -30,8 +30,8 @@ export const WorkerHeader = ({ onMenuClick, sidebarOpen }: WorkerHeaderProps) =>
     return document.documentElement.classList.contains('dark');
   });
 
-  const { logout, user } = useAuth();          // ✅ get logout from context
-  const navigate = useNavigate();        // ✅ use navigation
+  const { logout, user } = useAuth();          // get logout from context
+  const navigate = useNavigate();        // use navigation
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -112,7 +112,7 @@ export const WorkerHeader = ({ onMenuClick, sidebarOpen }: WorkerHeaderProps) =>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="text-destructive cursor-pointer"
-                  onClick={handleLogout}   // ✅ FIXED logout
+                  onClick={handleLogout}   // FIXED logout
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   {t('user.logout')}

@@ -361,7 +361,7 @@ export default function Employees() {
         </div>
         <div className="relative z-10">
           <h1 className="text-5xl font-black mb-2">
-            👥 {language === 'ar' ? 'إدارة الموظفين' : 'Gestion des Employés'}
+            {language === 'ar' ? 'إدارة الموظفين' : 'Gestion des Employés'}
           </h1>
           <p className="text-white/90 text-lg">{language === 'ar' ? 'ادارة فريقك والرواتب والصلاحيات' : 'Gérez votre équipe, salaires et permissions'}</p>
         </div>
@@ -376,7 +376,7 @@ export default function Employees() {
             <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity"></div>
             <Plus className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5`} />
             <span className="relative">
-              {language === 'ar' ? '✨ موظف جديد' : '✨ Nouvel Employé'}
+              {language === 'ar' ? 'موظف جديد' : 'Nouvel Employé'}
             </span>
           </Button>
         </motion.div>
@@ -392,11 +392,11 @@ export default function Employees() {
         <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
           <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">👥 {language === 'ar' ? 'إجمالي الموظفين' : 'Total Employés'}</CardTitle>
+              <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي الموظفين' : 'Total Employés'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black">{totalEmployees}</div>
-              <p className="text-xs mt-2 opacity-90">✅ {activeEmployees} {language === 'ar' ? 'نشطين' : 'actifs'}</p>
+              <p className="text-xs mt-2 opacity-90">{activeEmployees} {language === 'ar' ? 'نشطين' : 'actifs'}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -404,11 +404,11 @@ export default function Employees() {
         <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
           <Card className="border-0 shadow-md bg-gradient-to-br from-emerald-600 to-green-600 text-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">💰 {language === 'ar' ? 'ميزانية الرواتب' : 'Budget Salaires'}</CardTitle>
+              <CardTitle className="text-sm font-medium">{language === 'ar' ? 'ميزانية الرواتب' : 'Budget Salaires'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black">{formatCurrency(totalSalaryBudget).split('.')[0]}</div>
-              <p className="text-xs mt-2 opacity-90">📅 {language === 'ar' ? 'شهريا' : 'Par mois'}</p>
+              <p className="text-xs mt-2 opacity-90">{language === 'ar' ? 'شهريا' : 'Par mois'}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -416,11 +416,11 @@ export default function Employees() {
         <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
           <Card className="border-0 shadow-md bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">🔐 {language === 'ar' ? 'حسابات نشطة' : 'Comptes Actifs'}</CardTitle>
+              <CardTitle className="text-sm font-medium">{language === 'ar' ? 'حسابات نشطة' : 'Comptes Actifs'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black">{employeesWithAccounts}</div>
-              <p className="text-xs mt-2 opacity-90">🌐 {language === 'ar' ? 'وصول للنظام' : 'Accès système'}</p>
+              <p className="text-xs mt-2 opacity-90">{language === 'ar' ? 'وصول للنظام' : 'Accès système'}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -428,11 +428,11 @@ export default function Employees() {
         <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
           <Card className="border-0 shadow-md bg-gradient-to-br from-rose-600 to-pink-600 text-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">💵 {language === 'ar' ? 'إجمالي المدفوعات' : 'Total Paiements'}</CardTitle>
+              <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي المدفوعات' : 'Total Paiements'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black">{formatCurrency(totalPayments).split('.')[0]}</div>
-              <p className="text-xs mt-2 opacity-90">📊 {language === 'ar' ? 'هذا الشهر: ' : 'Ce mois: '}{formatCurrency(paymentsThisMonth).split('.')[0]}</p>
+              <p className="text-xs mt-2 opacity-90">{language === 'ar' ? 'هذا الشهر: ' : 'Ce mois: '}{formatCurrency(paymentsThisMonth).split('.')[0]}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -470,7 +470,7 @@ export default function Employees() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-            👨‍💼 {language === 'ar' ? 'فريق العمل' : 'Équipe de Travail'} ({filteredEmployees.length})
+            {language === 'ar' ? 'فريق العمل' : 'Équipe de Travail'} ({filteredEmployees.length})
           </h2>
         </div>
 
@@ -479,7 +479,7 @@ export default function Employees() {
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }} className="inline-block">
               <div className="h-12 w-12 border-4 border-purple-200 border-t-purple-600 rounded-full"></div>
             </motion.div>
-            <p className="mt-4 text-muted-foreground">{language === 'ar' ? '⏳ جارٍ تحميل البيانات...' : '⏳ Chargement des données...'}</p>
+            <p className="mt-4 text-muted-foreground">{language === 'ar' ? 'جارٍ تحميل البيانات...' : 'Chargement des données...'}</p>
           </div>
         ) : error ? (
           <motion.div 
@@ -487,7 +487,7 @@ export default function Employees() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center py-12 px-6 rounded-2xl bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700"
           >
-            <p className="text-lg font-bold text-red-700 dark:text-red-400">⚠️ {error}</p>
+            <p className="text-lg font-bold text-red-700 dark:text-red-400">{error}</p>
           </motion.div>
         ) : filteredEmployees.length === 0 ? (
           <motion.div 
@@ -496,7 +496,7 @@ export default function Employees() {
             className="text-center py-12 px-6 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-dashed border-purple-300 dark:border-purple-700"
           >
             <p className="text-lg text-muted-foreground">
-              {language === 'ar' ? '👥 لا توجد موظفين يطابقون معايير البحث' : '👥 Aucun employé ne correspond à votre recherche'}
+              {language === 'ar' ? 'لا توجد موظفين يطابقون معايير البحث' : 'Aucun employé ne correspond à votre recherche'}
             </p>
           </motion.div>
         ) : (
@@ -526,10 +526,10 @@ export default function Employees() {
                         <motion.h3 
                           className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 mb-1"
                         >
-                          {employee.position === 'admin' ? '👨‍💼 ' : '👤 '}{employee.full_name}
+                          {employee.position === 'admin' ? '' : ''}{employee.full_name}
                         </motion.h3>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <span>{employee.position === 'admin' ? '🔑' : '💼'}</span>
+                          <span>{employee.position === 'admin' ? '' : ''}</span>
                           {employee.position === 'admin' ? (language === 'ar' ? 'مسؤول النظام' : 'Administrateur') : (language === 'ar' ? 'موظف' : 'Travailleur')}
                         </p>
                       </div>
@@ -541,7 +541,7 @@ export default function Employees() {
                             : 'bg-gradient-to-r from-blue-500 to-cyan-500'
                         }`}
                       >
-                        {employee.position === 'admin' ? '👑 Admin' : '⭐ Staff'}
+                        {employee.position === 'admin' ? 'Admin' : 'Staff'}
                       </motion.div>
                     </div>
                   </div>
@@ -598,7 +598,7 @@ export default function Employees() {
                             <p className="text-xs text-muted-foreground">{formatDate(employee.lastPayment.date)}</p>
                           </div>
                         ) : (
-                          <p className="font-semibold text-amber-600 dark:text-amber-400">⏳ {language === 'ar' ? 'قيد الانتظار' : 'En attente'}</p>
+                          <p className="font-semibold text-amber-600 dark:text-amber-400">{language === 'ar' ? 'قيد الانتظار' : 'En attente'}</p>
                         )}
                       </div>
                     </motion.div>
@@ -614,7 +614,7 @@ export default function Employees() {
                           className="w-full h-12 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
                           title={language === 'ar' ? 'سجل الدفع' : 'Historique'}
                         >
-                          <span className="text-lg">📅</span>
+                          <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'السجل' : 'Histo.'}</span>
                         </Button>
                       </motion.div>
@@ -626,7 +626,7 @@ export default function Employees() {
                           className="w-full h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
                           title={language === 'ar' ? 'دفع' : 'Paiement'}
                         >
-                          <span className="text-lg">💳</span>
+                          <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'دفع' : 'Payer'}</span>
                         </Button>
                       </motion.div>
@@ -638,7 +638,7 @@ export default function Employees() {
                           className="w-full h-12 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
                           title={language === 'ar' ? 'تعديل' : 'Éditer'}
                         >
-                          <span className="text-lg">✏️</span>
+                          <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'تعديل' : 'Éditer'}</span>
                         </Button>
                       </motion.div>
@@ -650,7 +650,7 @@ export default function Employees() {
                           className="w-full h-12 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
                           title={language === 'ar' ? 'حذف' : 'Supprimer'}
                         >
-                          <span className="text-lg">🗑️</span>
+                          <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'حذف' : 'Suppr.'}</span>
                         </Button>
                       </motion.div>
@@ -672,20 +672,20 @@ export default function Employees() {
           <DialogHeader className="relative z-10 pb-6 border-b-2 border-purple-200 dark:border-purple-800">
             <div className="flex items-center gap-3">
               <div className="text-3xl">
-                {dialogMode === 'create' && '✨'}
-                {dialogMode === 'edit' && '✏️'}
-                {dialogMode === 'payment' && '💰'}
+                {dialogMode === 'create' && ''}
+                {dialogMode === 'edit' && ''}
+                {dialogMode === 'payment' && ''}
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black">
-                  {dialogMode === 'create' && (language === 'ar' ? '👥 موظف جديد' : '👥 Nouvel Employé')}
-                  {dialogMode === 'edit' && (language === 'ar' ? '📝 تعديل الموظف' : '📝 Modifier Employé')}
-                  {dialogMode === 'payment' && (language === 'ar' ? '💳 تسجيل دفعة' : '💳 Enregistrer Paiement')}
+                  {dialogMode === 'create' && (language === 'ar' ? 'موظف جديد' : 'Nouvel Employé')}
+                  {dialogMode === 'edit' && (language === 'ar' ? 'تعديل الموظف' : 'Modifier Employé')}
+                  {dialogMode === 'payment' && (language === 'ar' ? 'تسجيل دفعة' : 'Enregistrer Paiement')}
                 </DialogTitle>
                 <DialogDescription className="text-base mt-1">
-                  {dialogMode === 'create' && (language === 'ar' ? '🚀 أضف موظفًا جديدًا إلى فريقك الآن' : '🚀 Ajoutez un nouvel employé à votre équipe')}
-                  {dialogMode === 'edit' && (language === 'ar' ? '🔄 حدّث معلومات الموظف والصلاحيات' : '🔄 Mettez à jour les informations de l\'employé')}
-                  {dialogMode === 'payment' && (language === 'ar' ? '💸 سجّل الدفع للموظف' : '💸 Enregistrez le paiement de l\'employé')}
+                  {dialogMode === 'create' && (language === 'ar' ? 'أضف موظفًا جديدًا إلى فريقك الآن' : 'Ajoutez un nouvel employé à votre équipe')}
+                  {dialogMode === 'edit' && (language === 'ar' ? 'حدّث معلومات الموظف والصلاحيات' : 'Mettez à jour les informations de l\'employé')}
+                  {dialogMode === 'payment' && (language === 'ar' ? 'سجّل الدفع للموظف' : 'Enregistrez le paiement de l\'employé')}
                 </DialogDescription>
               </div>
             </div>
@@ -700,12 +700,12 @@ export default function Employees() {
               {/* Payment Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                  💵 {language === 'ar' ? 'تفاصيل الدفعة' : 'Détails du paiement'}
+                  {language === 'ar' ? 'تفاصيل الدفعة' : 'Détails du paiement'}
                 </h3>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
-                    <Label htmlFor="amount" className="font-bold text-green-700 dark:text-green-400">💰 {language === 'ar' ? 'المبلغ (د.ج)' : 'Montant (DZD)'}</Label>
+                    <Label htmlFor="amount" className="font-bold text-green-700 dark:text-green-400">{language === 'ar' ? 'المبلغ (د.ج)' : 'Montant (DZD)'}</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -717,22 +717,22 @@ export default function Employees() {
                   </div>
                   
                   <div className="space-y-2 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800">
-                    <Label htmlFor="paymentType" className="font-bold text-blue-700 dark:text-blue-400">📋 {language === 'ar' ? 'نوع الدفعة' : 'Type de Paiement'}</Label>
+                    <Label htmlFor="paymentType" className="font-bold text-blue-700 dark:text-blue-400">{language === 'ar' ? 'نوع الدفعة' : 'Type de Paiement'}</Label>
                     <Select value={paymentData.type} onValueChange={(value: any) => setPaymentData({...paymentData, type: value})}>
                       <SelectTrigger className="border-2 border-blue-300 dark:border-blue-700 rounded-lg font-bold">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="salary">💼 {language === 'ar' ? 'راتب شهري' : 'Salaire mensuel'}</SelectItem>
-                        <SelectItem value="bonus">🎁 {language === 'ar' ? 'مكافأة' : 'Prime'}</SelectItem>
-                        <SelectItem value="commission">📈 {language === 'ar' ? 'عمولة' : 'Commission'}</SelectItem>
+                        <SelectItem value="salary">{language === 'ar' ? 'راتب شهري' : 'Salaire mensuel'}</SelectItem>
+                        <SelectItem value="bonus">{language === 'ar' ? 'مكافأة' : 'Prime'}</SelectItem>
+                        <SelectItem value="commission">{language === 'ar' ? 'عمولة' : 'Commission'}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div className="space-y-2 p-4 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200 dark:border-orange-800">
-                  <Label htmlFor="paymentDate" className="font-bold text-orange-700 dark:text-orange-400">📅 {language === 'ar' ? 'تاريخ الدفعة' : 'Date de Paiement'}</Label>
+                  <Label htmlFor="paymentDate" className="font-bold text-orange-700 dark:text-orange-400">{language === 'ar' ? 'تاريخ الدفعة' : 'Date de Paiement'}</Label>
                   <Input
                     id="paymentDate"
                     type="date"
@@ -752,13 +752,13 @@ export default function Employees() {
               <Tabs defaultValue="personal" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/40 dark:to-blue-900/40 mb-6">
                   <TabsTrigger value="personal" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white">
-                    👤 {language === 'ar' ? 'شخصي' : 'Personnel'}
+                    {language === 'ar' ? 'شخصي' : 'Personnel'}
                   </TabsTrigger>
                   <TabsTrigger value="job" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
-                    💼 {language === 'ar' ? 'المنصب' : 'Poste'}
+                    {language === 'ar' ? 'المنصب' : 'Poste'}
                   </TabsTrigger>
                   <TabsTrigger value="account" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
-                    🔐 {language === 'ar' ? 'الحساب' : 'Compte'}
+                    {language === 'ar' ? 'الحساب' : 'Compte'}
                   </TabsTrigger>
                 </TabsList>
 
@@ -766,7 +766,7 @@ export default function Employees() {
                 <TabsContent value="personal" className="space-y-5">
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800">
                     <Label htmlFor="full_name" className="font-bold text-lg text-purple-700 dark:text-purple-400">
-                      👤 {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'} <span className="text-red-500">*</span>
+                      {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="full_name"
@@ -780,7 +780,7 @@ export default function Employees() {
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-4">
                     <div className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-800">
                       <Label htmlFor="phone" className="font-bold text-lg text-blue-700 dark:text-blue-400">
-                        📞 {language === 'ar' ? 'الهاتف' : 'Téléphone'}
+                        {language === 'ar' ? 'الهاتف' : 'Téléphone'}
                       </Label>
                       <Input
                         id="phone"
@@ -793,7 +793,7 @@ export default function Employees() {
 
                     <div className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800">
                       <Label htmlFor="email" className="font-bold text-lg text-green-700 dark:text-green-400">
-                        📧 {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                        {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                       </Label>
                       <Input
                         id="email"
@@ -808,7 +808,7 @@ export default function Employees() {
 
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border-2 border-orange-200 dark:border-orange-800">
                     <Label htmlFor="address" className="font-bold text-lg text-orange-700 dark:text-orange-400">
-                      📍 {language === 'ar' ? 'العنوان' : 'Adresse'}
+                      {language === 'ar' ? 'العنوان' : 'Adresse'}
                     </Label>
                     <Input
                       id="address"
@@ -821,7 +821,7 @@ export default function Employees() {
 
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 border-2 border-pink-200 dark:border-pink-800">
                     <Label htmlFor="birth_date" className="font-bold text-lg text-pink-700 dark:text-pink-400">
-                      🎂 {language === 'ar' ? 'تاريخ الميلاد' : 'Date de naissance'}
+                      {language === 'ar' ? 'تاريخ الميلاد' : 'Date de naissance'}
                     </Label>
                     <Input
                       id="birth_date"
@@ -837,22 +837,22 @@ export default function Employees() {
                 <TabsContent value="job" className="space-y-5">
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border-2 border-indigo-200 dark:border-indigo-800">
                     <Label htmlFor="position" className="font-bold text-lg text-indigo-700 dark:text-indigo-400">
-                      🏆 {language === 'ar' ? 'المنصب الوظيفي' : 'Poste Professionnel'} <span className="text-red-500">*</span>
+                      {language === 'ar' ? 'المنصب الوظيفي' : 'Poste Professionnel'} <span className="text-red-500">*</span>
                     </Label>
                     <Select value={formData.position} onValueChange={(value: any) => setFormData({...formData, position: value})}>
                       <SelectTrigger className="border-2 border-indigo-300 dark:border-indigo-700 rounded-lg font-bold text-base">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="admin">🔑 {language === 'ar' ? 'مسؤول النظام' : 'Administrateur'}</SelectItem>
-                        <SelectItem value="worker">💼 {language === 'ar' ? 'عامل' : 'Travailleur'}</SelectItem>
+                        <SelectItem value="admin">{language === 'ar' ? 'مسؤول النظام' : 'Administrateur'}</SelectItem>
+                        <SelectItem value="worker">{language === 'ar' ? 'عامل' : 'Travailleur'}</SelectItem>
                       </SelectContent>
                     </Select>
                   </motion.div>
 
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-yellow-200 dark:border-yellow-800">
                     <Label htmlFor="salary" className="font-bold text-lg text-yellow-700 dark:text-yellow-400">
-                      💵 {language === 'ar' ? 'الراتب الشهري' : 'Salaire Mensuel'} <span className="text-red-500">*</span>
+                      {language === 'ar' ? 'الراتب الشهري' : 'Salaire Mensuel'} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="salary"
@@ -863,7 +863,7 @@ export default function Employees() {
                       className="border-2 border-yellow-300 dark:border-yellow-700 rounded-lg font-bold text-lg"
                     />
                     <div className="text-sm text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
-                      <span>💰</span>
+                      <span></span>
                       {language === 'ar' ? 'بالدينار الجزائري (د.ج)' : 'En dinars algériens (DZD)'}
                     </div>
                   </motion.div>
@@ -877,7 +877,7 @@ export default function Employees() {
                     className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-300 dark:border-blue-700"
                   >
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="text-3xl">🔐</span>
+                      <span className="text-3xl"></span>
                       <h3 className="text-lg font-bold text-blue-700 dark:text-blue-400">
                         {language === 'ar' ? 'بيانات الحساب' : 'Données du Compte'}
                       </h3>
@@ -891,7 +891,7 @@ export default function Employees() {
 
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border-2 border-cyan-200 dark:border-cyan-800">
                     <Label htmlFor="username" className="font-bold text-lg text-cyan-700 dark:text-cyan-400">
-                      👤 {language === 'ar' ? 'اسم المستخدم' : 'Identifiant'}
+                      {language === 'ar' ? 'اسم المستخدم' : 'Identifiant'}
                     </Label>
                     <Input
                       id="username"
@@ -901,14 +901,14 @@ export default function Employees() {
                       className="border-2 border-cyan-300 dark:border-cyan-700 rounded-lg font-semibold"
                     />
                     <div className="text-sm text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
-                      <span>💡</span>
+                      <span></span>
                       {language === 'ar' ? 'يستخدم لتسجيل الدخول إلى النظام' : 'Utilisé pour se connecter au système'}
                     </div>
                   </motion.div>
 
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border-2 border-rose-200 dark:border-rose-800">
                     <Label htmlFor="password" className="font-bold text-lg text-rose-700 dark:text-rose-400">
-                      🔒 {language === 'ar' ? 'كلمة المرور' : 'Mot de passe'}
+                      {language === 'ar' ? 'كلمة المرور' : 'Mot de passe'}
                     </Label>
                     <div className="relative">
                       <Input
@@ -930,14 +930,14 @@ export default function Employees() {
                       </Button>
                     </div>
                     <div className="text-sm text-rose-600 dark:text-rose-400 flex items-center gap-2">
-                      <span>🔐</span>
+                      <span></span>
                       {language === 'ar' ? 'استخدم حروف وأرقام ورموز خاصة' : 'Utilisez des majuscules, minuscules et chiffres'}
                     </div>
                   </motion.div>
 
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-800">
                     <Label htmlFor="confirmPassword" className="font-bold text-lg text-violet-700 dark:text-violet-400">
-                      ✓ {language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}
+                      {language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}
                     </Label>
                     <div className="relative">
                       <Input
@@ -968,7 +968,7 @@ export default function Employees() {
                     >
                       <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
                       <span className="text-red-700 dark:text-red-400 font-semibold">
-                        {language === 'ar' ? '⚠️ كلمات المرور غير متطابقة' : '⚠️ Les mots de passe ne correspondent pas'}
+                        {language === 'ar' ? 'كلمات المرور غير متطابقة' : 'Les mots de passe ne correspondent pas'}
                       </span>
                     </motion.div>
                   )}
@@ -981,7 +981,7 @@ export default function Employees() {
                     >
                       <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                       <span className="text-green-700 dark:text-green-400 font-semibold">
-                        ✅ {language === 'ar' ? 'كلمات المرور متطابقة' : 'Mots de passe correspondants'}
+                        {language === 'ar' ? 'كلمات المرور متطابقة' : 'Mots de passe correspondants'}
                       </span>
                     </motion.div>
                   )}
@@ -997,16 +997,16 @@ export default function Employees() {
               onClick={() => setIsDialogOpen(false)}
               className="rounded-lg px-6 font-bold"
             >
-              ❌ {language === 'ar' ? 'إلغاء' : 'Annuler'}
+              {language === 'ar' ? 'إلغاء' : 'Annuler'}
             </Button>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={handleSubmit}
                 className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-lg px-8 py-2"
               >
-                {dialogMode === 'create' && '✨ ' + (language === 'ar' ? 'إنشاء الموظف' : 'Créer Employé')}
-                {dialogMode === 'edit' && '💾 ' + (language === 'ar' ? 'حفظ التغييرات' : 'Enregistrer')}
-                {dialogMode === 'payment' && '💳 ' + (language === 'ar' ? 'تسجيل الدفعة' : 'Enregistrer Paiement')}
+                {dialogMode === 'create' && '' + (language === 'ar' ? 'إنشاء الموظف' : 'Créer Employé')}
+                {dialogMode === 'edit' && '' + (language === 'ar' ? 'حفظ التغييرات' : 'Enregistrer')}
+                {dialogMode === 'payment' && '' + (language === 'ar' ? 'تسجيل الدفعة' : 'Enregistrer Paiement')}
               </Button>
             </motion.div>
           </DialogFooter>
@@ -1018,7 +1018,7 @@ export default function Employees() {
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-800">
           <DialogHeader className="pb-6 border-b-2 border-purple-200 dark:border-purple-800">
             <DialogTitle className="text-2xl font-black flex items-center gap-2">
-              📋 {language === 'ar' ? 'سجل الدفع' : 'Historique de paiements'}
+              {language === 'ar' ? 'سجل الدفع' : 'Historique de paiements'}
             </DialogTitle>
             <DialogDescription className="text-base mt-2">
               {language === 'ar' ? 'جميع المدفوعات المسجلة لـ' : 'Tous les paiements enregistrés pour'} <strong className="text-purple-600 dark:text-purple-400">{selectedEmployee?.full_name}</strong>
@@ -1031,10 +1031,10 @@ export default function Employees() {
                 <Table>
                   <TableHeader className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40">
                     <TableRow>
-                      <TableHead className="font-bold">📅 {language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
-                      <TableHead className="font-bold">📋 {language === 'ar' ? 'النوع' : 'Type'}</TableHead>
-                      <TableHead className="text-right font-bold">💰 {language === 'ar' ? 'المبلغ' : 'Montant'}</TableHead>
-                      <TableHead className="text-center font-bold">⚙️ {language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                      <TableHead className="font-bold">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
+                      <TableHead className="font-bold">{language === 'ar' ? 'النوع' : 'Type'}</TableHead>
+                      <TableHead className="text-right font-bold">{language === 'ar' ? 'المبلغ' : 'Montant'}</TableHead>
+                      <TableHead className="text-center font-bold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1043,7 +1043,7 @@ export default function Employees() {
                         <TableCell>{formatDate(payment.date)}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-700">
-                            {payment.type === 'salary' ? '💼 ' + (language === 'ar' ? 'راتب' : 'Salaire') : payment.type === 'bonus' ? '🎁 ' + (language === 'ar' ? 'مكافأة' : 'Prime') : '📈 ' + (language === 'ar' ? 'عمولة' : 'Commission')}
+                            {payment.type === 'salary' ? '' + (language === 'ar' ? 'راتب' : 'Salaire') : payment.type === 'bonus' ? '' + (language === 'ar' ? 'مكافأة' : 'Prime') : '' + (language === 'ar' ? 'عمولة' : 'Commission')}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right font-bold text-green-600 dark:text-green-400">
@@ -1072,7 +1072,7 @@ export default function Employees() {
                             }}
                             className="px-3 py-1 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 font-bold text-sm"
                           >
-                            🗑️ {language === 'ar' ? 'حذف' : 'Supprimer'}
+                            {language === 'ar' ? 'حذف' : 'Supprimer'}
                           </motion.button>
                         </TableCell>
                       </TableRow>
@@ -1083,7 +1083,7 @@ export default function Employees() {
             ) : (
               <div className="text-center py-12 px-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-dashed border-purple-300 dark:border-purple-700">
                 <p className="text-lg text-muted-foreground">
-                  {language === 'ar' ? '📭 لم يتم تسجيل أي مدفوعات' : '📭 Aucun paiement enregistré'}
+                  {language === 'ar' ? 'لم يتم تسجيل أي مدفوعات' : 'Aucun paiement enregistré'}
                 </p>
               </div>
             )}
@@ -1095,7 +1095,7 @@ export default function Employees() {
               onClick={() => setIsHistoryDialogOpen(false)}
               className="rounded-lg px-6 font-bold"
             >
-              ✖️ {language === 'ar' ? 'إغلاق' : 'Fermer'}
+              {language === 'ar' ? 'إغلاق' : 'Fermer'}
             </Button>
           </DialogFooter>
         </DialogContent>

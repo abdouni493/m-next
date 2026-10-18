@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import JsBarcode from "jsbarcode"; // ✅ offline import
+import JsBarcode from "jsbarcode"; // offline import
 import { Printer, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,7 +137,7 @@ export default function Barcodes() {
       <div className="flex items-center justify-between border-b pb-4 mb-6">
         <div>
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">
-            🔐 {texts[language].headerTitle}
+            {texts[language].headerTitle}
           </h1>
           <p className="text-muted-foreground text-lg">
             {texts[language].headerSubtitle}
@@ -149,7 +149,7 @@ export default function Barcodes() {
       <Card className="shadow-lg rounded-xl border-0">
         <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-t-xl p-4">
           <CardTitle className="text-xl font-semibold">
-            📝 {texts[language].generateCardTitle}
+            {texts[language].generateCardTitle}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-5">

@@ -21,17 +21,28 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
-				display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+				display: ['Sora', 'Inter', 'sans-serif'],
 				sora: ['Sora', 'Inter', 'sans-serif'],
 				arabic: ['IBM Plex Sans Arabic', 'Inter', 'sans-serif'],
 				grotesk: ['Space Grotesk', 'sans-serif'],
 				inter: ['Inter', 'sans-serif'],
 			},
 			colors: {
-				// Legacy hard-coded blue/cyan classes across pages follow the new indigo/violet brand.
-				blue: colors.indigo,
-				cyan: colors.violet,
-				sky: colors.indigo,
+				// Volt: no purple/pink neon. Legacy hard-coded colour classes fold into electric blue.
+				cyan: colors.blue,
+				sky: colors.blue,
+				indigo: colors.blue,
+				violet: colors.blue,
+				purple: colors.blue,
+				fuchsia: colors.blue,
+				pink: colors.rose,
+				volt: {
+					DEFAULT: 'hsl(var(--volt))',
+					foreground: 'hsl(var(--volt-foreground))',
+					soft: 'hsl(var(--volt-soft))',
+				},
+				electric: 'hsl(var(--electric))',
+				'surface-2': 'hsl(var(--surface-2))',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

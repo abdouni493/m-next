@@ -136,8 +136,8 @@ export default function PurchaseInvoices() {
   const getText = (key: string): string => {
     const translations: { [key: string]: { [key: string]: string } } = {
       en: {
-        title: '🚚 Purchase Management',
-        new_purchase: '➕ New Purchase',
+        title: 'Purchase Management',
+        new_purchase: 'New Purchase',
         total_invoices: 'Total Invoices',
         paid_invoices: 'Paid Invoices',
         pending_invoices: 'Pending Invoices',
@@ -146,33 +146,33 @@ export default function PurchaseInvoices() {
         showing_invoices: 'Showing latest {count} of {total} invoices',
         no_invoices: 'No invoices yet',
         start_creating: 'Start by creating a new purchase invoice',
-        search_charger: '🔍 Search Chargers...',
-        no_results: '❌ No chargers found',
-        mark: '🏷️ Mark',
-        connector: '🔌 Connector Type',
-        voltage: '⚡ Voltage (V)',
-        wattage: '🔌 Wattage (W)',
-        amperage: '⚙️ Amperage (A)',
-        model: '📱 Model Number',
-        initial_qty: '📦 Initial Quantity',
-        actual_qty: '📊 Actual Quantity',
-        minimal_qty: '⚠️ Minimal Quantity',
-        purchase_price: '💵 Purchase Price',
-        selling_price: '💰 Selling Price',
-        supplier: '🚚 Supplier',
-        amount_paid: '💳 Amount Paid',
-        total_rest: '💰 Rest to Pay',
-        save: '💾 Save Purchase',
-        cancel: '❌ Cancel',
-        loading: '⏳ Loading...',
-        error: '❌ Error',
-        success: '✅ Success',
-        add_new_mark: '➕ Add New Mark',
-        add_new_connector: '➕ Add Connector Type',
-        description: '📝 Description (Optional)',
-        images: '🖼️ Product Images',
-        upload_images: '📤 Upload Images',
-        search_by_name_mark: '🔍 Search by name or mark...',
+        search_charger: 'Search Chargers...',
+        no_results: 'No chargers found',
+        mark: 'Mark',
+        connector: 'Connector Type',
+        voltage: 'Voltage (V)',
+        wattage: 'Wattage (W)',
+        amperage: 'Amperage (A)',
+        model: 'Model Number',
+        initial_qty: 'Initial Quantity',
+        actual_qty: 'Actual Quantity',
+        minimal_qty: 'Minimal Quantity',
+        purchase_price: 'Purchase Price',
+        selling_price: 'Selling Price',
+        supplier: 'Supplier',
+        amount_paid: 'Amount Paid',
+        total_rest: 'Rest to Pay',
+        save: 'Save Purchase',
+        cancel: 'Cancel',
+        loading: 'Loading...',
+        error: 'Error',
+        success: 'Success',
+        add_new_mark: 'Add New Mark',
+        add_new_connector: 'Add Connector Type',
+        description: 'Description (Optional)',
+        images: 'Product Images',
+        upload_images: 'Upload Images',
+        search_by_name_mark: 'Search by name or mark...',
         select_product_first: 'Please select a charger first',
         charger_selected: 'Charger selected successfully',
         purchase_created: 'Purchase created successfully',
@@ -180,8 +180,8 @@ export default function PurchaseInvoices() {
         delete_image: 'Delete image',
       },
       fr: {
-        title: '🚚 Gestion des Achats',
-        new_purchase: '➕ Nouvel Achat',
+        title: 'Gestion des Achats',
+        new_purchase: 'Nouvel Achat',
         total_invoices: 'Total des factures',
         paid_invoices: 'Factures payées',
         pending_invoices: 'Factures en attente',
@@ -190,33 +190,33 @@ export default function PurchaseInvoices() {
         showing_invoices: 'Affichage des {count} dernières sur {total} factures',
         no_invoices: 'Aucune facture',
         start_creating: 'Commencez par créer une nouvelle facture d\'achat',
-        search_charger: '🔍 Rechercher des chargeurs...',
-        no_results: '❌ Aucun chargeur trouvé',
-        mark: '🏷️ Marque',
-        connector: '🔌 Type de connecteur',
-        voltage: '⚡ Tension (V)',
-        wattage: '🔌 Puissance (W)',
-        amperage: '⚙️ Intensité (A)',
-        model: '📱 Numéro de modèle',
-        initial_qty: '📦 Quantité initiale',
-        actual_qty: '📊 Quantité actuelle',
-        minimal_qty: '⚠️ Quantité minimale',
-        purchase_price: '💵 Prix d\'achat',
-        selling_price: '💰 Prix de vente',
-        supplier: '🚚 Fournisseur',
-        amount_paid: '💳 Montant payé',
-        total_rest: '💰 Reste à payer',
-        save: '💾 Sauvegarder l\'achat',
-        cancel: '❌ Annuler',
-        loading: '⏳ Chargement...',
-        error: '❌ Erreur',
-        success: '✅ Succès',
-        add_new_mark: '➕ Ajouter une nouvelle marque',
-        add_new_connector: '➕ Ajouter un type de connecteur',
-        description: '📝 Description (optionnel)',
-        images: '🖼️ Images du produit',
-        upload_images: '📤 Télécharger des images',
-        search_by_name_mark: '🔍 Rechercher par nom ou marque...',
+        search_charger: 'Rechercher des chargeurs...',
+        no_results: 'Aucun chargeur trouvé',
+        mark: 'Marque',
+        connector: 'Type de connecteur',
+        voltage: 'Tension (V)',
+        wattage: 'Puissance (W)',
+        amperage: 'Intensité (A)',
+        model: 'Numéro de modèle',
+        initial_qty: 'Quantité initiale',
+        actual_qty: 'Quantité actuelle',
+        minimal_qty: 'Quantité minimale',
+        purchase_price: 'Prix d\'achat',
+        selling_price: 'Prix de vente',
+        supplier: 'Fournisseur',
+        amount_paid: 'Montant payé',
+        total_rest: 'Reste à payer',
+        save: 'Sauvegarder l\'achat',
+        cancel: 'Annuler',
+        loading: 'Chargement...',
+        error: 'Erreur',
+        success: 'Succès',
+        add_new_mark: 'Ajouter une nouvelle marque',
+        add_new_connector: 'Ajouter un type de connecteur',
+        description: 'Description (optionnel)',
+        images: 'Images du produit',
+        upload_images: 'Télécharger des images',
+        search_by_name_mark: 'Rechercher par nom ou marque...',
         select_product_first: 'Veuillez d\'abord sélectionner un chargeur',
         charger_selected: 'Chargeur sélectionné avec succès',
         purchase_created: 'Achat créé avec succès',
@@ -224,8 +224,8 @@ export default function PurchaseInvoices() {
         delete_image: 'Supprimer l\'image',
       },
       ar: {
-        title: '🚚 إدارة الشراء',
-        new_purchase: '➕ شراء جديد',
+        title: 'إدارة الشراء',
+        new_purchase: 'شراء جديد',
         total_invoices: 'إجمالي الفواتير',
         paid_invoices: 'فواتير مدفوعة',
         pending_invoices: 'فواتير معلقة',
@@ -234,33 +234,33 @@ export default function PurchaseInvoices() {
         showing_invoices: 'عرض آخر {count} من أصل {total} فاتورة',
         no_invoices: 'لا توجد فواتير',
         start_creating: 'ابدأ بإنشاء فاتورة شراء جديدة',
-        search_charger: '🔍 البحث عن الشواحن...',
-        no_results: '❌ لم يتم العثور على شواحن',
-        mark: '🏷️ العلامة',
-        connector: '🔌 نوع الموصل',
-        voltage: '⚡ الجهد (V)',
-        wattage: '🔌 القوة (W)',
-        amperage: '⚙️ التيار (A)',
-        model: '📱 رقم الموديل',
-        initial_qty: '📦 الكمية الأولية',
-        actual_qty: '📊 الكمية الحالية',
-        minimal_qty: '⚠️ الحد الأدنى للكمية',
-        purchase_price: '💵 سعر الشراء',
-        selling_price: '💰 سعر البيع',
-        supplier: '🚚 المورد',
-        amount_paid: '💳 المبلغ المدفوع',
-        total_rest: '💰 الباقي',
-        save: '💾 حفظ الشراء',
-        cancel: '❌ إلغاء',
-        loading: '⏳ جاري التحميل...',
-        error: '❌ خطأ',
-        success: '✅ نجاح',
-        add_new_mark: '➕ إضافة علامة جديدة',
-        add_new_connector: '➕ إضافة نوع موصل',
-        description: '📝 الوصف (اختياري)',
-        images: '🖼️ صور المنتج',
-        upload_images: '📤 تحميل الصور',
-        search_by_name_mark: '🔍 البحث بالاسم أو العلامة...',
+        search_charger: 'البحث عن الشواحن...',
+        no_results: 'لم يتم العثور على شواحن',
+        mark: 'العلامة',
+        connector: 'نوع الموصل',
+        voltage: 'الجهد (V)',
+        wattage: 'القوة (W)',
+        amperage: 'التيار (A)',
+        model: 'رقم الموديل',
+        initial_qty: 'الكمية الأولية',
+        actual_qty: 'الكمية الحالية',
+        minimal_qty: 'الحد الأدنى للكمية',
+        purchase_price: 'سعر الشراء',
+        selling_price: 'سعر البيع',
+        supplier: 'المورد',
+        amount_paid: 'المبلغ المدفوع',
+        total_rest: 'الباقي',
+        save: 'حفظ الشراء',
+        cancel: 'إلغاء',
+        loading: 'جاري التحميل...',
+        error: 'خطأ',
+        success: 'نجاح',
+        add_new_mark: 'إضافة علامة جديدة',
+        add_new_connector: 'إضافة نوع موصل',
+        description: 'الوصف (اختياري)',
+        images: 'صور المنتج',
+        upload_images: 'تحميل الصور',
+        search_by_name_mark: 'البحث بالاسم أو العلامة...',
         select_product_first: 'يرجى تحديد شاحن أولاً',
         charger_selected: 'تم تحديد الشاحن بنجاح',
         purchase_created: 'تم إنشاء الشراء بنجاح',
@@ -678,7 +678,7 @@ export default function PurchaseInvoices() {
                 <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('total_invoices')}</p>
                 <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{invoices.length}</p>
               </div>
-              <div className="text-5xl opacity-50">📋</div>
+              <div className="text-5xl opacity-50"></div>
             </div>
           </motion.div>
 
@@ -694,7 +694,7 @@ export default function PurchaseInvoices() {
                 <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('paid_invoices')}</p>
                 <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{invoices.filter(inv => inv.status === 'paid').length}</p>
               </div>
-              <div className="text-5xl opacity-50">✅</div>
+              <div className="text-5xl opacity-50"></div>
             </div>
           </motion.div>
 
@@ -710,7 +710,7 @@ export default function PurchaseInvoices() {
                 <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('pending_invoices')}</p>
                 <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{invoices.filter(inv => inv.status === 'pending').length}</p>
               </div>
-              <div className="text-5xl opacity-50">⏳</div>
+              <div className="text-5xl opacity-50"></div>
             </div>
           </motion.div>
 
@@ -724,9 +724,9 @@ export default function PurchaseInvoices() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('total_amount')}</p>
-                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">💵 {invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0).toFixed(2)}</p>
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0).toFixed(2)}</p>
               </div>
-              <div className="text-5xl opacity-50">💰</div>
+              <div className="text-5xl opacity-50"></div>
             </div>
           </motion.div>
         </div>
@@ -756,7 +756,7 @@ export default function PurchaseInvoices() {
                   }}
                   className="text-2xl hover:scale-110 transition-transform"
                 >
-                  ❌
+                  
                 </button>
               </div>
 
@@ -794,15 +794,15 @@ export default function PurchaseInvoices() {
                               <div className="flex-1">
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">{product.name}</h3>
                                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                                  {product.mark?.name && `🏷️ ${product.mark.name}`}
-                                  {product.connector_type?.name && ` • 🔌 ${product.connector_type.name}`}
+                                  {product.mark?.name && `${product.mark.name}`}
+                                  {product.connector_type?.name && ` • ${product.connector_type.name}`}
                                 </p>
                                 <p className="text-sm mt-2">
-                                  ⚡ {product.voltage}V • 🔌 {product.wattage}W • ⚙️ {product.amperage}A
+                                  {product.voltage}V • {product.wattage}W • {product.amperage}A
                                 </p>
-                                <p className="text-lg font-bold text-blue-600 mt-2">💵 {product.purchase_price}</p>
+                                <p className="text-lg font-bold text-blue-600 mt-2">{product.purchase_price}</p>
                               </div>
-                              <Badge className="h-fit bg-blue-500">➜ {language === 'ar' ? 'اختيار' : 'Select'}</Badge>
+                              <Badge className="h-fit bg-blue-500">{language === 'ar' ? 'اختيار' : 'Select'}</Badge>
                             </div>
                           </motion.div>
                         ))}
@@ -811,7 +811,7 @@ export default function PurchaseInvoices() {
 
                     {searchTerm && searchResults.length === 0 && (
                       <div className="text-center py-12 text-slate-500">
-                        <p className="text-3xl mb-2">📭</p>
+                        <p className="text-3xl mb-2"></p>
                         <p>{getText('no_results')}</p>
                       </div>
                     )}
@@ -822,7 +822,7 @@ export default function PurchaseInvoices() {
                     {selectedProduct && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-2 border-blue-200">
                         <p className="font-bold text-lg">
-                          ✅ {language === 'ar' ? 'تم تحديد' : 'Selected'}: <span className="text-blue-600">{selectedProduct.name}</span>
+                          {language === 'ar' ? 'تم تحديد' : 'Selected'}: <span className="text-blue-600">{selectedProduct.name}</span>
                         </p>
                         <button
                           onClick={() => setStep('search')}
@@ -840,12 +840,12 @@ export default function PurchaseInvoices() {
                       transition={{ delay: 0 }}
                       className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200"
                     >
-                      <h3 className="text-lg font-bold text-cyan-900 mb-4">🖼️ {language === 'ar' ? 'صور المنتج' : 'Product Images'}</h3>
+                      <h3 className="text-lg font-bold text-cyan-900 mb-4">{language === 'ar' ? 'صور المنتج' : 'Product Images'}</h3>
                       
                       {/* Current Images Preview */}
                       {chargerImages.length > 0 && (
                         <div className="mb-4 p-4 bg-white dark:bg-slate-700 rounded-lg border border-cyan-300 dark:border-cyan-600">
-                          <p className="text-xs font-semibold text-cyan-700 mb-3">📸 {language === 'ar' ? 'الصور الحالية' : 'Current Images'}</p>
+                          <p className="text-xs font-semibold text-cyan-700 mb-3">{language === 'ar' ? 'الصور الحالية' : 'Current Images'}</p>
                           <div className="grid grid-cols-4 gap-2">
                             {chargerImages.map((image) => (
                               <div key={image.id} className="relative group">
@@ -861,7 +861,7 @@ export default function PurchaseInvoices() {
                                     className="bg-red-500 hover:bg-red-600 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
                                     title={getText('delete_image')}
                                   >
-                                    🗑️
+                                    
                                   </button>
                                 </div>
                               </div>
@@ -883,10 +883,10 @@ export default function PurchaseInvoices() {
                         <label htmlFor="imageInput" className="cursor-pointer block">
                           <p className="text-cyan-900 font-semibold">
                             {formData.images.length > 0
-                              ? `✅ ${formData.images.length} ${language === 'ar' ? 'صورة محددة' : 'image(s) selected'}`
+                              ? `${formData.images.length} ${language === 'ar' ? 'صورة محددة' : 'image(s) selected'}`
                               : language === 'ar'
-                              ? '📤 اضغط لتحديد الصور'
-                              : '📤 Click to select images'}
+                              ? 'اضغط لتحديد الصور'
+                              : 'Click to select images'}
                           </p>
                         </label>
                       </div>
@@ -908,7 +908,7 @@ export default function PurchaseInvoices() {
                                   className="bg-red-500 hover:bg-red-600 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
                                   title={getText('delete_image')}
                                 >
-                                  🗑️
+                                  
                                 </button>
                               </div>
                               <p className="text-xs text-cyan-700 mt-1 truncate">{image.name}</p>
@@ -925,11 +925,11 @@ export default function PurchaseInvoices() {
                       transition={{ delay: 0.05 }}
                       className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
                     >
-                      <h3 className="text-lg font-bold text-blue-900 mb-4">📦 {language === 'ar' ? 'معلومات المنتج' : 'Product Information'}</h3>
+                      <h3 className="text-lg font-bold text-blue-900 mb-4">{language === 'ar' ? 'معلومات المنتج' : 'Product Information'}</h3>
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-semibold mb-2 text-blue-900">
-                            🏷️ {language === 'ar' ? 'اسم المنتج' : 'Product Name'}
+                            {language === 'ar' ? 'اسم المنتج' : 'Product Name'}
                           </label>
                           <input
                             type="text"
@@ -940,7 +940,7 @@ export default function PurchaseInvoices() {
                         </div>
                         <div>
                           <label className="block text-sm font-semibold mb-2 text-blue-900">
-                            📝 {language === 'ar' ? 'الوصف' : 'Description'}
+                            {language === 'ar' ? 'الوصف' : 'Description'}
                           </label>
                           <textarea
                             value={formData.description}
@@ -959,11 +959,11 @@ export default function PurchaseInvoices() {
                       transition={{ delay: 0.1 }}
                       className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200"
                     >
-                      <h3 className="text-lg font-bold text-purple-900 mb-4">🏢 {language === 'ar' ? 'الماركة والموصل' : 'Brand & Connector'}</h3>
+                      <h3 className="text-lg font-bold text-purple-900 mb-4">{language === 'ar' ? 'الماركة والموصل' : 'Brand & Connector'}</h3>
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
                           <label className="block text-sm font-semibold mb-2 text-purple-900">
-                            🏷️ {language === 'ar' ? 'الماركة' : 'Mark / Brand'}
+                            {language === 'ar' ? 'الماركة' : 'Mark / Brand'}
                           </label>
                           <div className="flex gap-2">
                             <select
@@ -983,14 +983,14 @@ export default function PurchaseInvoices() {
                               variant="outline"
                               className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
                             >
-                              ➕
+                              
                             </Button>
                           </div>
                         </div>
 
                         <div>
                           <label className="block text-sm font-semibold mb-2 text-purple-900">
-                            🔗 {language === 'ar' ? 'نوع الموصل' : 'Connector Type'}
+                            {language === 'ar' ? 'نوع الموصل' : 'Connector Type'}
                           </label>
                           <div className="flex gap-2">
                             <select
@@ -1010,14 +1010,14 @@ export default function PurchaseInvoices() {
                               variant="outline"
                               className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
                             >
-                              ➕
+                              
                             </Button>
                           </div>
                         </div>
 
                         <div className="col-span-2">
                           <label className="block text-sm font-semibold mb-2 text-indigo-900">
-                            🚚 {language === 'ar' ? 'المورد' : 'Supplier'}
+                            {language === 'ar' ? 'المورد' : 'Supplier'}
                           </label>
                           <select
                             value={formData.supplier_id}
@@ -1042,10 +1042,10 @@ export default function PurchaseInvoices() {
                       transition={{ delay: 0.15 }}
                       className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200"
                     >
-                      <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-300 mb-4">⚡ {language === 'ar' ? 'المواصفات الكهربائية' : 'Electrical Specs'}</h3>
+                      <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-300 mb-4">{language === 'ar' ? 'المواصفات الكهربائية' : 'Electrical Specs'}</h3>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">⚡ {language === 'ar' ? 'الجهد' : 'Voltage'} (V)</label>
+                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">{language === 'ar' ? 'الجهد' : 'Voltage'} (V)</label>
                           <input
                             type="number"
                             step="0.1"
@@ -1055,7 +1055,7 @@ export default function PurchaseInvoices() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">🔌 {language === 'ar' ? 'القدرة' : 'Wattage'} (W)</label>
+                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">{language === 'ar' ? 'القدرة' : 'Wattage'} (W)</label>
                           <input
                             type="number"
                             step="0.1"
@@ -1065,7 +1065,7 @@ export default function PurchaseInvoices() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900">⚙️ {language === 'ar' ? 'التيار' : 'Amperage'} (A)</label>
+                          <label className="block text-sm font-semibold mb-2 text-yellow-900">{language === 'ar' ? 'التيار' : 'Amperage'} (A)</label>
                           <input
                             type="number"
                             step="0.1"
@@ -1076,7 +1076,7 @@ export default function PurchaseInvoices() {
                         </div>
                       </div>
                       <div className="mt-4">
-                        <label className="block text-sm font-semibold mb-2 text-yellow-900">📱 {language === 'ar' ? 'رقم الموديل' : 'Model Number'}</label>
+                        <label className="block text-sm font-semibold mb-2 text-yellow-900">{language === 'ar' ? 'رقم الموديل' : 'Model Number'}</label>
                         <input
                           type="text"
                           value={formData.model_number}
@@ -1093,10 +1093,10 @@ export default function PurchaseInvoices() {
                       transition={{ delay: 0.2 }}
                       className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
                     >
-                      <h3 className="text-lg font-bold text-green-900 mb-4">📊 {language === 'ar' ? 'المخزون' : 'Inventory'}</h3>
+                      <h3 className="text-lg font-bold text-green-900 mb-4">{language === 'ar' ? 'المخزون' : 'Inventory'}</h3>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-green-900">📦 {language === 'ar' ? 'الكمية الأولية' : 'Initial Qty'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-green-900">{language === 'ar' ? 'الكمية الأولية' : 'Initial Qty'}</label>
                           <input
                             type="number"
                             value={formData.quantity_initial}
@@ -1105,7 +1105,7 @@ export default function PurchaseInvoices() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-green-900">📊 {language === 'ar' ? 'الكمية الفعلية' : 'Actual Qty'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-green-900">{language === 'ar' ? 'الكمية الفعلية' : 'Actual Qty'}</label>
                           <input
                             type="number"
                             value={formData.quantity_actual}
@@ -1114,7 +1114,7 @@ export default function PurchaseInvoices() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-green-900">⚠️ {language === 'ar' ? 'الحد الأدنى' : 'Minimal Qty'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-green-900">{language === 'ar' ? 'الحد الأدنى' : 'Minimal Qty'}</label>
                           <input
                             type="number"
                             value={formData.quantity_minimal}
@@ -1132,10 +1132,10 @@ export default function PurchaseInvoices() {
                       transition={{ delay: 0.25 }}
                       className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200"
                     >
-                      <h3 className="text-lg font-bold text-orange-900 mb-4">💳 {language === 'ar' ? 'السعر والدفع' : 'Payment & Pricing'}</h3>
+                      <h3 className="text-lg font-bold text-orange-900 mb-4">{language === 'ar' ? 'السعر والدفع' : 'Payment & Pricing'}</h3>
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-orange-900">💵 {language === 'ar' ? 'سعر الشراء' : 'Purchase Price'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-orange-900">{language === 'ar' ? 'سعر الشراء' : 'Purchase Price'}</label>
                           <input
                             type="number"
                             step="0.01"
@@ -1145,7 +1145,7 @@ export default function PurchaseInvoices() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-orange-900">🏷️ {language === 'ar' ? 'سعر البيع' : 'Selling Price'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-orange-900">{language === 'ar' ? 'سعر البيع' : 'Selling Price'}</label>
                           <input
                             type="number"
                             step="0.01"
@@ -1161,7 +1161,7 @@ export default function PurchaseInvoices() {
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
                             <p className="text-sm text-slate-600 mb-1">{language === 'ar' ? 'السعر الإجمالي' : 'Total Price'}</p>
-                            <p className="text-2xl font-bold text-emerald-600">💵 {totalPrice.toFixed(2)}</p>
+                            <p className="text-2xl font-bold text-emerald-600">{totalPrice.toFixed(2)}</p>
                           </div>
                           <div>
                             <label className="block text-sm font-semibold mb-2 text-orange-900">{language === 'ar' ? 'المبلغ المدفوع' : 'Amount Paid'}</label>
@@ -1177,7 +1177,7 @@ export default function PurchaseInvoices() {
                         <div className="text-right border-t border-emerald-300 pt-3">
                           <p className="text-sm text-slate-600 mb-1">{language === 'ar' ? 'المتبقي' : 'Balance Remaining'}</p>
                           <p className={`text-2xl font-bold ${restToPay > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            💰 {restToPay.toFixed(2)}
+                            {restToPay.toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -1299,12 +1299,12 @@ export default function PurchaseInvoices() {
       >
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">📦 {getText('recent_invoices')}</h2>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{getText('recent_invoices')}</h2>
             <p className="text-slate-600 dark:text-slate-400 mt-2">
               {getText('showing_invoices').replace('{count}', Math.min(10, invoices.length).toString()).replace('{total}', invoices.length.toString())}
             </p>
           </div>
-          <div className="text-5xl opacity-30">📊</div>
+          <div className="text-5xl opacity-30"></div>
         </div>
 
         {invoices.length === 0 ? (
@@ -1313,7 +1313,7 @@ export default function PurchaseInvoices() {
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-            <p className="text-2xl text-slate-400">📭 {getText('no_invoices')}</p>
+            <p className="text-2xl text-slate-400">{getText('no_invoices')}</p>
             <p className="text-slate-500 mt-2">{getText('start_creating')}</p>
           </motion.div>
         ) : (
@@ -1342,17 +1342,17 @@ export default function PurchaseInvoices() {
                           ? 'bg-green-500 hover:bg-green-600 text-white' 
                           : 'bg-yellow-500 hover:bg-yellow-600 text-white'
                       }`}>
-                        {invoice.status === 'paid' ? '✅ Paid' : '⏳ Pending'}
+                        {invoice.status === 'paid' ? 'Paid' : 'Pending'}
                       </Badge>
                     </div>
 
                     <div className="space-y-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
                       <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                        <span>📅</span>
+                        <span></span>
                         <span className="text-sm">{new Date(invoice.invoice_date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                        <span>🏪</span>
+                        <span></span>
                         <span className="text-sm">{invoice.store_name || 'Unknown Store'}</span>
                       </div>
                     </div>
@@ -1360,7 +1360,7 @@ export default function PurchaseInvoices() {
                     <div className="pt-4">
                       <p className="text-xs text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-2">{language === 'ar' ? 'المجموع' : 'Total Amount'}</p>
                       <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                        💵 {parseFloat(invoice.total_amount).toFixed(2)}
+                        {parseFloat(invoice.total_amount).toFixed(2)}
                       </p>
                     </div>
                   </CardContent>
@@ -1384,7 +1384,7 @@ export default function PurchaseInvoices() {
                 // Can add navigation to full invoices list here
               }}
             >
-              📋 {language === 'ar' ? `عرض جميع الفواتير (${invoices.length})` : `View all invoices (${invoices.length})`}
+              {language === 'ar' ? `عرض جميع الفواتير (${invoices.length})` : `View all invoices (${invoices.length})`}
             </Button>
           </motion.div>
         )}

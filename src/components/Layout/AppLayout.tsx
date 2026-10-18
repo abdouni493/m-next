@@ -4,6 +4,8 @@ import { Header } from './Header';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Helmet } from 'react-helmet-async';
+import { findNavItem } from '@/admin/nav';
 
 const DESKTOP_QUERY = '(min-width: 1024px)';
 const STORAGE_KEY = 'admin:sidebar';
@@ -46,8 +48,14 @@ export const AppLayout = () => {
 
   const slideFrom = isRTL ? '100%' : '-100%';
 
+  const pageTitle = findNavItem(location.pathname)?.title || 'Administration';
+
   return (
     <div className="flex h-dvh bg-background">
+      <Helmet>
+        <title>{`${pageTitle} · Admin M NEXT`}</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Desktop: sidebar pushes content and hides completely when closed */}
       {isDesktop && (
         <AnimatePresence initial={false}>
@@ -55,7 +63,7 @@ export const AppLayout = () => {
             <motion.div
               key="sidebar"
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 272, opacity: 1 }}
+              animate={{ width: 248, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 380, damping: 38 }}
               className="shrink-0 overflow-hidden"
@@ -101,11 +109,11 @@ export const AppLayout = () => {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen((o) => !o)} sidebarOpen={sidebarOpen} />
-        <main className="admin-main custom-scrollbar flex-1 overflow-auto px-3 py-4 sm:px-5 md:py-6 lg:px-8">
+        <main className="admin-main custom-scrollbar flex-1 overflow-auto px-3 py-4 sm:px-6 md:py-6">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
-              className="mx-auto max-w-7xl"
+              className="mx-auto max-w-[1440px]"
               initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
               exit={{ opacity: 0, y: -6, transition: { duration: 0.16, ease: [0.55, 0, 1, 0.45] } }}

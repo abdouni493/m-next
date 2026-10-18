@@ -150,7 +150,7 @@ export default function Commands() {
   const fetchAllOrders = async () => {
     setLoadingOrders(true);
     try {
-      console.log('🔍 Fetching all orders with items (optimized query)...');
+      console.log('Fetching all orders with items (optimized query)...');
       
       // First, fetch just the orders with count and thumbnail for card display
       const { data: orders, error } = await supabase
@@ -176,16 +176,16 @@ export default function Commands() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error fetching orders:', error);
+        console.error('Error fetching orders:', error);
         throw error;
       }
 
-      console.log(`✅ Loaded ${(orders || []).length} orders (fast initial load)`);
+      console.log(`Loaded ${(orders || []).length} orders (fast initial load)`);
       
       setOrders(orders || []);
       applyFilters(orders || [], searchQuery, statusFilter);
     } catch (error) {
-      console.error('❌ Error fetching orders:', error);
+      console.error('Error fetching orders:', error);
       toast({
         title: language === 'ar' ? 'خطأ' : 'Erreur',
         description: language === 'ar' ? 'فشل في جلب الطلبات' : 'Impossible de charger les commandes',
@@ -237,7 +237,7 @@ export default function Commands() {
     try {
       await approveTestimonial(testimonialId);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم الموافقة على الرأي' : 'Avis approuvé',
       });
       fetchPendingTestimonials();
@@ -257,7 +257,7 @@ export default function Commands() {
     try {
       await rejectTestimonial(testimonialId);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم رفض الرأي' : 'Avis rejeté',
       });
       fetchPendingTestimonials();
@@ -276,7 +276,7 @@ export default function Commands() {
     try {
       await deleteTestimonial(testimonialId);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم حذف الرأي' : 'Avis supprimé',
       });
       fetchTestimonials();
@@ -332,7 +332,7 @@ export default function Commands() {
   // View order details - OPTIMIZED
   const handleViewDetails = async (order: Order) => {
     try {
-      console.log('📋 Fetching order items for:', order.id);
+      console.log('Fetching order items for:', order.id);
       
       // Fetch only the items for this order (fast, selective query)
       const { data: items, error } = await supabase
@@ -360,7 +360,7 @@ export default function Commands() {
         throw error;
       }
 
-      console.log(`✅ Fetched ${items?.length || 0} items for order ${order.id}`);
+      console.log(`Fetched ${items?.length || 0} items for order ${order.id}`);
       
       setSelectedOrder(order);
       setOrderItems(items || []);
@@ -396,7 +396,7 @@ export default function Commands() {
     try {
       await updateOrder(selectedOrder.id, editForm);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم تحديث الطلب' : 'Commande mise à jour',
       });
       setShowEditDialog(false);
@@ -417,7 +417,7 @@ export default function Commands() {
     try {
       await deleteOrder(selectedOrder.id);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم حذف الطلب' : 'Commande supprimée',
       });
       setShowDeleteDialog(false);
@@ -436,7 +436,7 @@ export default function Commands() {
     try {
       await confirmOrder(order.id);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم تأكيد الطلب' : 'Commande confirmée',
       });
       fetchAllOrders();
@@ -454,7 +454,7 @@ export default function Commands() {
     try {
       await startOrderDelivery(order.id);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم بدء التوصيل' : 'Livraison en cours',
       });
       fetchAllOrders();
@@ -472,7 +472,7 @@ export default function Commands() {
     try {
       await finalizeOrder(order.id);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم إنهاء الطلب' : 'Commande livrée',
       });
       fetchAllOrders();
@@ -496,7 +496,7 @@ export default function Commands() {
     try {
       await cancelOrder(order.id, reason || undefined);
       toast({
-        title: language === 'ar' ? '✅ تم' : '✅ Succès',
+        title: language === 'ar' ? 'تم' : 'Succès',
         description: language === 'ar' ? 'تم إلغاء الطلب' : 'Commande annulée',
       });
       fetchAllOrders();
@@ -515,27 +515,27 @@ export default function Commands() {
     const statusConfig: Record<string, { color: string; emoji: string; label: string }> = {
       pending: {
         color: 'bg-yellow-500 hover:bg-yellow-600',
-        emoji: '⏳',
+        emoji: '',
         label: language === 'ar' ? 'قيد الانتظار' : 'En attente'
       },
       confirmed: {
         color: 'bg-blue-500 hover:bg-blue-600',
-        emoji: '✅',
+        emoji: '',
         label: language === 'ar' ? 'مؤكد' : 'Confirmé'
       },
       on_delivery: {
         color: 'bg-purple-500 hover:bg-purple-600',
-        emoji: '🚚',
+        emoji: '',
         label: language === 'ar' ? 'في التوصيل' : 'En livraison'
       },
       delivered: {
         color: 'bg-green-500 hover:bg-green-600',
-        emoji: '🎉',
+        emoji: '',
         label: language === 'ar' ? 'تم التوصيل' : 'Livré'
       },
       cancelled: {
         color: 'bg-red-500 hover:bg-red-600',
-        emoji: '❌',
+        emoji: '',
         label: language === 'ar' ? 'ملغى' : 'Annulé'
       }
     };
@@ -557,7 +557,7 @@ export default function Commands() {
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 flex items-center gap-3">
               <Truck className="w-8 h-8" />
-              {language === 'ar' ? '📦 إدارة الطلبات' : '📦 Gestion des Commandes'}
+              {language === 'ar' ? 'إدارة الطلبات' : 'Gestion des Commandes'}
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mt-2">
               {language === 'ar' ? 'عرض وإدارة جميع الطلبات' : 'Afficher et gérer toutes les commandes'}
@@ -570,7 +570,7 @@ export default function Commands() {
             className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg"
           >
             <MessageSquare className="w-5 h-5" />
-            {language === 'ar' ? '💬 الآراء' : '💬 Avis'}
+            {language === 'ar' ? 'الآراء' : 'Avis'}
             {showTestimonialsPanel ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </motion.button>
         </div>
@@ -670,7 +670,7 @@ export default function Commands() {
         <DialogContent className="max-w-4xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="border-b border-slate-200 dark:border-slate-700 pb-4">
             <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">
-              {language === 'ar' ? '📋 تفاصيل الطلب الكاملة' : '📋 Détails Complets de la Commande'}
+              {language === 'ar' ? 'تفاصيل الطلب الكاملة' : 'Détails Complets de la Commande'}
             </DialogTitle>
             <DialogDescription className="text-slate-600 dark:text-slate-400 mt-1">
               {language === 'ar' ? 'معرف الطلب: ' : 'Numéro: '}{selectedOrder?.id.slice(0, 12)}...
@@ -701,7 +701,7 @@ export default function Commands() {
                 <div className="md:col-span-1">
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
                     <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4 flex items-center gap-2">
-                      <span>👤</span>
+                      <span></span>
                       {language === 'ar' ? 'بيانات العميل' : 'Client'}
                     </h3>
                     <div className="space-y-3">
@@ -728,7 +728,7 @@ export default function Commands() {
                       <div>
                         <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold uppercase">{language === 'ar' ? 'نوع التوصيل' : 'Livraison'}</p>
                         <p className="text-sm font-bold text-slate-900 dark:text-white">
-                          {selectedOrder.delivery_type === 'bureau' ? '📮 Bureau' : '🏠 Domicile'}
+                          {selectedOrder.delivery_type === 'bureau' ? 'Bureau' : 'Domicile'}
                         </p>
                       </div>
                     </div>
@@ -738,7 +738,7 @@ export default function Commands() {
                 {/* Products List - Column 2-3 */}
                 <div className="md:col-span-2">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <span>📦</span>
+                    <span></span>
                     {language === 'ar' ? `المنتجات (${orderItems.length})` : `Produits (${orderItems.length})`}
                   </h3>
                   <div className="space-y-4">
@@ -749,7 +749,7 @@ export default function Commands() {
                           <h4 className="text-base font-bold text-slate-900 dark:text-white mb-1">{item.product_name}</h4>
                           {item.product_mark && (
                             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded text-xs font-semibold">
-                              🏷️ {item.product_mark}
+                              {item.product_mark}
                             </span>
                           )}
                         </div>
@@ -835,7 +835,7 @@ export default function Commands() {
               {/* Pricing Summary Section */}
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
                 <h3 className="text-lg font-bold text-green-900 dark:text-green-300 mb-3">
-                  {language === 'ar' ? '💰 ملخص الدفع' : '💰 Résumé du Paiement'}
+                  {language === 'ar' ? 'ملخص الدفع' : 'Résumé du Paiement'}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -860,7 +860,7 @@ export default function Commands() {
               {/* Timeline Section */}
               <div className="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
-                  {language === 'ar' ? '📅 الجدول الزمني' : '📅 Timeline'}
+                  {language === 'ar' ? 'الجدول الزمني' : 'Timeline'}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-3">
@@ -882,7 +882,7 @@ export default function Commands() {
         <DialogContent className="max-w-3xl bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-purple-700 max-h-96 overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
-              ✏️ {language === 'ar' ? 'تعديل الطلب' : 'Éditer la Commande'}
+              {language === 'ar' ? 'تعديل الطلب' : 'Éditer la Commande'}
             </DialogTitle>
             <DialogDescription>
               {language === 'ar' ? 'تحديث معلومات الطلب والعميل' : 'Mettre à jour les informations de la commande et du client'}
@@ -892,12 +892,12 @@ export default function Commands() {
           <div className="space-y-5">
             {/* Customer Information Section */}
             <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-4 rounded-xl border-2 border-blue-200 dark:border-blue-700">
-              <h3 className="font-bold text-lg mb-4 text-blue-900 dark:text-blue-100">👤 {language === 'ar' ? 'معلومات العميل' : 'Informations Client'}</h3>
+              <h3 className="font-bold text-lg mb-4 text-blue-900 dark:text-blue-100">{language === 'ar' ? 'معلومات العميل' : 'Informations Client'}</h3>
               
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
-                    👤 {language === 'ar' ? 'اسم العميل' : 'Nom du Client'}
+                    {language === 'ar' ? 'اسم العميل' : 'Nom du Client'}
                   </label>
                   <Input
                     value={editForm.customer_name}
@@ -909,7 +909,7 @@ export default function Commands() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
-                      📱 {language === 'ar' ? 'الهاتف' : 'Téléphone'}
+                      {language === 'ar' ? 'الهاتف' : 'Téléphone'}
                     </label>
                     <Input
                       value={editForm.customer_phone}
@@ -919,7 +919,7 @@ export default function Commands() {
                   </div>
                   <div>
                     <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
-                      ✉️ {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                      {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                     </label>
                     <Input
                       value={editForm.customer_email}
@@ -932,7 +932,7 @@ export default function Commands() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
-                      📍 {language === 'ar' ? 'الولاية' : 'Wilaya'}
+                      {language === 'ar' ? 'الولاية' : 'Wilaya'}
                     </label>
                     <Input
                       value={editForm.customer_wilaya}
@@ -942,22 +942,22 @@ export default function Commands() {
                   </div>
                   <div>
                     <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
-                      🏠 {language === 'ar' ? 'نوع التوصيل' : 'Type de Livraison'}
+                      {language === 'ar' ? 'نوع التوصيل' : 'Type de Livraison'}
                     </label>
                     <select
                       value={editForm.delivery_type}
                       onChange={(e) => setEditForm({ ...editForm, delivery_type: e.target.value as 'bureau' | 'domicile' })}
                       className="w-full bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-2 focus:border-blue-500 font-bold text-slate-900 dark:text-white"
                     >
-                      <option value="bureau">📮 Bureau</option>
-                      <option value="domicile">🏠 Domicile</option>
+                      <option value="bureau">Bureau</option>
+                      <option value="domicile">Domicile</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
-                    🗺️ {language === 'ar' ? 'العنوان الكامل' : 'Adresse Complète'}
+                    {language === 'ar' ? 'العنوان الكامل' : 'Adresse Complète'}
                   </label>
                   <textarea
                     value={editForm.customer_address}
@@ -971,7 +971,7 @@ export default function Commands() {
 
             {/* Admin Notes Section */}
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-800/30 p-4 rounded-xl border-2 border-yellow-200 dark:border-yellow-700">
-              <h3 className="font-bold text-lg mb-3 text-yellow-900 dark:text-yellow-100">📝 {language === 'ar' ? 'ملاحظات الإدارة' : 'Notes d\'Administration'}</h3>
+              <h3 className="font-bold text-lg mb-3 text-yellow-900 dark:text-yellow-100">{language === 'ar' ? 'ملاحظات الإدارة' : 'Notes d\'Administration'}</h3>
               <textarea
                 value={editForm.admin_notes}
                 onChange={(e) => setEditForm({ ...editForm, admin_notes: e.target.value })}
@@ -987,13 +987,13 @@ export default function Commands() {
                 onClick={handleSaveEdit}
                 className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 h-10"
               >
-                ✅ {language === 'ar' ? 'حفظ التغييرات' : 'Enregistrer'}
+                {language === 'ar' ? 'حفظ التغييرات' : 'Enregistrer'}
               </Button>
               <Button
                 onClick={() => setShowEditDialog(false)}
                 className="flex-1 bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 h-10"
               >
-                ❌ {language === 'ar' ? 'إلغاء' : 'Annuler'}
+                {language === 'ar' ? 'إلغاء' : 'Annuler'}
               </Button>
             </div>
           </div>
@@ -1005,7 +1005,7 @@ export default function Commands() {
         <AlertDialogContent className="bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {language === 'ar' ? '⚠️ تأكيد الحذف' : '⚠️ Confirmer la suppression'}
+              {language === 'ar' ? 'تأكيد الحذف' : 'Confirmer la suppression'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {language === 'ar'
@@ -1041,7 +1041,7 @@ export default function Commands() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <MessageSquare className="w-6 h-6 text-purple-600" />
-              {language === 'ar' ? '💬 الآراء' : '💬 Avis Clients'}
+              {language === 'ar' ? 'الآراء' : 'Avis Clients'}
             </h2>
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -1062,7 +1062,7 @@ export default function Commands() {
                   : 'text-slate-500 dark:text-slate-400'
               }`}
             >
-              ✅ {language === 'ar' ? 'موافق عليه' : 'Approuvés'} ({testimonials.length})
+              {language === 'ar' ? 'موافق عليه' : 'Approuvés'} ({testimonials.length})
             </button>
             <button
               onClick={() => setShowPendingTab(true)}
@@ -1072,7 +1072,7 @@ export default function Commands() {
                   : 'text-slate-500 dark:text-slate-400'
               }`}
             >
-              ⏳ {language === 'ar' ? 'قيد المراجعة' : 'En attente'} ({pendingTestimonials.length})
+              {language === 'ar' ? 'قيد المراجعة' : 'En attente'} ({pendingTestimonials.length})
             </button>
           </div>
 
@@ -1086,7 +1086,7 @@ export default function Commands() {
                     transition={{ duration: 2, repeat: Infinity }}
                     className="inline-block"
                   >
-                    <span className="text-3xl">⭐</span>
+                    <span className="text-3xl"></span>
                   </motion.div>
                   <p className="text-slate-500 mt-2 text-sm">
                     {language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}
@@ -1116,7 +1116,7 @@ export default function Commands() {
                             i < (testimonial.rating || 5) ? 'text-lg' : 'text-lg opacity-30'
                           }`}
                         >
-                          ⭐
+                          
                         </span>
                       ))}
                     </div>
@@ -1168,7 +1168,7 @@ export default function Commands() {
                     transition={{ duration: 2, repeat: Infinity }}
                     className="inline-block"
                   >
-                    <span className="text-3xl">⏳</span>
+                    <span className="text-3xl"></span>
                   </motion.div>
                   <p className="text-slate-500 mt-2 text-sm">
                     {language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}
@@ -1198,7 +1198,7 @@ export default function Commands() {
                             i < (testimonial.rating || 5) ? 'text-lg' : 'text-lg opacity-30'
                           }`}
                         >
-                          ⭐
+                          
                         </span>
                       ))}
                     </div>
@@ -1255,7 +1255,7 @@ export default function Commands() {
             disabled={loadingTestimonials || loadingPending}
             className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:opacity-50 text-white font-bold py-2 rounded-lg transition-all"
           >
-            🔄 {language === 'ar' ? 'تحديث' : 'Rafraîchir'}
+            {language === 'ar' ? 'تحديث' : 'Rafraîchir'}
           </motion.button>
         </motion.div>
       )}

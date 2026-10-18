@@ -1,47 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
-
 /* Volt design system — storefront only. Scoped to .shop-root so the admin app is untouched. */
 .shop-root {
-  --shop-bg: #F7F8FA;
-  --shop-surface: #FFFFFF;
-  --shop-surface-2: #EEF1F5;
-  --shop-border: #E2E6EC;
-  --shop-text: #0B1220;
-  --shop-muted: #5B6475;
-  --shop-primary: #0B1220;
-  --shop-primary-fg: #FFFFFF;
-  --shop-volt: #C6F432;
-  --shop-volt-ink: #0B1220;
-  --shop-volt-soft: #F1FCD0;
-  --shop-electric: #1F6FFF;
-  --shop-success: #12B76A;
-  --shop-warning: #F79009;
-  --shop-danger: #E5484D;
-  --shop-shadow: 0 1px 2px rgb(16 24 40 / .06), 0 8px 24px rgb(16 24 40 / .06);
-  --shop-shadow-hover: 0 2px 4px rgb(16 24 40 / .06), 0 16px 32px rgb(16 24 40 / .10);
+  /* Aliases of the global Volt tokens in src/index.css (single source of truth). */
+  --shop-bg: hsl(var(--background));
+  --shop-surface: hsl(var(--card));
+  --shop-surface-2: hsl(var(--surface-2));
+  --shop-border: hsl(var(--border));
+  --shop-text: hsl(var(--foreground));
+  --shop-muted: hsl(var(--muted-foreground));
+  --shop-primary: hsl(var(--primary));
+  --shop-primary-fg: hsl(var(--primary-foreground));
+  --shop-volt: hsl(var(--volt));
+  --shop-volt-ink: hsl(var(--volt-foreground));
+  --shop-volt-soft: hsl(var(--volt-soft));
+  --shop-electric: hsl(var(--electric));
+  --shop-success: hsl(var(--success));
+  --shop-warning: hsl(var(--warning));
+  --shop-danger: hsl(var(--destructive));
+  --shop-shadow: var(--shadow-md);
+  --shop-shadow-hover: var(--shadow-lg);
 
   background: var(--shop-bg);
   color: var(--shop-text);
   font-family: 'Inter', system-ui, sans-serif;
   line-height: 1.5;
-}
-
-.dark .shop-root {
-  --shop-bg: #0A0D14;
-  --shop-surface: #121722;
-  --shop-surface-2: #1A2030;
-  --shop-border: #262D3D;
-  --shop-text: #F2F4F8;
-  --shop-muted: #9AA3B5;
-  --shop-primary: #F2F4F8;
-  --shop-primary-fg: #0B1220;
-  --shop-volt-soft: rgba(198, 244, 50, .12);
-  --shop-electric: #5B93FF;
-  --shop-success: #32D583;
-  --shop-warning: #FDB022;
-  --shop-danger: #FF6369;
-  --shop-shadow: none;
-  --shop-shadow-hover: none;
 }
 
 .shop-root[dir='rtl'],

@@ -519,7 +519,7 @@ export default function FactureDuStock() {
     <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">📋 {t.title}</h1>
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">{t.title}</h1>
           <p className="text-muted-foreground">{t.subtitle}</p>
         </div>
         <div className="flex items-center gap-3">
@@ -538,7 +538,7 @@ export default function FactureDuStock() {
   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-600 to-violet-600 text-white">
           <CardHeader>
-            <CardTitle>📊 {language === 'ar' ? 'إجمالي الفواتير' : 'Invoices Created'}</CardTitle>
+            <CardTitle>{language === 'ar' ? 'إجمالي الفواتير' : 'Invoices Created'}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{invoices.length}</div>
@@ -547,7 +547,7 @@ export default function FactureDuStock() {
         </Card>
         <Card className="border-0 shadow-md bg-gradient-to-br from-emerald-600 to-green-600 text-white">
           <CardHeader>
-            <CardTitle>💚 {language === 'ar' ? 'قيمة المخزون (ابتدائي)' : 'Stock Value (Initial)'}</CardTitle>
+            <CardTitle>{language === 'ar' ? 'قيمة المخزون (ابتدائي)' : 'Stock Value (Initial)'}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(products.reduce((s, p) => s + ((p.buying_price || 0) * (p.initial_quantity || 0)), 0))}</div>
@@ -557,7 +557,7 @@ export default function FactureDuStock() {
 
         <Card className="border-0 shadow-md bg-gradient-to-br from-red-600 to-pink-600 text-white">
           <CardHeader>
-            <CardTitle>💰 {language === 'ar' ? 'قيمة الفواتير' : 'Invoices Total'}</CardTitle>
+            <CardTitle>{language === 'ar' ? 'قيمة الفواتير' : 'Invoices Total'}</CardTitle>
           </CardHeader>
           <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(
