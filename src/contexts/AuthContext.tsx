@@ -66,27 +66,41 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.removeItem('user');
     localStorage.removeItem('authTimestamp');
 
+    // Never leave the app stuck on the loader (slow network, hung token refresh…).
+    const safety = setTimeout(() => { if (alive) setIsLoading(false); }, 8000);
+
     (async () => {
-      const { data } = await supabase.auth.getSession();
-      let session = data.session;
-      // "Se souvenir de moi" unchecked → the session ends with the browser session.
-      if (session && localStorage.getItem(REMEMBER_KEY) === '0' && !sessionStorage.getItem(ALIVE_KEY)) {
-        await supabase.auth.signOut();
-        session = null;
+      try {
+        const { data } = await supabase.auth.getSession();
+        let session = data.session;
+        // "Se souvenir de moi" unchecked → the session ends with the browser session.
+        if (session && localStorage.getItem(REMEMBER_KEY) === '0' && !sessionStorage.getItem(ALIVE_KEY)) {
+          await supabase.auth.signOut();
+          session = null;
+        }
+        if (session) {
+          const u = await loadProfile(session);
+          if (alive) setUser(u);
+        }
+      } catch { /* treat as signed out */ }
+      finally {
+        clearTimeout(safety);
+        if (alive) setIsLoading(false);
       }
-      if (session) {
-        const u = await loadProfile(session);
-        if (alive) setUser(u);
-      }
-      if (alive) setIsLoading(false);
     })();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // The callback must stay synchronous: awaiting Supabase calls inside it deadlocks the
+    // auth lock (getSession() never resolves → infinite loader). Defer the profile load.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (signingIn.current) return; // signIn() sets the user itself
       if (event === 'SIGNED_OUT' || !session) { setUser(null); return; }
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') setUser(await loadProfile(session));
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        setTimeout(() => {
+          loadProfile(session).then((u) => { if (alive) setUser(u); }).catch(() => {});
+        }, 0);
+      }
     });
-    return () => { alive = false; sub.subscription.unsubscribe(); };
+    return () => { alive = false; clearTimeout(safety); sub.subscription.unsubscribe(); };
   }, []);
 
   const signIn = useCallback(async (email: string, password: string, remember = true) => {
