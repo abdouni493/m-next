@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
-import { compressImage } from '@/lib/imageUtils';
+import { uploadImage, uploadImages as uploadImageFiles } from '@/lib/imageUpload';
 
 interface Charger {
   id: string;
@@ -436,24 +436,11 @@ const Inventory = () => {
 
       // Upload image if selected
       if (newMarkImage) {
-        const fileName = `${Date.now()}-${newMarkImage.name}`;
         const brandId = editingBrandId || 'temp';
-        const filePath = `marks/${brandId}/${fileName}`;
-
-        console.log('📤 Uploading brand image:', { filePath, fileSize: newMarkImage.size });
-
-        const { error: uploadError } = await supabase.storage
-          .from('chargers')
-          .upload(filePath, newMarkImage);
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrl } = supabase.storage
-          .from('chargers')
-          .getPublicUrl(filePath);
+        const { publicUrl, path: filePath } = await uploadImage(newMarkImage, { folder: `marks/${brandId}`, preset: 'logo' });
 
         logoPath = filePath;
-        logoUrl = publicUrl.publicUrl;
+        logoUrl = publicUrl;
         
         console.log('✅ Image uploaded successfully:', { logoPath, logoUrl });
       }
@@ -656,46 +643,14 @@ const Inventory = () => {
     try {
       console.log(`🚀 Starting image upload for product ${productId}. Total images: ${formData.images.length}`);
       
-      for (let i = 0; i < formData.images.length; i++) {
-        const raw = formData.images[i];
+      const uploaded = await uploadImageFiles(formData.images, { folder: productId, preset: 'product' });
+      const userId = (await supabase.auth.getUser()).data?.user?.id;
+
+      for (let i = 0; i < uploaded.length; i++) {
         const isPrimary = i === primaryImageId || (primaryImageId === null && i === 0);
-
-        // Compress before upload
-        const file = await compressImage(raw, 1200, 0.85);
-
-        const timestamp = Date.now();
-        const ext = file.name.split('.').pop() || 'webp';
-        const fileName = `${productId}/${timestamp}-${i}.${ext}`;
-
-        // 1. Upload file to storage bucket 'chargers' with 1-year cache
-        const { error: uploadError } = await supabase.storage
-          .from('chargers')
-          .upload(fileName, file, {
-            cacheControl: '31536000',
-            upsert: false,
-            contentType: file.type,
-          });
-
-        if (uploadError) {
-          console.error(`❌ Upload failed for ${fileName}:`, uploadError);
-          throw new Error(`Failed to upload image ${i + 1}: ${uploadError.message}`);
-        }
-        
-        console.log(`✅ Image ${i + 1} uploaded to storage bucket`);
-
-        // 2. Get public URL for the uploaded file
-        const { data: publicUrlData } = supabase.storage
-          .from('chargers')
-          .getPublicUrl(fileName);
-        
-        const publicUrl = publicUrlData.publicUrl;
-        console.log(`🔗 Public URL: ${publicUrl}`);
-
-        // 3. Save primary image URL if this is the primary
-        if (isPrimary) {
-          primaryImageUrl = publicUrl;
-          console.log(`⭐ Primary image URL: ${primaryImageUrl}`);
-        }
+        const publicUrl = uploaded[i].publicUrl;
+        const fileName = uploaded[i].path;
+        if (isPrimary) primaryImageUrl = publicUrl;
 
         // 4. Also save to product_images table for record keeping
         const { error: dbError } = await supabase
@@ -707,7 +662,7 @@ const Inventory = () => {
               file_path: fileName,
               display_order: i,
               is_primary: isPrimary,
-              uploaded_by: (await supabase.auth.getUser()).data?.user?.id,
+              uploaded_by: userId,
             },
           ]);
 

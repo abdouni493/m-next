@@ -144,7 +144,7 @@ export default function WebsitePackages() {
   };
 
   return (
-    <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
+    <div style={{ background: '#0A0918', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
 
       {/* Emerald-themed page header */}
       <div className="relative py-16 px-4 overflow-hidden">
@@ -172,7 +172,7 @@ export default function WebsitePackages() {
             </motion.div>
 
             <h1 className="font-grotesk font-black text-4xl md:text-5xl mb-3">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #34D399, #00D4FF)' }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #34D399, #8B5CF6)' }}>
                 📦 {t.title}
               </span>
             </h1>
@@ -191,7 +191,7 @@ export default function WebsitePackages() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-4 rounded-xl text-sm outline-none transition-all"
-            style={{ background: '#0F172A', color: '#F1F5F9', border: '1px solid rgba(16,185,129,0.2)' }}
+            style={{ background: '#13112A', color: '#F1F5F9', border: '1px solid rgba(16,185,129,0.2)' }}
             onFocus={e => (e.target.style.borderColor = '#10B981')}
             onBlur={e => (e.target.style.borderColor = 'rgba(16,185,129,0.2)')}
           />
@@ -220,7 +220,7 @@ export default function WebsitePackages() {
                 <GlowCard glowColor="emerald" className="flex flex-col h-full relative">
 
                   {/* Image */}
-                  <div className="relative h-52 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.05), rgba(0,212,255,0.05))' }}>
+                  <div className="relative h-52 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.05), rgba(139,92,246,0.05))' }}>
                     {pkg.image_url ? (
                       <motion.img src={imgSrc.card(pkg.image_url)} alt={pkg.name} className="w-full h-full object-cover"
                         loading="lazy" decoding="async"
@@ -307,7 +307,7 @@ export default function WebsitePackages() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowDetails(false)}
-              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }}
+              className="fixed inset-0 z-40" style={{ background: 'rgba(10,9,24,0.85)', backdropFilter: 'blur(6px)' }}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -315,7 +315,7 @@ export default function WebsitePackages() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               className="fixed inset-4 sm:inset-8 z-50 rounded-2xl overflow-hidden flex flex-col"
-              style={{ background: '#0F172A', border: '1px solid rgba(16,185,129,0.3)', maxWidth: '900px', margin: 'auto' }}
+              style={{ background: '#13112A', border: '1px solid rgba(16,185,129,0.3)', maxWidth: '900px', margin: 'auto' }}
             >
               {/* Header */}
               <div className="flex items-center justify-between p-5 flex-shrink-0" style={{ borderBottom: '1px solid rgba(16,185,129,0.15)' }}>
@@ -375,8 +375,8 @@ export default function WebsitePackages() {
                             <p className="font-bold text-sm truncate" style={{ color: '#F1F5F9' }}>{item.product_name}</p>
                             {item.product_mark && <p className="text-xs mb-1" style={{ color: '#64748B' }}>{item.product_mark}</p>}
                             <div className="flex flex-wrap gap-1.5 mt-1">
-                              {item.product_voltage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.15)' }}>⚡ {item.product_voltage}V</span>}
-                              {item.product_amperage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(124,58,237,0.08)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.15)' }}>🔌 {item.product_amperage}A</span>}
+                              {item.product_voltage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.15)' }}>⚡ {item.product_voltage}V</span>}
+                              {item.product_amperage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(236,72,153,0.08)', color: '#EC4899', border: '1px solid rgba(236,72,153,0.15)' }}>🔌 {item.product_amperage}A</span>}
                               {item.product_wattage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.15)' }}>💡 {item.product_wattage}W</span>}
                             </div>
                           </div>

@@ -10,9 +10,9 @@ interface GlowCardProps {
 }
 
 const glowMap = {
-  cyan: 'rgba(0,212,255,0.3)',
-  violet: 'rgba(124,58,237,0.3)',
-  orange: 'rgba(255,107,53,0.3)',
+  cyan: 'rgba(139,92,246,0.3)',
+  violet: 'rgba(236,72,153,0.3)',
+  orange: 'rgba(249,115,22,0.3)',
   emerald: 'rgba(16,185,129,0.3)',
 };
 
@@ -28,16 +28,16 @@ export default function GlowCard({
   const card = (
     <div
       onClick={onClick}
-      className={`relative bg-[#0F172A] border border-[#1E3A5F] rounded-2xl overflow-hidden transition-all duration-300 ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`relative bg-[#13112A] border border-[#2E2A5A] rounded-2xl overflow-hidden transition-all duration-300 ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={{
-        background: 'linear-gradient(135deg, rgba(0,212,255,0.03) 0%, rgba(124,58,237,0.03) 100%), #0F172A',
+        background: 'linear-gradient(135deg, rgba(139,92,246,0.03) 0%, rgba(236,72,153,0.03) 100%), #13112A',
       }}
     >
       {/* Gradient overlay */}
       <div
         className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
         style={{
-          background: `linear-gradient(135deg, rgba(0,212,255,0.05) 0%, rgba(124,58,237,0.05) 100%)`,
+          background: `linear-gradient(135deg, rgba(139,92,246,0.05) 0%, rgba(236,72,153,0.05) 100%)`,
         }}
       />
       {children}
@@ -56,16 +56,16 @@ export default function GlowCard({
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       onClick={onClick}
-      className={`relative bg-[#0F172A] border border-[#1E3A5F] rounded-2xl overflow-hidden transition-colors duration-300 ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`relative bg-[#13112A] border border-[#2E2A5A] rounded-2xl overflow-hidden transition-colors duration-300 ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={{
-        background: 'linear-gradient(135deg, rgba(0,212,255,0.03) 0%, rgba(124,58,237,0.03) 100%), #0F172A',
+        background: 'linear-gradient(135deg, rgba(139,92,246,0.03) 0%, rgba(236,72,153,0.03) 100%), #13112A',
       }}
     >
       {/* Gradient overlay on hover */}
       <div
         className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
         style={{
-          background: `linear-gradient(135deg, rgba(0,212,255,0.05) 0%, rgba(124,58,237,0.05) 100%)`,
+          background: `linear-gradient(135deg, rgba(139,92,246,0.05) 0%, rgba(236,72,153,0.05) 100%)`,
         }}
       />
       {children}

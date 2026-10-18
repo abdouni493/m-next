@@ -207,9 +207,9 @@ export default function WebsiteLanding() {
   };
 
   const featureCards = [
-    { icon: <Zap className="w-7 h-7" />, color: '#00D4FF', title: language === 'ar' ? 'جودة عالية' : 'Qualité Premium', desc: language === 'ar' ? 'شواحن مختبرة ومضمونة' : 'Chargeurs testés et garantis' },
-    { icon: <Truck className="w-7 h-7" />, color: '#7C3AED', title: language === 'ar' ? 'توصيل سريع' : 'Livraison Rapide', desc: language === 'ar' ? 'إلى جميع ولايات الجزائر' : 'Dans toute l\'Algérie' },
-    { icon: <Shield className="w-7 h-7" />, color: '#FF6B35', title: language === 'ar' ? 'ضمان كامل' : 'Garantie Totale', desc: language === 'ar' ? 'خدمة ما بعد البيع مضمونة' : 'Service après-vente assuré' },
+    { icon: <Zap className="w-7 h-7" />, color: '#8B5CF6', title: language === 'ar' ? 'جودة عالية' : 'Qualité Premium', desc: language === 'ar' ? 'شواحن مختبرة ومضمونة' : 'Chargeurs testés et garantis' },
+    { icon: <Truck className="w-7 h-7" />, color: '#EC4899', title: language === 'ar' ? 'توصيل سريع' : 'Livraison Rapide', desc: language === 'ar' ? 'إلى جميع ولايات الجزائر' : 'Dans toute l\'Algérie' },
+    { icon: <Shield className="w-7 h-7" />, color: '#F97316', title: language === 'ar' ? 'ضمان كامل' : 'Garantie Totale', desc: language === 'ar' ? 'خدمة ما بعد البيع مضمونة' : 'Service après-vente assuré' },
   ];
 
   const stats = [
@@ -220,7 +220,7 @@ export default function WebsiteLanding() {
   ];
 
   return (
-    <div style={{ background: '#020817', color: '#F1F5F9' }} className="min-h-screen">
+    <div style={{ background: '#0A0918', color: '#F1F5F9' }} className="min-h-screen">
 
       {/* Cart toast */}
       <AnimatePresence>
@@ -242,7 +242,7 @@ export default function WebsiteLanding() {
         <FloatingParticles />
 
         {/* Background radial glow */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,212,255,0.07) 0%, transparent 70%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(139,92,246,0.07) 0%, transparent 70%)' }} />
 
         {/* Hero content */}
         <div className="relative z-10 max-w-7xl mx-auto w-full py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -264,7 +264,7 @@ export default function WebsiteLanding() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-grotesk font-black leading-tight mb-6 bg-clip-text text-transparent"
-              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}
+              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', backgroundImage: 'linear-gradient(90deg, #8B5CF6, #EC4899)' }}
             >
               {settings?.description || websiteSettings?.description || ''}
             </motion.h1>
@@ -276,11 +276,11 @@ export default function WebsiteLanding() {
               className="flex flex-wrap gap-4"
             >
               <motion.button
-                whileHover={{ scale: 1.04, boxShadow: '0 0 30px rgba(0,212,255,0.5)' }}
+                whileHover={{ scale: 1.04, boxShadow: '0 0 30px rgba(139,92,246,0.5)' }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate('/website-shop/offers')}
                 className="relative flex items-center gap-2 px-7 py-4 rounded-xl font-grotesk font-bold text-base overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817', boxShadow: '0 0 20px rgba(0,212,255,0.3)' }}
+                style={{ background: 'linear-gradient(135deg, #8B5CF6, #0098BB)', color: '#0A0918', boxShadow: '0 0 20px rgba(139,92,246,0.3)' }}
               >
                 <motion.span
                   className="absolute inset-0"
@@ -293,11 +293,11 @@ export default function WebsiteLanding() {
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.04, borderColor: '#FF6B35', boxShadow: '0 0 20px rgba(255,107,53,0.3)' }}
+                whileHover={{ scale: 1.04, borderColor: '#F97316', boxShadow: '0 0 20px rgba(249,115,22,0.3)' }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate('/website-shop/special-offers')}
                 className="flex items-center gap-2 px-7 py-4 rounded-xl font-grotesk font-bold text-base transition-all duration-200"
-                style={{ background: 'rgba(255,107,53,0.08)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.3)' }}
+                style={{ background: 'rgba(249,115,22,0.08)', color: '#F97316', border: '1px solid rgba(249,115,22,0.3)' }}
               >
                 <Flame className="w-5 h-5" />
                 {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}
@@ -318,13 +318,13 @@ export default function WebsiteLanding() {
               animate={{ rotate: 360 }}
               transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
               className="absolute w-80 h-80 rounded-full"
-              style={{ border: '1px solid rgba(0,212,255,0.2)' }}
+              style={{ border: '1px solid rgba(139,92,246,0.2)' }}
             />
             <motion.div
               animate={{ rotate: -360 }}
               transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
               className="absolute w-64 h-64 rounded-full"
-              style={{ border: '1px dashed rgba(124,58,237,0.3)' }}
+              style={{ border: '1px dashed rgba(236,72,153,0.3)' }}
             />
             {/* Center glow orb */}
             <motion.div
@@ -332,18 +332,18 @@ export default function WebsiteLanding() {
               transition={{ duration: 4, repeat: Infinity }}
               className="w-44 h-44 rounded-full flex items-center justify-center"
               style={{
-                background: 'radial-gradient(circle, rgba(0,212,255,0.25) 0%, rgba(124,58,237,0.15) 50%, transparent 70%)',
-                boxShadow: '0 0 60px rgba(0,212,255,0.4), 0 0 120px rgba(0,212,255,0.15)',
+                background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, rgba(236,72,153,0.15) 50%, transparent 70%)',
+                boxShadow: '0 0 60px rgba(139,92,246,0.4), 0 0 120px rgba(139,92,246,0.15)',
               }}
             >
-              <Zap className="w-16 h-16" style={{ color: '#00D4FF', filter: 'drop-shadow(0 0 10px #00D4FF)' }} />
+              <Zap className="w-16 h-16" style={{ color: '#8B5CF6', filter: 'drop-shadow(0 0 10px #8B5CF6)' }} />
             </motion.div>
             {/* Orbiting dots */}
             {[0, 120, 240].map((deg, i) => (
               <motion.div
                 key={i}
                 className="absolute w-3 h-3 rounded-full"
-                style={{ background: i === 0 ? '#00D4FF' : i === 1 ? '#7C3AED' : '#FF6B35' }}
+                style={{ background: i === 0 ? '#8B5CF6' : i === 1 ? '#EC4899' : '#F97316' }}
                 animate={{ rotate: [deg, deg + 360] }}
                 transition={{ duration: 6 + i * 2, repeat: Infinity, ease: 'linear' }}
                 transformTemplate={({ rotate }) => `rotate(${rotate}) translateX(140px) rotate(-${rotate})`}
@@ -365,11 +365,11 @@ export default function WebsiteLanding() {
           {showUploadUI && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="absolute inset-0 z-50 flex items-center justify-center p-4"
-              style={{ background: 'rgba(2,8,23,0.9)' }}
+              style={{ background: 'rgba(10,9,24,0.9)' }}
             >
               <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
                 className="rounded-2xl p-8 w-full max-w-md"
-                style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.2)' }}
+                style={{ background: '#13112A', border: '1px solid rgba(139,92,246,0.2)' }}
               >
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-grotesk font-bold text-xl" style={{ color: '#F1F5F9' }}>
@@ -388,11 +388,11 @@ export default function WebsiteLanding() {
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   className="mb-4 rounded-xl p-8 text-center cursor-pointer transition-all"
-                  style={{ border: '2px dashed rgba(0,212,255,0.3)' }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = '#00D4FF')}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(0,212,255,0.3)')}
+                  style={{ border: '2px dashed rgba(139,92,246,0.3)' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = '#8B5CF6')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.3)')}
                 >
-                  <Upload className="w-10 h-10 mx-auto mb-2" style={{ color: '#00D4FF' }} />
+                  <Upload className="w-10 h-10 mx-auto mb-2" style={{ color: '#8B5CF6' }} />
                   <p className="text-sm" style={{ color: '#64748B' }}>PNG, JPG up to 5MB</p>
                 </div>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} disabled={uploading || deleting} className="hidden" />
@@ -409,7 +409,7 @@ export default function WebsiteLanding() {
                 )}
                 <button onClick={() => fileInputRef.current?.click()} disabled={uploading || deleting}
                   className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817' }}
+                  style={{ background: 'linear-gradient(135deg, #8B5CF6, #0098BB)', color: '#0A0918' }}
                 >
                   {uploading ? <><Loader className="w-4 h-4 animate-spin" /> Uploading...</> : <><Upload className="w-4 h-4" /> {language === 'ar' ? 'اختر صورة' : 'Choisir'}</>}
                 </button>
@@ -429,7 +429,7 @@ export default function WebsiteLanding() {
         >
           {stats.map((s, i) => (
             <GlowCard key={i} className="p-6 text-center">
-              <div className="font-grotesk font-black text-3xl mb-1" style={{ color: '#00D4FF' }}>
+              <div className="font-grotesk font-black text-3xl mb-1" style={{ color: '#8B5CF6' }}>
                 <AnimatedCounter target={s.value} suffix={s.suffix} />
               </div>
               <div className="text-sm font-medium" style={{ color: '#64748B' }}>{s.label}</div>
@@ -450,11 +450,11 @@ export default function WebsiteLanding() {
               className="text-center mb-10"
             >
               <h2 className="font-grotesk font-black text-3xl md:text-4xl mb-3">
-                <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+                <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #8B5CF6, #EC4899)' }}>
                   ⚡ {language === 'ar' ? 'منتجات مميزة' : 'Produits Vedettes'}
                 </span>
               </h2>
-              <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }} />
+              <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #8B5CF6, #EC4899)' }} />
             </motion.div>
 
             {/* Brand filter */}
@@ -469,9 +469,9 @@ export default function WebsiteLanding() {
                   onClick={() => handleBrandClick(null)}
                   className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
                   style={{
-                    background: selectedBrand === null ? 'rgba(0,212,255,0.15)' : 'rgba(30,58,95,0.4)',
-                    color: selectedBrand === null ? '#00D4FF' : '#64748B',
-                    border: `1px solid ${selectedBrand === null ? 'rgba(0,212,255,0.4)' : 'rgba(30,58,95,0.6)'}`,
+                    background: selectedBrand === null ? 'rgba(139,92,246,0.15)' : 'rgba(30,58,95,0.4)',
+                    color: selectedBrand === null ? '#8B5CF6' : '#64748B',
+                    border: `1px solid ${selectedBrand === null ? 'rgba(139,92,246,0.4)' : 'rgba(30,58,95,0.6)'}`,
                   }}
                 >
                   {language === 'ar' ? '⭐ الكل' : '⭐ Tous'}
@@ -489,9 +489,9 @@ export default function WebsiteLanding() {
                       title={brand}
                       className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-2"
                       style={{
-                        background: selectedBrand === brand ? 'rgba(0,212,255,0.15)' : 'rgba(30,58,95,0.4)',
-                        color: selectedBrand === brand ? '#00D4FF' : '#64748B',
-                        border: `1px solid ${selectedBrand === brand ? 'rgba(0,212,255,0.4)' : 'rgba(30,58,95,0.6)'}`,
+                        background: selectedBrand === brand ? 'rgba(139,92,246,0.15)' : 'rgba(30,58,95,0.4)',
+                        color: selectedBrand === brand ? '#8B5CF6' : '#64748B',
+                        border: `1px solid ${selectedBrand === brand ? 'rgba(139,92,246,0.4)' : 'rgba(30,58,95,0.6)'}`,
                       }}
                     >
                       {logoUrl && <img src={logoUrl} alt={brand} className="w-4 h-4 object-contain" onError={e => (e.currentTarget.style.display = 'none')} />}
@@ -517,7 +517,7 @@ export default function WebsiteLanding() {
                     {/* Image */}
                     <div
                       className="relative h-52 overflow-hidden"
-                      style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.05), rgba(124,58,237,0.05))' }}
+                      style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.05), rgba(236,72,153,0.05))' }}
                     >
                       {product.primary_image ? (
                         <motion.img
@@ -531,7 +531,7 @@ export default function WebsiteLanding() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Zap className="w-16 h-16" style={{ color: '#1E3A5F' }} />
+                          <Zap className="w-16 h-16" style={{ color: '#2E2A5A' }} />
                         </div>
                       )}
                       {/* Brand badge */}
@@ -555,12 +555,12 @@ export default function WebsiteLanding() {
                       {/* Specs chips */}
                       <div className="flex flex-wrap gap-2 mb-4">
                         {product.voltage && (
-                          <span className="px-2 py-1 rounded-md text-xs font-bold" style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.2)' }}>
+                          <span className="px-2 py-1 rounded-md text-xs font-bold" style={{ background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.2)' }}>
                             ⚡ {product.voltage}V
                           </span>
                         )}
                         {product.amperage && (
-                          <span className="px-2 py-1 rounded-md text-xs font-bold" style={{ background: 'rgba(124,58,237,0.08)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                          <span className="px-2 py-1 rounded-md text-xs font-bold" style={{ background: 'rgba(236,72,153,0.08)', color: '#EC4899', border: '1px solid rgba(236,72,153,0.2)' }}>
                             🔌 {product.amperage}A
                           </span>
                         )}
@@ -585,7 +585,7 @@ export default function WebsiteLanding() {
                           whileTap={{ scale: 0.96 }}
                           onClick={() => handleAddToCart(product)}
                           className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all"
-                          style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+                          style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.25)' }}
                         >
                           <ShoppingCart className="w-3.5 h-3.5" />
                           {language === 'ar' ? 'سلة' : 'Panier'}
@@ -595,17 +595,17 @@ export default function WebsiteLanding() {
                           whileTap={{ scale: 0.96 }}
                           onClick={handleViewDetails}
                           className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all"
-                          style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.25)' }}
+                          style={{ background: 'rgba(236,72,153,0.1)', color: '#EC4899', border: '1px solid rgba(236,72,153,0.25)' }}
                         >
                           <Eye className="w-3.5 h-3.5" />
                           {language === 'ar' ? 'عرض' : 'Voir'}
                         </motion.button>
                         <motion.button
-                          whileHover={{ scale: 1.04, boxShadow: '0 0 15px rgba(255,107,53,0.4)' }}
+                          whileHover={{ scale: 1.04, boxShadow: '0 0 15px rgba(249,115,22,0.4)' }}
                           whileTap={{ scale: 0.96 }}
                           onClick={() => handleOrder(product)}
                           className="flex items-center justify-center py-2 rounded-lg text-xs font-bold text-white"
-                          style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                          style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}
                         >
                           {language === 'ar' ? '📦 طلب' : '📦 Commander'}
                         </motion.button>
@@ -613,14 +613,14 @@ export default function WebsiteLanding() {
                     </div>
                   </GlowCard>
                 )) : (
-                  <div className="col-span-3 py-20 text-center rounded-2xl" style={{ border: '2px dashed rgba(0,212,255,0.15)', background: 'rgba(0,212,255,0.02)' }}>
-                    <Zap className="w-16 h-16 mx-auto mb-4" style={{ color: '#1E3A5F' }} />
+                  <div className="col-span-3 py-20 text-center rounded-2xl" style={{ border: '2px dashed rgba(139,92,246,0.15)', background: 'rgba(139,92,246,0.02)' }}>
+                    <Zap className="w-16 h-16 mx-auto mb-4" style={{ color: '#2E2A5A' }} />
                     <p className="text-lg font-semibold mb-4" style={{ color: '#64748B' }}>
                       {language === 'ar' ? 'لا توجد منتجات' : 'Aucun produit trouvé'}
                     </p>
                     <button onClick={() => handleBrandClick(null)}
                       className="px-6 py-2 rounded-xl text-sm font-bold"
-                      style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.3)' }}
+                      style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.3)' }}
                     >
                       {language === 'ar' ? 'عرض الكل' : 'Voir tous'}
                     </button>
@@ -632,11 +632,11 @@ export default function WebsiteLanding() {
             {/* View all button */}
             <div className="text-center mt-10">
               <motion.button
-                whileHover={{ scale: 1.04, boxShadow: '0 0 25px rgba(0,212,255,0.3)' }}
+                whileHover={{ scale: 1.04, boxShadow: '0 0 25px rgba(139,92,246,0.3)' }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate('/website-shop/offers')}
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-grotesk font-bold text-base"
-                style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+                style={{ background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.25)' }}
               >
                 {language === 'ar' ? 'عرض جميع المنتجات' : 'Voir Tous Les Chargeurs'}
                 <ChevronRight className="w-5 h-5" />
@@ -655,11 +655,11 @@ export default function WebsiteLanding() {
             className="text-center mb-12"
           >
             <h2 className="font-grotesk font-black text-3xl md:text-4xl mb-3">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #8B5CF6, #EC4899)' }}>
                 {language === 'ar' ? 'لماذا تختارنا؟' : 'Pourquoi Nous Choisir?'}
               </span>
             </h2>
-            <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #00D4FF, #7C3AED)' }} />
+            <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #8B5CF6, #EC4899)' }} />
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -673,7 +673,7 @@ export default function WebsiteLanding() {
                 <GlowCard glowColor={i === 0 ? 'cyan' : i === 1 ? 'violet' : 'orange'} className="p-7 h-full">
                   {/* Top border accent */}
                   <div className="h-0.5 absolute top-0 left-0 right-0 rounded-t-2xl" style={{ background: card.color }} />
-                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ background: `rgba(${card.color === '#00D4FF' ? '0,212,255' : card.color === '#7C3AED' ? '124,58,237' : '255,107,53'},0.12)` }}>
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ background: `rgba(${card.color === '#8B5CF6' ? '0,212,255' : card.color === '#EC4899' ? '124,58,237' : '255,107,53'},0.12)` }}>
                     <span style={{ color: card.color }}>{card.icon}</span>
                   </div>
                   <h3 className="font-grotesk font-bold text-lg mb-2" style={{ color: '#F1F5F9' }}>{card.title}</h3>
@@ -695,21 +695,21 @@ export default function WebsiteLanding() {
           >
             <Star className="w-10 h-10 mx-auto mb-4" style={{ color: '#F59E0B' }} />
             <h2 className="font-grotesk font-black text-3xl md:text-4xl mb-3">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #FF6B35)' }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #F97316)' }}>
                 {language === 'ar' ? 'آراء عملائنا' : 'Ce que Disent Nos Clients'}
               </span>
             </h2>
-            <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #F59E0B, #FF6B35)' }} />
+            <div className="w-16 h-1 mx-auto rounded-full" style={{ background: 'linear-gradient(90deg, #F59E0B, #F97316)' }} />
           </motion.div>
 
           {/* Share review button */}
           <div className="flex justify-center mb-10">
             <motion.button
-              whileHover={{ scale: 1.04, boxShadow: '0 0 20px rgba(0,212,255,0.3)' }}
+              whileHover={{ scale: 1.04, boxShadow: '0 0 20px rgba(139,92,246,0.3)' }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setShowTestimonialModal(true)}
               className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
-              style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+              style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.25)' }}
             >
               + {language === 'ar' ? 'شارك رأيك' : 'Partagez votre avis'}
             </motion.button>
@@ -733,10 +733,10 @@ export default function WebsiteLanding() {
                         ))}
                       </div>
                       {/* Quote */}
-                      <div className="text-4xl font-serif mb-2" style={{ color: 'rgba(0,212,255,0.15)' }}>"</div>
+                      <div className="text-4xl font-serif mb-2" style={{ color: 'rgba(139,92,246,0.15)' }}>"</div>
                       <p className="text-sm leading-relaxed mb-5 flex-1" style={{ color: '#94A3B8' }}>{t.opinion}</p>
                       {/* Author */}
-                      <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid rgba(0,212,255,0.1)' }}>
+                      <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid rgba(139,92,246,0.1)' }}>
                         <div>
                           <p className="font-semibold text-sm" style={{ color: '#F1F5F9' }}>{t.client_name}</p>
                           <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>{new Date(t.created_at).toLocaleDateString()}</p>
@@ -749,13 +749,13 @@ export default function WebsiteLanding() {
               </AnimatePresence>
             </div>
           ) : (
-            <div className="text-center py-16 rounded-2xl" style={{ border: '2px dashed rgba(0,212,255,0.1)', background: 'rgba(0,212,255,0.01)' }}>
+            <div className="text-center py-16 rounded-2xl" style={{ border: '2px dashed rgba(139,92,246,0.1)', background: 'rgba(139,92,246,0.01)' }}>
               <p className="text-lg mb-4" style={{ color: '#64748B' }}>
                 {language === 'ar' ? 'لا توجد آراء بعد' : 'Aucun avis pour l\'instant'}
               </p>
               <button onClick={() => setShowTestimonialModal(true)}
                 className="px-6 py-3 rounded-xl font-bold text-sm"
-                style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.25)' }}
+                style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.25)' }}
               >
                 {language === 'ar' ? 'أضف رأيك' : 'Ajouter votre avis'}
               </button>
@@ -770,7 +770,7 @@ export default function WebsiteLanding() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowTestimonialModal(false)}
-              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.8)', backdropFilter: 'blur(4px)' }}
+              className="fixed inset-0 z-40" style={{ background: 'rgba(10,9,24,0.8)', backdropFilter: 'blur(4px)' }}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -779,7 +779,7 @@ export default function WebsiteLanding() {
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               className="fixed inset-0 flex items-center justify-center z-50 p-4"
             >
-              <div className="w-full max-w-lg rounded-2xl p-8" style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.2)' }}>
+              <div className="w-full max-w-lg rounded-2xl p-8" style={{ background: '#13112A', border: '1px solid rgba(139,92,246,0.2)' }}>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-grotesk font-bold text-xl" style={{ color: '#F1F5F9' }}>
                     {language === 'ar' ? 'شارك رأيك' : 'Partagez votre avis'}
@@ -797,9 +797,9 @@ export default function WebsiteLanding() {
                       type="text" value={testimonialName} onChange={e => setTestimonialName(e.target.value)}
                       placeholder={language === 'ar' ? 'اسمك...' : 'Votre nom...'}
                       className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-                      style={{ background: '#1E293B', color: '#F1F5F9', border: '1px solid rgba(0,212,255,0.15)' }}
-                      onFocus={e => (e.target.style.borderColor = '#00D4FF')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
+                      style={{ background: '#1F1B3D', color: '#F1F5F9', border: '1px solid rgba(139,92,246,0.15)' }}
+                      onFocus={e => (e.target.style.borderColor = '#8B5CF6')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(139,92,246,0.15)')}
                     />
                   </div>
                   <div>
@@ -809,7 +809,7 @@ export default function WebsiteLanding() {
                     <div className="flex gap-2">
                       {[1,2,3,4,5].map(r => (
                         <button key={r} onClick={() => setTestimonialRating(r)} className="text-2xl transition-transform hover:scale-110">
-                          <Star className={`w-6 h-6 ${r <= testimonialRating ? 'fill-current' : ''}`} style={{ color: r <= testimonialRating ? '#F59E0B' : '#1E3A5F' }} />
+                          <Star className={`w-6 h-6 ${r <= testimonialRating ? 'fill-current' : ''}`} style={{ color: r <= testimonialRating ? '#F59E0B' : '#2E2A5A' }} />
                         </button>
                       ))}
                     </div>
@@ -822,9 +822,9 @@ export default function WebsiteLanding() {
                       value={testimonialOpinion} onChange={e => setTestimonialOpinion(e.target.value)}
                       placeholder={language === 'ar' ? 'تجربتك...' : 'Votre expérience...'}
                       rows={4} className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
-                      style={{ background: '#1E293B', color: '#F1F5F9', border: '1px solid rgba(0,212,255,0.15)' }}
-                      onFocus={e => (e.target.style.borderColor = '#00D4FF')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
+                      style={{ background: '#1F1B3D', color: '#F1F5F9', border: '1px solid rgba(139,92,246,0.15)' }}
+                      onFocus={e => (e.target.style.borderColor = '#8B5CF6')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(139,92,246,0.15)')}
                     />
                   </div>
                   <div className="flex gap-3 pt-2">
@@ -838,7 +838,7 @@ export default function WebsiteLanding() {
                       whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                       onClick={handleSubmitTestimonial} disabled={submittingTestimonial}
                       className="flex-1 py-3 rounded-xl text-sm font-bold transition-all"
-                      style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817' }}
+                      style={{ background: 'linear-gradient(135deg, #8B5CF6, #0098BB)', color: '#0A0918' }}
                     >
                       {submittingTestimonial ? (language === 'ar' ? 'إرسال...' : 'Envoi...') : (language === 'ar' ? 'إرسال' : 'Envoyer')}
                     </motion.button>
@@ -853,9 +853,9 @@ export default function WebsiteLanding() {
       {/* ===== FINAL CTA ===== */}
       <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto text-center rounded-3xl p-12 relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,58,237,0.08))', border: '1px solid rgba(0,212,255,0.15)' }}
+          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(236,72,153,0.08))', border: '1px solid rgba(139,92,246,0.15)' }}
         >
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%)' }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.06) 0%, transparent 70%)' }} />
           <h2 className="font-grotesk font-black text-3xl mb-4 relative" style={{ color: '#F1F5F9' }}>
             {language === 'ar' ? 'جاهز للطلب؟' : 'Prêt à Commander?'}
           </h2>
@@ -863,11 +863,11 @@ export default function WebsiteLanding() {
             {language === 'ar' ? 'توصيل سريع إلى جميع ولايات الجزائر' : 'Livraison rapide dans toute l\'Algérie'}
           </p>
           <motion.button
-            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(0,212,255,0.4)' }}
+            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(139,92,246,0.4)' }}
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate('/website-shop/offers')}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-grotesk font-bold text-base relative"
-            style={{ background: 'linear-gradient(135deg, #00D4FF, #0098BB)', color: '#020817' }}
+            style={{ background: 'linear-gradient(135deg, #8B5CF6, #0098BB)', color: '#0A0918' }}
           >
             {language === 'ar' ? 'تصفح المتجر' : 'Parcourir la Boutique'}
             <ChevronRight className="w-5 h-5" />

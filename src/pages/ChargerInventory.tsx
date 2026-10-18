@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
-import { compressImage } from '@/lib/imageUtils';
+import { uploadImage } from '@/lib/imageUpload';
 
 interface Charger {
   id: string;
@@ -264,24 +264,8 @@ const ChargerInventory = () => {
 
     try {
       for (let i = 0; i < formData.images.length; i++) {
-        const raw = formData.images[i];
-        const file = await compressImage(raw, 1200, 0.85);
-        const ext = file.name.split('.').pop() || 'webp';
-        const fileName = `${productId}/${Date.now()}-${i}.${ext}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('chargers')
-          .upload(fileName, file, {
-            cacheControl: '31536000',
-            upsert: false,
-            contentType: file.type,
-          });
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrl } = supabase.storage
-          .from('chargers')
-          .getPublicUrl(fileName);
+        const { publicUrl: url, path: fileName } = await uploadImage(formData.images[i], { folder: productId, preset: 'product' });
+        const publicUrl = { publicUrl: url };
 
         const { error: dbError } = await supabase
           .from('product_images')
@@ -934,15 +918,8 @@ const ChargerInventory = () => {
 
                           // Upload new image if selected
                           if (editNewImage) {
-                            const fileName = `${selectedCharger.id}/${Date.now()}-${editNewImage.name}`;
-                            const { error: uploadError } = await supabase.storage
-                              .from('chargers')
-                              .upload(fileName, editNewImage);
-                            if (uploadError) throw uploadError;
-                            const { data: urlData } = supabase.storage
-                              .from('chargers')
-                              .getPublicUrl(fileName);
-                            newPrimaryImageUrl = urlData.publicUrl;
+                            const { publicUrl } = await uploadImage(editNewImage, { folder: selectedCharger.id, preset: 'product' });
+                            newPrimaryImageUrl = publicUrl;
                           }
 
                           const { error } = await supabase

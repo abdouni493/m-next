@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UploadProgressBar } from "@/components/UploadProgressBar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/Layout/AppLayout";
@@ -47,9 +48,9 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
   // Don't redirect while checking auth status
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="text-slate-600 dark:text-slate-400">Loading...</p>
         </div>
       </div>
@@ -74,9 +75,9 @@ const AppContent = () => {
   // Show loading screen while checking authentication
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <p className="text-slate-600 dark:text-slate-400">Loading application...</p>
         </div>
       </div>
@@ -160,6 +161,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <UploadProgressBar />
             <div className="min-h-screen bg-background transition-colors duration-300">
               <AppContent />
             </div>

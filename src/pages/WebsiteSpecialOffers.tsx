@@ -112,17 +112,17 @@ export default function WebsiteSpecialOffers() {
   const displayPrice = (offer: SpecialOffer) => offer.offer_price ?? offer.special_price;
 
   return (
-    <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
+    <div style={{ background: '#0A0918', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
 
       {/* Fire-themed page header */}
       <div className="relative py-16 px-4 overflow-hidden">
         {/* Fire radial glow */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 60%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(249,115,22,0.12) 0%, transparent 60%)' }} />
         {/* Animated fire particles (CSS) */}
         {[...Array(6)].map((_, i) => (
           <motion.div key={i}
             className="absolute bottom-0 rounded-full pointer-events-none"
-            style={{ width: `${4 + i * 3}px`, height: `${4 + i * 3}px`, left: `${10 + i * 15}%`, background: i % 2 === 0 ? '#FF6B35' : '#F59E0B', filter: 'blur(2px)' }}
+            style={{ width: `${4 + i * 3}px`, height: `${4 + i * 3}px`, left: `${10 + i * 15}%`, background: i % 2 === 0 ? '#F97316' : '#F59E0B', filter: 'blur(2px)' }}
             animate={{ y: [0, -80, -160], opacity: [0.8, 0.4, 0] }}
             transition={{ duration: 2 + i * 0.3, repeat: Infinity, delay: i * 0.4, ease: 'easeOut' }}
           />
@@ -135,10 +135,10 @@ export default function WebsiteSpecialOffers() {
               transition={{ duration: 1.5, repeat: Infinity }}
               className="inline-block mb-4"
             >
-              <Flame className="w-12 h-12 mx-auto" style={{ color: '#FF6B35', filter: 'drop-shadow(0 0 8px #FF6B35)' }} />
+              <Flame className="w-12 h-12 mx-auto" style={{ color: '#F97316', filter: 'drop-shadow(0 0 8px #F97316)' }} />
             </motion.div>
             <h1 className="font-grotesk font-black text-4xl md:text-5xl mb-3">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #FF6B35, #F59E0B, #EF4444)' }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #F97316, #F59E0B, #EF4444)' }}>
                 🔥 {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}
               </span>
             </h1>
@@ -146,7 +146,7 @@ export default function WebsiteSpecialOffers() {
               <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: Infinity }}
                 className="w-2 h-2 rounded-full" style={{ background: '#EF4444' }}
               />
-              <p className="text-sm font-semibold" style={{ color: '#FF6B35' }}>
+              <p className="text-sm font-semibold" style={{ color: '#F97316' }}>
                 {language === 'ar' ? 'عروض محدودة!' : 'Offres Limitées !'}
               </p>
             </div>
@@ -161,15 +161,15 @@ export default function WebsiteSpecialOffers() {
 
         {/* Search */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative max-w-lg mx-auto">
-          <Search className="absolute top-1/2 -translate-y-1/2 left-4 w-5 h-5 pointer-events-none" style={{ color: '#FF6B35' }} />
+          <Search className="absolute top-1/2 -translate-y-1/2 left-4 w-5 h-5 pointer-events-none" style={{ color: '#F97316' }} />
           <input
             placeholder={language === 'ar' ? '🔍 ابحث عن عرض...' : '🔍 Rechercher une offre...'}
             value={searchQuery}
             onChange={e => handleSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-4 rounded-xl text-sm outline-none transition-all"
-            style={{ background: '#0F172A', color: '#F1F5F9', border: '1px solid rgba(255,107,53,0.2)' }}
-            onFocus={e => (e.target.style.borderColor = '#FF6B35')}
-            onBlur={e => (e.target.style.borderColor = 'rgba(255,107,53,0.2)')}
+            style={{ background: '#13112A', color: '#F1F5F9', border: '1px solid rgba(249,115,22,0.2)' }}
+            onFocus={e => (e.target.style.borderColor = '#F97316')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(249,115,22,0.2)')}
           />
         </motion.div>
 
@@ -191,7 +191,7 @@ export default function WebsiteSpecialOffers() {
           <div className="flex justify-center py-20">
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
               className="w-12 h-12 rounded-full"
-              style={{ border: '2px solid rgba(255,107,53,0.1)', borderTopColor: '#FF6B35' }}
+              style={{ border: '2px solid rgba(249,115,22,0.1)', borderTopColor: '#F97316' }}
             />
           </div>
         ) : (
@@ -209,13 +209,13 @@ export default function WebsiteSpecialOffers() {
                 >
                   <GlowCard glowColor="orange" className="flex flex-col h-full relative cursor-pointer" onClick={() => handleViewDetails(offer)}>
                     {/* Animated fire border */}
-                    <div className="absolute inset-0 rounded-2xl pointer-events-none fire-border" style={{ border: '1px solid #FF6B35', opacity: 0.5 }} />
+                    <div className="absolute inset-0 rounded-2xl pointer-events-none fire-border" style={{ border: '1px solid #F97316', opacity: 0.5 }} />
 
                     {/* PROMO ribbon */}
                     {offer.discount_percentage > 0 && (
                       <div className="absolute top-4 right-0 z-10 overflow-hidden" style={{ width: '80px' }}>
                         <div className="text-xs font-black text-white text-center py-1 px-2 rotate-0"
-                          style={{ background: 'linear-gradient(135deg, #EF4444, #FF6B35)', borderRadius: '4px 0 0 4px' }}
+                          style={{ background: 'linear-gradient(135deg, #EF4444, #F97316)', borderRadius: '4px 0 0 4px' }}
                         >
                           -{offer.discount_percentage}%
                         </div>
@@ -223,7 +223,7 @@ export default function WebsiteSpecialOffers() {
                     )}
 
                     {/* Image */}
-                    <div className="relative h-56 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,107,53,0.05), rgba(239,68,68,0.05))' }}>
+                    <div className="relative h-56 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.05), rgba(239,68,68,0.05))' }}>
                       {offer.product_image ? (
                         <motion.img src={imgSrc.card(offer.product_image)} alt={offer.product_name}
                           className="w-full h-full object-cover"
@@ -232,7 +232,7 @@ export default function WebsiteSpecialOffers() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Flame className="w-14 h-14" style={{ color: 'rgba(255,107,53,0.3)' }} />
+                          <Flame className="w-14 h-14" style={{ color: 'rgba(249,115,22,0.3)' }} />
                         </div>
                       )}
                       {offer.product_mark && (
@@ -253,7 +253,7 @@ export default function WebsiteSpecialOffers() {
 
                       {/* Specs */}
                       <div className="flex flex-wrap gap-1.5 mb-4">
-                        {offer.voltage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(255,107,53,0.08)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.2)' }}>⚡ {offer.voltage}V</span>}
+                        {offer.voltage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(249,115,22,0.08)', color: '#F97316', border: '1px solid rgba(249,115,22,0.2)' }}>⚡ {offer.voltage}V</span>}
                         {offer.amperage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>🔌 {offer.amperage}A</span>}
                         {offer.wattage && <span className="px-2 py-0.5 rounded-md text-xs font-bold" style={{ background: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>💡 {offer.wattage}W</span>}
                       </div>
@@ -272,7 +272,7 @@ export default function WebsiteSpecialOffers() {
                               </span>
                             )}
                             {displayPrice(offer) != null && (
-                              <span className="font-grotesk font-black text-2xl" style={{ color: '#FF6B35' }}>
+                              <span className="font-grotesk font-black text-2xl" style={{ color: '#F97316' }}>
                                 {(displayPrice(offer) as number).toLocaleString()} DZD
                               </span>
                             )}
@@ -297,7 +297,7 @@ export default function WebsiteSpecialOffers() {
                             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                               onClick={() => handleAddToCart(offer)}
                               className="flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold"
-                              style={{ background: 'rgba(255,107,53,0.1)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.25)' }}
+                              style={{ background: 'rgba(249,115,22,0.1)', color: '#F97316', border: '1px solid rgba(249,115,22,0.25)' }}
                             >
                               <ShoppingCart className="w-3.5 h-3.5" />
                               {language === 'ar' ? 'سلة' : 'Panier'}
@@ -309,10 +309,10 @@ export default function WebsiteSpecialOffers() {
                             >
                               👁️ {language === 'ar' ? 'عرض' : 'Voir'}
                             </motion.button>
-                            <motion.button whileHover={{ scale: 1.04, boxShadow: '0 0 14px rgba(255,107,53,0.5)' }} whileTap={{ scale: 0.96 }}
+                            <motion.button whileHover={{ scale: 1.04, boxShadow: '0 0 14px rgba(249,115,22,0.5)' }} whileTap={{ scale: 0.96 }}
                               onClick={() => handleOrder(offer)}
                               className="flex items-center justify-center py-2 rounded-lg text-xs font-bold text-white"
-                              style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                              style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}
                             >
                               📦 {language === 'ar' ? 'طلب' : 'Cmd'}
                             </motion.button>
@@ -329,13 +329,13 @@ export default function WebsiteSpecialOffers() {
             {filteredOffers.length === 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 className="text-center py-24 rounded-2xl"
-                style={{ border: '2px dashed rgba(255,107,53,0.1)', background: 'rgba(255,107,53,0.01)' }}
+                style={{ border: '2px dashed rgba(249,115,22,0.1)', background: 'rgba(249,115,22,0.01)' }}
               >
-                <Flame className="w-16 h-16 mx-auto mb-4" style={{ color: 'rgba(255,107,53,0.2)' }} />
+                <Flame className="w-16 h-16 mx-auto mb-4" style={{ color: 'rgba(249,115,22,0.2)' }} />
                 <h3 className="font-grotesk font-bold text-xl mb-2" style={{ color: '#64748B' }}>
                   {language === 'ar' ? 'لا توجد عروض حالياً' : 'Aucune offre disponible'}
                 </h3>
-                <p className="text-sm" style={{ color: '#1E3A5F' }}>
+                <p className="text-sm" style={{ color: '#2E2A5A' }}>
                   {language === 'ar' ? 'عد قريباً للحصول على عروض جديدة' : 'Revenez bientôt pour de nouvelles offres'}
                 </p>
               </motion.div>
@@ -350,7 +350,7 @@ export default function WebsiteSpecialOffers() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowDetails(false)}
-              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }}
+              className="fixed inset-0 z-40" style={{ background: 'rgba(10,9,24,0.85)', backdropFilter: 'blur(6px)' }}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -358,11 +358,11 @@ export default function WebsiteSpecialOffers() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               className="fixed inset-4 sm:inset-8 z-50 rounded-2xl overflow-hidden flex flex-col"
-              style={{ background: '#0F172A', border: '1px solid rgba(255,107,53,0.3)', maxWidth: '900px', margin: 'auto' }}
+              style={{ background: '#13112A', border: '1px solid rgba(249,115,22,0.3)', maxWidth: '900px', margin: 'auto' }}
             >
-              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(255,107,53,0.15)' }}>
+              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(249,115,22,0.15)' }}>
                 <div className="flex items-center gap-3">
-                  <Flame className="w-5 h-5 flex-shrink-0" style={{ color: '#FF6B35' }} />
+                  <Flame className="w-5 h-5 flex-shrink-0" style={{ color: '#F97316' }} />
                   <h2 className="font-grotesk font-bold text-lg line-clamp-1" style={{ color: '#F1F5F9' }}>
                     {selectedOffer.product_name}
                   </h2>
@@ -376,27 +376,27 @@ export default function WebsiteSpecialOffers() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Image */}
                   <div className="h-64 rounded-xl flex items-center justify-center overflow-hidden"
-                    style={{ background: 'rgba(255,107,53,0.04)', border: '1px solid rgba(255,107,53,0.15)' }}
+                    style={{ background: 'rgba(249,115,22,0.04)', border: '1px solid rgba(249,115,22,0.15)' }}
                   >
                     {selectedOffer.product_image ? (
                       <img src={imgSrc.detail(selectedOffer.product_image)} alt={selectedOffer.product_name} className="max-w-full max-h-full object-contain p-4" loading="lazy" decoding="async" />
                     ) : (
-                      <Flame className="w-20 h-20" style={{ color: 'rgba(255,107,53,0.2)' }} />
+                      <Flame className="w-20 h-20" style={{ color: 'rgba(249,115,22,0.2)' }} />
                     )}
                   </div>
 
                   {/* Details */}
                   <div className="space-y-4">
                     {selectedOffer.product_mark && (
-                      <div className="p-3 rounded-xl" style={{ background: 'rgba(255,107,53,0.05)', borderLeft: '3px solid #FF6B35' }}>
+                      <div className="p-3 rounded-xl" style={{ background: 'rgba(249,115,22,0.05)', borderLeft: '3px solid #F97316' }}>
                         <p className="text-xs mb-1" style={{ color: '#64748B' }}>🏷️ Marque</p>
-                        <p className="font-grotesk font-bold text-lg" style={{ color: '#FF6B35' }}>{selectedOffer.product_mark}</p>
+                        <p className="font-grotesk font-bold text-lg" style={{ color: '#F97316' }}>{selectedOffer.product_mark}</p>
                       </div>
                     )}
 
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        { label: 'Voltage', value: selectedOffer.voltage ? `${selectedOffer.voltage}V` : 'N/A', color: '#FF6B35' },
+                        { label: 'Voltage', value: selectedOffer.voltage ? `${selectedOffer.voltage}V` : 'N/A', color: '#F97316' },
                         { label: 'Ampérage', value: selectedOffer.amperage ? `${selectedOffer.amperage}A` : 'N/A', color: '#EF4444' },
                         { label: 'Puissance', value: selectedOffer.wattage ? `${selectedOffer.wattage}W` : 'N/A', color: '#F59E0B' },
                         { label: 'Connexion', value: selectedOffer.connection_type || 'N/A', color: '#10B981' },
@@ -417,13 +417,13 @@ export default function WebsiteSpecialOffers() {
 
                     {/* Price section */}
                     {selectedOffer.show_price !== false && displayPrice(selectedOffer) != null && (
-                      <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(255,107,53,0.06)', border: '1px solid rgba(255,107,53,0.2)' }}>
+                      <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)' }}>
                         {selectedOffer.original_price > 0 && (
                           <p className="text-sm line-through mb-1" style={{ color: '#64748B' }}>
                             {selectedOffer.original_price.toLocaleString()} DZD
                           </p>
                         )}
-                        <span className="font-grotesk font-black text-3xl" style={{ color: '#FF6B35' }}>
+                        <span className="font-grotesk font-black text-3xl" style={{ color: '#F97316' }}>
                           {(displayPrice(selectedOffer) as number).toLocaleString()} DZD
                         </span>
                         {selectedOffer.discount_percentage > 0 && (
@@ -449,15 +449,15 @@ export default function WebsiteSpecialOffers() {
                         <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                           onClick={() => { handleAddToCart(selectedOffer); setShowDetails(false); }}
                           className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm"
-                          style={{ background: 'rgba(255,107,53,0.1)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.3)' }}
+                          style={{ background: 'rgba(249,115,22,0.1)', color: '#F97316', border: '1px solid rgba(249,115,22,0.3)' }}
                         >
                           <ShoppingCart className="w-4 h-4" />
                           {language === 'ar' ? 'أضف للسلة' : 'Ajouter'}
                         </motion.button>
-                        <motion.button whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(255,107,53,0.4)' }} whileTap={{ scale: 0.98 }}
+                        <motion.button whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(249,115,22,0.4)' }} whileTap={{ scale: 0.98 }}
                           onClick={() => handleOrder(selectedOffer)}
                           className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white"
-                          style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}
+                          style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}
                         >
                           🚀 {language === 'ar' ? 'اطلب الآن' : 'Commander'}
                         </motion.button>

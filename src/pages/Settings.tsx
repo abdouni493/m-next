@@ -34,6 +34,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase, getUserProfile, getSystemInfo, getStores, updateUserProfile } from '@/lib/supabaseClient';
+import { uploadImage } from '@/lib/imageUpload';
 
 export default function Settings() {
   const { toast } = useToast();
@@ -291,15 +292,15 @@ export default function Settings() {
     }
   };
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Check file size (limit to 2MB)
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 15 * 1024 * 1024) {
       toast({
         title: 'Erreur',
-        description: 'Le fichier est trop volumineux. Taille maximale: 2MB',
+        description: 'Le fichier est trop volumineux. Taille maximale: 15MB',
         variant: 'destructive'
       });
       return;
@@ -315,12 +316,17 @@ export default function Settings() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64 = e.target?.result as string;
-      setWebsiteSettings(prev => ({ ...prev, logo_data: base64 }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Store the compressed file in Supabase Storage; only the public URL goes in the DB.
+      const { publicUrl } = await uploadImage(file, { folder: 'logos', preset: 'logo' });
+      setWebsiteSettings(prev => ({ ...prev, logo_url: publicUrl, logo_data: publicUrl }));
+    } catch (err) {
+      toast({
+        title: 'Erreur',
+        description: err instanceof Error ? err.message : 'Échec du téléversement',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleWebsiteSettingsUpdate = async () => {
@@ -703,7 +709,7 @@ export default function Settings() {
                         className="h-12 bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded-xl hover:border-blue-300 focus:border-blue-500 dark:text-slate-100 transition-colors cursor-pointer file:bg-blue-50 dark:file:bg-blue-900 file:text-blue-700 dark:file:text-blue-300 file:border-0 file:rounded-lg file:px-3 file:py-1 file:mr-3 file:font-semibold"
                       />
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        📎 {language === 'ar' ? 'JPG, PNG, GIF. Max: 2MB' : 'JPG, PNG, GIF. Max: 2MB'}
+                        📎 {language === 'ar' ? 'JPG, PNG, GIF. Max: 15MB' : 'JPG, PNG, GIF. Max: 15MB'}
                       </p>
                     </div>
                   </div>

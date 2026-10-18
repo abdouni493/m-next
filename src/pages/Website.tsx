@@ -46,6 +46,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { uploadImage } from '@/lib/imageUpload';
 import { supabase, getProducts, getWebsiteSettings, updateWebsiteSettings, getOffers, createOffer, updateOffer, deleteOffer, getSpecialOffers, createSpecialOffer, updateSpecialOffer, deleteSpecialOffer, getApprovedTestimonials, createTestimonial, deleteTestimonial } from '@/lib/supabaseClient';
 
 interface Product {
@@ -557,50 +558,14 @@ export default function Website() {
 
       // Upload logo if changed
       if (logoFile) {
-        try {
-          const fileName = `logo_${Date.now()}_${logoFile.name}`;
-          const { error: uploadError } = await supabase.storage
-            .from('chargers')
-            .upload(fileName, logoFile);
-
-          if (uploadError) {
-            console.warn('Storage upload warning:', uploadError);
-          } else {
-            const { data: publicUrl } = supabase.storage
-              .from('chargers')
-              .getPublicUrl(fileName);
-
-            if (publicUrl?.publicUrl) {
-              settingsToUpdate.logo_url = publicUrl.publicUrl;
-            }
-          }
-        } catch (storageError) {
-          console.warn('Storage error (continuing):', storageError);
-        }
+        const { publicUrl } = await uploadImage(logoFile, { folder: 'logos', preset: 'logo' });
+        settingsToUpdate.logo_url = publicUrl;
       }
 
       // Upload landing page image if changed
       if (landingPageImageFile) {
-        try {
-          const fileName = `landing_bg_${Date.now()}_${landingPageImageFile.name}`;
-          const { error: uploadError } = await supabase.storage
-            .from('chargers')
-            .upload(fileName, landingPageImageFile);
-
-          if (uploadError) {
-            console.warn('Storage upload warning:', uploadError);
-          } else {
-            const { data: publicUrl } = supabase.storage
-              .from('chargers')
-              .getPublicUrl(fileName);
-
-            if (publicUrl?.publicUrl) {
-              settingsToUpdate.landing_page_image_url = publicUrl.publicUrl;
-            }
-          }
-        } catch (storageError) {
-          console.warn('Storage error (continuing):', storageError);
-        }
+        const { publicUrl } = await uploadImage(landingPageImageFile, { folder: 'landing', preset: 'hero' });
+        settingsToUpdate.landing_page_image_url = publicUrl;
       }
 
       const result = await updateWebsiteSettings(settingsToUpdate);

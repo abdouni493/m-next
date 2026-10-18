@@ -48,9 +48,9 @@ export default function WebsiteContacts() {
       label: language === 'ar' ? 'الهاتف' : 'Téléphone',
       value: settings?.phone_number,
       href: settings?.phone_number ? `tel:${settings.phone_number}` : '#',
-      color: '#00D4FF',
-      bg: 'rgba(0,212,255,0.07)',
-      border: 'rgba(0,212,255,0.2)',
+      color: '#8B5CF6',
+      bg: 'rgba(139,92,246,0.07)',
+      border: 'rgba(139,92,246,0.2)',
       emoji: '☎️',
     },
     {
@@ -78,9 +78,9 @@ export default function WebsiteContacts() {
       label: language === 'ar' ? 'البريد الإلكتروني' : 'Email',
       value: settings?.email,
       href: settings?.email ? `mailto:${settings.email}` : '#',
-      color: '#FF6B35',
-      bg: 'rgba(255,107,53,0.07)',
-      border: 'rgba(255,107,53,0.2)',
+      color: '#F97316',
+      bg: 'rgba(249,115,22,0.07)',
+      border: 'rgba(249,115,22,0.2)',
       emoji: '📧',
     },
     {
@@ -88,9 +88,9 @@ export default function WebsiteContacts() {
       label: language === 'ar' ? 'الموقع' : 'Localisation',
       value: settings?.location,
       href: '#',
-      color: '#7C3AED',
-      bg: 'rgba(124,58,237,0.07)',
-      border: 'rgba(124,58,237,0.2)',
+      color: '#EC4899',
+      bg: 'rgba(236,72,153,0.07)',
+      border: 'rgba(236,72,153,0.2)',
       emoji: '📍',
     },
   ];
@@ -104,40 +104,40 @@ export default function WebsiteContacts() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: '#020817' }}>
+      <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: '#0A0918' }}>
         <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
           className="w-12 h-12 rounded-full"
-          style={{ border: '2px solid rgba(0,212,255,0.1)', borderTopColor: '#00D4FF' }}
+          style={{ border: '2px solid rgba(139,92,246,0.1)', borderTopColor: '#8B5CF6' }}
         />
       </div>
     );
   }
 
   return (
-    <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
+    <div style={{ background: '#0A0918', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
 
       {/* Header */}
       <div className="relative py-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(0,212,255,0.08) 0%, transparent 55%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(139,92,246,0.08) 0%, transparent 55%)' }} />
         {/* Grid pattern */}
         <div className="absolute inset-0 pointer-events-none opacity-5"
-          style={{ backgroundImage: 'linear-gradient(rgba(0,212,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.4) 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+          style={{ backgroundImage: 'linear-gradient(rgba(139,92,246,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.4) 1px, transparent 1px)', backgroundSize: '40px 40px' }}
         />
 
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <motion.div
-              animate={{ boxShadow: ['0 0 0px rgba(0,212,255,0)', '0 0 20px rgba(0,212,255,0.25)', '0 0 0px rgba(0,212,255,0)'] }}
+              animate={{ boxShadow: ['0 0 0px rgba(139,92,246,0)', '0 0 20px rgba(139,92,246,0.25)', '0 0 0px rgba(139,92,246,0)'] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5 text-sm font-bold"
-              style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)', color: '#00D4FF' }}
+              style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', color: '#8B5CF6' }}
             >
               <Zap className="w-4 h-4" />
               {language === 'ar' ? 'تواصل معنا' : 'Contactez-nous'}
             </motion.div>
 
             <h1 className="font-grotesk font-black text-4xl md:text-5xl mb-3">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #00D4FF, #7C3AED, #00D4FF)' }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #8B5CF6, #EC4899, #8B5CF6)' }}>
                 📞 {language === 'ar' ? 'جهات الاتصال' : 'Nos Contacts'}
               </span>
             </h1>
@@ -161,14 +161,14 @@ export default function WebsiteContacts() {
                   <motion.img src={imgSrc.thumb(settings.logo_url)} alt="Logo"
                     className="h-24 w-24 rounded-2xl object-cover"
                     loading="lazy" decoding="async"
-                    style={{ boxShadow: '0 0 20px rgba(0,212,255,0.2)' }}
+                    style={{ boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}
                     whileHover={{ scale: 1.05 }}
                   />
                 </div>
               )}
               <div>
                 <h2 className="font-grotesk font-black text-2xl mb-1" style={{ color: '#F1F5F9' }}>{settings.store_name}</h2>
-                <p className="text-sm" style={{ color: '#00D4FF' }}>{settings.slogan}</p>
+                <p className="text-sm" style={{ color: '#8B5CF6' }}>{settings.slogan}</p>
                 {settings.description && (
                   <p className="text-sm mt-3 max-w-xl mx-auto leading-relaxed" style={{ color: '#64748B' }}>{settings.description}</p>
                 )}
@@ -240,7 +240,7 @@ export default function WebsiteContacts() {
                     style={{ textDecoration: 'none' }}
                   >
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                      style={{ background: '#0F172A', border: `1px solid ${media.color}33` }}>
+                      style={{ background: '#13112A', border: `1px solid ${media.color}33` }}>
                       <Icon className="w-6 h-6" style={{ color: media.color }} />
                     </div>
                     <span className="text-xs font-semibold" style={{ color: '#64748B' }}>{media.name}</span>
@@ -255,7 +255,7 @@ export default function WebsiteContacts() {
         {settings?.location && (
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <GlowCard glowColor="violet" className="p-6 text-center space-y-3">
-              <MapPin className="w-8 h-8 mx-auto" style={{ color: '#7C3AED' }} />
+              <MapPin className="w-8 h-8 mx-auto" style={{ color: '#EC4899' }} />
               <h3 className="font-grotesk font-bold text-lg" style={{ color: '#F1F5F9' }}>
                 📍 {language === 'ar' ? 'موقعنا' : 'Notre Localisation'}
               </h3>
@@ -272,8 +272,8 @@ export default function WebsiteContacts() {
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               {[
-                { day: language === 'ar' ? 'أيام العمل' : 'Lun – Ven', hours: '9:00 – 18:00', color: '#00D4FF' },
-                { day: language === 'ar' ? 'السبت' : 'Samedi', hours: '10:00 – 17:00', color: '#7C3AED' },
+                { day: language === 'ar' ? 'أيام العمل' : 'Lun – Ven', hours: '9:00 – 18:00', color: '#8B5CF6' },
+                { day: language === 'ar' ? 'السبت' : 'Samedi', hours: '10:00 – 17:00', color: '#EC4899' },
                 { day: language === 'ar' ? 'الأحد' : 'Dimanche', hours: language === 'ar' ? 'مغلق' : 'Fermé', color: '#64748B' },
               ].map(h => (
                 <div key={h.day} className="p-4 rounded-xl" style={{ background: 'rgba(30,58,95,0.3)', border: `1px solid ${h.color}22` }}>

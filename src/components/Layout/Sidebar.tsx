@@ -1,14 +1,20 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  LayoutDashboard, Boxes, UsersRound, Truck, Receipt, Store, LineChart, PackageCheck,
+  Globe2, ScanLine, Wallet, Barcode, Settings2, Zap, Crown, UserRound, type LucideIcon,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { getWebsiteSettingsREST } from '@/lib/supabaseClient';
-import { Globe } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
 }
+
+type NavItem = { title: string; href: string; icon: LucideIcon };
 
 export const Sidebar = ({ isOpen }: SidebarProps) => {
   const location = useLocation();
@@ -48,162 +54,150 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
     fetchSettings();
   }, []);
 
-  const navigationItems = [
-    { title: t('nav.dashboard'), href: '/', emoji: '📊' },
-    { title: t('nav.inventory'), href: '/inventory', emoji: '📦' },
-    { title: 'Clients', href: '/clients', emoji: '👥' },
-    { title: 'Factures d\'Achat', href: '/purchase-invoices', emoji: '🚚' },
-    { title: t('nav.sales'), href: '/sales', emoji: '🛒' },
-    { title: t('nav.suppliers'), href: '/suppliers', emoji: '🏪' },
-    { title: t('nav.reports'), href: '/reports', emoji: '📈' },
-    { title: 'Commandes', href: '/commands', emoji: '📦' }
+  const navigationItems: NavItem[] = [
+    { title: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
+    { title: t('nav.inventory'), href: '/inventory', icon: Boxes },
+    { title: 'Clients', href: '/clients', icon: UsersRound },
+    { title: "Factures d'Achat", href: '/purchase-invoices', icon: Truck },
+    { title: t('nav.sales'), href: '/sales', icon: Receipt },
+    { title: t('nav.suppliers'), href: '/suppliers', icon: Store },
+    { title: t('nav.reports'), href: '/reports', icon: LineChart },
+    { title: 'Commandes', href: '/commands', icon: PackageCheck },
   ];
 
-  const toolItems = [
-    { title: 'Gestion du Site', href: '/website', emoji: '🌐' },
-    { title: t('nav.pos'), href: '/pos', emoji: '🧮' },
-    { title: 'Caisse', href: '/caisse', emoji: '💰' },
-    { title: t('nav.barcodes'), href: '/barcodes', emoji: '📲' },
-    { title: t('nav.settings'), href: '/settings', emoji: '⚙️' }
+  const toolItems: NavItem[] = [
+    { title: 'Gestion du Site', href: '/website', icon: Globe2 },
+    { title: t('nav.pos'), href: '/pos', icon: ScanLine },
+    { title: 'Caisse', href: '/caisse', icon: Wallet },
+    { title: t('nav.barcodes'), href: '/barcodes', icon: Barcode },
+    { title: t('nav.settings'), href: '/settings', icon: Settings2 },
   ];
 
   const isActiveRoute = (href: string) => {
-    if (href === '/') {
-      return location.pathname === '/';
-    }
+    if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href);
   };
 
+  const initials = (user?.name || user?.username || 'U')
+    .split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+  const renderSection = (label: string, items: NavItem[], offset: number) => (
+    <div className="space-y-1">
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.p
+            initial={{ opacity: 0, x: isRTL ? 8 : -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className={cn('px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/50', isRTL && 'text-right')}
+          >
+            {label}
+          </motion.p>
+        )}
+      </AnimatePresence>
+      {items.map((item, index) => {
+        const isActive = isActiveRoute(item.href);
+        const Icon = item.icon;
+        return (
+          <motion.div
+            key={item.href}
+            initial={{ opacity: 0, x: isRTL ? 12 : -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: (index + offset) * 0.03, type: 'spring', stiffness: 400, damping: 32 }}
+          >
+            <NavLink
+              to={item.href}
+              title={!isOpen ? item.title : undefined}
+              aria-label={item.title}
+              className={cn(
+                'group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-sidebar-ring',
+                isRTL && 'flex-row-reverse',
+                !isOpen && 'justify-center px-0',
+                isActive
+                  ? 'text-white'
+                  : 'text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+              )}
+            >
+              {isActive && (
+                <motion.span
+                  layoutId="sidebar-active"
+                  className="absolute inset-0 rounded-xl bg-gradient-primary shadow-primary"
+                  transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                />
+              )}
+              <Icon className="relative z-10 h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110" strokeWidth={2} />
+              {isOpen && (
+                <span className={cn('relative z-10 flex-1 truncate', isRTL && 'text-right')}>{item.title}</span>
+              )}
+            </NavLink>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <aside className={cn(
-      `bg-gradient-to-b from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 border-${isRTL ? 'l' : 'r'} border-blue-200 dark:border-slate-700 transition-all duration-300 flex flex-col shadow-lg`,
-      isOpen ? "w-72" : "w-20"
-    )}>
-      {/* Logo Section */}
-      <div className="p-6 border-b border-blue-200 dark:border-slate-700 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-slate-800 dark:to-slate-700">
-        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg border border-white/50 bg-white flex items-center justify-center">
-            {storeLogoUrl ? (
-              <img src={storeLogoUrl} alt="Logo magasin" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold text-xl">
-                <Globe className="w-6 h-6" />
-              </div>
-            )}
-          </div>
-          {isOpen && (
-            <div className={isRTL ? 'text-right' : ''}>
-              <h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">{storeDisplayName || storeName}</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400">{storeName}</p>
-            </div>
+    <motion.aside
+      initial={false}
+      animate={{ width: isOpen ? 272 : 80 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+      className={cn(
+        'relative z-20 flex shrink-0 flex-col overflow-hidden bg-sidebar text-sidebar-foreground',
+        isRTL ? 'border-l border-sidebar-border' : 'border-r border-sidebar-border'
+      )}
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.28),transparent_70%)]" />
+
+      {/* Brand */}
+      <div className={cn('relative flex h-[72px] items-center gap-3 px-5', isRTL && 'flex-row-reverse', !isOpen && 'justify-center px-0')}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-primary shadow-primary ring-1 ring-white/10">
+          {storeLogoUrl ? (
+            <img src={storeLogoUrl} alt="Logo" className="h-full w-full object-cover" />
+          ) : (
+            <Zap className="h-5 w-5 text-white" fill="currentColor" />
           )}
         </div>
+        <AnimatePresence initial={false}>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: isRTL ? 10 : -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isRTL ? 10 : -10 }}
+              transition={{ duration: 0.2 }}
+              className={cn('min-w-0', isRTL && 'text-right')}
+            >
+              <h1 className="truncate font-display text-lg font-bold leading-tight text-white">{storeDisplayName || storeName}</h1>
+              <p className="truncate text-xs text-sidebar-foreground/55">Admin console</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-6 custom-scrollbar overflow-y-auto">
-        {/* Main Navigation Section */}
-        <div className="space-y-3">
-          {isOpen && (
-            <div className="px-4 py-3 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
-              <h3 className="text-xs font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600 uppercase tracking-widest">
-                📋 Navigation
-              </h3>
-            </div>
-          )}
-          <div className="space-y-2">
-            {navigationItems.map((item, index) => {
-              const isActive = isActiveRoute(item.href);
-              
-              return (
-                <NavLink
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    `group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`,
-                    isActive 
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg scale-105" 
-                      : "text-slate-700 dark:text-slate-300 hover:bg-gradient-to-r hover:from-blue-100 hover:to-cyan-100 dark:hover:from-slate-700 dark:hover:to-slate-600"
-                  )}
-                  title={!isOpen ? item.title : undefined}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <span className="text-2xl">{item.emoji}</span>
-                  {isOpen && (
-                    <span className={`font-semibold text-sm flex-1 ${isRTL ? 'text-right' : ''}`}>
-                      {item.title}
-                    </span>
-                  )}
-                  {isActive && isOpen && (
-                    <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  )}
-                </NavLink>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tools Section */}
-        <div className="space-y-3 pt-4 border-t border-blue-200 dark:border-slate-700">
-          {isOpen && (
-            <div className="px-4 py-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg border border-purple-200 dark:border-purple-800">
-              <h3 className="text-xs font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-pink-600 uppercase tracking-widest">
-                🛠️ Tools
-              </h3>
-            </div>
-          )}
-          <div className="space-y-2">
-            {toolItems.map((item, index) => {
-              const isActive = isActiveRoute(item.href);
-              
-              return (
-                <NavLink
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    `group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`,
-                    isActive 
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105" 
-                      : "text-slate-700 dark:text-slate-300 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 dark:hover:from-slate-700 dark:hover:to-slate-600"
-                  )}
-                  title={!isOpen ? item.title : undefined}
-                  style={{ animationDelay: `${(index + navigationItems.length) * 0.05}s` }}
-                >
-                  <span className="text-2xl">{item.emoji}</span>
-                  {isOpen && (
-                    <span className={`font-semibold text-sm flex-1 ${isRTL ? 'text-right' : ''}`}>
-                      {item.title}
-                    </span>
-                  )}
-                  {isActive && isOpen && (
-                    <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  )}
-                </NavLink>
-              );
-            })}
-          </div>
-        </div>
+      <nav className="custom-scrollbar relative flex-1 space-y-6 overflow-y-auto px-3 py-4">
+        {renderSection('Navigation', navigationItems, 0)}
+        <div className="mx-3 h-px bg-sidebar-border" />
+        {renderSection('Tools', toolItems, navigationItems.length)}
       </nav>
 
-      {/* User Section */}
-      <div className="p-4 border-t border-blue-200 dark:border-slate-700 bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30">
-        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md">
-            {(user?.name || user?.username || 'U')
-              .split(' ')
-              .map(n => n[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)}
+      {/* User */}
+      <div className="relative border-t border-sidebar-border p-3">
+        <div className={cn('flex items-center gap-3 rounded-xl bg-sidebar-accent/60 p-2.5', isRTL && 'flex-row-reverse', !isOpen && 'justify-center bg-transparent p-0')}>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-accent text-sm font-bold text-white">
+            {initials}
           </div>
           {isOpen && (
-            <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : ''}`}>
-              <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{user?.name || user?.username || 'User'}</p>
-              <p className="text-xs text-slate-600 dark:text-slate-400">{user?.role === 'admin' ? '👑 Admin' : '👤 User'}</p>
+            <div className={cn('min-w-0 flex-1', isRTL && 'text-right')}>
+              <p className="truncate text-sm font-semibold text-white">{user?.name || user?.username || 'User'}</p>
+              <p className={cn('flex items-center gap-1 text-xs text-sidebar-foreground/60', isRTL && 'flex-row-reverse')}>
+                {user?.role === 'admin' ? <Crown className="h-3 w-3 text-amber-400" /> : <UserRound className="h-3 w-3" />}
+                {user?.role === 'admin' ? 'Admin' : 'User'}
+              </p>
             </div>
           )}
         </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 };

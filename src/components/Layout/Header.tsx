@@ -8,7 +8,11 @@ import {
   User,
   LogOut,
   Settings,
-  Globe
+  Zap,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Crown,
+  UserRound
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,7 +91,7 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
     .slice(0, 2);
 
   return (
-    <header className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-slate-900 dark:to-slate-800 border-b border-blue-200 dark:border-slate-700 shadow-md">
+    <header className="sticky top-0 z-10 border-b border-border/60 bg-background/75 backdrop-blur-xl">
       <div className="flex items-center justify-between h-16 px-6">
         {/* Left Section */}
         <div className="flex items-center gap-4">
@@ -95,20 +99,21 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
             variant="ghost"
             size="icon"
             onClick={onMenuClick}
-            className="hover:bg-accent"
+            className="rounded-xl hover:bg-accent"
+            aria-label="Toggle sidebar"
           >
-            <Menu className="w-5 h-5" />
+            {sidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
           </Button>
 
           <div className="hidden sm:flex items-center gap-2">
             {storeLogoUrl ? (
-              <img src={storeLogoUrl} alt="Logo magasin" className="w-8 h-8 rounded-sm object-cover border" />
+              <img src={storeLogoUrl} alt="Logo magasin" className="w-8 h-8 rounded-lg object-cover ring-1 ring-border" />
             ) : (
-              <div className="w-8 h-8 rounded-sm bg-blue-200 flex items-center justify-center">
-                <Globe className="w-5 h-5 text-blue-600" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
+                <Zap className="w-4 h-4 text-white" fill="currentColor" />
               </div>
             )}
-            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{storeDisplayName}</span>
+            <span className="font-display text-sm font-semibold text-foreground">{storeDisplayName}</span>
           </div>
         </div>
 
@@ -119,12 +124,12 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
             variant="ghost"
             size="icon"
             onClick={toggleDarkMode}
-            className="hover:bg-blue-100 dark:hover:bg-slate-700 animate-scale-in rounded-lg"
+            className="rounded-xl hover:bg-accent" aria-label="Toggle theme"
           >
             {isDarkMode ? (
-              <Sun className="w-5 h-5 text-yellow-400 transition-transform hover:rotate-12" />
+              <Sun className="w-5 h-5 text-amber-400 transition-transform duration-300 hover:rotate-45" />
             ) : (
-              <Moon className="w-5 h-5 text-blue-600 transition-transform hover:rotate-12" />
+              <Moon className="w-5 h-5 text-primary transition-transform duration-300 hover:-rotate-12" />
             )}
           </Button>
 
@@ -133,17 +138,17 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-3 pl-4 border-l border-blue-200 dark:border-slate-700 hover:bg-blue-100 dark:hover:bg-slate-700 rounded-lg">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full flex items-center justify-center text-white font-semibold text-sm animate-scale-in shadow-md">
+                <Button variant="ghost" className="flex items-center gap-3 rounded-xl pl-2 pr-3 hover:bg-accent">
+                  <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center text-white font-semibold text-sm shadow-primary">
                     {userInitials}
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-medium">{user?.name || user?.username || 'User'}</p>
-                    <p className="text-xs text-muted-foreground">{user?.role === 'admin' ? '👑 Administrator' : user?.role === 'employee' ? '👤 Employee' : 'User'}</p>
+                    <p className="text-xs text-muted-foreground">{user?.role === 'admin' ? 'Administrator' : user?.role === 'employee' ? 'Employee' : 'User'}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align={isRTL ? "start" : "end"} className="w-56 animate-fade-in bg-background border shadow-lg">
+              <DropdownMenuContent align={isRTL ? "start" : "end"} className="w-56 shadow-elegant">
                 <div className="px-3 py-2 border-b">
                   <p className="text-sm font-medium">{user?.name || user?.username || 'User'}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>

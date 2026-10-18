@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { uploadImage } from '@/lib/imageUpload';
 import { supabase, getProducts, getWebsiteSettings, updateWebsiteSettings, getOffers, createOffer, updateOffer, deleteOffer, getSpecialOffers, createSpecialOffer, updateSpecialOffer, deleteSpecialOffer } from '@/lib/supabaseClient';
 
 interface Product {
@@ -414,26 +415,8 @@ export default function Website() {
 
       // Upload logo if changed
       if (logoFile) {
-        try {
-          const fileName = `logo-${Date.now()}`;
-          const { error: uploadError } = await supabase.storage
-            .from('website')
-            .upload(`logos/${fileName}`, logoFile);
-
-          if (uploadError) {
-            console.warn('Storage upload warning:', uploadError);
-          } else {
-            const { data: publicUrl } = supabase.storage
-              .from('website')
-              .getPublicUrl(`logos/${fileName}`);
-
-            if (publicUrl?.publicUrl) {
-              settingsToUpdate.logo_url = publicUrl.publicUrl;
-            }
-          }
-        } catch (storageError) {
-          console.warn('Storage error (continuing):', storageError);
-        }
+        const { publicUrl } = await uploadImage(logoFile, { folder: 'logos', preset: 'logo' });
+        settingsToUpdate.logo_url = publicUrl;
       }
 
       const result = await updateWebsiteSettings(settingsToUpdate);

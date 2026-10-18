@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 export default {
 	darkMode: ["class"],
@@ -20,10 +21,15 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
+				display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
 				grotesk: ['Space Grotesk', 'sans-serif'],
 				inter: ['Inter', 'sans-serif'],
 			},
 			colors: {
+				// Legacy hard-coded blue/cyan classes across pages follow the new indigo/violet brand.
+				blue: colors.indigo,
+				cyan: colors.violet,
+				sky: colors.indigo,
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -80,13 +86,13 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				brand: {
-					cyan: '#00D4FF',
-					violet: '#7C3AED',
-					orange: '#FF6B35',
-					dark: '#020817',
-					surface: '#0F172A',
-					surface2: '#1E293B',
-					border: '#1E3A5F',
+					cyan: '#8B5CF6',
+					violet: '#EC4899',
+					orange: '#F97316',
+					dark: '#0A0918',
+					surface: '#13112A',
+					surface2: '#1F1B3D',
+					border: '#2E2A5A',
 					gold: '#F59E0B',
 				}
 			},
@@ -100,13 +106,15 @@ export default {
 				'md': 'var(--shadow-md)',
 				'lg': 'var(--shadow-lg)',
 				'primary': 'var(--shadow-primary)',
-				'cyan': '0 0 20px rgba(0,212,255,0.3)',
-				'cyan-lg': '0 0 40px rgba(0,212,255,0.5)',
-				'violet': '0 0 20px rgba(124,58,237,0.3)',
-				'orange': '0 0 20px rgba(255,107,53,0.4)',
+				'elegant': 'var(--shadow-elegant)',
+				'cyan': '0 0 20px rgba(139,92,246,0.3)',
+				'cyan-lg': '0 0 40px rgba(139,92,246,0.5)',
+				'violet': '0 0 20px rgba(236,72,153,0.3)',
+				'orange': '0 0 20px rgba(249,115,22,0.4)',
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-accent': 'var(--gradient-accent)',
 				'gradient-success': 'var(--gradient-success)',
 				'gradient-warning': 'var(--gradient-warning)',
 				'gradient-card': 'var(--gradient-card)',
@@ -125,8 +133,8 @@ export default {
 					'50%': { backgroundPosition: '100% 50%' },
 				},
 				borderGlow: {
-					'0%': { boxShadow: '0 0 5px rgba(0,212,255,0.3)' },
-					'100%': { boxShadow: '0 0 20px rgba(0,212,255,0.8), 0 0 40px rgba(0,212,255,0.3)' },
+					'0%': { boxShadow: '0 0 5px rgba(139,92,246,0.3)' },
+					'100%': { boxShadow: '0 0 20px rgba(139,92,246,0.8), 0 0 40px rgba(139,92,246,0.3)' },
 				},
 				float: {
 					'0%, 100%': { transform: 'translateY(0px)' },
@@ -138,7 +146,7 @@ export default {
 					'100%': { transform: 'rotate(-15deg)' },
 				},
 				borderFire: {
-					'0%': { borderColor: '#FF6B35' },
+					'0%': { borderColor: '#F97316' },
 					'50%': { borderColor: '#F59E0B' },
 					'100%': { borderColor: '#EF4444' },
 				},
@@ -149,6 +157,24 @@ export default {
 				shimmer: {
 					'0%': { transform: 'translateX(-100%)' },
 					'100%': { transform: 'translateX(100%)' },
+				},
+				'overlay-in': { from: { opacity: '0' }, to: { opacity: '1' } },
+				'overlay-out': { from: { opacity: '1' }, to: { opacity: '0' } },
+				'dialog-in': {
+					from: { opacity: '0', transform: 'translate(-50%, -46%) scale(0.94)', filter: 'blur(4px)' },
+					to: { opacity: '1', transform: 'translate(-50%, -50%) scale(1)', filter: 'blur(0)' },
+				},
+				'dialog-out': {
+					from: { opacity: '1', transform: 'translate(-50%, -50%) scale(1)' },
+					to: { opacity: '0', transform: 'translate(-50%, -48%) scale(0.97)' },
+				},
+				'pop-in': {
+					from: { opacity: '0', transform: 'scale(0.96) translateY(-4px)' },
+					to: { opacity: '1', transform: 'scale(1) translateY(0)' },
+				},
+				'pop-out': {
+					from: { opacity: '1', transform: 'scale(1)' },
+					to: { opacity: '0', transform: 'scale(0.97)' },
 				},
 				fadeInUp: {
 					'0%': { opacity: '0', transform: 'translateY(30px)' },
@@ -166,6 +192,12 @@ export default {
 				'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
 				'shimmer': 'shimmer 2s infinite',
 				'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+				'overlay-in': 'overlay-in 0.24s cubic-bezier(0.22,1,0.36,1)',
+				'overlay-out': 'overlay-out 0.16s cubic-bezier(0.55,0,1,0.45)',
+				'dialog-in': 'dialog-in 0.32s cubic-bezier(0.22,1,0.36,1)',
+				'dialog-out': 'dialog-out 0.18s cubic-bezier(0.55,0,1,0.45)',
+				'pop-in': 'pop-in 0.18s cubic-bezier(0.22,1,0.36,1)',
+				'pop-out': 'pop-out 0.12s cubic-bezier(0.55,0,1,0.45)',
 			}
 		}
 	},

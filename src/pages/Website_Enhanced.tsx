@@ -52,6 +52,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { uploadImage } from '@/lib/imageUpload';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   supabase, 
@@ -483,21 +484,11 @@ export default function Website_Enhanced() {
       reader.readAsDataURL(file);
 
       // Upload to Supabase Storage
-      const fileName = `logo_${Date.now()}_${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('chargers')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from('chargers')
-        .getPublicUrl(fileName);
+      const { publicUrl } = await uploadImage(file, { folder: 'logos', preset: 'logo' });
 
       setWebsiteSettings({
         ...websiteSettings,
-        logo_url: publicUrlData.publicUrl,
+        logo_url: publicUrl,
       });
 
       toast({
@@ -508,7 +499,7 @@ export default function Website_Enhanced() {
       console.error('Error uploading logo:', error);
       toast({
         title: t.common.error,
-        description: 'Failed to upload logo',
+        description: error instanceof Error ? error.message : 'Failed to upload logo',
         variant: 'destructive',
       });
     }
@@ -521,21 +512,11 @@ export default function Website_Enhanced() {
       setLandingPageImageFile(file);
 
       // Upload to Supabase Storage
-      const fileName = `landing_bg_${Date.now()}_${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('chargers')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from('chargers')
-        .getPublicUrl(fileName);
+      const { publicUrl } = await uploadImage(file, { folder: 'landing', preset: 'hero' });
 
       setWebsiteSettings({
         ...websiteSettings,
-        landing_page_image_url: publicUrlData.publicUrl,
+        landing_page_image_url: publicUrl,
       });
 
       toast({
@@ -546,7 +527,7 @@ export default function Website_Enhanced() {
       console.error('Error uploading landing page background:', error);
       toast({
         title: t.common.error,
-        description: 'Failed to upload landing page background',
+        description: error instanceof Error ? error.message : 'Failed to upload landing page background',
         variant: 'destructive',
       });
     }
@@ -768,20 +749,9 @@ export default function Website_Enhanced() {
       // Upload package image if provided, now that we have the package ID
       let imageUrl = '';
       if (packageImage) {
-        const timestamp = Date.now();
-        const filePath = `packages/${createdPackage.id}/${timestamp}_${packageImage.name}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('chargers')
-          .upload(filePath, packageImage);
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('chargers')
-          .getPublicUrl(filePath);
-        imageUrl = urlData.publicUrl;
+        const uploaded = await uploadImage(packageImage, { folder: `packages/${createdPackage.id}`, preset: 'offer' });
+        const filePath = uploaded.path;
+        imageUrl = uploaded.publicUrl;
 
         // Update package with image URL
         await updatePackage(createdPackage.id, {

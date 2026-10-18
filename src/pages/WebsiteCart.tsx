@@ -57,9 +57,9 @@ interface Testimonial {
 const ALGERIAN_WILAYAS = getAllWilayas();
 
 const inputStyle = {
-  background: '#0F172A',
+  background: '#13112A',
   color: '#F1F5F9',
-  border: '1px solid rgba(0,212,255,0.15)',
+  border: '1px solid rgba(139,92,246,0.15)',
   borderRadius: '10px',
   padding: '10px 14px',
   fontSize: '14px',
@@ -274,7 +274,7 @@ export default function WebsiteCart() {
   // ======= SUCCESS SCREEN =======
   if (orderPlaced && orderDetails) {
     return (
-      <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
+      <div style={{ background: '#0A0918', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
         {/* Confetti particles */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
           {[...Array(20)].map((_, i) => (
@@ -283,7 +283,7 @@ export default function WebsiteCart() {
               animate={{ y: '110vh', opacity: [0, 1, 1, 0], rotate: [0, 180, 360] }}
               transition={{ duration: 3 + (i % 4) * 0.5, delay: i * 0.15, ease: 'linear' }}
               className="absolute w-2 h-2 rounded-sm"
-              style={{ background: ['#00D4FF', '#7C3AED', '#FF6B35', '#10B981', '#F59E0B'][i % 5], top: 0 }}
+              style={{ background: ['#8B5CF6', '#EC4899', '#F97316', '#10B981', '#F59E0B'][i % 5], top: 0 }}
             />
           ))}
         </div>
@@ -297,7 +297,7 @@ export default function WebsiteCart() {
             <div className="relative w-28 h-28">
               <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
                 className="absolute inset-0 rounded-full"
-                style={{ border: '2px solid transparent', borderTopColor: '#10B981', borderRightColor: '#00D4FF' }}
+                style={{ border: '2px solid transparent', borderTopColor: '#10B981', borderRightColor: '#8B5CF6' }}
               />
               <div className="absolute inset-2 rounded-full flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.1)', border: '2px solid rgba(16,185,129,0.3)' }}>
                 <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
@@ -309,7 +309,7 @@ export default function WebsiteCart() {
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-center">
             <h1 className="font-grotesk font-black text-3xl mb-2">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #00D4FF)' }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #8B5CF6)' }}>
                 🎉 {language === 'ar' ? 'شكراً لطلبك!' : 'Merci pour votre Commande!'}
               </span>
             </h1>
@@ -321,7 +321,7 @@ export default function WebsiteCart() {
             <GlowCard glowColor="cyan" className="text-center p-6">
               <p className="text-xs font-semibold mb-2" style={{ color: '#64748B' }}>📋 {language === 'ar' ? 'رقم الطلب' : 'N° de Commande'}</p>
               <motion.p animate={{ scale: [1, 1.03, 1] }} transition={{ duration: 2, repeat: Infinity }}
-                className="font-grotesk font-black text-5xl tracking-widest" style={{ color: '#00D4FF' }}>
+                className="font-grotesk font-black text-5xl tracking-widest" style={{ color: '#8B5CF6' }}>
                 {orderDetails.order_number}
               </motion.p>
               <p className="text-xs mt-2" style={{ color: '#64748B' }}>⏰ {orderDetails.created_at}</p>
@@ -331,15 +331,15 @@ export default function WebsiteCart() {
           {/* Customer info */}
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
             <GlowCard glowColor="violet" className="p-5">
-              <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#7C3AED' }}>
+              <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#EC4899' }}>
                 <User className="w-4 h-4" /> {language === 'ar' ? 'بيانات العميل' : 'Infos Client'}
               </h2>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: language === 'ar' ? 'الاسم' : 'Nom', value: orderDetails.customer_name, color: '#7C3AED' },
-                  { label: language === 'ar' ? 'الهاتف' : 'Téléphone', value: orderDetails.customer_phone, color: '#00D4FF' },
+                  { label: language === 'ar' ? 'الاسم' : 'Nom', value: orderDetails.customer_name, color: '#EC4899' },
+                  { label: language === 'ar' ? 'الهاتف' : 'Téléphone', value: orderDetails.customer_phone, color: '#8B5CF6' },
                   { label: language === 'ar' ? 'الولاية' : 'Wilaya', value: orderDetails.customer_wilaya, color: '#10B981' },
-                  { label: language === 'ar' ? 'التسليم' : 'Livraison', value: orderDetails.delivery_type === 'bureau' ? '🏢 Bureau' : '🏠 Domicile', color: '#FF6B35' },
+                  { label: language === 'ar' ? 'التسليم' : 'Livraison', value: orderDetails.delivery_type === 'bureau' ? '🏢 Bureau' : '🏠 Domicile', color: '#F97316' },
                 ].map(info => (
                   <div key={info.label} className="p-3 rounded-xl" style={{ background: 'rgba(30,58,95,0.3)', border: `1px solid ${info.color}22` }}>
                     <p className="text-xs mb-1" style={{ color: '#64748B' }}>{info.label}</p>
@@ -357,18 +357,18 @@ export default function WebsiteCart() {
           {/* Items */}
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
             <GlowCard glowColor="orange" className="p-5">
-              <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#FF6B35' }}>
+              <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#F97316' }}>
                 <Package className="w-4 h-4" /> {language === 'ar' ? 'المنتجات' : 'Produits'} ({orderDetails.items.length})
               </h2>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {orderDetails.items.map((item: any, idx: number) => (
                   <div key={`${item.product_id}-${idx}`} className="flex items-center justify-between p-3 rounded-xl"
-                    style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(255,107,53,0.1)' }}>
+                    style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(249,115,22,0.1)' }}>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-sm truncate" style={{ color: '#F1F5F9' }}>{item.name}</p>
                       <p className="text-xs" style={{ color: '#64748B' }}>x{item.quantity} × {(item.price || 0).toFixed(2)} DZD</p>
                     </div>
-                    <span className="font-grotesk font-bold text-sm" style={{ color: '#FF6B35' }}>{(item.price * item.quantity).toFixed(2)} DZD</span>
+                    <span className="font-grotesk font-bold text-sm" style={{ color: '#F97316' }}>{(item.price * item.quantity).toFixed(2)} DZD</span>
                   </div>
                 ))}
               </div>
@@ -377,7 +377,7 @@ export default function WebsiteCart() {
 
           {/* Totals */}
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-            <div className="p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(16,185,129,0.08))', border: '1px solid rgba(16,185,129,0.25)' }}>
+            <div className="p-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(16,185,129,0.08))', border: '1px solid rgba(16,185,129,0.25)' }}>
               <div className="space-y-2 mb-4 text-sm" style={{ color: '#94A3B8' }}>
                 <div className="flex justify-between"><span>{language === 'ar' ? 'المنتجات' : 'Sous-total'}</span><span>{orderDetails.subtotal.toFixed(2)} DZD</span></div>
                 <div className="flex justify-between"><span>🚚 {language === 'ar' ? 'التوصيل' : 'Livraison'}</span><span>{orderDetails.delivery_price.toFixed(2)} DZD</span></div>
@@ -407,17 +407,17 @@ export default function WebsiteCart() {
 
   // ======= MAIN CART =======
   return (
-    <div style={{ background: '#020817', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
+    <div style={{ background: '#0A0918', color: '#F1F5F9', minHeight: '100vh' }} className={isRTL ? 'rtl' : 'ltr'}>
 
       {/* Sticky header */}
-      <div className="sticky top-0 z-40" style={{ background: 'rgba(2,8,23,0.95)', borderBottom: '1px solid rgba(0,212,255,0.1)', backdropFilter: 'blur(12px)' }}>
+      <div className="sticky top-0 z-40" style={{ background: 'rgba(10,9,24,0.95)', borderBottom: '1px solid rgba(139,92,246,0.1)', backdropFilter: 'blur(12px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/website-shop')}
             className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.15)' }}
+            style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}
           >
-            <ArrowLeft className="w-4 h-4" style={{ color: '#00D4FF' }} />
+            <ArrowLeft className="w-4 h-4" style={{ color: '#8B5CF6' }} />
           </motion.button>
           <div className="flex-1">
             <h1 className="font-grotesk font-black text-xl" style={{ color: '#F1F5F9' }}>
@@ -428,7 +428,7 @@ export default function WebsiteCart() {
           {itemCount > 0 && (
             <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 2, repeat: Infinity }}
               className="px-3 py-1.5 rounded-full text-xs font-bold text-white flex items-center gap-1.5"
-              style={{ background: 'linear-gradient(135deg, #FF6B35, #EF4444)' }}>
+              style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}>
               <ShoppingCart className="w-3.5 h-3.5" /> {itemCount}
             </motion.div>
           )}
@@ -441,26 +441,26 @@ export default function WebsiteCart() {
         {cartItems.length === 0 ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="text-center py-24 rounded-2xl max-w-lg mx-auto"
-            style={{ border: '2px dashed rgba(0,212,255,0.1)', background: 'rgba(0,212,255,0.01)' }}>
+            style={{ border: '2px dashed rgba(139,92,246,0.1)', background: 'rgba(139,92,246,0.01)' }}>
             <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-              <ShoppingCart className="w-20 h-20 mx-auto mb-4" style={{ color: 'rgba(0,212,255,0.2)' }} />
+              <ShoppingCart className="w-20 h-20 mx-auto mb-4" style={{ color: 'rgba(139,92,246,0.2)' }} />
             </motion.div>
             <h2 className="font-grotesk font-bold text-2xl mb-2" style={{ color: '#64748B' }}>
               {language === 'ar' ? 'سلتك فارغة' : 'Votre panier est vide'}
             </h2>
-            <p className="text-sm mb-6" style={{ color: '#1E3A5F' }}>
+            <p className="text-sm mb-6" style={{ color: '#2E2A5A' }}>
               {language === 'ar' ? 'ابدأ التسوق واضف منتجات مميزة' : 'Commencez vos achats'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 onClick={() => navigate('/website-shop/offers')}
                 className="px-5 py-2.5 rounded-xl font-bold text-sm"
-                style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.2)' }}
+                style={{ background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.2)' }}
               >⚡ {language === 'ar' ? 'عروضنا' : 'Nos Offres'}</motion.button>
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 onClick={() => navigate('/website-shop/special-offers')}
                 className="px-5 py-2.5 rounded-xl font-bold text-sm"
-                style={{ background: 'rgba(255,107,53,0.08)', color: '#FF6B35', border: '1px solid rgba(255,107,53,0.2)' }}
+                style={{ background: 'rgba(249,115,22,0.08)', color: '#F97316', border: '1px solid rgba(249,115,22,0.2)' }}
               >🔥 {language === 'ar' ? 'عروض خاصة' : 'Offres Spéciales'}</motion.button>
             </div>
           </motion.div>
@@ -469,8 +469,8 @@ export default function WebsiteCart() {
 
             {/* Cart items */}
             <div className="xl:col-span-2 space-y-5">
-              <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.1)' }}>
-                <Package className="w-5 h-5" style={{ color: '#00D4FF' }} />
+              <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.1)' }}>
+                <Package className="w-5 h-5" style={{ color: '#8B5CF6' }} />
                 <h2 className="font-grotesk font-bold text-lg" style={{ color: '#F1F5F9' }}>
                   {language === 'ar' ? '📦 المنتجات' : '📦 Produits'} — {itemCount} {language === 'ar' ? 'منتج' : 'article'} · {totalQuantity} {language === 'ar' ? 'وحدة' : 'unité'}
                 </h2>
@@ -482,30 +482,30 @@ export default function WebsiteCart() {
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.06 }}>
                     <GlowCard glowColor="cyan" className="flex flex-col h-full p-4 space-y-3">
                       {/* Image */}
-                      <div className="h-36 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: 'rgba(0,212,255,0.04)' }}>
+                      <div className="h-36 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: 'rgba(139,92,246,0.04)' }}>
                         {item.image ? (
                           <img src={imgSrc.thumb(item.image)} alt={item.name} className="max-w-full max-h-full object-contain p-2" loading="lazy" decoding="async" />
                         ) : (
-                          <ShoppingCart className="w-10 h-10" style={{ color: 'rgba(0,212,255,0.2)' }} />
+                          <ShoppingCart className="w-10 h-10" style={{ color: 'rgba(139,92,246,0.2)' }} />
                         )}
                       </div>
 
                       <div>
                         <h3 className="font-bold text-sm line-clamp-2 mb-1" style={{ color: '#F1F5F9' }}>{item.name}</h3>
-                        {item.product_mark && <span className="text-xs px-2 py-0.5 rounded-md" style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.15)' }}>🏷️ {item.product_mark}</span>}
+                        {item.product_mark && <span className="text-xs px-2 py-0.5 rounded-md" style={{ background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.15)' }}>🏷️ {item.product_mark}</span>}
                       </div>
 
                       {/* Specs */}
                       {(item.voltage || item.wattage || item.amperage) && (
                         <div className="flex gap-1.5 flex-wrap">
-                          {item.voltage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,212,255,0.06)', color: '#00D4FF' }}>⚡{item.voltage}V</span>}
+                          {item.voltage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(139,92,246,0.06)', color: '#8B5CF6' }}>⚡{item.voltage}V</span>}
                           {item.wattage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(245,158,11,0.06)', color: '#F59E0B' }}>💡{item.wattage}W</span>}
-                          {item.amperage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(124,58,237,0.06)', color: '#7C3AED' }}>🔌{item.amperage}A</span>}
+                          {item.amperage && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(236,72,153,0.06)', color: '#EC4899' }}>🔌{item.amperage}A</span>}
                         </div>
                       )}
 
                       {/* Price */}
-                      <div className="text-center py-2 rounded-xl" style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.1)' }}>
+                      <div className="text-center py-2 rounded-xl" style={{ background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.1)' }}>
                         <span className="font-grotesk font-black text-xl" style={{ color: '#F59E0B' }}>{(item.price || 0).toFixed(2)}</span>
                         <span className="text-xs ml-1" style={{ color: '#64748B' }}>DZD</span>
                       </div>
@@ -515,7 +515,7 @@ export default function WebsiteCart() {
                         <motion.button whileTap={{ scale: 0.9 }}
                           onClick={() => handleUpdateQuantity(item.product_id, item.quantity - 1)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm"
-                          style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>−</motion.button>
+                          style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>−</motion.button>
                         <input type="number" value={item.quantity}
                           onChange={e => handleUpdateQuantity(item.product_id, parseInt(e.target.value) || 1)}
                           className="w-10 text-center text-sm font-bold bg-transparent outline-none" min="1"
@@ -523,7 +523,7 @@ export default function WebsiteCart() {
                         <motion.button whileTap={{ scale: 0.9 }}
                           onClick={() => handleUpdateQuantity(item.product_id, item.quantity + 1)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm"
-                          style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>+</motion.button>
+                          style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>+</motion.button>
                       </div>
 
                       <div className="flex items-center justify-between">
@@ -545,10 +545,10 @@ export default function WebsiteCart() {
             <div className="space-y-5">
               {/* Summary */}
               <GlowCard glowColor="cyan" className="p-5">
-                <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#00D4FF' }}>
+                <h2 className="font-grotesk font-bold text-base mb-4 flex items-center gap-2" style={{ color: '#8B5CF6' }}>
                   <Zap className="w-4 h-4" /> {language === 'ar' ? 'الملخص' : 'Résumé'}
                 </h2>
-                <div className="space-y-2 text-sm mb-4 pb-4" style={{ borderBottom: '1px solid rgba(0,212,255,0.1)' }}>
+                <div className="space-y-2 text-sm mb-4 pb-4" style={{ borderBottom: '1px solid rgba(139,92,246,0.1)' }}>
                   <div className="flex justify-between" style={{ color: '#94A3B8' }}>
                     <span>{language === 'ar' ? 'المنتجات' : 'Articles'}</span><span>{itemCount} ({totalQuantity})</span>
                   </div>
@@ -570,8 +570,8 @@ export default function WebsiteCart() {
 
               {/* Form */}
               <form onSubmit={handleCheckout} className="space-y-4">
-                <div className="flex items-center gap-2 p-4 rounded-xl" style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.1)' }}>
-                  <User className="w-4 h-4" style={{ color: '#7C3AED' }} />
+                <div className="flex items-center gap-2 p-4 rounded-xl" style={{ background: 'rgba(236,72,153,0.05)', border: '1px solid rgba(236,72,153,0.1)' }}>
+                  <User className="w-4 h-4" style={{ color: '#EC4899' }} />
                   <h2 className="font-grotesk font-bold text-base" style={{ color: '#F1F5F9' }}>{language === 'ar' ? '👤 بيانات التسليم' : '👤 Infos Livraison'}</h2>
                 </div>
 
@@ -582,13 +582,13 @@ export default function WebsiteCart() {
                     <input name="client_name" required placeholder={language === 'ar' ? 'أدخل اسمك' : 'Entrez votre nom'}
                       value={formData.client_name} onChange={handleFormChange}
                       style={inputStyle}
-                      onFocus={e => (e.target.style.borderColor = '#7C3AED')}
-                      onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
+                      onFocus={e => (e.target.style.borderColor = '#EC4899')}
+                      onBlur={e => (e.target.style.borderColor = 'rgba(139,92,246,0.15)')}
                     />
                     <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                       type="button" onClick={handleOpenTestimonials} disabled={!formData.client_name.trim()}
                       className="px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-1 whitespace-nowrap flex-shrink-0 disabled:opacity-40"
-                      style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                      style={{ background: 'rgba(236,72,153,0.1)', color: '#EC4899', border: '1px solid rgba(236,72,153,0.2)' }}>
                       <MessageSquare className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">{language === 'ar' ? 'آرائي' : 'Avis'}</span>
                     </motion.button>
@@ -601,8 +601,8 @@ export default function WebsiteCart() {
                   <input name="client_phone" required placeholder="+213..."
                     value={formData.client_phone} onChange={handleFormChange}
                     style={inputStyle}
-                    onFocus={e => (e.target.style.borderColor = '#00D4FF')}
-                    onBlur={e => (e.target.style.borderColor = 'rgba(0,212,255,0.15)')}
+                    onFocus={e => (e.target.style.borderColor = '#8B5CF6')}
+                    onBlur={e => (e.target.style.borderColor = 'rgba(139,92,246,0.15)')}
                   />
                 </div>
 
@@ -613,7 +613,7 @@ export default function WebsiteCart() {
                     <SelectTrigger style={{ ...inputStyle, cursor: 'pointer' }}>
                       <SelectValue placeholder={language === 'ar' ? 'اختر الولاية' : 'Choisir une wilaya'} />
                     </SelectTrigger>
-                    <SelectContent style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.15)' }}>
+                    <SelectContent style={{ background: '#13112A', border: '1px solid rgba(139,92,246,0.15)' }}>
                       {ALGERIAN_WILAYAS.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -626,7 +626,7 @@ export default function WebsiteCart() {
                     <SelectTrigger style={{ ...inputStyle, cursor: formData.client_wilaya ? 'pointer' : 'not-allowed', opacity: formData.client_wilaya ? 1 : 0.5 }}>
                       <SelectValue placeholder={!formData.client_wilaya ? (language === 'ar' ? 'اختر ولاية أولاً' : 'Wilaya d\'abord') : (language === 'ar' ? 'اختر بلدية' : 'Choisir commune')} />
                     </SelectTrigger>
-                    <SelectContent style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.15)' }}>
+                    <SelectContent style={{ background: '#13112A', border: '1px solid rgba(139,92,246,0.15)' }}>
                       {formData.client_wilaya && getMunicipalitiesForWilaya(formData.client_wilaya).map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -642,7 +642,7 @@ export default function WebsiteCart() {
                       <SelectTrigger style={{ ...inputStyle, cursor: 'pointer' }}>
                         <SelectValue placeholder={language === 'ar' ? 'اختر الوكالة' : 'Choisir agence'} />
                       </SelectTrigger>
-                      <SelectContent style={{ background: '#0F172A', border: '1px solid rgba(0,212,255,0.15)' }}>
+                      <SelectContent style={{ background: '#13112A', border: '1px solid rgba(139,92,246,0.15)' }}>
                         {deliveryAgencies.map(a => (
                           <SelectItem key={a.id} value={a.id}>
                             {a.name} — {deliveryPrice.toFixed(2)} DZD
@@ -652,7 +652,7 @@ export default function WebsiteCart() {
                     </Select>
                   ) : (
                     <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold"
-                      style={{ background: 'rgba(255,107,53,0.05)', border: '1px solid rgba(255,107,53,0.15)', color: '#FF6B35' }}>
+                      style={{ background: 'rgba(249,115,22,0.05)', border: '1px solid rgba(249,115,22,0.15)', color: '#F97316' }}>
                       <AlertCircle className="w-4 h-4 flex-shrink-0" />
                       {language === 'ar' ? 'اختر الولاية أولاً' : 'Choisissez d\'abord une wilaya'}
                     </div>
@@ -664,7 +664,7 @@ export default function WebsiteCart() {
                   <label className="text-xs font-semibold" style={{ color: '#64748B' }}>🚚 {language === 'ar' ? 'نوع التسليم *' : 'Type de Livraison *'}</label>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { value: 'bureau', emoji: '🏢', label: language === 'ar' ? 'مكتب' : 'Bureau', color: '#00D4FF' },
+                      { value: 'bureau', emoji: '🏢', label: language === 'ar' ? 'مكتب' : 'Bureau', color: '#8B5CF6' },
                       { value: 'domicile', emoji: '🏠', label: language === 'ar' ? 'منزل' : 'Domicile', color: '#10B981' },
                     ].map(opt => (
                       <motion.button key={opt.value} whileTap={{ scale: 0.97 }} type="button"
@@ -688,10 +688,10 @@ export default function WebsiteCart() {
 
                 {/* Submit */}
                 <motion.button type="submit" disabled={loading}
-                  whileHover={!loading ? { scale: 1.02, boxShadow: '0 0 24px rgba(0,212,255,0.3)' } : {}}
+                  whileHover={!loading ? { scale: 1.02, boxShadow: '0 0 24px rgba(139,92,246,0.3)' } : {}}
                   whileTap={!loading ? { scale: 0.98 } : {}}
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-grotesk font-bold text-white text-base disabled:opacity-60"
-                  style={{ background: loading ? 'rgba(30,58,95,0.5)' : 'linear-gradient(135deg, #00D4FF, #7C3AED)' }}
+                  style={{ background: loading ? 'rgba(30,58,95,0.5)' : 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
                 >
                   {loading ? (
                     <><motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}
@@ -702,7 +702,7 @@ export default function WebsiteCart() {
                   )}
                 </motion.button>
 
-                <p className="text-center text-xs" style={{ color: '#1E3A5F' }}>🔒 {language === 'ar' ? 'بيانات آمنة' : 'Données sécurisées'}</p>
+                <p className="text-center text-xs" style={{ color: '#2E2A5A' }}>🔒 {language === 'ar' ? 'بيانات آمنة' : 'Données sécurisées'}</p>
               </form>
             </div>
           </div>
@@ -715,14 +715,14 @@ export default function WebsiteCart() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowTestimonialsModal(false)}
-              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }} />
+              className="fixed inset-0 z-40" style={{ background: 'rgba(10,9,24,0.85)', backdropFilter: 'blur(6px)' }} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', stiffness: 280, damping: 26 }}
               className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[560px] z-50 rounded-2xl flex flex-col overflow-hidden"
-              style={{ background: '#0F172A', border: '1px solid rgba(124,58,237,0.25)', maxHeight: '80vh' }}>
-              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(124,58,237,0.12)' }}>
+              style={{ background: '#13112A', border: '1px solid rgba(236,72,153,0.25)', maxHeight: '80vh' }}>
+              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(236,72,153,0.12)' }}>
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" style={{ color: '#7C3AED' }} />
+                  <MessageSquare className="w-5 h-5" style={{ color: '#EC4899' }} />
                   <h2 className="font-grotesk font-bold text-lg" style={{ color: '#F1F5F9' }}>{language === 'ar' ? '💬 آرائي' : '💬 Mes avis'}</h2>
                 </div>
                 <button onClick={() => setShowTestimonialsModal(false)} style={{ color: '#64748B' }}><X className="w-5 h-5" /></button>
@@ -731,7 +731,7 @@ export default function WebsiteCart() {
                 {loadingTestimonials ? (
                   <div className="text-center py-8">
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                      className="w-8 h-8 rounded-full mx-auto" style={{ border: '2px solid rgba(124,58,237,0.1)', borderTopColor: '#7C3AED' }} />
+                      className="w-8 h-8 rounded-full mx-auto" style={{ border: '2px solid rgba(236,72,153,0.1)', borderTopColor: '#EC4899' }} />
                   </div>
                 ) : userTestimonials.length === 0 ? (
                   <div className="text-center py-8">
@@ -739,13 +739,13 @@ export default function WebsiteCart() {
                     <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                       onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
                       className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-bold mx-auto"
-                      style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                      style={{ background: 'rgba(236,72,153,0.1)', color: '#EC4899', border: '1px solid rgba(236,72,153,0.2)' }}>
                       <Plus className="w-4 h-4" /> {language === 'ar' ? 'إضافة رأي' : 'Ajouter un avis'}
                     </motion.button>
                   </div>
                 ) : userTestimonials.map(t => (
                   <motion.div key={t.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="p-4 rounded-xl space-y-2" style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(124,58,237,0.12)' }}>
+                    className="p-4 rounded-xl space-y-2" style={{ background: 'rgba(30,58,95,0.3)', border: '1px solid rgba(236,72,153,0.12)' }}>
                     <div className="flex items-center justify-between">
                       <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => <span key={i} className={i < (t.rating || 5) ? '' : 'opacity-20'}>⭐</span>)}</div>
                       <div className="flex items-center gap-2">
@@ -758,7 +758,7 @@ export default function WebsiteCart() {
                     <div className="flex gap-2 pt-1">
                       <motion.button whileHover={{ scale: 1.03 }} onClick={() => handleEditTestimonial(t)}
                         className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-bold"
-                        style={{ background: 'rgba(0,212,255,0.08)', color: '#00D4FF', border: '1px solid rgba(0,212,255,0.15)' }}>
+                        style={{ background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.15)' }}>
                         <Edit2 className="w-3 h-3" /> {language === 'ar' ? 'تعديل' : 'Modifier'}
                       </motion.button>
                       <motion.button whileHover={{ scale: 1.03 }} onClick={() => handleDeleteTestimonial(t.id)}
@@ -770,14 +770,14 @@ export default function WebsiteCart() {
                   </motion.div>
                 ))}
               </div>
-              <div className="flex gap-3 p-5" style={{ borderTop: '1px solid rgba(124,58,237,0.12)' }}>
+              <div className="flex gap-3 p-5" style={{ borderTop: '1px solid rgba(236,72,153,0.12)' }}>
                 <motion.button whileHover={{ scale: 1.02 }} onClick={() => setShowTestimonialsModal(false)}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'rgba(30,58,95,0.5)', color: '#94A3B8' }}>
                   {language === 'ar' ? 'إغلاق' : 'Fermer'}
                 </motion.button>
                 <motion.button whileHover={{ scale: 1.02 }} onClick={() => { setShowTestimonialsModal(false); setShowTestimonialForm(true); }}
                   className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-sm font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
+                  style={{ background: 'linear-gradient(135deg, #EC4899, #6D28D9)' }}>
                   <Plus className="w-4 h-4" /> {language === 'ar' ? 'رأي جديد' : 'Nouvel avis'}
                 </motion.button>
               </div>
@@ -792,14 +792,14 @@ export default function WebsiteCart() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowTestimonialForm(false)}
-              className="fixed inset-0 z-40" style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(6px)' }} />
+              className="fixed inset-0 z-40" style={{ background: 'rgba(10,9,24,0.85)', backdropFilter: 'blur(6px)' }} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', stiffness: 280, damping: 26 }}
               className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 z-50 rounded-2xl overflow-hidden"
-              style={{ background: '#0F172A', border: '1px solid rgba(124,58,237,0.25)' }}>
-              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(124,58,237,0.12)' }}>
+              style={{ background: '#13112A', border: '1px solid rgba(236,72,153,0.25)' }}>
+              <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid rgba(236,72,153,0.12)' }}>
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" style={{ color: '#7C3AED' }} />
+                  <MessageSquare className="w-4 h-4" style={{ color: '#EC4899' }} />
                   <h2 className="font-grotesk font-bold text-base" style={{ color: '#F1F5F9' }}>
                     {editingTestimonial ? (language === 'ar' ? 'تعديل الرأي' : 'Modifier l\'avis') : (language === 'ar' ? 'رأي جديد' : 'Nouvel avis')}
                   </h2>
@@ -822,12 +822,12 @@ export default function WebsiteCart() {
                   <textarea value={testimonialOpinion} onChange={e => setTestimonialOpinion(e.target.value)}
                     placeholder={language === 'ar' ? 'شارك رأيك...' : 'Partagez votre avis...'}
                     rows={4} className="w-full rounded-xl p-3 text-sm resize-none outline-none"
-                    style={{ background: '#1E293B', color: '#F1F5F9', border: '1px solid rgba(124,58,237,0.2)' }}
+                    style={{ background: '#1F1B3D', color: '#F1F5F9', border: '1px solid rgba(236,72,153,0.2)' }}
                   />
                   <p className="text-xs mt-1" style={{ color: '#64748B' }}>{testimonialOpinion.length} {language === 'ar' ? 'حرف' : 'caractères'}</p>
                 </div>
               </div>
-              <div className="flex gap-3 p-5" style={{ borderTop: '1px solid rgba(124,58,237,0.12)' }}>
+              <div className="flex gap-3 p-5" style={{ borderTop: '1px solid rgba(236,72,153,0.12)' }}>
                 <motion.button whileHover={{ scale: 1.02 }} disabled={submittingTestimonial}
                   onClick={() => { setShowTestimonialForm(false); setEditingTestimonial(null); setTestimonialOpinion(''); setTestimonialRating(5); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-bold" style={{ background: 'rgba(30,58,95,0.5)', color: '#94A3B8' }}>
@@ -836,7 +836,7 @@ export default function WebsiteCart() {
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   onClick={handleSubmitTestimonial} disabled={submittingTestimonial || !testimonialOpinion.trim()}
                   className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-50"
-                  style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}>
+                  style={{ background: 'linear-gradient(135deg, #EC4899, #6D28D9)' }}>
                   {submittingTestimonial ? (
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity }}
                       className="w-4 h-4 rounded-full" style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />

@@ -27,7 +27,7 @@ export default function FloatingParticles() {
     resize();
     window.addEventListener('resize', resize);
 
-    const colors = ['#00D4FF', '#7C3AED', '#FF6B35', '#00D4FF', '#00D4FF'];
+    const colors = ['#8B5CF6', '#EC4899', '#F97316', '#8B5CF6', '#8B5CF6'];
     const particles: Particle[] = Array.from({ length: 60 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,

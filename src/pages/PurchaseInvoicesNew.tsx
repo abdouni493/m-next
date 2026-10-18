@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { uploadImage } from '@/lib/imageUpload';
 import { supabase } from '@/lib/supabaseClient';
 import {
   Select,
@@ -485,22 +486,7 @@ export default function PurchaseInvoicesNew() {
 
     try {
       for (let i = 0; i < formData.images.length; i++) {
-        const file = formData.images[i];
-        const timestamp = Date.now();
-        const fileExtension = file.name.split('.').pop();
-        const fileName = `${productId}/${timestamp}-${i}.${fileExtension}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('chargers')
-          .upload(fileName, file, { cacheControl: '3600', upsert: false });
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabase.storage
-          .from('chargers')
-          .getPublicUrl(fileName);
-
-        const publicUrl = publicUrlData.publicUrl;
+        const { publicUrl, path: fileName } = await uploadImage(formData.images[i], { folder: productId, preset: 'product' });
 
         if (i === 0) {
           await supabase
