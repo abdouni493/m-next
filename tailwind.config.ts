@@ -22,6 +22,8 @@ export default {
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
 				display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+				sora: ['Sora', 'Inter', 'sans-serif'],
+				arabic: ['IBM Plex Sans Arabic', 'Inter', 'sans-serif'],
 				grotesk: ['Space Grotesk', 'sans-serif'],
 				inter: ['Inter', 'sans-serif'],
 			},
@@ -84,6 +86,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Storefront "Volt" tokens (defined in src/shop/shop.css, scoped to .shop-root)
+				shop: {
+					bg: 'var(--shop-bg)',
+					surface: 'var(--shop-surface)',
+					'surface-2': 'var(--shop-surface-2)',
+					border: 'var(--shop-border)',
+					text: 'var(--shop-text)',
+					muted: 'var(--shop-muted)',
+					primary: 'var(--shop-primary)',
+					'primary-fg': 'var(--shop-primary-fg)',
+					volt: 'var(--shop-volt)',
+					'volt-ink': 'var(--shop-volt-ink)',
+					'volt-soft': 'var(--shop-volt-soft)',
+					electric: 'var(--shop-electric)',
+					success: 'var(--shop-success)',
+					warning: 'var(--shop-warning)',
+					danger: 'var(--shop-danger)',
 				},
 				brand: {
 					cyan: '#8B5CF6',

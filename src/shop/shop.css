@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+/* Volt design system — storefront only. Scoped to .shop-root so the admin app is untouched. */
+.shop-root {
+  --shop-bg: #F7F8FA;
+  --shop-surface: #FFFFFF;
+  --shop-surface-2: #EEF1F5;
+  --shop-border: #E2E6EC;
+  --shop-text: #0B1220;
+  --shop-muted: #5B6475;
+  --shop-primary: #0B1220;
+  --shop-primary-fg: #FFFFFF;
+  --shop-volt: #C6F432;
+  --shop-volt-ink: #0B1220;
+  --shop-volt-soft: #F1FCD0;
+  --shop-electric: #1F6FFF;
+  --shop-success: #12B76A;
+  --shop-warning: #F79009;
+  --shop-danger: #E5484D;
+  --shop-shadow: 0 1px 2px rgb(16 24 40 / .06), 0 8px 24px rgb(16 24 40 / .06);
+  --shop-shadow-hover: 0 2px 4px rgb(16 24 40 / .06), 0 16px 32px rgb(16 24 40 / .10);
+
+  background: var(--shop-bg);
+  color: var(--shop-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.dark .shop-root {
+  --shop-bg: #0A0D14;
+  --shop-surface: #121722;
+  --shop-surface-2: #1A2030;
+  --shop-border: #262D3D;
+  --shop-text: #F2F4F8;
+  --shop-muted: #9AA3B5;
+  --shop-primary: #F2F4F8;
+  --shop-primary-fg: #0B1220;
+  --shop-volt-soft: rgba(198, 244, 50, .12);
+  --shop-electric: #5B93FF;
+  --shop-success: #32D583;
+  --shop-warning: #FDB022;
+  --shop-danger: #FF6369;
+  --shop-shadow: none;
+  --shop-shadow-hover: none;
+}
+
+.shop-root[dir='rtl'],
+.shop-root [lang='ar'] {
+  font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+}
+
+.shop-root h1,
+.shop-root h2,
+.shop-root h3,
+.shop-root .font-sora {
+  font-family: 'Sora', 'Inter', sans-serif;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.shop-root .tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-root :focus-visible {
+  outline: 2px solid var(--shop-electric);
+  outline-offset: 2px;
+}
+
+.shop-card {
+  background: var(--shop-surface);
+  border: 1px solid var(--shop-border);
+  border-radius: 16px;
+  box-shadow: var(--shop-shadow);
+}
+
+.shop-lift {
+  transition: transform .2s ease-out, box-shadow .2s ease-out, border-color .2s ease-out;
+}
+.shop-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shop-shadow-hover);
+}
+.dark .shop-lift:hover {
+  border-color: #3A4357;
+}
+
+.shop-zoom img {
+  transition: transform .25s ease-out, opacity .25s ease-out;
+}
+.shop-zoom:hover img {
+  transform: scale(1.03);
+}
+
+/* Signature "charge bar" */
+.charge-bar {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--shop-surface-2);
+  overflow: hidden;
+}
+.charge-bar > span {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: inherit;
+  background: var(--shop-volt);
+  transition: width .4s ease-out;
+}
+
+.shop-no-scrollbar::-webkit-scrollbar { display: none; }
+.shop-no-scrollbar { scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-lift, .shop-zoom img, .charge-bar > span { transition: none; }
+  .shop-lift:hover { transform: none; }
+  .shop-zoom:hover img { transform: none; }
+}
