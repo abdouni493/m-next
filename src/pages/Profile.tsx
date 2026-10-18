@@ -135,8 +135,8 @@ export default function Profile() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto py-10">
       {/* Profile Details Card */}
-      <Card className="card-elevated border-0 shadow-md">
-        <CardHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
+      <Card className="card-elevated border border-border shadow-sm">
+        <CardHeader className="bg-card">
           <CardTitle className="flex items-center gap-2">
             Mon Profil
           </CardTitle>
@@ -170,9 +170,9 @@ export default function Profile() {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
+                  <Eye className="h-4 w-4 text-muted-foreground" />
                 )}
               </span>
             </div>
@@ -193,9 +193,9 @@ export default function Profile() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-500" />
+                  <EyeOff className="h-4 w-4 text-muted-foreground" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-500" />
+                  <Eye className="h-4 w-4 text-muted-foreground" />
                 )}
               </span>
             </div>
@@ -210,20 +210,20 @@ export default function Profile() {
             <Button variant="outline" onClick={handleCancel}>
               <X className="mr-2 h-4 w-4" /> Annuler
             </Button>
-            <Button onClick={handleSave} className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg rounded-lg">
+            <Button onClick={handleSave} className="text-primary-foreground font-semibold shadow-sm rounded-lg bg-primary">
               <Save className="mr-2 h-4 w-4" /> Enregistrer les changements
             </Button>
           </>
         ) : (
-          <Button onClick={() => setIsEditing(true)} className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg rounded-lg">
+          <Button onClick={() => setIsEditing(true)} className="text-primary-foreground font-semibold shadow-sm rounded-lg bg-primary">
             <Edit className="mr-2 h-4 w-4" /> Modifier le profil
           </Button>
         )}
       </div>
 
       {/* Backup Section */}
-      <Card className="card-elevated border-0 shadow-md">
-        <CardHeader className="bg-gradient-to-r from-green-100 to-emerald-100">
+      <Card className="card-elevated border border-border shadow-sm">
+        <CardHeader className="bg-card">
           <CardTitle className="flex items-center gap-2">
             Sauvegarde
           </CardTitle>

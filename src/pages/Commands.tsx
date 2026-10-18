@@ -514,27 +514,27 @@ export default function Commands() {
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { color: string; emoji: string; label: string }> = {
       pending: {
-        color: 'bg-yellow-500 hover:bg-yellow-600',
+        color: 'bg-warning hover:bg-warning/90',
         emoji: '',
         label: language === 'ar' ? 'قيد الانتظار' : 'En attente'
       },
       confirmed: {
-        color: 'bg-blue-500 hover:bg-blue-600',
+        color: 'bg-primary hover:bg-primary/90',
         emoji: '',
         label: language === 'ar' ? 'مؤكد' : 'Confirmé'
       },
       on_delivery: {
-        color: 'bg-purple-500 hover:bg-purple-600',
+        color: 'bg-primary hover:bg-primary/90',
         emoji: '',
         label: language === 'ar' ? 'في التوصيل' : 'En livraison'
       },
       delivered: {
-        color: 'bg-green-500 hover:bg-green-600',
+        color: 'bg-success hover:bg-success/90',
         emoji: '',
         label: language === 'ar' ? 'تم التوصيل' : 'Livré'
       },
       cancelled: {
-        color: 'bg-red-500 hover:bg-red-600',
+        color: 'bg-destructive hover:bg-destructive/90',
         emoji: '',
         label: language === 'ar' ? 'ملغى' : 'Annulé'
       }
@@ -549,17 +549,17 @@ export default function Commands() {
   };
 
   return (
-    <div className="flex gap-6 p-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <div className="flex gap-6 p-6 bg-surface-2 min-h-screen">
       {/* Main Content */}
       <div className="flex-1 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 flex items-center gap-3">
+            <h1 className="text-2xl md:text-[28px] tracking-tight font-bold flex items-center gap-3 text-foreground">
               <Truck className="w-8 h-8" />
               {language === 'ar' ? 'إدارة الطلبات' : 'Gestion des Commandes'}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
+            <p className="text-muted-foreground mt-2">
               {language === 'ar' ? 'عرض وإدارة جميع الطلبات' : 'Afficher et gérer toutes les commandes'}
             </p>
           </div>
@@ -567,7 +567,7 @@ export default function Commands() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowTestimonialsPanel(!showTestimonialsPanel)}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg"
+            className="text-primary-foreground font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm bg-primary"
           >
             <MessageSquare className="w-5 h-5" />
             {language === 'ar' ? 'الآراء' : 'Avis'}
@@ -579,12 +579,12 @@ export default function Commands() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div className="relative">
-          <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+          <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder={language === 'ar' ? 'بحث عن طلب...' : 'Rechercher une commande...'}
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="pl-10 bg-white dark:bg-slate-800 border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500"
+            className="pl-10 bg-card border-2 border-border focus:border-electric"
           />
         </div>
 
@@ -609,8 +609,8 @@ export default function Commands() {
                 onClick={() => handleStatusFilter(status)}
                 className={`${
                   statusFilter === status
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    ? 'text-primary-foreground bg-primary'
+                    : 'bg-surface-2 text-foreground hover:bg-surface-2'
                 } transition-all font-semibold`}
                 size="sm"
               >
@@ -624,15 +624,15 @@ export default function Commands() {
       {/* Orders List */}
       {loadingOrders ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-slate-600 dark:text-slate-400">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-electric mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">
             {language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}
           </p>
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="text-center py-12 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 rounded-2xl border-2 border-blue-200 dark:border-blue-700">
-          <Truck className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400 text-lg">
+        <div className="text-center py-12 rounded-2xl border-2 border-border bg-card">
+          <Truck className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground text-lg">
             {language === 'ar' ? 'لا توجد طلبات' : 'Aucune commande'}
           </p>
         </div>
@@ -667,12 +667,12 @@ export default function Commands() {
 
       {/* View Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-4xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="border-b border-slate-200 dark:border-slate-700 pb-4">
-            <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">
+        <DialogContent className="max-w-4xl bg-card border border-border max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="border-b border-border pb-4">
+            <DialogTitle className="text-2xl font-bold text-foreground">
               {language === 'ar' ? 'تفاصيل الطلب الكاملة' : 'Détails Complets de la Commande'}
             </DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-400 mt-1">
+            <DialogDescription className="text-muted-foreground mt-1">
               {language === 'ar' ? 'معرف الطلب: ' : 'Numéro: '}{selectedOrder?.id.slice(0, 12)}...
             </DialogDescription>
           </DialogHeader>
@@ -680,15 +680,15 @@ export default function Commands() {
           {selectedOrder && (
             <div className="space-y-6">
               {/* Horizontal Status and Summary Bar */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div className="p-4 rounded-lg border border-border bg-card">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? 'الحالة' : 'Statut'}</p>
+                    <p className="text-xs text-muted-foreground font-semibold">{language === 'ar' ? 'الحالة' : 'Statut'}</p>
                     {getStatusBadge(selectedOrder.status)}
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? 'السعر الكلي' : 'Total'}</p>
-                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    <p className="text-xs text-muted-foreground font-semibold">{language === 'ar' ? 'السعر الكلي' : 'Total'}</p>
+                    <p className="text-2xl font-bold text-electric">
                       {(selectedOrder.final_price > 0 ? selectedOrder.final_price : (selectedOrder.total_price - (selectedOrder.discount_amount || 0))).toFixed(2)} DZD
                     </p>
                   </div>
@@ -699,35 +699,35 @@ export default function Commands() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Customer Information - Column 1 */}
                 <div className="md:col-span-1">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-                    <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4 flex items-center gap-2">
+                  <div className="p-4 rounded-lg border border-border bg-card">
+                    <h3 className="text-lg font-bold text-electric mb-4 flex items-center gap-2">
                       <span></span>
                       {language === 'ar' ? 'بيانات العميل' : 'Client'}
                     </h3>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold uppercase">{language === 'ar' ? 'الاسم' : 'Nom'}</p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedOrder.customer_name}</p>
+                        <p className="text-xs text-electric font-semibold uppercase">{language === 'ar' ? 'الاسم' : 'Nom'}</p>
+                        <p className="text-sm font-bold text-foreground">{selectedOrder.customer_name}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold uppercase">{language === 'ar' ? 'الهاتف' : 'Téléphone'}</p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedOrder.customer_phone}</p>
+                        <p className="text-xs text-electric font-semibold uppercase">{language === 'ar' ? 'الهاتف' : 'Téléphone'}</p>
+                        <p className="text-sm font-bold text-foreground">{selectedOrder.customer_phone}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold uppercase">{language === 'ar' ? 'البريد' : 'Email'}</p>
-                        <p className="text-sm font-mono text-slate-900 dark:text-white break-all">{selectedOrder.customer_email || '-'}</p>
+                        <p className="text-xs text-electric font-semibold uppercase">{language === 'ar' ? 'البريد' : 'Email'}</p>
+                        <p className="text-sm font-mono text-foreground break-all">{selectedOrder.customer_email || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold uppercase">{language === 'ar' ? 'الولاية' : 'Wilaya'}</p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedOrder.customer_wilaya}</p>
+                        <p className="text-xs text-electric font-semibold uppercase">{language === 'ar' ? 'الولاية' : 'Wilaya'}</p>
+                        <p className="text-sm font-bold text-foreground">{selectedOrder.customer_wilaya}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold uppercase">{language === 'ar' ? 'العنوان' : 'Adresse'}</p>
-                        <p className="text-sm text-slate-900 dark:text-white">{selectedOrder.customer_address}</p>
+                        <p className="text-xs text-electric font-semibold uppercase">{language === 'ar' ? 'العنوان' : 'Adresse'}</p>
+                        <p className="text-sm text-foreground">{selectedOrder.customer_address}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold uppercase">{language === 'ar' ? 'نوع التوصيل' : 'Livraison'}</p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        <p className="text-xs text-electric font-semibold uppercase">{language === 'ar' ? 'نوع التوصيل' : 'Livraison'}</p>
+                        <p className="text-sm font-bold text-foreground">
                           {selectedOrder.delivery_type === 'bureau' ? 'Bureau' : 'Domicile'}
                         </p>
                       </div>
@@ -737,18 +737,18 @@ export default function Commands() {
 
                 {/* Products List - Column 2-3 */}
                 <div className="md:col-span-2">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                     <span></span>
                     {language === 'ar' ? `المنتجات (${orderItems.length})` : `Produits (${orderItems.length})`}
                   </h3>
                   <div className="space-y-4">
                     {orderItems.map((item) => (
-                      <div key={item.id} className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                      <div key={item.id} className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                         {/* Product Header */}
-                        <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 p-4 border-b border-slate-200 dark:border-slate-600">
-                          <h4 className="text-base font-bold text-slate-900 dark:text-white mb-1">{item.product_name}</h4>
+                        <div className="p-4 border-b border-border bg-card">
+                          <h4 className="text-base font-bold text-foreground mb-1">{item.product_name}</h4>
                           {item.product_mark && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-surface-2 text-electric rounded text-xs font-semibold">
                               {item.product_mark}
                             </span>
                           )}
@@ -764,14 +764,14 @@ export default function Commands() {
                                 <img 
                                   src={item.product_image} 
                                   alt={item.product_name}
-                                  className="w-full h-28 rounded-lg object-cover border border-slate-200 dark:border-slate-600"
+                                  className="w-full h-28 rounded-lg object-cover border border-border"
                                   onError={(e) => {
                                     (e.target as HTMLImageElement).style.display = 'none';
                                   }}
                                 />
                               ) : (
-                                <div className="w-full h-28 rounded-lg bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-full h-28 rounded-lg bg-surface-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
@@ -780,30 +780,30 @@ export default function Commands() {
 
                             {/* Charger Specifications */}
                             <div className="sm:col-span-3">
-                              <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase mb-2">{language === 'ar' ? 'المواصفات' : 'Spécifications'}</p>
+                              <p className="text-xs text-muted-foreground font-semibold uppercase mb-2">{language === 'ar' ? 'المواصفات' : 'Spécifications'}</p>
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 {item.voltage && (
-                                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/20 p-3 rounded border border-orange-200 dark:border-orange-700/50 text-center">
-                                    <p className="text-xs text-orange-700 dark:text-orange-400 font-semibold">Voltage</p>
-                                    <p className="text-lg font-bold text-orange-900 dark:text-orange-300">{item.voltage}V</p>
+                                  <div className="p-3 rounded border border-border text-center bg-card">
+                                    <p className="text-xs text-warning font-semibold">Voltage</p>
+                                    <p className="text-lg font-bold text-warning">{item.voltage}V</p>
                                   </div>
                                 )}
                                 {item.amperage && (
-                                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/20 p-3 rounded border border-blue-200 dark:border-blue-700/50 text-center">
-                                    <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold">Amperage</p>
-                                    <p className="text-lg font-bold text-blue-900 dark:text-blue-300">{item.amperage}A</p>
+                                  <div className="p-3 rounded border border-border text-center bg-card">
+                                    <p className="text-xs text-electric font-semibold">Amperage</p>
+                                    <p className="text-lg font-bold text-electric">{item.amperage}A</p>
                                   </div>
                                 )}
                                 {item.wattage && (
-                                  <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-900/20 p-3 rounded border border-green-200 dark:border-green-700/50 text-center">
-                                    <p className="text-xs text-green-700 dark:text-green-400 font-semibold">Wattage</p>
-                                    <p className="text-lg font-bold text-green-900 dark:text-green-300">{item.wattage}W</p>
+                                  <div className="p-3 rounded border border-border text-center bg-card">
+                                    <p className="text-xs text-success font-semibold">Wattage</p>
+                                    <p className="text-lg font-bold text-success">{item.wattage}W</p>
                                   </div>
                                 )}
                                 {item.connection_type && (
-                                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-900/20 p-3 rounded border border-purple-200 dark:border-purple-700/50 text-center">
-                                    <p className="text-xs text-purple-700 dark:text-purple-400 font-semibold">Type</p>
-                                    <p className="text-xs font-bold text-purple-900 dark:text-purple-300 truncate">{item.connection_type}</p>
+                                  <div className="p-3 rounded border border-border text-center bg-card">
+                                    <p className="text-xs text-electric font-semibold">Type</p>
+                                    <p className="text-xs font-bold text-electric truncate">{item.connection_type}</p>
                                   </div>
                                 )}
                               </div>
@@ -811,18 +811,18 @@ export default function Commands() {
                           </div>
 
                           {/* Quantity and Pricing */}
-                          <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-200 dark:border-slate-600">
-                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded text-center">
-                              <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase">{language === 'ar' ? 'الكمية' : 'Quantité'}</p>
-                              <p className="text-lg font-bold text-slate-900 dark:text-white">{item.quantity}</p>
+                          <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border">
+                            <div className="bg-surface-2 p-3 rounded text-center">
+                              <p className="text-xs text-muted-foreground font-semibold uppercase">{language === 'ar' ? 'الكمية' : 'Quantité'}</p>
+                              <p className="text-lg font-bold text-foreground">{item.quantity}</p>
                             </div>
-                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded text-center">
-                              <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase">{language === 'ar' ? 'السعر' : 'Prix U.'}</p>
-                              <p className="text-base font-bold text-slate-900 dark:text-white">{item.price_per_unit.toFixed(0)} DZD</p>
+                            <div className="bg-surface-2 p-3 rounded text-center">
+                              <p className="text-xs text-muted-foreground font-semibold uppercase">{language === 'ar' ? 'السعر' : 'Prix U.'}</p>
+                              <p className="text-base font-bold text-foreground">{item.price_per_unit.toFixed(0)} DZD</p>
                             </div>
-                            <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded text-center border border-green-200 dark:border-green-700/50">
-                              <p className="text-xs text-green-700 dark:text-green-400 font-semibold uppercase">{language === 'ar' ? 'الإجمالي' : 'Total'}</p>
-                              <p className="text-lg font-bold text-green-700 dark:text-green-400">{item.line_total.toFixed(0)} DZD</p>
+                            <div className="bg-surface-2 p-3 rounded text-center border border-border">
+                              <p className="text-xs text-success font-semibold uppercase">{language === 'ar' ? 'الإجمالي' : 'Total'}</p>
+                              <p className="text-lg font-bold text-success">{item.line_total.toFixed(0)} DZD</p>
                             </div>
                           </div>
                         </div>
@@ -833,24 +833,24 @@ export default function Commands() {
               </div>
 
               {/* Pricing Summary Section */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
-                <h3 className="text-lg font-bold text-green-900 dark:text-green-300 mb-3">
+              <div className="p-4 rounded-lg border border-border bg-card">
+                <h3 className="text-lg font-bold text-success mb-3">
                   {language === 'ar' ? 'ملخص الدفع' : 'Résumé du Paiement'}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-700 dark:text-slate-300">{language === 'ar' ? 'السعر الأساسي' : 'Sous-total'}:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{selectedOrder.total_price.toFixed(2)} DZD</span>
+                    <span className="text-foreground">{language === 'ar' ? 'السعر الأساسي' : 'Sous-total'}:</span>
+                    <span className="font-bold text-foreground">{selectedOrder.total_price.toFixed(2)} DZD</span>
                   </div>
                   {selectedOrder.discount_amount > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-slate-700 dark:text-slate-300">{language === 'ar' ? 'الخصم' : 'Réduction'}:</span>
-                      <span className="font-bold text-orange-600 dark:text-orange-400">-{selectedOrder.discount_amount.toFixed(2)} DZD</span>
+                      <span className="text-foreground">{language === 'ar' ? 'الخصم' : 'Réduction'}:</span>
+                      <span className="font-bold text-warning">-{selectedOrder.discount_amount.toFixed(2)} DZD</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-base font-bold border-t-2 border-green-200 dark:border-green-700 pt-2">
+                  <div className="flex justify-between text-base font-bold border-t-2 border-border pt-2">
                     <span>{language === 'ar' ? 'الإجمالي النهائي' : 'Total Final'}:</span>
-                    <span className="text-green-700 dark:text-green-400">
+                    <span className="text-success">
                       {(selectedOrder.final_price > 0 ? selectedOrder.final_price : (selectedOrder.total_price - (selectedOrder.discount_amount || 0))).toFixed(2)} DZD
                     </span>
                   </div>
@@ -858,16 +858,16 @@ export default function Commands() {
               </div>
 
               {/* Timeline Section */}
-              <div className="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
+              <div className="bg-surface-2 p-4 rounded-lg border border-border">
+                <h3 className="text-lg font-bold text-foreground mb-3">
                   {language === 'ar' ? 'الجدول الزمني' : 'Timeline'}
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-primary"></div>
                     <div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? 'الإنشاء' : 'Créé'}</p>
-                      <p className="text-slate-900 dark:text-white">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground font-semibold">{language === 'ar' ? 'الإنشاء' : 'Créé'}</p>
+                      <p className="text-foreground">{new Date(selectedOrder.created_at).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -879,9 +879,9 @@ export default function Commands() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-3xl bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-purple-700 max-h-96 overflow-y-auto">
+        <DialogContent className="max-w-3xl bg-card border-2 border-border max-h-96 overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+            <DialogTitle className="text-2xl font-bold text-foreground">
               {language === 'ar' ? 'تعديل الطلب' : 'Éditer la Commande'}
             </DialogTitle>
             <DialogDescription>
@@ -891,63 +891,63 @@ export default function Commands() {
 
           <div className="space-y-5">
             {/* Customer Information Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-4 rounded-xl border-2 border-blue-200 dark:border-blue-700">
-              <h3 className="font-bold text-lg mb-4 text-blue-900 dark:text-blue-100">{language === 'ar' ? 'معلومات العميل' : 'Informations Client'}</h3>
+            <div className="p-4 rounded-xl border-2 border-border bg-card">
+              <h3 className="font-bold text-lg mb-4 text-electric">{language === 'ar' ? 'معلومات العميل' : 'Informations Client'}</h3>
               
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
+                  <label className="block text-sm font-bold mb-2 text-foreground">
                     {language === 'ar' ? 'اسم العميل' : 'Nom du Client'}
                   </label>
                   <Input
                     value={editForm.customer_name}
                     onChange={(e) => setEditForm({ ...editForm, customer_name: e.target.value })}
-                    className="bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500"
+                    className="bg-card border-2 border-border focus:border-electric"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
+                    <label className="block text-sm font-bold mb-2 text-foreground">
                       {language === 'ar' ? 'الهاتف' : 'Téléphone'}
                     </label>
                     <Input
                       value={editForm.customer_phone}
                       onChange={(e) => setEditForm({ ...editForm, customer_phone: e.target.value })}
-                      className="bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500"
+                      className="bg-card border-2 border-border focus:border-electric"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
+                    <label className="block text-sm font-bold mb-2 text-foreground">
                       {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                     </label>
                     <Input
                       value={editForm.customer_email}
                       onChange={(e) => setEditForm({ ...editForm, customer_email: e.target.value })}
-                      className="bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500"
+                      className="bg-card border-2 border-border focus:border-electric"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
+                    <label className="block text-sm font-bold mb-2 text-foreground">
                       {language === 'ar' ? 'الولاية' : 'Wilaya'}
                     </label>
                     <Input
                       value={editForm.customer_wilaya}
                       onChange={(e) => setEditForm({ ...editForm, customer_wilaya: e.target.value })}
-                      className="bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500"
+                      className="bg-card border-2 border-border focus:border-electric"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
+                    <label className="block text-sm font-bold mb-2 text-foreground">
                       {language === 'ar' ? 'نوع التوصيل' : 'Type de Livraison'}
                     </label>
                     <select
                       value={editForm.delivery_type}
                       onChange={(e) => setEditForm({ ...editForm, delivery_type: e.target.value as 'bureau' | 'domicile' })}
-                      className="w-full bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-2 focus:border-blue-500 font-bold text-slate-900 dark:text-white"
+                      className="w-full bg-card border-2 border-border rounded-lg p-2 focus:border-electric font-bold text-foreground"
                     >
                       <option value="bureau">Bureau</option>
                       <option value="domicile">Domicile</option>
@@ -956,13 +956,13 @@ export default function Commands() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
+                  <label className="block text-sm font-bold mb-2 text-foreground">
                     {language === 'ar' ? 'العنوان الكامل' : 'Adresse Complète'}
                   </label>
                   <textarea
                     value={editForm.customer_address}
                     onChange={(e) => setEditForm({ ...editForm, customer_address: e.target.value })}
-                    className="w-full bg-white dark:bg-slate-700 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-2 focus:border-blue-500"
+                    className="w-full bg-card border-2 border-border rounded-lg p-2 focus:border-electric"
                     rows={2}
                   />
                 </div>
@@ -970,28 +970,28 @@ export default function Commands() {
             </div>
 
             {/* Admin Notes Section */}
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-800/30 p-4 rounded-xl border-2 border-yellow-200 dark:border-yellow-700">
-              <h3 className="font-bold text-lg mb-3 text-yellow-900 dark:text-yellow-100">{language === 'ar' ? 'ملاحظات الإدارة' : 'Notes d\'Administration'}</h3>
+            <div className="p-4 rounded-xl border-2 border-border bg-card">
+              <h3 className="font-bold text-lg mb-3 text-warning">{language === 'ar' ? 'ملاحظات الإدارة' : 'Notes d\'Administration'}</h3>
               <textarea
                 value={editForm.admin_notes}
                 onChange={(e) => setEditForm({ ...editForm, admin_notes: e.target.value })}
-                className="w-full bg-white dark:bg-slate-700 border-2 border-yellow-200 dark:border-yellow-700 rounded-lg p-2 focus:border-yellow-500"
+                className="w-full bg-card border-2 border-border rounded-lg p-2 focus:border-warning"
                 rows={3}
                 placeholder={language === 'ar' ? 'أضف ملاحظات إضافية...' : 'Ajouter des notes...'}
               />
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+            <div className="flex gap-2 pt-4 border-t-2 border-border">
               <Button
                 onClick={handleSaveEdit}
-                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 h-10"
+                className="flex-1 text-primary-foreground font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 h-10 bg-primary"
               >
                 {language === 'ar' ? 'حفظ التغييرات' : 'Enregistrer'}
               </Button>
               <Button
                 onClick={() => setShowEditDialog(false)}
-                className="flex-1 bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 h-10"
+                className="flex-1 text-primary-foreground font-bold rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 h-10 bg-primary"
               >
                 {language === 'ar' ? 'إلغاء' : 'Annuler'}
               </Button>
@@ -1002,7 +1002,7 @@ export default function Commands() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-white dark:bg-slate-800 border-2 border-red-200 dark:border-red-700">
+        <AlertDialogContent className="bg-card border-2 border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {language === 'ar' ? 'تأكيد الحذف' : 'Confirmer la suppression'}
@@ -1014,12 +1014,12 @@ export default function Commands() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-3">
-            <AlertDialogCancel className="bg-slate-500 hover:bg-slate-600 text-white font-bold">
+            <AlertDialogCancel className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold">
               {language === 'ar' ? 'إلغاء' : 'Annuler'}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteOrder}
-              className="bg-red-500 hover:bg-red-600 text-white font-bold"
+              className="bg-destructive hover:bg-destructive/90 text-white font-bold"
             >
               {language === 'ar' ? 'حذف' : 'Supprimer'}
             </AlertDialogAction>
@@ -1036,30 +1036,30 @@ export default function Commands() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 300 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="w-full md:w-96 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-6 border-2 border-blue-200 dark:border-blue-700 shadow-2xl max-h-screen overflow-y-auto"
+          className="w-full md:w-96 rounded-2xl p-6 border-2 border-border shadow-sm max-h-screen overflow-y-auto bg-card"
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold flex items-center gap-2">
-              <MessageSquare className="w-6 h-6 text-purple-600" />
+              <MessageSquare className="w-6 h-6 text-electric" />
               {language === 'ar' ? 'الآراء' : 'Avis Clients'}
             </h2>
             <motion.button
               whileHover={{ scale: 1.1 }}
               onClick={() => setShowTestimonialsPanel(false)}
-              className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              className="text-muted-foreground hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </motion.button>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-4 border-b-2 border-slate-200 dark:border-slate-700">
+          <div className="flex gap-2 mb-4 border-b-2 border-border">
             <button
               onClick={() => setShowPendingTab(false)}
               className={`flex-1 pb-2 px-3 font-bold text-sm transition-all ${
                 !showPendingTab
-                  ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'text-slate-500 dark:text-slate-400'
+                  ? 'border-b-2 border-electric text-electric'
+                  : 'text-muted-foreground'
               }`}
             >
               {language === 'ar' ? 'موافق عليه' : 'Approuvés'} ({testimonials.length})
@@ -1068,8 +1068,8 @@ export default function Commands() {
               onClick={() => setShowPendingTab(true)}
               className={`flex-1 pb-2 px-3 font-bold text-sm transition-all ${
                 showPendingTab
-                  ? 'border-b-2 border-yellow-500 text-yellow-600 dark:text-yellow-400'
-                  : 'text-slate-500 dark:text-slate-400'
+                  ? 'border-b-2 border-warning text-warning'
+                  : 'text-muted-foreground'
               }`}
             >
               {language === 'ar' ? 'قيد المراجعة' : 'En attente'} ({pendingTestimonials.length})
@@ -1088,13 +1088,13 @@ export default function Commands() {
                   >
                     <span className="text-3xl"></span>
                   </motion.div>
-                  <p className="text-slate-500 mt-2 text-sm">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     {language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}
                   </p>
                 </div>
               ) : testimonials.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {language === 'ar' ? 'لا توجد آراء موافق عليها' : 'Aucun avis approuvé'}
                   </p>
                 </div>
@@ -1105,7 +1105,7 @@ export default function Commands() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-white dark:bg-slate-800 rounded-lg p-3 border-l-4 border-green-500 shadow-md hover:shadow-lg transition-all"
+                    className="bg-card rounded-lg p-3 border-l-4 border-success shadow-sm hover:shadow-md transition-all"
                   >
                     {/* Stars */}
                     <div className="flex items-center gap-1 mb-2">
@@ -1122,17 +1122,17 @@ export default function Commands() {
                     </div>
 
                     {/* Opinion */}
-                    <p className="text-sm text-slate-700 dark:text-slate-300 mb-2 line-clamp-3">
+                    <p className="text-sm text-foreground mb-2 line-clamp-3">
                       "{testimonial.opinion}"
                     </p>
 
                     {/* Author and Date */}
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">
+                        <p className="text-xs font-bold text-foreground">
                           {testimonial.client_name}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-muted-foreground">
                           {new Date(testimonial.created_at).toLocaleDateString(
                             language === 'ar' ? 'ar-DZ' : 'fr-FR'
                           )}
@@ -1146,7 +1146,7 @@ export default function Commands() {
                         whileHover={{ scale: 1.15 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleDeleteTestimonial(testimonial.id)}
-                        className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs"
+                        className="p-1.5 bg-destructive hover:bg-destructive/90 text-white rounded text-xs"
                         title={language === 'ar' ? 'حذف' : 'Supprimer'}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1170,13 +1170,13 @@ export default function Commands() {
                   >
                     <span className="text-3xl"></span>
                   </motion.div>
-                  <p className="text-slate-500 mt-2 text-sm">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     {language === 'ar' ? 'جاري التحميل...' : 'Chargement...'}
                   </p>
                 </div>
               ) : pendingTestimonials.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {language === 'ar' ? 'لا توجد آراء قيد المراجعة' : 'Aucun avis en attente'}
                   </p>
                 </div>
@@ -1187,7 +1187,7 @@ export default function Commands() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-yellow-50 dark:bg-slate-800 rounded-lg p-3 border-l-4 border-yellow-500 shadow-md hover:shadow-lg transition-all"
+                    className="bg-surface-2 rounded-lg p-3 border-l-4 border-warning shadow-sm hover:shadow-md transition-all"
                   >
                     {/* Stars */}
                     <div className="flex items-center gap-1 mb-2">
@@ -1204,16 +1204,16 @@ export default function Commands() {
                     </div>
 
                     {/* Opinion */}
-                    <p className="text-sm text-slate-700 dark:text-slate-300 mb-3 line-clamp-3">
+                    <p className="text-sm text-foreground mb-3 line-clamp-3">
                       "{testimonial.opinion}"
                     </p>
 
                     {/* Author and Date */}
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                      <p className="text-xs font-bold text-foreground">
                         {testimonial.client_name}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         {new Date(testimonial.created_at).toLocaleDateString(
                           language === 'ar' ? 'ar-DZ' : 'fr-FR'
                         )}
@@ -1225,7 +1225,7 @@ export default function Commands() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         onClick={() => handleApproveTestimonial(testimonial.id)}
-                        className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-1 rounded text-xs flex items-center justify-center gap-1"
+                        className="flex-1 bg-success hover:bg-success/90 text-white font-bold py-1 rounded text-xs flex items-center justify-center gap-1"
                       >
                         <Check className="w-3 h-3" />
                         {language === 'ar' ? 'موافقة' : 'Approuver'}
@@ -1233,7 +1233,7 @@ export default function Commands() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         onClick={() => handleRejectTestimonial(testimonial.id)}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-1 rounded text-xs flex items-center justify-center gap-1"
+                        className="flex-1 bg-destructive hover:bg-destructive/90 text-white font-bold py-1 rounded text-xs flex items-center justify-center gap-1"
                       >
                         <X className="w-3 h-3" />
                         {language === 'ar' ? 'رفض' : 'Rejeter'}
@@ -1253,7 +1253,7 @@ export default function Commands() {
               fetchPendingTestimonials();
             }}
             disabled={loadingTestimonials || loadingPending}
-            className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:opacity-50 text-white font-bold py-2 rounded-lg transition-all"
+            className="w-full mt-4 disabled:opacity-50 text-primary-foreground font-bold py-2 rounded-lg transition-all bg-primary"
           >
             {language === 'ar' ? 'تحديث' : 'Rafraîchir'}
           </motion.button>

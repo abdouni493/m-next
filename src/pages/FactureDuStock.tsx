@@ -519,7 +519,7 @@ export default function FactureDuStock() {
     <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">{t.title}</h1>
+          <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">{t.title}</h1>
           <p className="text-muted-foreground">{t.subtitle}</p>
         </div>
         <div className="flex items-center gap-3">
@@ -527,7 +527,7 @@ export default function FactureDuStock() {
             <Calculator className="h-4 w-4" />
             {t.calculator}
           </Button>
-          <Button onClick={createStockInvoice} className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg rounded-lg flex items-center gap-2">
+          <Button onClick={createStockInvoice} className="text-primary-foreground font-semibold shadow-sm rounded-lg flex items-center gap-2 bg-primary">
             <Plus className="h-4 w-4" />
             {t.create}
           </Button>
@@ -536,7 +536,7 @@ export default function FactureDuStock() {
 
       {/* Small dashboard: invoices count + total stock value */}
   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-600 to-violet-600 text-white">
+        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
           <CardHeader>
             <CardTitle>{language === 'ar' ? 'إجمالي الفواتير' : 'Invoices Created'}</CardTitle>
           </CardHeader>
@@ -545,7 +545,7 @@ export default function FactureDuStock() {
             <div className="text-sm opacity-90">{language === 'ar' ? 'عدد فواتير المخزون المحفوظة' : 'Saved stock invoices'}</div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-md bg-gradient-to-br from-emerald-600 to-green-600 text-white">
+        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
           <CardHeader>
             <CardTitle>{language === 'ar' ? 'قيمة المخزون (ابتدائي)' : 'Stock Value (Initial)'}</CardTitle>
           </CardHeader>
@@ -555,7 +555,7 @@ export default function FactureDuStock() {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-md bg-gradient-to-br from-red-600 to-pink-600 text-white">
+        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
           <CardHeader>
             <CardTitle>{language === 'ar' ? 'قيمة الفواتير' : 'Invoices Total'}</CardTitle>
           </CardHeader>
@@ -693,14 +693,14 @@ export default function FactureDuStock() {
                 <button
                   type="button"
                   onClick={() => setPriceType('selling')}
-                  className={`w-full py-3 rounded-md text-white ${priceType === 'selling' ? 'ring-2 ring-offset-2 ring-red-400' : ''} bg-red-600 hover:bg-red-700`}
+                  className={`w-full py-3 rounded-md text-white ${priceType === 'selling' ? 'ring-2 ring-offset-2 ring-ring' : ''} bg-destructive hover:bg-destructive/90`}
                 >
                   {language === 'ar' ? 'سعر البيع' : 'Prix vente'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setPriceType('buying')}
-                  className={`w-full py-3 rounded-md text-white ${priceType === 'buying' ? 'ring-2 ring-offset-2 ring-blue-400' : ''} bg-blue-600 hover:bg-blue-700`}
+                  className={`w-full py-3 rounded-md text-white ${priceType === 'buying' ? 'ring-2 ring-offset-2 ring-ring' : ''} bg-primary hover:bg-primary/90`}
                 >
                   {language === 'ar' ? 'سعر الشراء' : 'Prix achat'}
                 </button>
@@ -716,7 +716,7 @@ export default function FactureDuStock() {
                     }
                     await createInvoiceFromCurrentStock();
                   }}
-                  className="w-full mt-2 py-4 text-lg font-semibold rounded-md bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full mt-2 py-4 text-lg font-semibold rounded-md bg-success hover:bg-success/90 text-white"
                 >
                   {language === 'ar' ? 'إنشاء فاتورة' : 'Generate Invoice'}
                 </button>

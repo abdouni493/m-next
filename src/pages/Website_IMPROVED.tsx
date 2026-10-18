@@ -756,7 +756,7 @@ export default function Website() {
                 {/* Social Media Section */}
                 <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-300 dark:border-blue-700 shadow-xl">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-2xl">
+                    <CardTitle className="flex items-center gap-3 text-lg">
                       <div className="p-2 bg-blue-500 rounded-lg">
                         <Zap className="h-6 w-6 text-white" />
                       </div>
@@ -789,7 +789,7 @@ export default function Website() {
                 {/* Contact Information Section */}
                 <Card className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border-2 border-green-300 dark:border-green-700 shadow-xl">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-2xl">
+                    <CardTitle className="flex items-center gap-3 text-lg">
                       <div className="p-2 bg-green-500 rounded-lg">
                         <Phone className="h-6 w-6 text-white" />
                       </div>
@@ -843,7 +843,7 @@ export default function Website() {
             >
               <Card className="bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-orange-900/20 dark:via-red-900/20 dark:to-pink-900/20 border-2 border-orange-300 dark:border-orange-700 shadow-2xl">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-3xl">
+                  <CardTitle className="flex items-center gap-3 text-lg">
                     <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl">
                       <Settings className="h-7 w-7 text-white" />
                     </div>

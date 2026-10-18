@@ -1189,7 +1189,7 @@ export default function Website_Enhanced() {
 
   // ========== RENDER ==========
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen p-6 bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1197,14 +1197,14 @@ export default function Website_Enhanced() {
       >
         {/* Header */}
         <div className="mb-8 flex items-center gap-4">
-          <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-4 rounded-2xl">
+          <div className="p-4 rounded-2xl bg-primary text-primary-foreground">
             <Globe className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">
               {language === 'ar' ? 'إدارة الموقع' : language === 'fr' ? 'Gestion Web' : 'Website Manager'}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-muted-foreground mt-1">
               {language === 'ar' ? 'تحكم كامل في عروضك والتواصل' : language === 'fr' ? 'Contrôle complet de vos offres' : 'Complete control over your offers'}
             </p>
           </div>
@@ -1222,8 +1222,8 @@ export default function Website_Enhanced() {
             whileTap={{ scale: 0.95 }}
             className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
               activeTab === 'offers'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-emerald-400'
+                ? 'text-primary-foreground shadow-sm bg-primary'
+                : 'bg-card text-foreground border-2 border-border hover:border-border'
             }`}
           >
             {language === 'ar' ? 'عروض' : language === 'fr' ? 'Offres' : 'Offers'}
@@ -1235,8 +1235,8 @@ export default function Website_Enhanced() {
             whileTap={{ scale: 0.95 }}
             className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
               activeTab === 'special'
-                ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
-                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-purple-400'
+                ? 'text-primary-foreground shadow-sm bg-primary'
+                : 'bg-card text-foreground border-2 border-border hover:border-border'
             }`}
           >
             {language === 'ar' ? 'عروض خاصة' : language === 'fr' ? 'Spéciales' : 'Special'}
@@ -1248,8 +1248,8 @@ export default function Website_Enhanced() {
             whileTap={{ scale: 0.95 }}
             className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
               activeTab === 'packages'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-cyan-400'
+                ? 'text-primary-foreground shadow-sm bg-primary'
+                : 'bg-card text-foreground border-2 border-border hover:border-border'
             }`}
           >
             {language === 'ar' ? 'باقات' : language === 'fr' ? 'Packs' : 'Packages'}
@@ -1261,8 +1261,8 @@ export default function Website_Enhanced() {
             whileTap={{ scale: 0.95 }}
             className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
               activeTab === 'contacts'
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
-                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-blue-400'
+                ? 'text-primary-foreground shadow-sm bg-primary'
+                : 'bg-card text-foreground border-2 border-border hover:border-border'
             }`}
           >
             {language === 'ar' ? 'جهات الاتصال' : language === 'fr' ? 'Contacts' : 'Contacts'}
@@ -1274,8 +1274,8 @@ export default function Website_Enhanced() {
             whileTap={{ scale: 0.95 }}
             className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
               activeTab === 'delivery'
-                ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg'
-                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-orange-400'
+                ? 'text-primary-foreground shadow-sm bg-primary'
+                : 'bg-card text-foreground border-2 border-border hover:border-border'
             }`}
           >
             {language === 'ar' ? 'التوصيل' : language === 'fr' ? 'Livraison' : 'Delivery'}
@@ -1287,8 +1287,8 @@ export default function Website_Enhanced() {
             whileTap={{ scale: 0.95 }}
             className={`px-6 py-3 rounded-xl font-bold whitespace-nowrap transition-all ${
               activeTab === 'settings'
-                ? 'bg-gradient-to-r from-slate-500 to-slate-700 text-white shadow-lg'
-                : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-400'
+                ? 'text-primary-foreground shadow-sm bg-primary'
+                : 'bg-card text-foreground border-2 border-border hover:border-border'
             }`}
           >
             {language === 'ar' ? 'الإعدادات' : language === 'fr' ? 'Paramètres' : 'Settings'}
@@ -1308,7 +1308,7 @@ export default function Website_Enhanced() {
             >
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                className="w-full bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 hover:from-blue-600 hover:via-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-xl"
+                className="w-full text-primary-foreground px-8 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-sm bg-primary"
               >
                 <ShoppingBag className="h-6 w-6" />
                 {language === 'ar' ? 'جميع منتجات المتجر' : language === 'fr' ? 'Tous les Produits de la Boutique' : 'All Store Products'}
@@ -1318,10 +1318,10 @@ export default function Website_Enhanced() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border-2 border-dashed border-blue-300 dark:border-blue-700"
+                  className="text-center py-20 bg-card rounded-2xl border-2 border-dashed border-border"
                 >
-                  <PackageIcon className="h-20 w-20 mx-auto mb-4 text-blue-400" />
-                  <p className="text-2xl text-slate-600 dark:text-slate-400 font-bold">
+                  <PackageIcon className="h-20 w-20 mx-auto mb-4 text-electric" />
+                  <p className="text-2xl text-muted-foreground font-bold">
                     {language === 'ar' ? 'لا توجد منتجات' : language === 'fr' ? 'Aucun produit' : 'No products'}
                   </p>
                 </motion.div>
@@ -1333,9 +1333,9 @@ export default function Website_Enhanced() {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       whileHover={{ y: -10 }}
-                      className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-blue-200 dark:border-blue-700 overflow-hidden shadow-xl hover:shadow-2xl transition-all"
+                      className="bg-card rounded-2xl border-2 border-border overflow-hidden shadow-sm hover:shadow-md transition-all"
                     >
-                      <div className="relative h-40 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 overflow-hidden flex items-center justify-center">
+                      <div className="relative h-40 overflow-hidden flex items-center justify-center bg-card">
                         {product.primary_image ? (
                           <img
                             src={product.primary_image}
@@ -1343,40 +1343,40 @@ export default function Website_Enhanced() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <PackageIcon className="h-16 w-16 text-slate-400" />
+                          <PackageIcon className="h-16 w-16 text-muted-foreground" />
                         )}
                       </div>
 
                       <div className="p-5 space-y-4">
                         <div>
-                          <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-2">{product.name}</h3>
+                          <h3 className="font-bold text-lg text-foreground line-clamp-2">{product.name}</h3>
                           {product.mark && (
-                            <p className="text-sm text-blue-600 dark:text-blue-400">{product.mark.name}</p>
+                            <p className="text-sm text-electric">{product.mark.name}</p>
                           )}
                         </div>
                         
                         {(product.voltage || product.wattage || product.amperage) && (
                           <div className="grid grid-cols-3 gap-2 text-xs">
                             {product.voltage && (
-                              <div className="bg-blue-50 dark:bg-blue-900/30 rounded p-2 text-center">
-                                <span className="font-bold text-blue-600 dark:text-blue-400">{product.voltage}V</span>
+                              <div className="bg-surface-2 rounded p-2 text-center">
+                                <span className="font-bold text-electric">{product.voltage}V</span>
                               </div>
                             )}
                             {product.wattage && (
-                              <div className="bg-purple-50 dark:bg-purple-900/30 rounded p-2 text-center">
-                                <span className="font-bold text-purple-600 dark:text-purple-400">{product.wattage}W</span>
+                              <div className="bg-surface-2 rounded p-2 text-center">
+                                <span className="font-bold text-electric">{product.wattage}W</span>
                               </div>
                             )}
                             {product.amperage && (
-                              <div className="bg-pink-50 dark:bg-pink-900/30 rounded p-2 text-center">
-                                <span className="font-bold text-pink-600 dark:text-pink-400">{product.amperage}A</span>
+                              <div className="bg-surface-2 rounded p-2 text-center">
+                                <span className="font-bold text-electric">{product.amperage}A</span>
                               </div>
                             )}
                           </div>
                         )}
 
-                        <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 p-3 rounded-xl">
-                          <span className="text-2xl font-bold text-green-600">{product.selling_price?.toFixed(2) || 0} DZD</span>
+                        <div className="flex items-center gap-3 bg-surface-2 p-3 rounded-xl">
+                          <span className="text-2xl font-bold text-success">{product.selling_price?.toFixed(2) || 0} DZD</span>
                         </div>
 
                         <div className="flex gap-2">
@@ -1388,7 +1388,7 @@ export default function Website_Enhanced() {
                               navigator.clipboard.writeText(boutiquUrl);
                               alert(language === 'ar' ? 'تم نسخ الرابط' : language === 'fr' ? 'Lien copié' : 'Link copied');
                             }}
-                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
                           >
                             <Copy className="h-4 w-4" />
                             {language === 'ar' ? 'نسخ' : 'Copy'}
@@ -1397,7 +1397,7 @@ export default function Website_Enhanced() {
                             whileHover={{ scale: 1.08 }}
                             whileTap={{ scale: 0.92 }}
                             onClick={() => window.open('/website-shop/offers', '_blank')}
-                            className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
                           >
                             <Eye className="h-4 w-4" />
                             {language === 'ar' ? 'عرض' : 'View'}
@@ -1408,7 +1408,7 @@ export default function Website_Enhanced() {
                             onClick={() => {
                               alert(language === 'ar' ? 'تحديث المنتج يتم من صفحة المخزون' : language === 'fr' ? 'Mise a jour du produit a partir de la page d\'inventaire' : 'Update product from Inventory page');
                             }}
-                            className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
+                            className="flex-1 bg-success hover:bg-success/90 text-white font-bold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition-all"
                           >
                             <Edit2 className="h-4 w-4" />
                             {language === 'ar' ? 'تحديث' : 'Edit'}
@@ -1432,7 +1432,7 @@ export default function Website_Enhanced() {
               className="space-y-4 sm:space-y-6"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-cyan-500 via-emerald-500 to-teal-500 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-lg sm:shadow-xl">
+              <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-primary-foreground shadow-sm sm:shadow-xl bg-primary">
                 <h2 className="text-2xl sm:text-4xl font-black mb-2">{language === 'ar' ? 'الباقات والحزم' : language === 'fr' ? 'Gestion des Packs' : 'Package Management'}</h2>
                 <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? 'إنشء حزم منتجات مخصصة بأسعار جذابة' : language === 'fr' ? 'Créez des bundles de produits personnalisés' : 'Create custom product bundles'}</p>
               </div>
@@ -1449,7 +1449,7 @@ export default function Website_Enhanced() {
                   setPackageDescription('');
                   setSelectedProductsPackage([]);
                 }}
-                className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all"
+                className="w-full text-primary-foreground font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-sm flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all bg-primary"
               >
                 <Plus className="h-5 sm:h-7 w-5 sm:w-7" />
                 <span className="hidden sm:inline">+ {language === 'ar' ? 'حزمة جديدة' : language === 'fr' ? 'Nouveau Pack' : 'New Package'}</span>
@@ -1462,25 +1462,25 @@ export default function Website_Enhanced() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-12 sm:py-24 bg-gradient-to-br from-cyan-50 to-emerald-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl sm:rounded-3xl border-4 border-dashed border-emerald-300 dark:border-emerald-700"
+                  className="text-center py-12 sm:py-24 rounded-2xl sm:rounded-3xl border-4 border-dashed border-border bg-card"
                 >
                   <motion.div
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                     className="mb-4"
                   >
-                    <PackageIcon className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-emerald-400" />
+                    <PackageIcon className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-success" />
                   </motion.div>
-                  <p className="text-xl sm:text-3xl font-black text-slate-700 dark:text-slate-200 mb-2">
+                  <p className="text-xl sm:text-3xl font-black text-foreground mb-2">
                     {language === 'ar' ? 'لا توجد حزم حالياً' : language === 'fr' ? 'Aucun pack créé' : 'No packages yet'}
                   </p>
-                  <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400">
+                  <p className="text-sm sm:text-lg text-muted-foreground">
                     {language === 'ar' ? 'اضغط الزر أعلاه لإنشاء حزمة جديدة' : language === 'fr' ? 'Cliquez sur le bouton ci-dessus' : 'Click the button above'}
                   </p>
                 </motion.div>
               ) : (
                 <div className="space-y-2 mb-4">
-                  <p className="text-base sm:text-lg font-bold text-slate-700 dark:text-slate-300">
+                  <p className="text-base sm:text-lg font-bold text-foreground">
                     {language === 'ar' ? `إجمالي: ${packages.length} حزمة` : language === 'fr' ? `Total: ${packages.length} pack` : `Total: ${packages.length} packages`}
                   </p>
                 </div>
@@ -1495,16 +1495,16 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
                       whileHover={{ y: -4 }}
-                      className={`relative rounded-2xl sm:rounded-3xl border-2 sm:border-3 overflow-hidden shadow-md sm:shadow-lg hover:shadow-xl transition-all ${
+                      className={`relative rounded-2xl sm:rounded-3xl border-2 sm:border-3 overflow-hidden shadow-sm sm:shadow-lg hover:shadow-md transition-all ${
                         !pkg.is_visible
-                          ? 'opacity-50 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800'
-                          : 'border-emerald-300 dark:border-emerald-600 bg-white dark:bg-slate-800'
+                          ? 'opacity-50 border-border bg-surface-2'
+                          : 'border-border bg-card'
                       }`}
                     >
                       {/* Top Badge */}
-                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white px-3 sm:px-4 py-1 sm:py-2 flex justify-between items-center z-20 text-sm sm:text-base">
+                      <div className="absolute top-0 left-0 right-0 text-primary-foreground px-3 sm:px-4 py-1 sm:py-2 flex justify-between items-center z-20 text-sm sm:text-base bg-primary">
                         <span className="font-bold">{language === 'ar' ? 'حزمة' : language === 'fr' ? 'Pack' : 'Package'}</span>
-                        {!pkg.is_visible && <span className="text-xs sm:text-sm bg-red-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">Hidden</span>}
+                        {!pkg.is_visible && <span className="text-xs sm:text-sm bg-destructive px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">Hidden</span>}
                       </div>
 
                       {/* Discount Badge */}
@@ -1512,7 +1512,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           animate={{ rotate: [0, 5, -5, 0] }}
                           transition={{ duration: 3, repeat: Infinity }}
-                          className="absolute top-10 sm:top-12 right-2 sm:right-3 bg-gradient-to-br from-red-500 to-orange-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-black z-10 shadow-lg border-2 border-white"
+                          className="absolute top-10 sm:top-12 right-2 sm:right-3 text-primary-foreground px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-black z-10 shadow-sm border-2 border-white bg-primary"
                         >
                           -{pkg.discount_percentage}%
                         </motion.div>
@@ -1521,12 +1521,12 @@ export default function Website_Enhanced() {
                       {/* Image */}
                       <div className="mt-8 sm:mt-10">
                         {pkg.image_url ? (
-                          <div className="h-32 sm:h-40 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 relative overflow-hidden">
+                          <div className="h-32 sm:h-40 relative overflow-hidden bg-card">
                             <img src={pkg.image_url} alt={pkg.name} className="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
                           </div>
                         ) : (
-                          <div className="h-32 sm:h-40 bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 flex items-center justify-center">
-                            <PackageIcon className="h-12 sm:h-16 w-12 sm:w-16 text-emerald-500 dark:text-emerald-400" />
+                          <div className="h-32 sm:h-40 flex items-center justify-center bg-card">
+                            <PackageIcon className="h-12 sm:h-16 w-12 sm:w-16 text-success" />
                           </div>
                         )}
                       </div>
@@ -1534,20 +1534,20 @@ export default function Website_Enhanced() {
                       {/* Content */}
                       <div className="p-4 sm:p-6">
                         {/* Name */}
-                        <h3 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-white mb-1 line-clamp-2">{pkg.name}</h3>
+                        <h3 className="text-lg sm:text-2xl font-black text-foreground mb-1 line-clamp-2">{pkg.name}</h3>
 
                         {/* Product Count Badge */}
-                        <div className="inline-block bg-emerald-100 dark:bg-emerald-900 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300 mb-3">
+                        <div className="inline-block bg-success/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-bold text-success mb-3">
                           {language === 'ar' ? `${packages.filter(p => p.id === pkg.id).length} منتج` : language === 'fr' ? `${packages.filter(p => p.id === pkg.id).length} produit` : `1 package`}
                         </div>
 
                         {/* Description */}
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-3 sm:mb-4 line-clamp-2">{pkg.description || '—'}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 line-clamp-2">{pkg.description || '—'}</p>
 
                         {/* Price Section */}
-                        <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 dark:from-emerald-900/30 dark:to-cyan-900/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 border-2 border-emerald-200 dark:border-emerald-700">
-                          <div className="text-xs uppercase tracking-wider text-slate-600 dark:text-slate-400 font-bold mb-1">{language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}</div>
-                          <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-300">
+                        <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 border-2 border-border bg-card">
+                          <div className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-1">{language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'}</div>
+                          <div className="text-2xl sm:text-3xl font-black text-success">
                             {pkg.package_price?.toFixed(2) || '0.00'} DZD
                           </div>
                         </div>
@@ -1561,7 +1561,7 @@ export default function Website_Enhanced() {
                               setSelectedPackageDetails(pkg);
                               setShowPackageDetails(true);
                             }}
-                            className="bg-gradient-to-br from-blue-500 via-blue-500 to-blue-600 hover:from-blue-600 hover:via-blue-600 hover:to-blue-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-blue-400"
+                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-border bg-primary"
                             title="View details"
                           >
                             
@@ -1572,7 +1572,7 @@ export default function Website_Enhanced() {
                             whileHover={{ scale: 1.08, y: -3 }}
                             whileTap={{ scale: 0.92 }}
                             onClick={() => handleEditPackage(pkg)}
-                            className="bg-gradient-to-br from-amber-500 via-amber-500 to-amber-600 hover:from-amber-600 hover:via-amber-600 hover:to-amber-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-amber-400"
+                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-border bg-primary"
                             title="Edit package"
                           >
                             
@@ -1583,10 +1583,10 @@ export default function Website_Enhanced() {
                             whileHover={{ scale: 1.08, y: -3 }}
                             whileTap={{ scale: 0.92 }}
                             onClick={() => handleTogglePackageVisibility(pkg)}
-                            className={`font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 ${
+                            className={`font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 ${
                               pkg.is_visible
-                                ? 'bg-gradient-to-br from-emerald-500 via-emerald-500 to-teal-600 hover:from-emerald-600 hover:via-emerald-600 hover:to-teal-700 text-white border-emerald-400'
-                                : 'bg-gradient-to-br from-slate-400 via-slate-400 to-slate-500 hover:from-slate-500 hover:via-slate-500 hover:to-slate-600 text-white border-slate-300'
+                                ? 'text-primary-foreground border-border bg-primary'
+                                : 'text-primary-foreground border-border bg-primary'
                             }`}
                             title={pkg.is_visible ? 'Hide package' : 'Show package'}
                           >
@@ -1601,7 +1601,7 @@ export default function Website_Enhanced() {
                               setSelectedPackageDelete(pkg.id);
                               setShowDeletePackageDialog(true);
                             }}
-                            className="bg-gradient-to-br from-red-500 via-red-500 to-red-600 hover:from-red-600 hover:via-red-600 hover:to-red-700 text-white font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-md hover:shadow-lg flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-red-400"
+                            className="text-primary-foreground font-bold py-3 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-all shadow-sm hover:shadow-md flex flex-col sm:flex-row items-center justify-center gap-1 text-xs sm:text-sm border-2 border-border bg-primary"
                             title="Delete package"
                           >
                             
@@ -1616,9 +1616,9 @@ export default function Website_Enhanced() {
 
               {/* Create Package Dialog */}
               <Dialog open={showCreatePackageDialog} onOpenChange={setShowCreatePackageDialog}>
-                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] bg-gradient-to-br from-white to-emerald-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-emerald-300 dark:border-emerald-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col">
+                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col bg-card">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-emerald-600 dark:text-emerald-400 font-black">
+                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-success font-black">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                         
                       </motion.div>
@@ -1631,8 +1631,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
-                    <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-emerald-300 dark:border-emerald-700">
-                      <h3 className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300 mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
+                      <h3 className="text-lg sm:text-xl font-black text-success mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
                         {/* Package Name */}
@@ -1644,7 +1644,7 @@ export default function Website_Enhanced() {
                             value={packageName}
                             onChange={(e) => setPackageName(e.target.value)}
                             placeholder={language === 'ar' ? 'أدخل اسم الحزمة' : language === 'fr' ? 'Nom du pack' : 'Package name'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-emerald-300 dark:border-emerald-600 rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1658,7 +1658,7 @@ export default function Website_Enhanced() {
                             value={packagePrice}
                             onChange={(e) => setPackagePrice(e.target.value)}
                             placeholder="0.00"
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-emerald-300 dark:border-emerald-600 rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1671,7 +1671,7 @@ export default function Website_Enhanced() {
                             value={packageDescription}
                             onChange={(e) => setPackageDescription(e.target.value)}
                             placeholder={language === 'ar' ? 'وصف الحزمة' : language === 'fr' ? 'Description du pack' : 'Package description'}
-                            className="w-full p-3 sm:p-4 border-2 border-emerald-300 dark:border-emerald-600 rounded-lg sm:rounded-xl dark:bg-slate-700 dark:text-white text-sm sm:text-base h-20 sm:h-24 resize-none font-semibold"
+                            className="w-full p-3 sm:p-4 border-2 border-border rounded-lg sm:rounded-xl text-sm sm:text-base h-20 sm:h-24 resize-none font-semibold"
                           />
                         </div>
 
@@ -1693,7 +1693,7 @@ export default function Website_Enhanced() {
                                 alt="Package preview"
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="h-12 sm:h-16 w-12 sm:w-16 rounded-lg object-cover border-2 border-emerald-300 dark:border-emerald-700"
+                                className="h-12 sm:h-16 w-12 sm:w-16 rounded-lg object-cover border-2 border-border"
                               />
                             )}
                           </div>
@@ -1702,8 +1702,8 @@ export default function Website_Enhanced() {
                     </div>
 
                     {/* Step 2: Search and Add Products */}
-                    <div className="bg-cyan-100 dark:bg-cyan-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-cyan-300 dark:border-cyan-700">
-                      <h3 className="text-lg sm:text-xl font-black text-cyan-700 dark:text-cyan-300 mb-3 sm:mb-4">{language === 'ar' ? 'اختر المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
+                    <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
+                      <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">{language === 'ar' ? 'اختر المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
                       
                       <div className="space-y-3">
                         <Input
@@ -1711,12 +1711,12 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'ابحث عن منتج...' : language === 'fr' ? 'Rechercher un produit' : 'Search product...'}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-10 sm:h-12 text-sm sm:text-base border-2 border-cyan-300 dark:border-cyan-600 rounded-lg sm:rounded-xl"
+                          className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
                         />
 
                         {/* Product Selection */}
                         {searchQuery && (
-                          <div className="max-h-56 overflow-y-auto border-3 border-dashed border-cyan-300 dark:border-cyan-700 rounded-lg sm:rounded-xl p-3 sm:p-4 space-y-2 bg-white dark:bg-slate-800">
+                          <div className="max-h-56 overflow-y-auto border-3 border-dashed border-border rounded-lg sm:rounded-xl p-3 sm:p-4 space-y-2 bg-card">
                             {products
                               .filter(
                                 (p) =>
@@ -1724,7 +1724,7 @@ export default function Website_Enhanced() {
                                   p.mark?.name.toLowerCase().includes(searchQuery.toLowerCase())
                               )
                               .length === 0 ? (
-                              <p className="text-center text-slate-500 py-4 text-sm">No products found</p>
+                              <p className="text-center text-muted-foreground py-4 text-sm">No products found</p>
                             ) : (
                               products
                                 .filter(
@@ -1737,12 +1737,12 @@ export default function Website_Enhanced() {
                                     key={product.id}
                                     onClick={() => handleSelectProductForPackage(product)}
                                     whileHover={{ x: 5, scale: 1.02 }}
-                                    className="w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-100 to-emerald-100 dark:from-cyan-900 dark:to-emerald-900 hover:from-cyan-200 hover:to-emerald-200 dark:hover:from-cyan-800 dark:hover:to-emerald-800 transition-all border-2 border-cyan-300 dark:border-cyan-700"
+                                    className="w-full text-left p-3 sm:p-4 rounded-lg sm:rounded-xl transition-all border-2 border-border bg-card"
                                   >
-                                    <div className="font-bold text-sm sm:text-base text-cyan-900 dark:text-cyan-100">
+                                    <div className="font-bold text-sm sm:text-base text-electric">
                                       {product.name}
                                     </div>
-                                    <div className="text-xs sm:text-sm text-cyan-700 dark:text-cyan-300">
+                                    <div className="text-xs sm:text-sm text-electric">
                                       {product.mark?.name || 'N/A'} • {product.selling_price} DZD
                                     </div>
                                   </motion.button>
@@ -1755,8 +1755,8 @@ export default function Website_Enhanced() {
 
                     {/* Step 3: Selected Products */}
                     {selectedProductsPackage.length > 0 && (
-                      <div className="bg-purple-100 dark:bg-purple-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-purple-300 dark:border-purple-700">
-                        <h3 className="text-lg sm:text-xl font-black text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
+                      <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
+                        <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">
                           {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
                         <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -1766,14 +1766,14 @@ export default function Website_Enhanced() {
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.1 }}
-                              className="p-3 sm:p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 rounded-lg sm:rounded-xl border-2 border-purple-300 dark:border-purple-600 shadow-md"
+                              className="p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 border-border shadow-sm bg-card"
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
+                                  <div className="font-bold text-sm sm:text-base text-electric truncate">
                                     {item.product.name}
                                   </div>
-                                  <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
+                                  <div className="text-xs sm:text-sm text-electric truncate">
                                     {item.product.mark?.name || 'N/A'} • {item.product.selling_price} DZD
                                   </div>
                                 </div>
@@ -1781,16 +1781,16 @@ export default function Website_Enhanced() {
                                   whileHover={{ scale: 1.15, rotate: 10 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={() => handleRemoveProductFromPackage(item.product.id)}
-                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
+                                  className="text-primary-foreground p-2 sm:p-3 rounded-lg shadow-sm transition-all flex-shrink-0 ml-2 bg-primary"
                                 >
                                   
                                 </motion.button>
                               </div>
                               
                               {/* Quantity and Price Inputs */}
-                              <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-purple-300 dark:border-purple-600">
+                              <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-border">
                                 <div>
-                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                  <label className="text-xs sm:text-sm font-semibold text-electric block mb-1">
                                     {language === 'ar' ? 'الكمية' : language === 'fr' ? 'Quantité' : 'Quantity'}
                                   </label>
                                   <Input
@@ -1798,11 +1798,11 @@ export default function Website_Enhanced() {
                                     min="1"
                                     value={item.quantity}
                                     onChange={(e) => handleUpdateProductQuantity(item.product.id, parseInt(e.target.value))}
-                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
                                   />
                                 </div>
                                 <div>
-                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                  <label className="text-xs sm:text-sm font-semibold text-electric block mb-1">
                                     {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'} (DZD)
                                   </label>
                                   <Input
@@ -1810,7 +1810,7 @@ export default function Website_Enhanced() {
                                     step="0.01"
                                     value={item.customPrice}
                                     onChange={(e) => handleUpdateProductPrice(item.product.id, e.target.value)}
-                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
                                   />
                                 </div>
                               </div>
@@ -1821,16 +1821,16 @@ export default function Website_Enhanced() {
                     )}
                   </div>
 
-                  <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-slate-200 dark:border-slate-700">
+                  <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-border">
                     <Button
                       onClick={() => setShowCreatePackageDialog(false)}
-                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all"
+                      className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all"
                     >
                       {t.common.cancel}
                     </Button>
                     <Button
                       onClick={handleCreatePackage}
-                      className="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                      className="flex-1 text-primary-foreground font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 bg-primary"
                     >
                       <Plus className="h-5 sm:h-6 w-5 sm:w-6" />
                       <span className="hidden sm:inline">{language === 'ar' ? 'إنشاء الحزمة' : language === 'fr' ? 'Créer le Pack' : 'Create Package'}</span>
@@ -1842,9 +1842,9 @@ export default function Website_Enhanced() {
 
               {/* Edit Package Dialog */}
               <Dialog open={showEditPackageDialog} onOpenChange={setShowEditPackageDialog}>
-                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] bg-gradient-to-br from-white to-amber-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-amber-300 dark:border-amber-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col">
+                <DialogContent className="w-[95vw] max-w-full sm:max-w-2xl lg:max-w-3xl max-h-[90vh] border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 overflow-y-auto flex flex-col bg-card">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-amber-600 dark:text-amber-400 font-black">
+                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-warning font-black">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                         
                       </motion.div>
@@ -1857,8 +1857,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
                     {/* Step 1: Package Details */}
-                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-amber-300 dark:border-amber-700">
-                      <h3 className="text-lg sm:text-xl font-black text-amber-700 dark:text-amber-300 mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
+                      <h3 className="text-lg sm:text-xl font-black text-warning mb-3 sm:mb-4">{language === 'ar' ? 'بيانات الحزمة' : language === 'fr' ? 'Informations du Pack' : 'Package Details'}</h3>
                       
                       <div className="space-y-3 sm:space-y-4">
                         {/* Package Name */}
@@ -1870,7 +1870,7 @@ export default function Website_Enhanced() {
                             value={packageName}
                             onChange={(e) => setPackageName(e.target.value)}
                             placeholder={language === 'ar' ? 'أدخل اسم الحزمة' : language === 'fr' ? 'Nom du pack' : 'Package name'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-amber-300 dark:border-amber-600 rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1884,7 +1884,7 @@ export default function Website_Enhanced() {
                             value={packagePrice}
                             onChange={(e) => setPackagePrice(e.target.value)}
                             placeholder="0.00"
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-amber-300 dark:border-amber-600 rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
 
@@ -1897,15 +1897,15 @@ export default function Website_Enhanced() {
                             value={packageDescription}
                             onChange={(e) => setPackageDescription(e.target.value)}
                             placeholder={language === 'ar' ? 'أدخل وصف الحزمة' : language === 'fr' ? 'Description du pack' : 'Package description'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-amber-300 dark:border-amber-600 rounded-lg sm:rounded-xl"
+                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Step 2: Product Selection */}
-                    <div className="bg-cyan-100 dark:bg-cyan-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-cyan-300 dark:border-cyan-700">
-                      <h3 className="text-lg sm:text-xl font-black text-cyan-700 dark:text-cyan-300 mb-3 sm:mb-4">{language === 'ar' ? 'اختيار المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
+                    <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
+                      <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">{language === 'ar' ? 'اختيار المنتجات' : language === 'fr' ? 'Sélectionner les Produits' : 'Select Products'}</h3>
                       
                       {/* Search Field */}
                       <div className="mb-4">
@@ -1914,7 +1914,7 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'ابحث عن منتج...' : language === 'fr' ? 'Rechercher un produit' : 'Search product name...'}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-10 sm:h-12 text-sm sm:text-base border-2 border-cyan-300 dark:border-cyan-600 rounded-lg sm:rounded-xl w-full"
+                          className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl w-full"
                         />
                       </div>
 
@@ -1941,24 +1941,24 @@ export default function Website_Enhanced() {
                             }}
                             className={`p-2 sm:p-3 rounded-lg sm:rounded-xl border-2 text-left transition-all ${
                               selectedProductsPackage.some((p) => p.product.id === product.id)
-                                ? 'bg-cyan-500 dark:bg-cyan-600 border-cyan-600 dark:border-cyan-500 text-white shadow-lg'
-                                : 'bg-white dark:bg-slate-700 border-cyan-300 dark:border-cyan-600 text-slate-800 dark:text-white hover:border-cyan-500'
+                                ? 'bg-primary border-electric text-primary-foreground shadow-sm'
+                                : 'bg-card border-border text-foreground hover:border-electric'
                             }`}
                           >
                             <div className="font-bold text-xs sm:text-sm truncate">{product.name}</div>
-                            <div className="text-xs text-slate-600 dark:text-slate-300 truncate">{product.mark?.name || 'Charger'}</div>
+                            <div className="text-xs text-muted-foreground truncate">{product.mark?.name || 'Charger'}</div>
                           </motion.button>
                         ))}
                       </div>
                       {products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-                        <p className="text-center text-slate-500 py-4 text-sm">{language === 'ar' ? 'لا توجد منتجات' : language === 'fr' ? 'Aucun produit' : 'No products found'}</p>
+                        <p className="text-center text-muted-foreground py-4 text-sm">{language === 'ar' ? 'لا توجد منتجات' : language === 'fr' ? 'Aucun produit' : 'No products found'}</p>
                       )}
                     </div>
 
                     {/* Step 3: Selected Products */}
                     {selectedProductsPackage.length > 0 && (
-                      <div className="bg-purple-100 dark:bg-purple-900/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-purple-300 dark:border-purple-700">
-                        <h3 className="text-lg sm:text-xl font-black text-purple-700 dark:text-purple-300 mb-3 sm:mb-4">
+                      <div className="bg-surface-2 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-border">
+                        <h3 className="text-lg sm:text-xl font-black text-electric mb-3 sm:mb-4">
                           {language === 'ar' ? 'المنتجات المختارة' : language === 'fr' ? 'Produits Sélectionnés' : 'Selected Products'} ({selectedProductsPackage.length})
                         </h3>
                         <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -1968,14 +1968,14 @@ export default function Website_Enhanced() {
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: idx * 0.1 }}
-                              className="p-3 sm:p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 rounded-lg sm:rounded-xl border-2 border-purple-300 dark:border-purple-600 shadow-md"
+                              className="p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 border-border shadow-sm bg-card"
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-sm sm:text-base text-purple-900 dark:text-purple-100 truncate">
+                                  <div className="font-bold text-sm sm:text-base text-electric truncate">
                                     {item.product.name}
                                   </div>
-                                  <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 truncate">
+                                  <div className="text-xs sm:text-sm text-electric truncate">
                                     {item.product.mark?.name || 'N/A'} • {item.product.selling_price} DZD
                                   </div>
                                 </div>
@@ -1983,16 +1983,16 @@ export default function Website_Enhanced() {
                                   whileHover={{ scale: 1.15, rotate: 10 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={() => handleRemoveProductFromPackage(item.product.id)}
-                                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-2 sm:p-3 rounded-lg shadow-md transition-all flex-shrink-0 ml-2"
+                                  className="text-primary-foreground p-2 sm:p-3 rounded-lg shadow-sm transition-all flex-shrink-0 ml-2 bg-primary"
                                 >
                                   
                                 </motion.button>
                               </div>
                               
                               {/* Quantity and Price Inputs */}
-                              <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-purple-300 dark:border-purple-600">
+                              <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-border">
                                 <div>
-                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                  <label className="text-xs sm:text-sm font-semibold text-electric block mb-1">
                                     {language === 'ar' ? 'الكمية' : language === 'fr' ? 'Quantité' : 'Quantity'}
                                   </label>
                                   <Input
@@ -2000,11 +2000,11 @@ export default function Website_Enhanced() {
                                     min="1"
                                     value={item.quantity}
                                     onChange={(e) => handleUpdateProductQuantity(item.product.id, parseInt(e.target.value))}
-                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
                                   />
                                 </div>
                                 <div>
-                                  <label className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-300 block mb-1">
+                                  <label className="text-xs sm:text-sm font-semibold text-electric block mb-1">
                                     {language === 'ar' ? 'السعر' : language === 'fr' ? 'Prix' : 'Price'} (DZD)
                                   </label>
                                   <Input
@@ -2012,7 +2012,7 @@ export default function Website_Enhanced() {
                                     step="0.01"
                                     value={item.customPrice}
                                     onChange={(e) => handleUpdateProductPrice(item.product.id, e.target.value)}
-                                    className="h-8 sm:h-10 text-sm border-2 border-purple-300 dark:border-purple-600 rounded-lg"
+                                    className="h-8 sm:h-10 text-sm border-2 border-border rounded-lg"
                                   />
                                 </div>
                               </div>
@@ -2023,16 +2023,16 @@ export default function Website_Enhanced() {
                     )}
                   </div>
 
-                  <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-slate-200 dark:border-slate-700">
+                  <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-border">
                     <Button
                       onClick={() => setShowEditPackageDialog(false)}
-                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all"
+                      className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all"
                     >
                       {t.common.cancel}
                     </Button>
                     <Button
                       onClick={handleUpdatePackage}
-                      className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                      className="flex-1 text-primary-foreground font-black text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-8 rounded-lg sm:rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 bg-primary"
                     >
                       <Check className="h-5 sm:h-6 w-5 sm:w-6" />
                       <span className="hidden sm:inline">{language === 'ar' ? 'حفظ التغييرات' : language === 'fr' ? 'Sauvegarder' : 'Save Changes'}</span>
@@ -2045,9 +2045,9 @@ export default function Website_Enhanced() {
               {/* Package Details Dialog */}
               {selectedPackageDetails && (
                 <Dialog open={showPackageDetails} onOpenChange={setShowPackageDetails}>
-                  <DialogContent className="max-w-2xl bg-white dark:bg-slate-800 border-2 border-emerald-300 dark:border-emerald-600 rounded-3xl">
+                  <DialogContent className="max-w-2xl bg-card border-2 border-border rounded-2xl">
                     <DialogHeader>
-                      <DialogTitle className="text-3xl flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                      <DialogTitle className="text-3xl flex items-center gap-2 text-success">
                         <PackageIcon className="h-8 w-8" />
                         {selectedPackageDetails.name}
                       </DialogTitle>
@@ -2059,11 +2059,11 @@ export default function Website_Enhanced() {
                     <div className="space-y-6 py-6">
                       <div>
                         <h4 className="font-bold text-lg mb-2">{language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}</h4>
-                        <p className="text-slate-600 dark:text-slate-300">{selectedPackageDetails.description}</p>
+                        <p className="text-muted-foreground">{selectedPackageDetails.description}</p>
                       </div>
 
-                      <div className="bg-gradient-to-r from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 p-4 rounded-xl">
-                        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">
+                      <div className="p-4 rounded-xl bg-card">
+                        <p className="text-2xl font-bold text-success">
                           {selectedPackageDetails.package_price} DZD
                         </p>
                       </div>
@@ -2078,7 +2078,7 @@ export default function Website_Enhanced() {
                                 key={item.id} 
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="p-4 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-650 rounded-xl border-2 border-slate-300 dark:border-slate-600 flex gap-4 items-start hover:shadow-lg transition-all"
+                                className="p-4 rounded-xl border-2 border-border flex gap-4 items-start hover:shadow-md transition-all bg-card"
                               >
                                 {item.product_image && (
                                   <img src={item.product_image} alt={item.product_name} className="h-20 w-20 object-cover rounded-lg flex-shrink-0" />
@@ -2086,10 +2086,10 @@ export default function Website_Enhanced() {
                                 <div className="flex-1">
                                   <div className="flex items-start justify-between mb-1">
                                     <div>
-                                      <div className="font-bold text-slate-800 dark:text-white text-base">{item.product_name}</div>
-                                      <div className="text-sm text-slate-600 dark:text-slate-300">{item.product_mark}</div>
+                                      <div className="font-bold text-foreground text-base">{item.product_name}</div>
+                                      <div className="text-sm text-muted-foreground">{item.product_mark}</div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-emerald-400 to-green-500 dark:from-emerald-600 dark:to-green-700 rounded-lg px-3 py-2 flex-shrink-0">
+                                    <div className="rounded-lg px-3 py-2 flex-shrink-0 bg-primary text-primary-foreground">
                                       <div className="text-center">
                                         <p className="text-xs text-white font-semibold uppercase">Qty</p>
                                         <p className="text-xl font-bold text-white">{item.quantity || 1}</p>
@@ -2099,13 +2099,13 @@ export default function Website_Enhanced() {
                                   {item.product_voltage && (
                                     <div className="flex gap-2 mt-2 flex-wrap">
                                       {item.product_voltage && (
-                                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded">{item.product_voltage}V</span>
+                                        <span className="text-xs bg-surface-2 text-electric px-2 py-1 rounded">{item.product_voltage}V</span>
                                       )}
                                       {item.product_amperage && (
-                                        <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 px-2 py-1 rounded">{item.product_amperage}A</span>
+                                        <span className="text-xs bg-surface-2 text-electric px-2 py-1 rounded">{item.product_amperage}A</span>
                                       )}
                                       {item.product_wattage && (
-                                        <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100 px-2 py-1 rounded">{item.product_wattage}W</span>
+                                        <span className="text-xs bg-surface-2 text-warning px-2 py-1 rounded">{item.product_wattage}W</span>
                                       )}
                                     </div>
                                   )}
@@ -2117,7 +2117,7 @@ export default function Website_Enhanced() {
                     </div>
 
                     <DialogFooter>
-                      <Button onClick={() => setShowPackageDetails(false)} className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                      <Button onClick={() => setShowPackageDetails(false)} className="bg-success hover:bg-success/90 text-white font-bold text-lg h-11 px-6 rounded-xl">
                         {t.common.close}
                       </Button>
                     </DialogFooter>
@@ -2127,9 +2127,9 @@ export default function Website_Enhanced() {
 
               {/* Delete Package Dialog */}
               <Dialog open={showDeletePackageDialog} onOpenChange={setShowDeletePackageDialog}>
-                <DialogContent className="bg-red-50 dark:bg-slate-800 border-2 border-red-300 dark:border-red-700">
+                <DialogContent className="bg-surface-2 border-2 border-border">
                   <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-red-600 text-2xl">
+                    <DialogTitle className="flex items-center gap-2 text-destructive text-2xl">
                       <AlertCircle className="h-7 w-7" />
                       {language === 'ar' ? 'تأكيد الحذف' : language === 'fr' ? 'Confirmer la suppression' : 'Confirm Delete'}
                     </DialogTitle>
@@ -2138,7 +2138,7 @@ export default function Website_Enhanced() {
                     </DialogDescription>
                   </DialogHeader>
 
-                  <p className="text-lg text-slate-700 dark:text-slate-300">
+                  <p className="text-lg text-foreground">
                     {language === 'ar'
                       ? 'هل أنت متأكد من حذف هذه الحزمة؟'
                       : language === 'fr'
@@ -2147,10 +2147,10 @@ export default function Website_Enhanced() {
                   </p>
 
                   <DialogFooter>
-                    <Button onClick={() => setShowDeletePackageDialog(false)} className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                    <Button onClick={() => setShowDeletePackageDialog(false)} className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-lg h-11 px-6 rounded-xl">
                       {t.common.cancel}
                     </Button>
-                    <Button onClick={handleDeletePackage} className="bg-red-500 hover:bg-red-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                    <Button onClick={handleDeletePackage} className="bg-destructive hover:bg-destructive/90 text-white font-bold text-lg h-11 px-6 rounded-xl">
                       {t.common.delete}
                     </Button>
                   </DialogFooter>
@@ -2182,7 +2182,7 @@ export default function Website_Enhanced() {
                   setSearchQuery('');
                   setOriginalPriceSpecial(0);
                 }}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg h-14 rounded-2xl shadow-lg flex items-center justify-center gap-3"
+                className="w-full text-primary-foreground font-bold text-lg h-14 rounded-2xl shadow-sm flex items-center justify-center gap-3 bg-primary"
               >
                 <Plus className="h-6 w-6" />
                 {t.special.create}
@@ -2193,10 +2193,10 @@ export default function Website_Enhanced() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border-2 border-dashed border-purple-300 dark:border-purple-700"
+                  className="text-center py-20 bg-card rounded-2xl border-2 border-dashed border-border"
                 >
-                  <Tag className="h-20 w-20 mx-auto mb-4 text-purple-400" />
-                  <p className="text-2xl text-slate-600 dark:text-slate-400 font-bold">
+                  <Tag className="h-20 w-20 mx-auto mb-4 text-electric" />
+                  <p className="text-2xl text-muted-foreground font-bold">
                     {language === 'ar' ? 'لا توجد عروض خاصة' : language === 'fr' ? 'Aucune offre spéciale' : 'No special offers'}
                   </p>
                 </motion.div>
@@ -2208,18 +2208,18 @@ export default function Website_Enhanced() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
-                      className={`relative rounded-2xl border-2 overflow-hidden shadow-lg hover:shadow-2xl transition-all ${
+                      className={`relative rounded-2xl border-2 overflow-hidden shadow-sm hover:shadow-md transition-all ${
                         !offer.is_visible
-                          ? 'opacity-60 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800'
-                          : 'border-purple-300 dark:border-purple-600 bg-white dark:bg-slate-800'
+                          ? 'opacity-60 border-border bg-surface-2'
+                          : 'border-border bg-card'
                       }`}
                     >
                       {/* Image */}
                       {offer.product_image && (
-                        <div className="h-40 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 relative overflow-hidden">
+                        <div className="h-40 relative overflow-hidden bg-card">
                           <img src={offer.product_image} alt={offer.product_name} className="w-full h-full object-cover" />
                           {offer.show_price && (
-                            <div className="absolute bottom-0 right-0 bg-red-500 text-white px-3 py-1 text-sm font-bold">
+                            <div className="absolute bottom-0 right-0 bg-destructive text-white px-3 py-1 text-sm font-bold">
                               -{Math.round(offer.discount_percentage)}%
                             </div>
                           )}
@@ -2228,23 +2228,23 @@ export default function Website_Enhanced() {
 
                       {/* Content */}
                       <div className="p-6">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-1">{offer.product_name}</h3>
-                        <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-3">{offer.product_mark}</p>
+                        <h3 className="text-xl font-bold text-foreground mb-1">{offer.product_name}</h3>
+                        <p className="text-xs text-electric font-semibold mb-3">{offer.product_mark}</p>
 
                         {/* Price Visibility Badge */}
                         <div className="mb-3">
-                          <Badge className={`${offer.show_price ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'}`}>
+                          <Badge className={`${offer.show_price ? 'bg-surface-2 text-success' : 'bg-surface-2 text-warning'}`}>
                             {offer.show_price ? '' + t.special.display : '' + t.special.dont_display}
                           </Badge>
                         </div>
 
                         {/* Price Display (if visible) */}
                         {offer.show_price && (
-                          <div className="bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900 dark:to-pink-900 p-3 rounded-xl mb-4">
-                            <div className="text-sm text-slate-600 dark:text-slate-300 line-through">
+                          <div className="p-3 rounded-xl mb-4 bg-card">
+                            <div className="text-sm text-muted-foreground line-through">
                               {offer.original_price} DZD
                             </div>
-                            <div className="text-2xl font-bold text-red-600 dark:text-red-300">
+                            <div className="text-2xl font-bold text-destructive">
                               {offer.special_price} DZD
                             </div>
                           </div>
@@ -2252,7 +2252,7 @@ export default function Website_Enhanced() {
 
                         {/* Description */}
                         {offer.description && (
-                          <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 line-clamp-2">{offer.description}</p>
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{offer.description}</p>
                         )}
 
                         {/* WhatsApp Button (if price hidden) */}
@@ -2262,7 +2262,7 @@ export default function Website_Enhanced() {
                             target="_blank"
                             rel="noopener noreferrer"
                             whileHover={{ scale: 1.05 }}
-                            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2 mb-3 transition-colors"
+                            className="w-full bg-success hover:bg-success/90 text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2 mb-3 transition-colors"
                           >
                             <MessageCircle className="h-5 w-5" />
                             WhatsApp
@@ -2277,7 +2277,7 @@ export default function Website_Enhanced() {
                               setSelectedSpecialDetails(offer);
                               setShowSpecialDetails(true);
                             }}
-                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg transition-colors"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 rounded-lg transition-colors"
                           >
                             {t.common.view}
                           </motion.button>
@@ -2292,7 +2292,7 @@ export default function Website_Enhanced() {
                               setShowSpecialPrice(offer.show_price ?? true);
                               setShowCreateSpecialDialog(true);
                             }}
-                            className="flex-1 bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 rounded-lg transition-colors"
+                            className="flex-1 bg-muted-foreground hover:bg-muted-foreground text-white font-bold py-2 rounded-lg transition-colors"
                           >
                             
                           </motion.button>
@@ -2302,7 +2302,7 @@ export default function Website_Enhanced() {
                               setSelectedSpecialDelete(offer.id);
                               setShowDeleteSpecialDialog(true);
                             }}
-                            className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition-colors"
+                            className="flex-1 bg-destructive hover:bg-destructive/90 text-white font-bold py-2 rounded-lg transition-colors"
                           >
                             
                           </motion.button>
@@ -2315,9 +2315,9 @@ export default function Website_Enhanced() {
 
               {/* Create Special Offer Dialog with Price Visibility */}
               <Dialog open={showCreateSpecialDialog} onOpenChange={setShowCreateSpecialDialog}>
-                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] bg-white dark:bg-slate-800 border-2 border-purple-300 dark:border-purple-600 rounded-2xl sm:rounded-3xl p-4 sm:p-6 overflow-y-auto flex flex-col">
+                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] bg-card border-2 border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 overflow-y-auto flex flex-col">
                   <DialogHeader>
-                    <DialogTitle className="text-3xl flex items-center gap-2 text-purple-600 dark:text-purple-400">
+                    <DialogTitle className="text-3xl flex items-center gap-2 text-electric">
                       <Tag className="h-8 w-8" />
                       {t.special.create}
                     </DialogTitle>
@@ -2340,7 +2340,7 @@ export default function Website_Enhanced() {
 
                         {/* Products Search Results */}
                         {searchQuery && (
-                          <div className="max-h-48 overflow-y-auto border-2 border-slate-300 dark:border-slate-600 rounded-xl p-3 space-y-2">
+                          <div className="max-h-48 overflow-y-auto border-2 border-border rounded-xl p-3 space-y-2">
                             {products
                               .filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.mark?.name.toLowerCase().includes(searchQuery.toLowerCase()))
                               .map((product) => (
@@ -2348,18 +2348,18 @@ export default function Website_Enhanced() {
                                   key={product.id}
                                   onClick={() => handleSelectProductSpecial(product)}
                                   whileHover={{ x: 5 }}
-                                  className="w-full text-left p-3 rounded-lg bg-purple-100 dark:bg-purple-900 hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
+                                  className="w-full text-left p-3 rounded-lg bg-surface-2 hover:bg-surface-2 transition-colors"
                                 >
-                                  <div className="font-bold text-purple-900 dark:text-purple-100">{product.name}</div>
-                                  <div className="text-sm text-purple-700 dark:text-purple-300">{product.mark?.name} - {product.selling_price} DZD</div>
+                                  <div className="font-bold text-electric">{product.name}</div>
+                                  <div className="text-sm text-electric">{product.mark?.name} - {product.selling_price} DZD</div>
                                 </motion.button>
                               ))}
                           </div>
                         )}
 
                         {selectedProductSpecial && (
-                          <div className="p-4 bg-purple-50 dark:bg-purple-900 rounded-xl border-2 border-purple-300 dark:border-purple-600">
-                            <p className="font-bold text-purple-900 dark:text-purple-100">
+                          <div className="p-4 bg-surface-2 rounded-xl border-2 border-border">
+                            <p className="font-bold text-electric">
                               {selectedProductSpecial.name}
                             </p>
                           </div>
@@ -2376,8 +2376,8 @@ export default function Website_Enhanced() {
                           onClick={() => setShowSpecialPrice(true)}
                           className={`p-4 rounded-xl border-2 font-bold transition-all ${
                             showSpecialPrice
-                              ? 'border-green-500 bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100'
-                              : 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                              ? 'border-success bg-surface-2 text-success'
+                              : 'border-border bg-surface-2 text-muted-foreground'
                           }`}
                         >
                           {t.special.display}
@@ -2387,8 +2387,8 @@ export default function Website_Enhanced() {
                           onClick={() => setShowSpecialPrice(false)}
                           className={`p-4 rounded-xl border-2 font-bold transition-all ${
                             !showSpecialPrice
-                              ? 'border-yellow-500 bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100'
-                              : 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                              ? 'border-warning bg-surface-2 text-warning'
+                              : 'border-border bg-surface-2 text-muted-foreground'
                           }`}
                         >
                           {t.special.dont_display}
@@ -2408,8 +2408,8 @@ export default function Website_Enhanced() {
                           className="h-12 text-base"
                         />
                         {discountAmountSpecial > 0 && (
-                          <div className="bg-red-100 dark:bg-red-900 p-3 rounded-xl">
-                            <p className="text-red-900 dark:text-red-100 font-bold">
+                          <div className="bg-surface-2 p-3 rounded-xl">
+                            <p className="text-destructive font-bold">
                               {language === 'ar' ? 'الخصم' : language === 'fr' ? 'Remise' : 'Discount'}: {discountAmountSpecial} DZD ({discountPercentSpecial}%)
                             </p>
                           </div>
@@ -2421,25 +2421,25 @@ export default function Website_Enhanced() {
                     <div className="space-y-3">
                       <Label className="text-lg font-bold">
                         {language === 'ar' ? 'الوصف' : language === 'fr' ? 'Description' : 'Description'}
-                        {!showSpecialPrice && <span className="text-red-500"> *</span>}
+                        {!showSpecialPrice && <span className="text-destructive"> *</span>}
                       </Label>
-                      <p className="text-sm text-slate-600 dark:text-slate-300 italic">{t.special.info}</p>
+                      <p className="text-sm text-muted-foreground italic">{t.special.info}</p>
                       <textarea
                         value={specialOfferDescription}
                         onChange={(e) => setSpecialOfferDescription(e.target.value)}
                         placeholder={!showSpecialPrice ? t.special.description_req : 'Optional description...'}
-                        className="w-full p-3 border-2 border-slate-300 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-white text-base h-24 resize-none"
+                        className="w-full p-3 border-2 border-border rounded-xl text-base h-24 resize-none"
                       />
                     </div>
                   </div>
 
                   <DialogFooter>
-                    <Button onClick={() => setShowCreateSpecialDialog(false)} className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                    <Button onClick={() => setShowCreateSpecialDialog(false)} className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-lg h-11 px-6 rounded-xl">
                       {t.common.cancel}
                     </Button>
                     <Button
                       onClick={handleCreateSpecialOfferWithPriceToggle}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg h-11 px-6 rounded-xl"
+                      className="text-primary-foreground font-bold text-lg h-11 px-6 rounded-xl bg-primary"
                     >
                       {t.special.create_btn}
                     </Button>
@@ -2450,9 +2450,9 @@ export default function Website_Enhanced() {
               {/* Special Offer Details Dialog */}
               {selectedSpecialDetails && (
                 <Dialog open={showSpecialDetails} onOpenChange={setShowSpecialDetails}>
-                  <DialogContent className="max-w-2xl bg-white dark:bg-slate-800 border-2 border-purple-300 dark:border-purple-600 rounded-3xl">
+                  <DialogContent className="max-w-2xl bg-card border-2 border-border rounded-2xl">
                     <DialogHeader>
-                      <DialogTitle className="text-3xl flex items-center gap-2 text-purple-600 dark:text-purple-400">
+                      <DialogTitle className="text-3xl flex items-center gap-2 text-electric">
                         <Tag className="h-8 w-8" />
                         {selectedSpecialDetails.product_name}
                       </DialogTitle>
@@ -2464,24 +2464,24 @@ export default function Website_Enhanced() {
                       )}
 
                       {selectedSpecialDetails.show_price && (
-                        <div className="bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900 dark:to-pink-900 p-4 rounded-xl">
-                          <p className="text-sm text-slate-600 dark:text-slate-300">Original Price</p>
-                          <p className="text-3xl font-bold text-red-600 dark:text-red-300 line-through">{selectedSpecialDetails.original_price} DZD</p>
-                          <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">Special Price</p>
-                          <p className="text-4xl font-bold text-green-600 dark:text-green-300">{selectedSpecialDetails.special_price} DZD</p>
-                          <p className="text-lg font-bold text-red-600 dark:text-red-300 mt-2">Save {selectedSpecialDetails.discount_percentage}%</p>
+                        <div className="p-4 rounded-xl bg-card">
+                          <p className="text-sm text-muted-foreground">Original Price</p>
+                          <p className="text-3xl font-bold text-destructive line-through">{selectedSpecialDetails.original_price} DZD</p>
+                          <p className="text-sm text-muted-foreground mt-2">Special Price</p>
+                          <p className="text-4xl font-bold text-success">{selectedSpecialDetails.special_price} DZD</p>
+                          <p className="text-lg font-bold text-destructive mt-2">Save {selectedSpecialDetails.discount_percentage}%</p>
                         </div>
                       )}
 
                       {!selectedSpecialDetails.show_price && (
-                        <div className="bg-yellow-50 dark:bg-yellow-900 border-2 border-yellow-300 dark:border-yellow-600 p-4 rounded-xl">
-                          <p className="font-bold text-yellow-900 dark:text-yellow-100 mb-3">Price Hidden - Contact via WhatsApp</p>
+                        <div className="bg-surface-2 border-2 border-border p-4 rounded-xl">
+                          <p className="font-bold text-warning mb-3">Price Hidden - Contact via WhatsApp</p>
                           <motion.a
                             href={selectedSpecialDetails.whatsapp_link || '#'}
                             target="_blank"
                             rel="noopener noreferrer"
                             whileHover={{ scale: 1.05 }}
-                            className="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg text-center"
+                            className="block w-full bg-success hover:bg-success/90 text-white font-bold py-3 rounded-lg text-center"
                           >
                             Contact on WhatsApp
                           </motion.a>
@@ -2491,13 +2491,13 @@ export default function Website_Enhanced() {
                       {selectedSpecialDetails.description && (
                         <div>
                           <h4 className="font-bold text-lg mb-2">Description</h4>
-                          <p className="text-slate-600 dark:text-slate-300">{selectedSpecialDetails.description}</p>
+                          <p className="text-muted-foreground">{selectedSpecialDetails.description}</p>
                         </div>
                       )}
                     </div>
 
                     <DialogFooter>
-                      <Button onClick={() => setShowSpecialDetails(false)} className="bg-purple-500 hover:bg-purple-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                      <Button onClick={() => setShowSpecialDetails(false)} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg h-11 px-6 rounded-xl">
                         {t.common.close}
                       </Button>
                     </DialogFooter>
@@ -2507,18 +2507,18 @@ export default function Website_Enhanced() {
 
               {/* Delete Special Offer Dialog */}
               <Dialog open={showDeleteSpecialDialog} onOpenChange={setShowDeleteSpecialDialog}>
-                <DialogContent className="bg-red-50 dark:bg-slate-800 border-2 border-red-300 dark:border-red-700">
+                <DialogContent className="bg-surface-2 border-2 border-border">
                   <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-red-600 text-2xl">
+                    <DialogTitle className="flex items-center gap-2 text-destructive text-2xl">
                       <AlertCircle className="h-7 w-7" />
                       Confirm Delete
                     </DialogTitle>
                   </DialogHeader>
 
-                  <p className="text-lg text-slate-700 dark:text-slate-300">Are you sure you want to delete this special offer?</p>
+                  <p className="text-lg text-foreground">Are you sure you want to delete this special offer?</p>
 
                   <DialogFooter>
-                    <Button onClick={() => setShowDeleteSpecialDialog(false)} className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                    <Button onClick={() => setShowDeleteSpecialDialog(false)} className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-lg h-11 px-6 rounded-xl">
                       {t.common.cancel}
                     </Button>
                     <Button
@@ -2535,7 +2535,7 @@ export default function Website_Enhanced() {
                           }
                         }
                       }}
-                      className="bg-red-500 hover:bg-red-600 text-white font-bold text-lg h-11 px-6 rounded-xl"
+                      className="bg-destructive hover:bg-destructive/90 text-white font-bold text-lg h-11 px-6 rounded-xl"
                     >
                       Delete
                     </Button>
@@ -2559,17 +2559,17 @@ export default function Website_Enhanced() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-slate-900 dark:to-black rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50 p-8"
+                className="rounded-2xl overflow-hidden shadow-sm border border-border p-8 bg-primary text-primary-foreground"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl shadow-lg">
+                  <div className="p-3 rounded-2xl shadow-sm bg-primary text-primary-foreground">
                     <Globe className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    <h2 className="text-4xl font-black text-foreground">
                       {language === 'ar' ? 'إدارة جهات الاتصال' : 'Gestion des Contacts'}
                     </h2>
-                    <p className="text-slate-400 mt-2">
+                    <p className="text-muted-foreground mt-2">
                       {language === 'ar' ? 'أضف روابط وسائل التواصل الاجتماعي وبيانات الاتصال' : 'Ajoutez vos réseaux sociaux et informations de contact'}
                     </p>
                   </div>
@@ -2581,9 +2581,9 @@ export default function Website_Enhanced() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 dark:from-blue-900/40 dark:to-cyan-900/40 border-2 border-blue-500/50 dark:border-blue-600/50 rounded-3xl overflow-hidden shadow-xl p-0"
+                className="border-2 border-electric rounded-2xl overflow-hidden shadow-sm p-0 bg-primary text-primary-foreground"
               >
-                <div className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-700 dark:to-cyan-700 px-8 py-6 border-b-2 border-blue-700/50">
+                <div className="px-8 py-6 border-b-2 border-electric bg-primary text-primary-foreground">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/20 rounded-lg">
                       <LinkIcon className="h-6 w-6 text-white" />
@@ -2592,7 +2592,7 @@ export default function Website_Enhanced() {
                       {language === 'ar' ? 'روابط وسائل التواصل الاجتماعي' : 'Liens Réseaux Sociaux'}
                     </h3>
                   </div>
-                  <p className="text-blue-100 mt-2 ml-11">
+                  <p className="text-primary-foreground mt-2 ml-11">
                     {language === 'ar' ? 'أضف روابط الملفات الشخصية لديك على منصات التواصل' : 'Ajoutez les URLs de vos profils sociaux'}
                   </p>
                 </div>
@@ -2605,8 +2605,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.25 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-blue-400/30 dark:border-blue-600/30 hover:border-blue-500 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-700 dark:text-blue-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <Facebook className="h-5 w-5" />
                           <span>Facebook</span>
                         </Label>
@@ -2615,7 +2615,7 @@ export default function Website_Enhanced() {
                           placeholder="https://facebook.com/yourpage"
                           value={settings.facebook_url || ''}
                           onChange={(e) => setSettings({ ...settings, facebook_url: e.target.value })}
-                          className="border-2 border-blue-300/50 dark:border-blue-700/50 h-12 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2626,8 +2626,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-pink-400/30 dark:border-pink-600/30 hover:border-pink-500 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-pink-50 dark:bg-pink-900/30 rounded-xl text-pink-700 dark:text-pink-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <Instagram className="h-5 w-5" />
                           <span>Instagram</span>
                         </Label>
@@ -2636,7 +2636,7 @@ export default function Website_Enhanced() {
                           placeholder="https://instagram.com/yourprofile"
                           value={settings.instagram_url || ''}
                           onChange={(e) => setSettings({ ...settings, instagram_url: e.target.value })}
-                          className="border-2 border-pink-300/50 dark:border-pink-700/50 h-12 rounded-xl focus:border-pink-500 dark:focus:border-pink-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2647,8 +2647,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.35 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-black/30 dark:border-white/20 hover:border-black/60 dark:hover:border-white/40 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-slate-700 dark:text-slate-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-black/30 hover:border-black/60 hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-foreground">
                           <Smartphone className="h-5 w-5" />
                           <span>TikTok</span>
                         </Label>
@@ -2657,7 +2657,7 @@ export default function Website_Enhanced() {
                           placeholder="https://tiktok.com/@yourprofile"
                           value={settings.tiktok_url || ''}
                           onChange={(e) => setSettings({ ...settings, tiktok_url: e.target.value })}
-                          className="border-2 border-slate-300/50 dark:border-slate-600/50 h-12 rounded-xl focus:border-slate-500 dark:focus:border-slate-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-border bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2668,8 +2668,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-red-400/30 dark:border-red-600/30 hover:border-red-500 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-xl text-red-700 dark:text-red-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-destructive hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-destructive">
                           <Map className="h-5 w-5" />
                           <span>{language === 'ar' ? 'خرائط Google' : 'Google Maps'}</span>
                         </Label>
@@ -2678,7 +2678,7 @@ export default function Website_Enhanced() {
                           placeholder="https://maps.google.com/..."
                           value={settings.location || ''}
                           onChange={(e) => setSettings({ ...settings, location: e.target.value })}
-                          className="border-2 border-red-300/50 dark:border-red-700/50 h-12 rounded-xl focus:border-red-500 dark:focus:border-red-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-destructive bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2691,9 +2691,9 @@ export default function Website_Enhanced() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}
-                className="bg-gradient-to-br from-green-900/30 to-teal-900/30 dark:from-green-900/40 dark:to-teal-900/40 border-2 border-green-500/50 dark:border-green-600/50 rounded-3xl overflow-hidden shadow-xl p-0"
+                className="border-2 border-success rounded-2xl overflow-hidden shadow-sm p-0 bg-primary text-primary-foreground"
               >
-                <div className="bg-gradient-to-r from-green-600 to-teal-600 dark:from-green-700 dark:to-teal-700 px-8 py-6 border-b-2 border-green-700/50">
+                <div className="px-8 py-6 border-b-2 border-success bg-primary text-primary-foreground">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/20 rounded-lg">
                       <Phone className="h-6 w-6 text-white" />
@@ -2702,7 +2702,7 @@ export default function Website_Enhanced() {
                       {language === 'ar' ? 'أرقام الاتصال' : 'Numéros de Contact'}
                     </h3>
                   </div>
-                  <p className="text-green-100 mt-2 ml-11">
+                  <p className="text-primary-foreground mt-2 ml-11">
                     {language === 'ar' ? 'أضف أرقام الهاتف والتطبيقات الفورية' : 'Ajoutez vos numéros de téléphone et applications de messagerie'}
                   </p>
                 </div>
@@ -2715,8 +2715,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-green-400/30 dark:border-green-600/30 hover:border-green-500 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-xl text-green-700 dark:text-green-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-success hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-success">
                           <Phone className="h-5 w-5" />
                           <span>{language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}</span>
                         </Label>
@@ -2725,7 +2725,7 @@ export default function Website_Enhanced() {
                           placeholder="+213 5XX XX XX XX"
                           value={settings.phone_number || ''}
                           onChange={(e) => setSettings({ ...settings, phone_number: e.target.value })}
-                          className="border-2 border-green-300/50 dark:border-green-700/50 h-12 rounded-xl focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-success bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2736,8 +2736,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.55 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-green-400/30 dark:border-green-600/30 hover:border-green-500 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-xl text-green-700 dark:text-green-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-success hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-success">
                           <MessageCircle className="h-5 w-5" />
                           <span>WhatsApp</span>
                         </Label>
@@ -2746,7 +2746,7 @@ export default function Website_Enhanced() {
                           placeholder="+213 5XX XX XX XX"
                           value={settings.whatsapp_number || ''}
                           onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
-                          className="border-2 border-green-300/50 dark:border-green-700/50 h-12 rounded-xl focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-success bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2757,8 +2757,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.6 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-blue-400/30 dark:border-blue-600/30 hover:border-blue-500 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-blue-700 dark:text-blue-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <Send className="h-5 w-5" />
                           <span>Telegram</span>
                         </Label>
@@ -2767,7 +2767,7 @@ export default function Website_Enhanced() {
                           placeholder="@yourusername or +213..."
                           value={settings.telegram_number || ''}
                           onChange={(e) => setSettings({ ...settings, telegram_number: e.target.value })}
-                          className="border-2 border-blue-300/50 dark:border-blue-700/50 h-12 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2778,8 +2778,8 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.65 }}
                     >
-                      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-purple-400/30 dark:border-purple-600/30 hover:border-purple-500 hover:shadow-lg transition-all duration-300">
-                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl text-purple-700 dark:text-purple-300">
+                      <div className="bg-card rounded-2xl p-5 border-2 border-border hover:border-electric hover:shadow-md transition-all duration-300">
+                        <Label className="flex items-center gap-3 font-bold mb-3 p-3 bg-surface-2 rounded-xl text-electric">
                           <MapPin className="h-5 w-5" />
                           <span>{language === 'ar' ? 'العنوان' : 'Adresse'}</span>
                         </Label>
@@ -2788,7 +2788,7 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'أدخل العنوان الكامل' : 'Entrez l\'adresse complète'}
                           value={settings.location || ''}
                           onChange={(e) => setSettings({ ...settings, location: e.target.value })}
-                          className="border-2 border-purple-300/50 dark:border-purple-700/50 h-12 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 bg-white dark:bg-slate-700 dark:text-slate-100 transition-all"
+                          className="border-2 border-border h-12 rounded-xl focus:border-electric bg-card transition-all"
                         />
                       </div>
                     </motion.div>
@@ -2806,7 +2806,7 @@ export default function Website_Enhanced() {
                   whileHover={{ scale: 1.02, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)' }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleSaveWebsiteSettings()}
-                  className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl border-0 transition-all duration-300"
+                  className="w-full text-primary-foreground px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-sm border-0 transition-all duration-300 bg-primary"
                 >
                   <Check className="h-6 w-6" />
                   {language === 'ar' ? 'حفظ جميع معلومات الاتصال' : 'Sauvegarder tous les contacts'}
@@ -2818,15 +2818,15 @@ export default function Website_Enhanced() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.75 }}
-                className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-xl p-6"
+                className="bg-surface-2 border-l-4 border-electric rounded-xl p-6"
               >
                 <div className="flex gap-4">
-                  <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="h-6 w-6 text-electric flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-2">
+                    <h4 className="font-bold text-electric mb-2">
                       {language === 'ar' ? 'نصيحة' : 'Conseil'}
                     </h4>
-                    <p className="text-blue-700 dark:text-blue-400 text-sm">
+                    <p className="text-electric text-sm">
                       {language === 'ar' 
                         ? 'تأكد من إدخال البيانات الصحيحة. تظهر هذه المعلومات على الموقع الإلكتروني الخاص بك ليتمكن العملاء من التواصل معك.'
                         : 'Assurez-vous d\'entrer les bonnes informations. Ces données apparaîtront sur votre site web pour que les clients puissent vous contacter.'}
@@ -2847,7 +2847,7 @@ export default function Website_Enhanced() {
               className="space-y-6"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-lg sm:shadow-xl">
+              <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-primary-foreground shadow-sm sm:shadow-xl bg-primary">
                 <h2 className="text-2xl sm:text-4xl font-black mb-2">{language === 'ar' ? 'إدارة التوصيل' : language === 'fr' ? 'Gestion de la Livraison' : 'Delivery Management'}</h2>
                 <p className="text-base sm:text-lg opacity-90">{language === 'ar' ? 'إضافة وإدارة شركات التوصيل والأسعار' : language === 'fr' ? 'Ajoutez et gérez les agences de livraison' : 'Manage delivery agencies and prices'}</p>
               </div>
@@ -2866,7 +2866,7 @@ export default function Website_Enhanced() {
                   setPriceDomicile('');
                   setPriceBureau('');
                 }}
-                className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all"
+                className="w-full text-primary-foreground font-black text-sm sm:text-lg h-12 sm:h-16 rounded-xl sm:rounded-2xl shadow-sm flex items-center justify-center gap-2 sm:gap-3 border-2 border-white/20 transition-all bg-primary"
               >
                 <Plus className="h-5 sm:h-7 w-5 sm:w-7" />
                 <span className="hidden sm:inline">+ {language === 'ar' ? 'شركة توصيل جديدة' : language === 'fr' ? 'Nouvelle Agence' : 'New Agency'}</span>
@@ -2878,19 +2878,19 @@ export default function Website_Enhanced() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-12 sm:py-24 bg-gradient-to-br from-orange-50 to-red-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl sm:rounded-3xl border-4 border-dashed border-orange-300 dark:border-orange-700"
+                  className="text-center py-12 sm:py-24 rounded-2xl sm:rounded-3xl border-4 border-dashed border-border bg-card"
                 >
                   <motion.div
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                     className="mb-4"
                   >
-                    <Truck className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-orange-400" />
+                    <Truck className="h-16 sm:h-28 w-16 sm:w-28 mx-auto text-warning" />
                   </motion.div>
-                  <p className="text-xl sm:text-3xl font-black text-slate-700 dark:text-slate-200 mb-2">
+                  <p className="text-xl sm:text-3xl font-black text-foreground mb-2">
                     {language === 'ar' ? 'لا توجد شركات توصيل حالياً' : language === 'fr' ? 'Aucune agence de livraison' : 'No delivery agencies yet'}
                   </p>
-                  <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-400">
+                  <p className="text-sm sm:text-lg text-muted-foreground">
                     {language === 'ar' ? 'اضغط الزر أعلاه لإضافة شركة توصيل' : language === 'fr' ? 'Cliquez sur le bouton ci-dessus' : 'Click the button above'}
                   </p>
                 </motion.div>
@@ -2903,23 +2903,23 @@ export default function Website_Enhanced() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
                       whileHover={{ y: -4 }}
-                      className={`relative rounded-2xl sm:rounded-3xl border-2 sm:border-3 overflow-hidden shadow-md sm:shadow-lg hover:shadow-xl transition-all p-4 sm:p-6 ${
+                      className={`relative rounded-2xl sm:rounded-3xl border-2 sm:border-3 overflow-hidden shadow-sm sm:shadow-lg hover:shadow-md transition-all p-4 sm:p-6 ${
                         !agency.is_visible
-                          ? 'opacity-50 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800'
-                          : 'border-orange-300 dark:border-orange-600 bg-white dark:bg-slate-800'
+                          ? 'opacity-50 border-border bg-surface-2'
+                          : 'border-border bg-card'
                       }`}
                     >
                       {/* Header Badge */}
-                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 sm:px-4 py-2 flex justify-between items-center z-20 text-xs sm:text-sm">
+                      <div className="absolute top-0 left-0 right-0 text-primary-foreground px-3 sm:px-4 py-2 flex justify-between items-center z-20 text-xs sm:text-sm bg-primary">
                         <span className="font-bold">{agency.name}</span>
-                        {!agency.is_visible && <span className="text-xs bg-red-600 px-2 rounded-full">Hidden</span>}
+                        {!agency.is_visible && <span className="text-xs bg-destructive px-2 rounded-full">Hidden</span>}
                       </div>
 
                       {/* Content */}
                       <div className="mt-12 sm:mt-14 space-y-3 sm:space-y-4">
                         {/* Description */}
                         {agency.description && (
-                          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2">{agency.description}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{agency.description}</p>
                         )}
 
                         {/* Contact Info */}
@@ -2927,13 +2927,13 @@ export default function Website_Enhanced() {
                           {agency.contact_phone && (
                             <div className="flex items-center gap-2 text-xs sm:text-sm">
                               <span></span>
-                              <span className="text-slate-700 dark:text-slate-300">{agency.contact_phone}</span>
+                              <span className="text-foreground">{agency.contact_phone}</span>
                             </div>
                           )}
                           {agency.contact_email && (
                             <div className="flex items-center gap-2 text-xs sm:text-sm">
                               <span></span>
-                              <span className="text-slate-700 dark:text-slate-300">{agency.contact_email}</span>
+                              <span className="text-foreground">{agency.contact_email}</span>
                             </div>
                           )}
                         </div>
@@ -2943,7 +2943,7 @@ export default function Website_Enhanced() {
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             onClick={() => handleOpenWilayaPricingDialog(agency)}
-                            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Manage Prices"
                           >
                             
@@ -2951,7 +2951,7 @@ export default function Website_Enhanced() {
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             onClick={() => handleEditDeliveryAgency(agency)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Edit"
                           >
                             
@@ -2961,8 +2961,8 @@ export default function Website_Enhanced() {
                             onClick={() => handleToggleDeliveryVisibility(agency)}
                             className={`font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl ${
                               agency.is_visible
-                                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                                : 'bg-slate-400 hover:bg-slate-500 text-white'
+                                ? 'bg-success hover:bg-success/90 text-white'
+                                : 'bg-muted-foreground hover:bg-muted-foreground text-white'
                             }`}
                             title={agency.is_visible ? 'Hide' : 'Show'}
                           >
@@ -2974,7 +2974,7 @@ export default function Website_Enhanced() {
                               setSelectedDeliveryDelete(agency.id);
                               setShowDeleteDeliveryDialog(true);
                             }}
-                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
+                            className="bg-destructive hover:bg-destructive/90 text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-xl"
                             title="Delete"
                           >
                             
@@ -2988,9 +2988,9 @@ export default function Website_Enhanced() {
 
               {/* Create/Edit Delivery Agency Dialog */}
               <Dialog open={showCreateDeliveryDialog} onOpenChange={setShowCreateDeliveryDialog}>
-                <DialogContent className="max-w-full w-full sm:max-w-2xl mx-auto bg-gradient-to-br from-white to-orange-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-orange-300 dark:border-orange-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-full w-full sm:max-w-2xl mx-auto border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto bg-card">
                   <DialogHeader className="mb-4 sm:mb-6">
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-orange-600 dark:text-orange-400 font-black line-clamp-2">
+                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-warning font-black line-clamp-2">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex-shrink-0">
                         
                       </motion.div>
@@ -3005,8 +3005,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-3 sm:space-y-6 py-2 sm:py-4">
                     {/* Section 1: Basic Info */}
-                    <div className="bg-orange-100 dark:bg-orange-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-orange-300 dark:border-orange-700">
-                      <h3 className="text-base sm:text-lg font-black text-orange-700 dark:text-orange-300 mb-3 sm:mb-4">{language === 'ar' ? 'المعلومات الأساسية' : language === 'fr' ? 'Informations de Base' : 'Basic Info'}</h3>
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-border">
+                      <h3 className="text-base sm:text-lg font-black text-warning mb-3 sm:mb-4">{language === 'ar' ? 'المعلومات الأساسية' : language === 'fr' ? 'Informations de Base' : 'Basic Info'}</h3>
                       
                       <div className="space-y-2 sm:space-y-3">
                         {/* Agency Name */}
@@ -3018,7 +3018,7 @@ export default function Website_Enhanced() {
                             value={agencyName}
                             onChange={(e) => setAgencyName(e.target.value)}
                             placeholder={language === 'ar' ? 'مثل: Yassir' : language === 'fr' ? 'Ex: Yassir' : 'E.g: Yassir'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-orange-300 dark:border-orange-600 rounded-lg sm:rounded-xl font-semibold"
+                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl font-semibold"
                           />
                         </div>
 
@@ -3031,7 +3031,7 @@ export default function Website_Enhanced() {
                             value={agencyDescription}
                             onChange={(e) => setAgencyDescription(e.target.value)}
                             placeholder={language === 'ar' ? 'وصف الخدمة' : language === 'fr' ? 'Description du service' : 'Service description'}
-                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-orange-300 dark:border-orange-600 rounded-lg sm:rounded-xl font-semibold"
+                            className="h-10 sm:h-12 text-sm sm:text-base border-2 border-border rounded-lg sm:rounded-xl font-semibold"
                           />
                         </div>
                       </div>
@@ -3040,7 +3040,7 @@ export default function Website_Enhanced() {
 
                   </div>
 
-                  <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-slate-200 dark:border-slate-700 mt-4 sm:mt-6">
+                  <DialogFooter className="flex gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-border mt-4 sm:mt-6">
                     <Button
                       onClick={() => {
                         setShowCreateDeliveryDialog(false);
@@ -3052,7 +3052,7 @@ export default function Website_Enhanced() {
                         setPriceDomicile('');
                         setPriceBureau('');
                       }}
-                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-xs sm:text-base h-10 sm:h-12 px-3 sm:px-6 rounded-lg sm:rounded-xl transition-all"
+                      className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-xs sm:text-base h-10 sm:h-12 px-3 sm:px-6 rounded-lg sm:rounded-xl transition-all"
                     >
                       {t.common.cancel}
                     </Button>
@@ -3064,7 +3064,7 @@ export default function Website_Enhanced() {
                           handleCreateDeliveryAgency();
                         }
                       }}
-                      className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-xs sm:text-base h-10 sm:h-12 rounded-lg sm:rounded-xl transition-all shadow-lg flex items-center justify-center gap-1 sm:gap-2"
+                      className="flex-1 text-primary-foreground font-bold text-xs sm:text-base h-10 sm:h-12 rounded-lg sm:rounded-xl transition-all shadow-sm flex items-center justify-center gap-1 sm:gap-2 bg-primary"
                     >
                       <span className="text-lg sm:text-xl">{editingDeliveryAgency ? '' : ''}</span>
                       <span className="hidden sm:inline">{editingDeliveryAgency ? language === 'ar' ? 'تحديث' : language === 'fr' ? 'Mettre à jour' : 'Update' : language === 'ar' ? 'إنشاء' : language === 'fr' ? 'Créer' : 'Create'}</span>
@@ -3076,9 +3076,9 @@ export default function Website_Enhanced() {
 
               {/* Delete Delivery Agency Dialog */}
               <Dialog open={showDeleteDeliveryDialog} onOpenChange={setShowDeleteDeliveryDialog}>
-                <DialogContent className="bg-red-50 dark:bg-slate-800 border-2 border-red-300 dark:border-red-700 rounded-3xl">
+                <DialogContent className="bg-surface-2 border-2 border-border rounded-2xl">
                   <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-red-600 text-2xl">
+                    <DialogTitle className="flex items-center gap-2 text-destructive text-2xl">
                       <AlertCircle className="h-7 w-7" />
                       {language === 'ar' ? 'تأكيد الحذف' : language === 'fr' ? 'Confirmer la suppression' : 'Confirm Delete'}
                     </DialogTitle>
@@ -3087,7 +3087,7 @@ export default function Website_Enhanced() {
                     </DialogDescription>
                   </DialogHeader>
 
-                  <p className="text-lg text-slate-700 dark:text-slate-300">
+                  <p className="text-lg text-foreground">
                     {language === 'ar'
                       ? 'هل أنت متأكد من حذف هذه شركة التوصيل؟'
                       : language === 'fr'
@@ -3096,10 +3096,10 @@ export default function Website_Enhanced() {
                   </p>
 
                   <DialogFooter>
-                    <Button onClick={() => setShowDeleteDeliveryDialog(false)} className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                    <Button onClick={() => setShowDeleteDeliveryDialog(false)} className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-lg h-11 px-6 rounded-xl">
                       {t.common.cancel}
                     </Button>
-                    <Button onClick={handleDeleteDeliveryAgency} className="bg-red-500 hover:bg-red-600 text-white font-bold text-lg h-11 px-6 rounded-xl">
+                    <Button onClick={handleDeleteDeliveryAgency} className="bg-destructive hover:bg-destructive/90 text-white font-bold text-lg h-11 px-6 rounded-xl">
                       {t.common.delete}
                     </Button>
                   </DialogFooter>
@@ -3108,9 +3108,9 @@ export default function Website_Enhanced() {
 
               {/* Wilaya Pricing Management Dialog */}
               <Dialog open={showWilayaPricingDialog} onOpenChange={setShowWilayaPricingDialog}>
-                <DialogContent className="max-w-full w-full sm:max-w-4xl mx-auto bg-gradient-to-br from-white to-indigo-50 dark:from-slate-800 dark:to-slate-900 border-2 sm:border-3 border-indigo-300 dark:border-indigo-600 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-full w-full sm:max-w-4xl mx-auto border-2 sm:border-3 border-border rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto bg-card">
                   <DialogHeader className="mb-4 sm:mb-6">
-                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-indigo-600 dark:text-indigo-400 font-black line-clamp-2">
+                    <DialogTitle className="text-2xl sm:text-4xl flex items-center gap-2 sm:gap-3 text-electric font-black line-clamp-2">
                       <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="flex-shrink-0">
                         
                       </motion.div>
@@ -3122,8 +3122,8 @@ export default function Website_Enhanced() {
 
                   <div className="space-y-3 sm:space-y-6 py-2 sm:py-4">
                     {/* Section 1: Add/Edit Wilaya Price */}
-                    <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-indigo-300 dark:border-indigo-700">
-                      <h3 className="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-300 mb-3 sm:mb-4">
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-border">
+                      <h3 className="text-base sm:text-lg font-black text-electric mb-3 sm:mb-4">
                         {editingWilayaPriceId ? '' : ''} {language === 'ar' ? 'إضافة أو تعديل سعر ولاية' : language === 'fr' ? 'Ajouter ou Modifier un Prix' : 'Add or Edit Wilaya Price'}
                       </h3>
 
@@ -3141,7 +3141,7 @@ export default function Website_Enhanced() {
                               value={selectedWilayaForEdit}
                               onChange={(e) => setSelectedWilayaForEdit(e.target.value)}
                               disabled={editingWilayaPriceId !== null}
-                              className="w-full border-2 border-indigo-300 dark:border-indigo-600 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                              className="w-full border-2 border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
                               list="wilaya-options"
                             />
                             <datalist id="wilaya-options">
@@ -3166,7 +3166,7 @@ export default function Website_Enhanced() {
                               placeholder="0.00"
                               value={wilayaPriceDomicile}
                               onChange={(e) => setWilayaPriceDomicile(e.target.value)}
-                              className="w-full border-2 border-blue-300 dark:border-blue-600 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                              className="w-full border-2 border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
                             />
                           </div>
                           <div>
@@ -3179,7 +3179,7 @@ export default function Website_Enhanced() {
                               placeholder="0.00"
                               value={wilayaPriceBureau}
                               onChange={(e) => setWilayaPriceBureau(e.target.value)}
-                              className="w-full border-2 border-purple-300 dark:border-purple-600 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                              className="w-full border-2 border-border rounded-lg px-3 py-2 text-sm focus:border-electric focus:outline-none"
                             />
                           </div>
                         </div>
@@ -3189,7 +3189,7 @@ export default function Website_Enhanced() {
                           <Button
                             onClick={handleSaveWilayaPrice}
                             disabled={!selectedWilayaForEdit || !wilayaPriceDomicile || !wilayaPriceBureau}
-                            className="bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-400 text-white font-bold py-2 rounded-lg transition-colors"
+                            className="bg-primary hover:bg-primary/90 disabled:bg-muted-foreground text-primary-foreground font-bold py-2 rounded-lg transition-colors"
                           >
                             <Check className="h-4 w-4 mr-2" />
                             {editingWilayaPriceId ? (language === 'ar' ? 'تحديث' : language === 'fr' ? 'Mettre à jour' : 'Update') : (language === 'ar' ? 'إضافة' : language === 'fr' ? 'Ajouter' : 'Add')}
@@ -3201,7 +3201,7 @@ export default function Website_Enhanced() {
                               setWilayaPriceBureau('');
                               setEditingWilayaPriceId(null);
                             }}
-                            className="bg-slate-400 hover:bg-slate-500 text-white font-bold py-2 rounded-lg transition-colors"
+                            className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold py-2 rounded-lg transition-colors"
                           >
                             {language === 'ar' ? 'إلغاء' : language === 'fr' ? 'Annuler' : 'Clear'}
                           </Button>
@@ -3210,36 +3210,36 @@ export default function Website_Enhanced() {
                     </div>
 
                     {/* Section 2: Configured Wilayas */}
-                    <div className="bg-blue-100 dark:bg-blue-900/30 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-blue-300 dark:border-blue-700">
-                      <h3 className="text-base sm:text-lg font-black text-blue-700 dark:text-blue-300 mb-3 sm:mb-4">
+                    <div className="bg-surface-2 p-3 sm:p-6 rounded-lg sm:rounded-2xl border-2 border-border">
+                      <h3 className="text-base sm:text-lg font-black text-electric mb-3 sm:mb-4">
                         {language === 'ar' ? 'الولايات المُعدّة' : language === 'fr' ? 'Wilayas Configurées' : 'Configured Wilayas'} ({wilayaPrices.length})
                       </h3>
 
                       {wilayaPrices.length === 0 ? (
-                        <p className="text-center text-slate-600 dark:text-slate-400 py-8">
+                        <p className="text-center text-muted-foreground py-8">
                           {language === 'ar' ? 'لا توجد ولايات مُعدّة بعد' : language === 'fr' ? 'Aucune wilaya configurée' : 'No wilayas configured yet'}
                         </p>
                       ) : (
                         <div className="space-y-2">
                           {wilayaPrices.map((price) => (
-                            <div key={`${price.agency_id}-${price.wilaya_name}`} className="bg-white dark:bg-slate-700 p-3 rounded-lg border border-blue-200 dark:border-blue-600 flex items-center justify-between gap-2 sm:gap-3">
+                            <div key={`${price.agency_id}-${price.wilaya_name}`} className="bg-card p-3 rounded-lg border border-border flex items-center justify-between gap-2 sm:gap-3">
                               <div className="flex-1 min-w-0">
-                                <p className="font-bold text-slate-700 dark:text-slate-200 text-sm sm:text-base">{price.wilaya_name}</p>
-                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                                <p className="font-bold text-foreground text-sm sm:text-base">{price.wilaya_name}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground">
                                   {price.price_domicile.toFixed(2)} DZD | {price.price_bureau.toFixed(2)} DZD
                                 </p>
                               </div>
                               <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                                 <Button
                                   onClick={() => handleEditWilayaPrice(price)}
-                                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
+                                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
                                   title="Edit"
                                 >
                                   
                                 </Button>
                                 <Button
                                   onClick={() => handleDeleteWilayaPrice(price.wilaya_name)}
-                                  className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
+                                  className="bg-destructive hover:bg-destructive/90 text-white px-2 sm:px-3 py-1 sm:py-2 rounded text-xs sm:text-sm font-bold"
                                   title="Delete"
                                 >
                                   
@@ -3252,8 +3252,8 @@ export default function Website_Enhanced() {
                     </div>
 
                     {/* Info Section */}
-                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 sm:p-4 rounded-lg border border-amber-300 dark:border-amber-600">
-                      <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
+                    <div className="bg-surface-2 p-3 sm:p-4 rounded-lg border border-border">
+                      <p className="text-xs sm:text-sm text-warning">
                         <strong>ℹ️ {language === 'ar' ? 'ملاحظة' : language === 'fr' ? 'Note' : 'Info'}:</strong> {language === 'ar' ? 'إذا لم تحدد سعراً لولاية معينة، سيتم استخدام السعر الافتراضي للوكالة' : language === 'fr' ? 'Si vous ne définissez pas de prix pour une wilaya, le prix par défaut de l\'agence sera utilisé' : 'If no price is set for a wilaya, the agency default price will be used'}
                       </p>
                     </div>
@@ -3262,7 +3262,7 @@ export default function Website_Enhanced() {
                   <DialogFooter className="mt-6">
                     <Button
                       onClick={() => setShowWilayaPricingDialog(false)}
-                      className="bg-slate-500 hover:bg-slate-600 text-white font-bold text-lg h-11 px-6 rounded-xl"
+                      className="bg-muted-foreground hover:bg-muted-foreground text-white font-bold text-lg h-11 px-6 rounded-xl"
                     >
                       {language === 'ar' ? 'إغلاق' : language === 'fr' ? 'Fermer' : 'Close'}
                     </Button>
@@ -3282,28 +3282,28 @@ export default function Website_Enhanced() {
               className="space-y-0"
             >
               {/* Main Settings Container */}
-              <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-slate-900 dark:to-black rounded-3xl overflow-hidden shadow-2xl border border-slate-700/50">
+              <div className="rounded-2xl overflow-hidden shadow-sm border border-border bg-primary text-primary-foreground">
                 
                 {/* Header Section with Preview */}
                 <div className="relative overflow-hidden">
                   {/* Background Pattern */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 pointer-events-none" />
-                  <div className="absolute -right-40 -top-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
-                  <div className="absolute -left-40 -bottom-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl" />
+                  <div className="absolute inset-0 pointer-events-none bg-primary text-primary-foreground" />
+                  <div className="absolute -right-40 -top-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
+                  <div className="absolute -left-40 -bottom-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
                   
                   {/* Header Content */}
                   <div className="relative z-10 p-8 lg:p-12">
                     <div className="flex items-start justify-between gap-8 flex-wrap">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-lg">
+                          <div className="p-3 rounded-2xl shadow-sm bg-primary text-primary-foreground">
                             <Settings className="h-8 w-8 text-white" />
                           </div>
-                          <h2 className="text-4xl font-black bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                          <h2 className="text-4xl font-black text-foreground">
                             {language === 'ar' ? 'إعدادات الموقع' : language === 'fr' ? 'Paramètres du Site' : 'Website Settings'}
                           </h2>
                         </div>
-                        <p className="text-slate-400 text-lg">
+                        <p className="text-muted-foreground text-lg">
                           {language === 'ar' ? 'إدارة معلومات متجرك والصور' : language === 'fr' ? 'Gérez les informations de votre magasin' : 'Manage your store information'}
                         </p>
                       </div>
@@ -3313,7 +3313,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           initial={{ scale: 0.9, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          className="w-32 h-32 rounded-2xl overflow-hidden border-2 border-cyan-400/50 shadow-xl backdrop-blur-sm"
+                          className="w-32 h-32 rounded-2xl overflow-hidden border-2 border-border shadow-sm backdrop-blur-sm"
                         >
                           <img
                             src={websiteSettings.logo_url}
@@ -3334,7 +3334,7 @@ export default function Website_Enhanced() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-cyan-500/30 shadow-lg"
+                    className="p-8 rounded-2xl border border-electric shadow-sm bg-primary text-primary-foreground"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                       <span className="text-3xl"></span>
@@ -3353,10 +3353,10 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'أدخل اسم متجرك' : language === 'fr' ? 'Entrez le nom du magasin' : 'Enter store name'}
                           value={websiteSettings?.store_name || ''}
                           onChange={(e) => setWebsiteSettings({ ...websiteSettings, store_name: e.target.value })}
-                          className="h-12 bg-slate-900/50 border-2 border-cyan-500/50 text-white placeholder-slate-500 rounded-xl text-lg font-semibold hover:border-cyan-400/70 focus:border-cyan-400 transition-all"
+                          className="h-12 bg-primary/50 border-2 border-electric text-white placeholder-muted-foreground rounded-xl text-lg font-semibold hover:border-border focus:border-border transition-all"
                         />
                         {websiteSettings?.store_name && (
-                          <p className="text-sm text-cyan-400">{language === 'ar' ? 'تم الإدخال' : language === 'fr' ? 'Rempli' : 'Filled'}</p>
+                          <p className="text-sm text-electric">{language === 'ar' ? 'تم الإدخال' : language === 'fr' ? 'Rempli' : 'Filled'}</p>
                         )}
                       </div>
 
@@ -3371,7 +3371,7 @@ export default function Website_Enhanced() {
                           placeholder={language === 'ar' ? 'شعارك المميز' : language === 'fr' ? 'Votre slogan unique' : 'Your unique slogan'}
                           value={websiteSettings?.slogan || ''}
                           onChange={(e) => setWebsiteSettings({ ...websiteSettings, slogan: e.target.value })}
-                          className="h-12 bg-slate-900/50 border-2 border-purple-500/50 text-white placeholder-slate-500 rounded-xl text-lg font-semibold hover:border-purple-400/70 focus:border-purple-400 transition-all"
+                          className="h-12 bg-primary/50 border-2 border-electric text-white placeholder-muted-foreground rounded-xl text-lg font-semibold hover:border-border focus:border-border transition-all"
                         />
                       </div>
                     </div>
@@ -3382,7 +3382,7 @@ export default function Website_Enhanced() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-orange-500/30 shadow-lg"
+                    className="p-8 rounded-2xl border border-warning shadow-sm bg-primary text-primary-foreground"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                       <span className="text-3xl"></span>
@@ -3391,18 +3391,18 @@ export default function Website_Enhanced() {
                     
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                       {/* Upload Area */}
-                      <label className="lg:col-span-2 flex items-center justify-center h-64 border-3 border-dashed border-orange-400/50 bg-orange-500/5 rounded-2xl cursor-pointer hover:border-orange-400 hover:bg-orange-500/10 transition-all group">
+                      <label className="lg:col-span-2 flex items-center justify-center h-64 border-3 border-dashed border-border bg-warning/5 rounded-2xl cursor-pointer hover:border-border hover:bg-warning/90 transition-all group">
                         <div className="flex flex-col items-center justify-center">
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: 5 }}
                             className="mb-4"
                           >
-                            <Upload className="h-16 w-16 text-orange-400 group-hover:text-orange-300 transition-colors" />
+                            <Upload className="h-16 w-16 text-warning group-hover:text-warning transition-colors" />
                           </motion.div>
                           <p className="text-white font-bold text-lg text-center">
                             {language === 'ar' ? 'اختر أو اسحب شعار المتجر' : language === 'fr' ? 'Choisir ou glisser le logo' : 'Choose or drag logo'}
                           </p>
-                          <p className="text-slate-400 text-sm mt-2">PNG, JPG, GIF</p>
+                          <p className="text-muted-foreground text-sm mt-2">PNG, JPG, GIF</p>
                         </div>
                         <input
                           type="file"
@@ -3417,7 +3417,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           initial={{ scale: 0.8 }}
                           animate={{ scale: 1 }}
-                          className="h-64 rounded-2xl overflow-hidden border-2 border-orange-400/50 shadow-xl bg-gradient-to-br from-orange-600/20 to-red-600/20 flex items-center justify-center"
+                          className="h-64 rounded-2xl overflow-hidden border-2 border-border shadow-sm flex items-center justify-center bg-primary text-primary-foreground"
                         >
                           <img
                             src={websiteSettings.logo_url}
@@ -3426,8 +3426,8 @@ export default function Website_Enhanced() {
                           />
                         </motion.div>
                       ) : (
-                        <div className="h-64 rounded-2xl border-2 border-dashed border-slate-500/30 flex items-center justify-center bg-slate-900/50">
-                          <p className="text-slate-500 text-center">
+                        <div className="h-64 rounded-2xl border-2 border-dashed border-border flex items-center justify-center bg-primary/50">
+                          <p className="text-muted-foreground text-center">
                             {language === 'ar' ? 'لا يوجد شعار محمل' : language === 'fr' ? 'Pas de logo' : 'No logo'}
                           </p>
                         </div>
@@ -3440,7 +3440,7 @@ export default function Website_Enhanced() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-blue-500/30 shadow-lg"
+                    className="p-8 rounded-2xl border border-electric shadow-sm bg-primary text-primary-foreground"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                       <span className="text-3xl"></span>
@@ -3451,10 +3451,10 @@ export default function Website_Enhanced() {
                       placeholder={language === 'ar' ? 'اكتب وصف شامل لموقعك ومتجرك...' : language === 'fr' ? 'Décrivez votre magasin en détail...' : 'Describe your store...'}
                       value={websiteSettings?.description || ''}
                       onChange={(e) => setWebsiteSettings({ ...websiteSettings, description: e.target.value })}
-                      className="w-full h-40 bg-slate-900/50 border-2 border-blue-500/50 text-white placeholder-slate-500 rounded-xl p-4 text-lg font-semibold hover:border-blue-400/70 focus:border-blue-400 transition-all resize-none"
+                      className="w-full h-40 bg-primary/50 border-2 border-electric text-white placeholder-muted-foreground rounded-xl p-4 text-lg font-semibold hover:border-border focus:border-border transition-all resize-none"
                     />
                     {websiteSettings?.description && (
-                      <p className="text-sm text-blue-400 mt-2">{language === 'ar' ? 'تم إدخال الوصف' : language === 'fr' ? 'Description saisie' : 'Description added'} ({websiteSettings.description.length} {language === 'ar' ? 'حرف' : language === 'fr' ? 'caractères' : 'chars'})</p>
+                      <p className="text-sm text-electric mt-2">{language === 'ar' ? 'تم إدخال الوصف' : language === 'fr' ? 'Description saisie' : 'Description added'} ({websiteSettings.description.length} {language === 'ar' ? 'حرف' : language === 'fr' ? 'caractères' : 'chars'})</p>
                     )}
                   </motion.div>
 
@@ -3463,7 +3463,7 @@ export default function Website_Enhanced() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="bg-gradient-to-br from-slate-800 to-slate-700 p-8 rounded-2xl border border-pink-500/30 shadow-lg"
+                    className="p-8 rounded-2xl border border-electric shadow-sm bg-primary text-primary-foreground"
                   >
                     <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                       <span className="text-3xl"></span>
@@ -3472,18 +3472,18 @@ export default function Website_Enhanced() {
                     
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                       {/* Upload Area */}
-                      <label className="lg:col-span-2 flex items-center justify-center h-64 border-3 border-dashed border-pink-400/50 bg-pink-500/5 rounded-2xl cursor-pointer hover:border-pink-400 hover:bg-pink-500/10 transition-all group">
+                      <label className="lg:col-span-2 flex items-center justify-center h-64 border-3 border-dashed border-border bg-primary/5 rounded-2xl cursor-pointer hover:border-border hover:bg-primary/90 transition-all group">
                         <div className="flex flex-col items-center justify-center">
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: 5 }}
                             className="mb-4"
                           >
-                            <Upload className="h-16 w-16 text-pink-400 group-hover:text-pink-300 transition-colors" />
+                            <Upload className="h-16 w-16 text-electric group-hover:text-electric transition-colors" />
                           </motion.div>
                           <p className="text-white font-bold text-lg text-center">
                             {language === 'ar' ? 'اختر أو اسحب صورة الخلفية' : language === 'fr' ? 'Choisir ou glisser le fond' : 'Choose or drag background'}
                           </p>
-                          <p className="text-slate-400 text-sm mt-2">PNG, JPG, GIF (Recommended: 1920x1080)</p>
+                          <p className="text-muted-foreground text-sm mt-2">PNG, JPG, GIF (Recommended: 1920x1080)</p>
                         </div>
                         <input
                           type="file"
@@ -3498,7 +3498,7 @@ export default function Website_Enhanced() {
                         <motion.div
                           initial={{ scale: 0.8 }}
                           animate={{ scale: 1 }}
-                          className="h-64 rounded-2xl overflow-hidden border-2 border-pink-400/50 shadow-xl bg-gradient-to-br from-pink-600/20 to-red-600/20 flex items-center justify-center"
+                          className="h-64 rounded-2xl overflow-hidden border-2 border-border shadow-sm flex items-center justify-center bg-primary text-primary-foreground"
                         >
                           <img
                             src={websiteSettings.landing_page_image_url}
@@ -3507,8 +3507,8 @@ export default function Website_Enhanced() {
                           />
                         </motion.div>
                       ) : (
-                        <div className="h-64 rounded-2xl border-2 border-dashed border-slate-500/30 flex items-center justify-center bg-slate-900/50">
-                          <p className="text-slate-500 text-center">
+                        <div className="h-64 rounded-2xl border-2 border-dashed border-border flex items-center justify-center bg-primary/50">
+                          <p className="text-muted-foreground text-center">
                             {language === 'ar' ? 'لا يوجد خلفية محملة' : language === 'fr' ? 'Pas de fond' : 'No background'}
                           </p>
                         </div>
@@ -3521,7 +3521,7 @@ export default function Website_Enhanced() {
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSaveWebsiteSettings}
-                    className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 text-white px-8 py-5 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-2xl border border-cyan-400/30 transition-all"
+                    className="w-full text-primary-foreground px-8 py-5 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 shadow-sm border border-border transition-all bg-primary"
                   >
                     <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }}>
                       <Check className="h-7 w-7" />
@@ -3530,8 +3530,8 @@ export default function Website_Enhanced() {
                   </motion.button>
 
                   {/* Info Box */}
-                  <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
-                    <p className="text-blue-300 text-sm">
+                  <div className="bg-primary/10 border border-border rounded-xl p-4">
+                    <p className="text-electric text-sm">
                       <span className="font-bold">ℹ️ {language === 'ar' ? 'ملاحظة:' : language === 'fr' ? 'Info:' : 'Note:'}</span> {language === 'ar' ? ' سيتم حفظ جميع الصور تلقائياً في السحابة' : language === 'fr' ? ' Toutes les images seront enregistrées dans le cloud' : ' All images will be saved to the cloud'}
                     </p>
                   </div>

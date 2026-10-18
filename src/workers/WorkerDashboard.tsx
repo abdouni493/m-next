@@ -22,21 +22,21 @@ const QuickActions = () => {
       description: "Lancer l'interface de caisse (POS).",
       icon: DollarSign,
       href: "/pos",
-      color: "text-green-500"
+      color: "text-success"
     },
     {
       title: "Mes Ventes",
       description: "Voir l'historique de mes ventes.",
       icon: ShoppingCart,
       href: "/employee/sales",
-      color: "text-blue-500"
+      color: "text-electric"
     },
     {
       title: "Paramètres",
       description: "Gérer mes paramètres utilisateur.",
       icon: Settings,
       href: "/employee/settings",
-      color: "text-purple-500"
+      color: "text-electric"
     }
   ];
 

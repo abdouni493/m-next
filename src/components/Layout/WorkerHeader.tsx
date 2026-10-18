@@ -69,9 +69,9 @@ export const WorkerHeader = ({ onMenuClick, sidebarOpen }: WorkerHeaderProps) =>
             className="hover:bg-accent animate-scale-in"
           >
             {isDarkMode ? (
-              <Sun className="w-5 h-5 text-yellow-500 transition-transform hover:rotate-12" />
+              <Sun className="w-5 h-5 text-warning transition-transform hover:rotate-12" />
             ) : (
-              <Moon className="w-5 h-5 text-blue-600 transition-transform hover:rotate-12" />
+              <Moon className="w-5 h-5 text-electric transition-transform hover:rotate-12" />
             )}
           </Button>
 

@@ -118,7 +118,7 @@ function DropdownMenuItemComponent({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 ${className}`}
+      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-colors hover:bg-surface-2 text-foreground ${className}`}
     >
       {icon}
       <span>{label}</span>
@@ -265,25 +265,25 @@ function EditInvoiceDialog({ isOpen, onClose, invoice, onUpdate }: {
               </div>
               <div>
                 <Label>{language === 'ar' ? 'المبلغ المدفوع حاليا' : 'Montant déjà payé'}</Label>
-                <p className="text-lg font-bold text-green-600">{formatCurrencyLocal(invoice.amount_paid, language)}</p>
+                <p className="text-lg font-bold text-success">{formatCurrencyLocal(invoice.amount_paid, language)}</p>
               </div>
             </div>
 
             {/* PAY IN FULL BUTTON - Only show if there's remaining debt */}
             {currentRemainingDebt > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-surface-2 border border-border rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-blue-800 font-semibold">
+                    <Label className="text-electric font-semibold">
                       {language === 'ar' ? 'دفع المبلغ المتبقي بالكامل' : 'Payer le montant restant en entier'}
                     </Label>
-                    <p className="text-sm text-blue-600">
+                    <p className="text-sm text-electric">
                       {language === 'ar' ? 'المبلغ المتبقي:' : 'Montant restant:'} {formatCurrencyLocal(currentRemainingDebt, language)}
                     </p>
                   </div>
                   <Button 
                     onClick={handlePayInFull}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     <Check className="w-4 h-4 mr-2" />
                     {language === 'ar' ? 'دفع الكل' : 'Tout Payer'}
@@ -310,12 +310,12 @@ function EditInvoiceDialog({ isOpen, onClose, invoice, onUpdate }: {
 
             <div className="flex justify-between items-center border-t pt-2">
               <Label>{language === 'ar' ? 'إجمالي المدفوع بعد الإضافة' : 'Total payé après ajout'}:</Label>
-              <p className="text-lg font-bold text-blue-600">{formatCurrencyLocal(currentTotalPaidAfterAddition, language)}</p>
+              <p className="text-lg font-bold text-electric">{formatCurrencyLocal(currentTotalPaidAfterAddition, language)}</p>
             </div>
 
             <div className="text-center text-xl font-bold">
               {language === 'ar' ? 'المبلغ المتبقي' : 'Dette restante'}:{' '}
-              <span className="text-red-600">{formatCurrencyLocal(Math.max(0, remainingDebt), language)}</span>
+              <span className="text-destructive">{formatCurrencyLocal(Math.max(0, remainingDebt), language)}</span>
             </div>
           </div>
         )}
@@ -621,10 +621,10 @@ function ImportSalesDialog({ isOpen, onClose, onImport }: {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+          <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+            <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
             <Label htmlFor="csv-upload" className="cursor-pointer">
-              <span className="text-blue-600 hover:text-blue-700 font-medium">
+              <span className="text-electric hover:text-electric font-medium">
                 {language === 'ar' ? 'اختر ملف CSV' : 'Choisir un fichier CSV'}
               </span>
               <input
@@ -636,7 +636,7 @@ function ImportSalesDialog({ isOpen, onClose, onImport }: {
                 disabled={isLoading}
               />
             </Label>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               {language === 'ar' ? 'CSV فقط' : 'CSV uniquement'}
             </p>
           </div>
@@ -680,51 +680,51 @@ function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
 
         <div className="space-y-6">
           {/* Client Information */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="border-2 border-blue-300 dark:border-blue-700 rounded-lg p-6 bg-blue-50 dark:bg-blue-950/30">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-900 dark:text-blue-100">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-electric">
               <User className="h-5 w-5" />
               {language === 'ar' ? 'معلومات العميل' : 'Informations Client'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-semibold text-blue-700 dark:text-blue-300">{language === 'ar' ? 'اسم العميل' : 'Nom du Client'}</Label>
-                <p className="text-xl font-bold text-blue-900 dark:text-blue-100 mt-1">{invoice.clientName || (language === 'ar' ? 'العميل عابر' : 'Client de passage')}</p>
+                <Label className="text-sm font-semibold text-electric">{language === 'ar' ? 'اسم العميل' : 'Nom du Client'}</Label>
+                <p className="text-xl font-bold text-electric mt-1">{invoice.clientName || (language === 'ar' ? 'العميل عابر' : 'Client de passage')}</p>
               </div>
               <div>
-                <Label className="text-sm font-semibold text-blue-700 dark:text-blue-300">{language === 'ar' ? 'تاريخ الفاتورة' : 'Date de Facture'}</Label>
-                <p className="text-xl font-bold text-blue-900 dark:text-blue-100 mt-1">{formatDate(invoice.created_at, language)}</p>
+                <Label className="text-sm font-semibold text-electric">{language === 'ar' ? 'تاريخ الفاتورة' : 'Date de Facture'}</Label>
+                <p className="text-xl font-bold text-electric mt-1">{formatDate(invoice.created_at, language)}</p>
               </div>
             </div>
           </motion.div>
 
           {/* Products Section */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="border-2 border-orange-300 dark:border-orange-700 rounded-lg p-6 bg-orange-50 dark:bg-orange-950/30">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-orange-900 dark:text-orange-100">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-warning">
               <Package className="h-5 w-5" />
               {language === 'ar' ? 'المنتجات / الأجهزة' : 'Produits / Chargeurs'}
             </h3>
             {invoiceItems.length === 0 ? (
-              <p className="text-sm text-orange-700 dark:text-orange-300">{language === 'ar' ? 'لا توجد منتجات' : 'Aucun produit'}</p>
+              <p className="text-sm text-warning">{language === 'ar' ? 'لا توجد منتجات' : 'Aucun produit'}</p>
             ) : (
               <div className="space-y-3">
                 {invoiceItems.map((item, idx) => (
-                  <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * idx }} className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
+                  <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * idx }} className="bg-card rounded-lg p-4 border border-border">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
-                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'اسم المنتج' : 'Produit'}</Label>
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{item.product_name}</p>
+                        <Label className="text-xs font-semibold text-muted-foreground">{language === 'ar' ? 'اسم المنتج' : 'Produit'}</Label>
+                        <p className="text-sm font-bold text-foreground mt-1">{item.product_name}</p>
                       </div>
                       <div>
-                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'الكمية' : 'Quantité'}</Label>
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{item.quantity} {language === 'ar' ? 'وحدة' : 'unités'}</p>
+                        <Label className="text-xs font-semibold text-muted-foreground">{language === 'ar' ? 'الكمية' : 'Quantité'}</Label>
+                        <p className="text-sm font-bold text-foreground mt-1">{item.quantity} {language === 'ar' ? 'وحدة' : 'unités'}</p>
                       </div>
                       <div>
-                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'السعر الواحد' : 'Prix Unitaire'}</Label>
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{formatCurrencyLocal(item.unit_price || item.selling_price || 0, language)}</p>
+                        <Label className="text-xs font-semibold text-muted-foreground">{language === 'ar' ? 'السعر الواحد' : 'Prix Unitaire'}</Label>
+                        <p className="text-sm font-bold text-foreground mt-1">{formatCurrencyLocal(item.unit_price || item.selling_price || 0, language)}</p>
                       </div>
                       <div>
-                        <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'الإجمالي' : 'Total'}</Label>
-                        <p className="text-sm font-bold text-orange-600 dark:text-orange-400 mt-1">{formatCurrencyLocal(item.total_price || 0, language)}</p>
+                        <Label className="text-xs font-semibold text-muted-foreground">{language === 'ar' ? 'الإجمالي' : 'Total'}</Label>
+                        <p className="text-sm font-bold text-warning mt-1">{formatCurrencyLocal(item.total_price || 0, language)}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -734,45 +734,45 @@ function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
           </motion.div>
 
           {/* Payment Section */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="border-2 border-green-300 dark:border-green-700 rounded-lg p-6 bg-green-50 dark:bg-green-950/30">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-green-900 dark:text-green-100">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-success">
               <DollarSign className="h-5 w-5" />
               {language === 'ar' ? 'معلومات الدفع' : 'Informations de Paiement'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border-l-4 border-green-600">
-                <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'المجموع' : 'Total'}</Label>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">{formatCurrencyLocal(invoice.total, language)}</p>
+              <div className="bg-card rounded-lg p-4 border-l-4 border-success">
+                <Label className="text-xs font-semibold text-muted-foreground">{language === 'ar' ? 'المجموع' : 'Total'}</Label>
+                <p className="text-2xl font-bold text-success mt-2">{formatCurrencyLocal(invoice.total, language)}</p>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border-l-4 border-blue-600">
-                <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{language === 'ar' ? 'المدفوع' : 'Payé'}</Label>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">{formatCurrencyLocal(invoice.amount_paid, language)}</p>
+              <div className="bg-card rounded-lg p-4 border-l-4 border-electric">
+                <Label className="text-xs font-semibold text-muted-foreground">{language === 'ar' ? 'المدفوع' : 'Payé'}</Label>
+                <p className="text-2xl font-bold text-electric mt-2">{formatCurrencyLocal(invoice.amount_paid, language)}</p>
               </div>
-              <div className={`bg-white dark:bg-slate-800 rounded-lg p-4 border-l-4 ${remainingDebt > 0 ? 'border-red-600' : 'border-emerald-600'}`}>
-                <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{remainingDebt > 0 ? (language === 'ar' ? 'المتبقي' : 'Reste') : (language === 'ar' ? 'الباقي' : 'Monnaie')}</Label>
-                <p className={`text-2xl font-bold mt-2 ${remainingDebt > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>{formatCurrencyLocal(Math.abs(remainingDebt), language)}</p>
+              <div className={`bg-card rounded-lg p-4 border-l-4 ${remainingDebt > 0 ? 'border-destructive' : 'border-success'}`}>
+                <Label className="text-xs font-semibold text-muted-foreground">{remainingDebt > 0 ? (language === 'ar' ? 'المتبقي' : 'Reste') : (language === 'ar' ? 'الباقي' : 'Monnaie')}</Label>
+                <p className={`text-2xl font-bold mt-2 ${remainingDebt > 0 ? 'text-destructive' : 'text-success'}`}>{formatCurrencyLocal(Math.abs(remainingDebt), language)}</p>
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">{language === 'ar' ? 'حالة الدفع' : 'Statut'}</span>
-              <Badge className={isPaid ? 'bg-emerald-600 text-white' : 'bg-orange-600 text-white'}>{isPaid ? (language === 'ar' ? 'مدفوعة' : 'Payée') : (language === 'ar' ? 'دين' : 'Dette')}</Badge>
+            <div className="mt-4 flex items-center justify-between p-4 bg-card rounded-lg">
+              <span className="font-semibold text-foreground">{language === 'ar' ? 'حالة الدفع' : 'Statut'}</span>
+              <Badge className={isPaid ? 'bg-success text-white' : 'bg-warning text-white'}>{isPaid ? (language === 'ar' ? 'مدفوعة' : 'Payée') : (language === 'ar' ? 'دين' : 'Dette')}</Badge>
             </div>
           </motion.div>
 
           {/* Summary */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="border-2 border-purple-300 dark:border-purple-700 rounded-lg p-6 bg-purple-50 dark:bg-purple-950/30">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-purple-900 dark:text-purple-100">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="border-2 border-border rounded-lg p-6 bg-surface-2">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-electric">
               <Receipt className="h-5 w-5" />
               {language === 'ar' ? 'ملخص' : 'Résumé'}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? 'المنتجات' : 'Produits'}</p>
-                <p className="text-xl font-bold text-purple-600 dark:text-purple-400 mt-1">{invoiceItems.length}</p>
+              <div className="bg-card rounded-lg p-3">
+                <p className="text-xs text-muted-foreground font-semibold">{language === 'ar' ? 'المنتجات' : 'Produits'}</p>
+                <p className="text-xl font-bold text-electric mt-1">{invoiceItems.length}</p>
               </div>
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
-                <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold">{language === 'ar' ? 'الكمية' : 'Quantité'}</p>
-                <p className="text-xl font-bold text-purple-600 dark:text-purple-400 mt-1">{invoiceItems.reduce((sum, item) => sum + item.quantity, 0)}</p>
+              <div className="bg-card rounded-lg p-3">
+                <p className="text-xs text-muted-foreground font-semibold">{language === 'ar' ? 'الكمية' : 'Quantité'}</p>
+                <p className="text-xl font-bold text-electric mt-1">{invoiceItems.reduce((sum, item) => sum + item.quantity, 0)}</p>
               </div>
             </div>
           </motion.div>
@@ -1117,10 +1117,10 @@ export default function Sales() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">
+          <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">
             {language === 'ar' ? 'المبيعات' : 'Ventes'}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             {language === 'ar' ? 'إدارة وعرض جميع فواتير المبيعات' : 'Gérez et visualisez toutes vos factures'}
           </p>
         </div>
@@ -1128,7 +1128,7 @@ export default function Sales() {
           <Button 
             variant="outline" 
             onClick={() => setIsImportDialogOpen(true)}
-            className="rounded-lg border-slate-300 hover:bg-slate-50"
+            className="rounded-lg border-border hover:bg-surface-2"
           >
             <Upload className="w-4 h-4 mr-2" />
             {language === 'ar' ? 'استيراد' : 'Importer'}
@@ -1136,14 +1136,14 @@ export default function Sales() {
           <Button 
             variant="outline" 
             onClick={handleExportSales}
-            className="rounded-lg border-slate-300 hover:bg-slate-50"
+            className="rounded-lg border-border hover:bg-surface-2"
           >
             <Download className="w-4 h-4 mr-2" />
             {language === 'ar' ? 'تصدير' : 'Exporter'}
           </Button>
           <Button 
             onClick={() => window.location.href = '/point-of-sale'}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-lg rounded-lg"
+            className="text-primary-foreground font-semibold shadow-sm rounded-lg bg-primary"
           >
             <Plus className="w-4 h-4 mr-2" />
             {language === 'ar' ? 'فاتورة جديدة' : 'Nouvelle Facture'}
@@ -1153,7 +1153,7 @@ export default function Sales() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-0 shadow-md bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
+        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'إجمالي المبيعات' : 'Chiffre d\'Affaires'}
@@ -1169,7 +1169,7 @@ export default function Sales() {
             </p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-md bg-gradient-to-br from-purple-600 to-pink-600 text-white">
+        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'عدد المعاملات' : 'Transactions'}
@@ -1183,7 +1183,7 @@ export default function Sales() {
             </p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-md bg-gradient-to-br from-orange-600 to-red-600 text-white">
+        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'متوسط الفاتورة' : 'Moyenne par Commande'}
@@ -1199,7 +1199,7 @@ export default function Sales() {
             </p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-md bg-gradient-to-br from-emerald-600 to-green-600 text-white">
+        <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'الفواتير المدفوعة' : 'Factures Payées'}
@@ -1244,10 +1244,10 @@ export default function Sales() {
         </CardHeader>
         <CardContent>
           {/* Invoices Table */}
-          <div className="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="rounded-md border border-border overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-100 dark:bg-slate-800">
+                <TableRow className="bg-surface-2">
                   <TableHead className="font-bold">{language === 'ar' ? 'رقم الفاتورة' : 'Numéro'}</TableHead>
                   <TableHead className="font-bold">{language === 'ar' ? 'العميل' : 'Client'}</TableHead>
                   <TableHead className="font-bold">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
@@ -1272,27 +1272,27 @@ export default function Sales() {
                     const isPaid = remainingDebt <= 0;
                     
                     return (
-                      <TableRow key={invoice.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-200 dark:border-slate-700">
-                        <TableCell className="font-bold text-blue-600 dark:text-blue-400">#{invoice.id}</TableCell>
+                      <TableRow key={invoice.id} className="hover:bg-surface-2 transition-colors border-b border-border">
+                        <TableCell className="font-bold text-electric">#{invoice.id}</TableCell>
                         <TableCell className="font-semibold">
                           {invoice.clientName || (language === 'ar' ? 'العميل عابر' : 'Client de passage')}
                         </TableCell>
-                        <TableCell className="text-sm text-slate-600 dark:text-slate-400">
+                        <TableCell className="text-sm text-muted-foreground">
                           {formatDate(invoice.created_at, language)}
                         </TableCell>
-                        <TableCell className="text-right font-bold text-slate-900 dark:text-slate-100">
+                        <TableCell className="text-right font-bold text-foreground">
                           {formatCurrencyLocal(invoice.total, language)}
                         </TableCell>
-                        <TableCell className="text-right font-bold text-green-600 dark:text-green-400">
+                        <TableCell className="text-right font-bold text-success">
                           {formatCurrencyLocal(invoice.amount_paid, language)}
                         </TableCell>
                         <TableCell className="text-right font-bold">
-                          <span className={remainingDebt > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
+                          <span className={remainingDebt > 0 ? 'text-destructive' : 'text-success'}>
                             {formatCurrencyLocal(Math.abs(remainingDebt), language)}
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Badge className={isPaid ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-orange-600 hover:bg-orange-700 text-white'}>
+                          <Badge className={isPaid ? 'bg-success hover:bg-success/90 text-white' : 'bg-warning hover:bg-warning/90 text-white'}>
                             {isPaid 
                               ? (language === 'ar' ? 'مدفوعة' : 'Payée') 
                               : (language === 'ar' ? 'دين' : 'Dette')}
@@ -1326,7 +1326,7 @@ export default function Sales() {
                                   icon={<Check className="h-4 w-4" />}
                                   label={language === 'ar' ? 'دفع الدين' : 'Payer la dette'}
                                   onClick={() => handleQuickPayInFull(invoice.id)}
-                                  className="text-green-600 dark:text-green-400"
+                                  className="text-success"
                                 />
                               )}
                               
@@ -1343,7 +1343,7 @@ export default function Sales() {
                                   icon={<Trash2 className="h-4 w-4" />}
                                   label={language === 'ar' ? 'حذف' : 'Supprimer'}
                                   onClick={() => openDeleteConfirmation(invoice.id)}
-                                  className="text-red-600 dark:text-red-400"
+                                  className="text-destructive"
                                 />
                               )}
                             </DropdownMenuContent>

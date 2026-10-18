@@ -751,7 +751,7 @@ export default function POS() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen p-6 bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="flex flex-col gap-6 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -760,13 +760,13 @@ export default function POS() {
           className="flex items-center justify-between gap-6 flex-wrap"
         >
           <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+            <h1 className="text-2xl md:text-[28px] tracking-tight font-bold mb-2 flex items-center gap-3">
               <span className="text-5xl"></span>
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-foreground">
                 {language === 'ar' ? 'نقطة البيع' : 'Point de Vente'}
               </span>
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+            <p className="text-muted-foreground flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               {language === 'ar' ? 'إدارة المبيعات والفواتير' : 'Gestion des ventes et factures'}
             </p>
@@ -783,9 +783,9 @@ export default function POS() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-slate-700 border-2 border-blue-200 dark:border-blue-700 shadow-xl hover:shadow-2xl transition-all">
+              <Card className="border-2 border-border shadow-sm hover:shadow-md transition-all bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-2xl text-blue-600 dark:text-blue-400">
+                  <CardTitle className="flex items-center gap-2 text-lg text-electric">
                     <Search className="w-6 h-6" />
                     {language === 'ar' ? 'ابحث عن المنتجات' : 'Recherche'}
                   </CardTitle>
@@ -800,7 +800,7 @@ export default function POS() {
                     }}
                     className="relative"
                   >
-                    <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-400`} />
+                    <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-5 h-5 text-electric`} />
                     <Input
                       ref={searchInputRef}
                       type="text"
@@ -811,8 +811,8 @@ export default function POS() {
                       onBlur={() => setSearchFocused(false)}
                       className={`${isRTL ? 'pr-10' : 'pl-10'} h-12 text-lg bg-white dark:bg-slate-700 border-2 transition-all duration-200 ${
                         searchFocused
-                          ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-700'
-                          : 'border-blue-200 dark:border-slate-600'
+                          ? 'border-electric ring-2 ring-ring'
+                          : 'border-border'
                       }`}
                     />
                   </motion.div>
@@ -826,9 +826,9 @@ export default function POS() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-white to-purple-50 dark:from-slate-800 dark:to-slate-700 border-2 border-purple-200 dark:border-purple-700 shadow-xl">
+              <Card className="border-2 border-border shadow-sm bg-card">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-xl text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                  <CardTitle className="text-xl text-electric flex items-center gap-2">
                     �️ {language === 'ar' ? `الشواحن (${filteredProducts.length})` : `Chargeurs (${filteredProducts.length})`}
                   </CardTitle>
                 </CardHeader>
@@ -840,10 +840,10 @@ export default function POS() {
                       className="text-center py-16"
                     >
                       <p className="text-5xl mb-4"></p>
-                      <p className="text-slate-600 dark:text-slate-400 text-lg font-semibold">
+                      <p className="text-muted-foreground text-lg font-semibold">
                         {language === 'ar' ? 'لم يتم العثور على شواحن' : 'Aucun chargeur trouvé'}
                       </p>
-                      <p className="text-slate-500 dark:text-slate-500 text-sm mt-2">
+                      <p className="text-muted-foreground text-sm mt-2">
                         {language === 'ar' ? 'جرب البحث بكلمة أخرى' : 'Essayez une autre recherche'}
                       </p>
                     </motion.div>
@@ -865,11 +865,11 @@ export default function POS() {
                             >
                               <div className={`h-full rounded-xl border-2 overflow-hidden bg-white dark:bg-slate-700 transition-all ${
                                 isLowStock 
-                                  ? 'border-red-300 dark:border-red-700' 
-                                  : 'border-purple-200 dark:border-purple-700 hover:border-purple-400 dark:hover:border-purple-500'
+                                  ? 'border-border' 
+                                  : 'border-border hover:border-border'
                               }`}>
                                 {/* Image */}
-                                <div className="relative bg-gradient-to-br from-purple-100 to-blue-100 dark:from-slate-600 dark:to-slate-500 h-40 overflow-hidden flex items-center justify-center">
+                                <div className="relative h-40 overflow-hidden flex items-center justify-center bg-card">
                                   {product.primary_image ? (
                                     <img
                                       src={product.primary_image}
@@ -881,8 +881,8 @@ export default function POS() {
                                     />
                                   ) : (
                                     <div className="text-center">
-                                      <Package className="h-12 w-12 text-slate-400 mx-auto mb-2" />
-                                      <p className="text-xs text-slate-500">{language === 'ar' ? 'بدون صورة' : 'Pas d\'image'}</p>
+                                      <Package className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                                      <p className="text-xs text-muted-foreground">{language === 'ar' ? 'بدون صورة' : 'Pas d\'image'}</p>
                                     </div>
                                   )}
                                   
@@ -891,8 +891,8 @@ export default function POS() {
                                     <Badge 
                                       className={`${
                                         isLowStock
-                                          ? 'bg-red-500 text-white'
-                                          : 'bg-green-500 text-white'
+                                          ? 'bg-destructive text-white'
+                                          : 'bg-success text-white'
                                       }`}
                                     >
                                       {product.quantity_actual}
@@ -903,16 +903,16 @@ export default function POS() {
                                 {/* Content */}
                                 <div className="p-3 space-y-2">
                                   <div>
-                                    <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">{product.name}</h3>
+                                    <h3 className="font-bold text-sm text-foreground truncate">{product.name}</h3>
                                     {product.mark && (
-                                      <p className="text-xs text-slate-600 dark:text-slate-400">
+                                      <p className="text-xs text-muted-foreground">
                                         {product.mark.name}
                                       </p>
                                     )}
                                   </div>
 
                                   {/* Charger Details */}
-                                  <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                                  <div className="text-xs text-muted-foreground space-y-1">
                                     {product.voltage && (
                                       <div className="flex items-center gap-1">
                                         <span></span>
@@ -934,30 +934,30 @@ export default function POS() {
                                   </div>
 
                                   {/* Three-Tier Prices */}
-                                  <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-600">
+                                  <div className="space-y-2 pt-2 border-t border-border">
                                     <div className="grid grid-cols-3 gap-2">
-                                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-2">
-                                        <p className="text-xs text-blue-600 dark:text-blue-300 font-bold"></p>
-                                        <p className="text-xs text-blue-700 dark:text-blue-400 font-bold">
+                                      <div className="bg-surface-2 rounded p-2">
+                                        <p className="text-xs text-electric font-bold"></p>
+                                        <p className="text-xs text-electric font-bold">
                                           {formatCurrencyLocal(parseFloat(product.selling_price_1 || product.selling_price || 0), language)}
                                         </p>
                                       </div>
-                                      <div className="bg-amber-50 dark:bg-amber-900/20 rounded p-2">
-                                        <p className="text-xs text-amber-600 dark:text-amber-300 font-bold"></p>
-                                        <p className="text-xs text-amber-700 dark:text-amber-400 font-bold">
+                                      <div className="bg-surface-2 rounded p-2">
+                                        <p className="text-xs text-warning font-bold"></p>
+                                        <p className="text-xs text-warning font-bold">
                                           {formatCurrencyLocal(parseFloat(product.selling_price_2 || product.selling_price || 0), language)}
                                         </p>
                                       </div>
-                                      <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
-                                        <p className="text-xs text-green-600 dark:text-green-300 font-bold"></p>
-                                        <p className="text-xs text-green-700 dark:text-green-400 font-bold">
+                                      <div className="bg-surface-2 rounded p-2">
+                                        <p className="text-xs text-success font-bold"></p>
+                                        <p className="text-xs text-success font-bold">
                                           {formatCurrencyLocal(parseFloat(product.selling_price_3 || product.selling_price || 0), language)}
                                         </p>
                                       </div>
                                     </div>
                                     <Button
                                       size="sm"
-                                      className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg"
+                                      className="w-full text-primary-foreground rounded-lg bg-primary"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         addToCart(product);
@@ -987,16 +987,16 @@ export default function POS() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="bg-gradient-to-br from-white to-orange-50 dark:from-slate-800 dark:to-slate-700 border-2 border-orange-200 dark:border-orange-700 shadow-xl sticky top-6">
+              <Card className="border-2 border-border shadow-sm sticky top-6 bg-card">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-lg text-orange-600 dark:text-orange-400">
+                    <CardTitle className="flex items-center gap-2 text-lg text-warning">
                       <ShoppingCart className="h-5 w-5" />
                       {language === 'ar' ? `السلة (${cart.length})` : `Panier (${cart.length})`}
                     </CardTitle>
                     {cart.length > 0 && (
-                      <Button variant="ghost" size="sm" onClick={clearCart} className="hover:bg-red-100 dark:hover:bg-red-900/30">
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                      <Button variant="ghost" size="sm" onClick={clearCart} className="hover:bg-surface-2">
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     )}
                   </div>
@@ -1005,10 +1005,10 @@ export default function POS() {
                   {/* Client Name Input */}
                   <div className="relative">
                     <div className="flex items-center justify-between mb-2">
-                      <Label className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                      <Label className="font-semibold text-foreground flex items-center gap-2">
                         {language === 'en' ? 'Select Client' : 'Sélectionner Client'}
                         {selectedClient && (
-                          <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full font-bold">
+                          <span className="text-xs bg-success/10 text-success px-2 py-1 rounded-full font-bold">
                             {selectedClient.name}
                           </span>
                         )}
@@ -1016,13 +1016,13 @@ export default function POS() {
                       <Button
                         size="sm"
                         onClick={() => setShowAddClientModal(true)}
-                        className="h-7 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-xs"
+                        className="h-7 text-primary-foreground text-xs bg-primary"
                       >
                         <Plus className="w-3 h-3 mr-1" /> {language === 'en' ? 'New' : 'Nouveau'}
                       </Button>
                     </div>
                     <div className="relative mt-2">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         type="text"
                         placeholder={language === 'en' ? 'Type client name or phone...' : 'Taper nom ou téléphone...'}
@@ -1032,7 +1032,7 @@ export default function POS() {
                           setShowClientDropdown(true);
                         }}
                         onFocus={() => setShowClientDropdown(true)}
-                        className="pl-10 border-2 border-cyan-200 dark:border-cyan-700 focus:border-cyan-400 dark:focus:border-cyan-500"
+                        className="pl-10 border-2 border-border focus:border-border"
                       />
                     </div>
                     
@@ -1041,10 +1041,10 @@ export default function POS() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border-2 border-cyan-200 dark:border-cyan-700 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto"
+                        className="absolute top-full left-0 right-0 mt-1 bg-card border-2 border-border rounded-lg shadow-sm z-50 max-h-48 overflow-y-auto"
                       >
                         {filteredClients.length === 0 ? (
-                          <div className="p-3 text-center text-slate-500 dark:text-slate-400">
+                          <div className="p-3 text-center text-muted-foreground">
                             {language === 'en' ? 'No clients found' : 'Aucun client trouvé'}
                           </div>
                         ) : (
@@ -1053,14 +1053,14 @@ export default function POS() {
                               key={client.id}
                               onClick={() => handleClientSelect(client)}
                               whileHover={{ x: 5 }}
-                              className="w-full text-left px-4 py-3 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 border-b border-slate-200 dark:border-slate-700 last:border-b-0 transition-colors"
+                              className="w-full text-left px-4 py-3 hover:bg-surface-2 border-b border-border last:border-b-0 transition-colors"
                             >
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="font-semibold text-slate-900 dark:text-white">{client.name}</p>
-                                  <p className="text-xs text-slate-600 dark:text-slate-400">{client.phone}</p>
+                                  <p className="font-semibold text-foreground">{client.name}</p>
+                                  <p className="text-xs text-muted-foreground">{client.phone}</p>
                                 </div>
-                                <span className="text-xs font-bold px-2 py-1 rounded bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">
+                                <span className="text-xs font-bold px-2 py-1 rounded bg-surface-2 text-electric">
                                   {client.price_tier === 1 && 'Normal'}
                                   {client.price_tier === 2 && 'Revendeur'}
                                   {client.price_tier === 3 && 'Gros'}
@@ -1077,18 +1077,18 @@ export default function POS() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 p-3 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg border border-cyan-200 dark:border-cyan-700"
+                        className="mt-3 p-3 rounded-lg border border-border bg-card"
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedClient.name}</p>
-                            <p className="text-xs text-slate-600 dark:text-slate-400">{selectedClient.phone}</p>
+                            <p className="text-sm font-bold text-foreground">{selectedClient.name}</p>
+                            <p className="text-xs text-muted-foreground">{selectedClient.phone}</p>
                           </div>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={handleClearClient}
-                            className="text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20"
+                            className="text-destructive hover:bg-surface-2"
                           >
                             
                           </Button>
@@ -1111,20 +1111,20 @@ export default function POS() {
                           key={item.product.id}
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="bg-gradient-to-r from-orange-100/50 to-yellow-100/50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-lg p-3 space-y-2 border border-orange-200 dark:border-orange-700"
+                          className="rounded-lg p-3 space-y-2 border border-border bg-card"
                         >
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <h4 className="font-bold text-sm text-slate-900 dark:text-white">{item.product.name}</h4>
-                              <p className="text-xs text-slate-600 dark:text-slate-400">{item.product.brand}</p>
+                              <h4 className="font-bold text-sm text-foreground">{item.product.name}</h4>
+                              <p className="text-xs text-muted-foreground">{item.product.brand}</p>
                             </div>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => removeFromCart(item.product.id)}
-                              className="h-6 w-6 hover:bg-red-100 dark:hover:bg-red-900/30"
+                              className="h-6 w-6 hover:bg-surface-2"
                             >
-                              <X className="h-3 w-3 text-red-500" />
+                              <X className="h-3 w-3 text-destructive" />
                             </Button>
                           </div>
                           
@@ -1148,7 +1148,7 @@ export default function POS() {
                                 <Plus className="h-3 w-3" />
                               </Button>
                             </div>
-                            <span className="font-bold text-green-600 dark:text-green-400">{formatCurrencyLocal(item.total, language)}</span>
+                            <span className="font-bold text-success">{formatCurrencyLocal(item.total, language)}</span>
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -1157,11 +1157,11 @@ export default function POS() {
                               placeholder={language === 'ar' ? 'خصم %' : 'Remise %'}
                               value={item.discount}
                               onChange={(e) => updateDiscount(item.product.id, Number(e.target.value))}
-                              className="h-6 text-xs border-orange-200 dark:border-orange-700"
+                              className="h-6 text-xs border-border"
                               min="0"
                               max="100"
                             />
-                            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">%</span>
+                            <span className="text-xs text-muted-foreground font-semibold">%</span>
                           </div>
                         </motion.div>
                       ))
@@ -1178,7 +1178,7 @@ export default function POS() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 dark:from-emerald-700 dark:via-green-700 dark:to-teal-800 text-white shadow-2xl border-0">
+                <Card className="text-primary-foreground shadow-sm border border-border bg-primary">
                   <CardContent className="p-6 space-y-4">
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
@@ -1187,7 +1187,7 @@ export default function POS() {
                       </div>
                       
                       {totalDiscount > 0 && (
-                        <div className="flex justify-between text-yellow-100">
+                        <div className="flex justify-between text-primary-foreground">
                           <span>{language === 'ar' ? 'خصم' : 'Remise'}:</span>
                           <span>-{formatCurrencyLocal(totalDiscount, language)}</span>
                         </div>
@@ -1204,8 +1204,8 @@ export default function POS() {
                             })}
                             className="bg-white/20 border border-white/30 rounded px-2 py-1 text-xs text-white font-semibold"
                           >
-                            <option value="fixed" className="bg-slate-800">DA</option>
-                            <option value="percentage" className="bg-slate-800">%</option>
+                            <option value="fixed" className="bg-primary">DA</option>
+                            <option value="percentage" className="bg-primary">%</option>
                           </select>
                         </div>
                         <Input
@@ -1234,7 +1234,7 @@ export default function POS() {
                         setEditableTotal(total);
                         setReceivedAmount(0);
                       }}
-                      className="w-full bg-white text-emerald-600 hover:bg-white/90 font-bold text-base h-12 rounded-lg shadow-lg"
+                      className="w-full bg-card text-success hover:bg-white/90 font-bold text-base h-12 rounded-lg shadow-sm"
                     >
                       <CreditCard className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5`} />
                       {language === 'ar' ? `دفع الآن` : `Payer maintenant`}
@@ -1263,17 +1263,17 @@ export default function POS() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', damping: 20, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-850 dark:to-slate-800 rounded-2xl shadow-2xl max-w-lg w-full p-8 border border-slate-200 dark:border-slate-700"
+              className="rounded-2xl shadow-sm max-w-lg w-full p-8 border border-border bg-card"
             >
               <div className="flex justify-between items-start mb-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                <h2 className="text-3xl font-bold text-foreground">
                   {language === 'ar' ? 'إضافة عميل جديد' : 'Ajouter un Client'}
                 </h2>
                 <button
                   onClick={() => setShowAddClientModal(false)}
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  className="p-2 hover:bg-surface-2 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  <X className="w-5 h-5 text-muted-foreground" />
                 </button>
               </div>
 
@@ -1284,7 +1284,7 @@ export default function POS() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 }}
                 >
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                     {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'}
                   </label>
                   <Input
@@ -1296,7 +1296,7 @@ export default function POS() {
                       })
                     }
                     placeholder={language === 'ar' ? 'أدخل الاسم' : 'Entrez le nom'}
-                    className="mt-2 border-2 border-cyan-300 dark:border-cyan-700 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-0 h-11 text-base"
+                    className="mt-2 border-2 border-border focus:border-electric focus:ring-0 h-11 text-base"
                   />
                 </motion.div>
 
@@ -1306,7 +1306,7 @@ export default function POS() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                     {language === 'ar' ? 'رقم الهاتف' : 'Téléphone'}
                   </label>
                   <Input
@@ -1318,7 +1318,7 @@ export default function POS() {
                       })
                     }
                     placeholder={language === 'ar' ? 'أدخل رقم الهاتف' : 'Entrez le téléphone'}
-                    className="mt-2 border-2 border-cyan-300 dark:border-cyan-700 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-0 h-11 text-base"
+                    className="mt-2 border-2 border-border focus:border-electric focus:ring-0 h-11 text-base"
                   />
                 </motion.div>
 
@@ -1328,7 +1328,7 @@ export default function POS() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.15 }}
                 >
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                     {language === 'ar' ? 'مستوى السعر' : 'Niveau de Prix'}
                   </label>
                   <div className="grid grid-cols-3 gap-3 mt-2">
@@ -1350,11 +1350,11 @@ export default function POS() {
                         className={`py-3 px-2 rounded-lg font-bold transition-all border-2 ${
                           newClientForm.price_tier === tier
                             ? tier === 1
-                              ? 'bg-blue-100 dark:bg-blue-900 border-blue-500 text-blue-700 dark:text-blue-300'
+                              ? 'bg-surface-2 border-electric text-electric'
                               : tier === 2
-                              ? 'bg-amber-100 dark:bg-amber-900 border-amber-500 text-amber-700 dark:text-amber-300'
-                              : 'bg-green-100 dark:bg-green-900 border-green-500 text-green-700 dark:text-green-300'
-                            : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400'
+                              ? 'bg-surface-2 border-warning text-warning'
+                              : 'bg-surface-2 border-success text-success'
+                            : 'border-border text-muted-foreground'
                         }`}
                       >
                         <div className="text-lg">{emoji}</div>
@@ -1370,7 +1370,7 @@ export default function POS() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                     {language === 'ar' ? 'ملاحظات' : 'Notes'}
                   </label>
                   <textarea
@@ -1382,25 +1382,25 @@ export default function POS() {
                       })
                     }
                     placeholder={language === 'ar' ? 'أدخل ملاحظات اختيارية' : 'Entrez des notes optionnelles'}
-                    className="mt-2 border-2 border-cyan-300 dark:border-cyan-700 focus:border-cyan-500 dark:focus:border-cyan-500 focus:ring-0 h-24 p-2 rounded-lg text-sm dark:bg-slate-800 dark:text-white"
+                    className="mt-2 border-2 border-border focus:border-electric focus:ring-0 h-24 p-2 rounded-lg text-sm"
                   />
                 </motion.div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex gap-3 mt-8 pt-6 border-t border-border">
                 <Button
                   onClick={() => {
                     setShowAddClientModal(false);
                     setNewClientForm({ name: '', phone: '', price_tier: 1, notes: '' });
                   }}
-                  className="flex-1 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-600 border-0"
+                  className="flex-1 bg-surface-2 text-foreground hover:bg-border border-0"
                 >
                   {language === 'ar' ? 'إلغاء' : 'Annuler'}
                 </Button>
                 <Button
                   onClick={handleAddNewClient}
-                  className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-bold border-0 shadow-lg"
+                  className="flex-1 text-primary-foreground font-bold border-0 shadow-sm bg-primary"
                 >
                   {language === 'ar' ? 'إضافة' : 'Créer'}
                 </Button>
@@ -1421,8 +1421,8 @@ export default function POS() {
               {language === 'ar' ? 'أدخل المبلغ الذي تم استلامه لإتمام عملية البيع' : 'Entrez le montant reçu pour finaliser la vente'}
             </DialogDescription>
             {selectedClient && (
-              <div className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-                {language === 'ar' ? 'العميل' : 'Client'}: <span className="font-bold text-slate-900 dark:text-white">{selectedClient.name}</span>
+              <div className="text-sm text-muted-foreground mt-2">
+                {language === 'ar' ? 'العميل' : 'Client'}: <span className="font-bold text-foreground">{selectedClient.name}</span>
                 <br />
                 {language === 'ar' ? 'المستوى' : 'Tier'}: 
                 {selectedClient.price_tier === 1 && ' Normal'}
@@ -1434,33 +1434,33 @@ export default function POS() {
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="editableTotal" className="font-bold text-slate-700 dark:text-slate-300">{language === 'ar' ? 'المبلغ الإجمالي' : 'Total à payer'}</Label>
+              <Label htmlFor="editableTotal" className="font-bold text-foreground">{language === 'ar' ? 'المبلغ الإجمالي' : 'Total à payer'}</Label>
               <Input
                 id="editableTotal"
                 type="number"
                 value={editableTotal}
                 onChange={(e) => setEditableTotal(Number(e.target.value))}
                 placeholder={language === 'ar' ? 'المبلغ الإجمالي' : 'Total à payer'}
-                className="mt-2 border-2 border-blue-300 dark:border-blue-700 focus:border-blue-500 dark:focus:border-blue-500 h-12 text-lg font-bold"
+                className="mt-2 border-2 border-border focus:border-electric h-12 text-lg font-bold"
               />
             </div>
 
             <div>
-              <Label htmlFor="receivedAmount" className="font-bold text-slate-700 dark:text-slate-300">{language === 'ar' ? 'المبلغ المستلم' : 'Montant reçu'}</Label>
+              <Label htmlFor="receivedAmount" className="font-bold text-foreground">{language === 'ar' ? 'المبلغ المستلم' : 'Montant reçu'}</Label>
               <Input
                 id="receivedAmount"
                 type="number"
                 value={receivedAmount}
                 onChange={(e) => setReceivedAmount(Number(e.target.value))}
                 placeholder={language === 'ar' ? 'المبلغ نقدا' : 'Montant en espèces'}
-                className="mt-2 border-2 border-green-300 dark:border-green-700 focus:border-green-500 dark:focus:border-green-500 h-12 text-lg"
+                className="mt-2 border-2 border-border focus:border-success h-12 text-lg"
               />
             </div>
             
             <Button
               onClick={() => setReceivedAmount(editableTotal)}
               variant="outline"
-              className="w-full border-2 border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 h-12 font-bold"
+              className="w-full border-2 border-border hover:bg-surface-2 h-12 font-bold"
             >
               <DollarSign className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
               {language === 'ar' ? 'العميل دفع الكل' : 'Paiement complet'}
@@ -1472,8 +1472,8 @@ export default function POS() {
                 animate={{ opacity: 1, scale: 1 }}
                 className={`rounded-lg p-4 font-bold text-center text-lg ${
                   editableTotal - receivedAmount > 0
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                    : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                    ? 'bg-surface-2 text-destructive'
+                    : 'bg-surface-2 text-success'
                 }`}
               >
                 {editableTotal - receivedAmount > 0 ? (
@@ -1498,7 +1498,7 @@ export default function POS() {
             <Button 
               onClick={completeSale}
               disabled={receivedAmount < 0}
-              className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold h-11"
+              className="text-primary-foreground font-bold h-11 bg-primary"
             >
               <Check className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
               {language === 'ar' ? 'إتمام البيع' : 'Finaliser'}
@@ -1524,7 +1524,7 @@ export default function POS() {
             </Button>
             <Button 
               onClick={() => { printSaleInvoice(); setPrintConfirmationDialog(false); }} 
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold h-11"
+              className="text-primary-foreground font-bold h-11 bg-primary"
             >
               <Printer className={`${isRTL ? 'ml-2' : 'mr-2'} h-4 w-4`} />
               {language === 'ar' ? 'نعم، طباعة' : 'Oui, imprimer'}

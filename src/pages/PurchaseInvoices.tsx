@@ -632,7 +632,7 @@ export default function PurchaseInvoices() {
   const restToPay = Math.max(0, totalPrice - amountPaid);
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen p-6 bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header with Statistics */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -641,10 +641,10 @@ export default function PurchaseInvoices() {
       >
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-blue-700 to-cyan-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-2xl md:text-[28px] tracking-tight font-bold mb-2 text-foreground">
               {getText('title')}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-lg">
+            <p className="text-muted-foreground text-lg">
               {language === 'ar' ? 'إدارة فواتير الشراء والمخزون' : 'Manage purchase invoices and inventory'}
             </p>
           </div>
@@ -657,7 +657,7 @@ export default function PurchaseInvoices() {
                 setShowCreateDialog(true);
                 setStep('search');
               }}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-lg font-bold text-lg flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+              className="text-primary-foreground px-8 py-3 rounded-lg font-bold text-lg flex items-center gap-2 shadow-sm hover:shadow-md transition-all bg-primary"
             >
               {getText('new_purchase')}
             </Button>
@@ -671,12 +671,12 @@ export default function PurchaseInvoices() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0 }}
-            className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-6 rounded-xl border border-blue-200 dark:border-blue-700"
+            className="p-6 rounded-xl border border-border bg-card"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('total_invoices')}</p>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{invoices.length}</p>
+                <p className="text-muted-foreground text-sm font-medium">{getText('total_invoices')}</p>
+                <p className="text-3xl font-bold text-electric mt-2">{invoices.length}</p>
               </div>
               <div className="text-5xl opacity-50"></div>
             </div>
@@ -687,12 +687,12 @@ export default function PurchaseInvoices() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 p-6 rounded-xl border border-green-200 dark:border-green-700"
+            className="p-6 rounded-xl border border-border bg-card"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('paid_invoices')}</p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{invoices.filter(inv => inv.status === 'paid').length}</p>
+                <p className="text-muted-foreground text-sm font-medium">{getText('paid_invoices')}</p>
+                <p className="text-3xl font-bold text-success mt-2">{invoices.filter(inv => inv.status === 'paid').length}</p>
               </div>
               <div className="text-5xl opacity-50"></div>
             </div>
@@ -703,12 +703,12 @@ export default function PurchaseInvoices() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30 p-6 rounded-xl border border-yellow-200 dark:border-yellow-700"
+            className="p-6 rounded-xl border border-border bg-card"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('pending_invoices')}</p>
-                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{invoices.filter(inv => inv.status === 'pending').length}</p>
+                <p className="text-muted-foreground text-sm font-medium">{getText('pending_invoices')}</p>
+                <p className="text-3xl font-bold text-warning mt-2">{invoices.filter(inv => inv.status === 'pending').length}</p>
               </div>
               <div className="text-5xl opacity-50"></div>
             </div>
@@ -719,12 +719,12 @@ export default function PurchaseInvoices() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 p-6 rounded-xl border border-purple-200 dark:border-purple-700"
+            className="p-6 rounded-xl border border-border bg-card"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{getText('total_amount')}</p>
-                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0).toFixed(2)}</p>
+                <p className="text-muted-foreground text-sm font-medium">{getText('total_amount')}</p>
+                <p className="text-3xl font-bold text-electric mt-2">{invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0).toFixed(2)}</p>
               </div>
               <div className="text-5xl opacity-50"></div>
             </div>
@@ -745,9 +745,9 @@ export default function PurchaseInvoices() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-card rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
             >
-              <div className="sticky top-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 flex items-center justify-between z-10">
+              <div className="sticky top-0 text-primary-foreground p-6 flex items-center justify-between z-10 bg-primary">
                 <h2 className="text-2xl font-bold">{getText('new_purchase')}</h2>
                 <button
                   onClick={() => {
@@ -779,7 +779,7 @@ export default function PurchaseInvoices() {
                         {searchResults.map((product) => (
                           <motion.div
                             key={product.id}
-                            className="border-2 border-slate-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer"
+                            className="border-2 border-border rounded-lg p-4 hover:border-electric hover:shadow-md transition-all cursor-pointer"
                             onClick={() => handleSelectProduct(product)}
                             whileHover={{ scale: 1.02 }}
                           >
@@ -792,17 +792,17 @@ export default function PurchaseInvoices() {
                                 />
                               )}
                               <div className="flex-1">
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{product.name}</h3>
-                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                <h3 className="text-lg font-bold text-foreground">{product.name}</h3>
+                                <p className="text-sm text-muted-foreground">
                                   {product.mark?.name && `${product.mark.name}`}
                                   {product.connector_type?.name && ` • ${product.connector_type.name}`}
                                 </p>
                                 <p className="text-sm mt-2">
                                   {product.voltage}V • {product.wattage}W • {product.amperage}A
                                 </p>
-                                <p className="text-lg font-bold text-blue-600 mt-2">{product.purchase_price}</p>
+                                <p className="text-lg font-bold text-electric mt-2">{product.purchase_price}</p>
                               </div>
-                              <Badge className="h-fit bg-blue-500">{language === 'ar' ? 'اختيار' : 'Select'}</Badge>
+                              <Badge className="h-fit bg-primary">{language === 'ar' ? 'اختيار' : 'Select'}</Badge>
                             </div>
                           </motion.div>
                         ))}
@@ -810,7 +810,7 @@ export default function PurchaseInvoices() {
                     )}
 
                     {searchTerm && searchResults.length === 0 && (
-                      <div className="text-center py-12 text-slate-500">
+                      <div className="text-center py-12 text-muted-foreground">
                         <p className="text-3xl mb-2"></p>
                         <p>{getText('no_results')}</p>
                       </div>
@@ -820,13 +820,13 @@ export default function PurchaseInvoices() {
                   // Form Step
                   <div className="space-y-6">
                     {selectedProduct && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-2 border-blue-200">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-surface-2 rounded-lg border-2 border-border">
                         <p className="font-bold text-lg">
-                          {language === 'ar' ? 'تم تحديد' : 'Selected'}: <span className="text-blue-600">{selectedProduct.name}</span>
+                          {language === 'ar' ? 'تم تحديد' : 'Selected'}: <span className="text-electric">{selectedProduct.name}</span>
                         </p>
                         <button
                           onClick={() => setStep('search')}
-                          className="text-sm text-blue-600 hover:underline mt-2"
+                          className="text-sm text-electric hover:underline mt-2"
                         >
                           {language === 'ar' ? 'تغيير المنتج' : 'Change Product'}
                         </button>
@@ -838,27 +838,27 @@ export default function PurchaseInvoices() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0 }}
-                      className="p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200"
+                      className="p-4 rounded-xl border border-border bg-card"
                     >
-                      <h3 className="text-lg font-bold text-cyan-900 mb-4">{language === 'ar' ? 'صور المنتج' : 'Product Images'}</h3>
+                      <h3 className="text-lg font-bold text-electric mb-4">{language === 'ar' ? 'صور المنتج' : 'Product Images'}</h3>
                       
                       {/* Current Images Preview */}
                       {chargerImages.length > 0 && (
-                        <div className="mb-4 p-4 bg-white dark:bg-slate-700 rounded-lg border border-cyan-300 dark:border-cyan-600">
-                          <p className="text-xs font-semibold text-cyan-700 mb-3">{language === 'ar' ? 'الصور الحالية' : 'Current Images'}</p>
+                        <div className="mb-4 p-4 bg-card rounded-lg border border-border">
+                          <p className="text-xs font-semibold text-electric mb-3">{language === 'ar' ? 'الصور الحالية' : 'Current Images'}</p>
                           <div className="grid grid-cols-4 gap-2">
                             {chargerImages.map((image) => (
                               <div key={image.id} className="relative group">
                                 <img
                                   src={image.image_url}
                                   alt="Product image"
-                                  className="w-full h-20 object-cover rounded-lg border border-cyan-300"
+                                  className="w-full h-20 object-cover rounded-lg border border-border"
                                 />
                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveExistingImage(image.id)}
-                                    className="bg-red-500 hover:bg-red-600 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
+                                    className="bg-destructive hover:bg-destructive/90 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
                                     title={getText('delete_image')}
                                   >
                                     
@@ -871,7 +871,7 @@ export default function PurchaseInvoices() {
                       )}
                       
                       {/* Upload Section */}
-                      <div className="border-2 border-dashed border-cyan-300 dark:border-cyan-600 rounded-lg p-6 text-center bg-white dark:bg-slate-700 mb-4">
+                      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-card mb-4">
                         <input
                           type="file"
                           multiple
@@ -881,7 +881,7 @@ export default function PurchaseInvoices() {
                           className="hidden"
                         />
                         <label htmlFor="imageInput" className="cursor-pointer block">
-                          <p className="text-cyan-900 font-semibold">
+                          <p className="text-electric font-semibold">
                             {formData.images.length > 0
                               ? `${formData.images.length} ${language === 'ar' ? 'صورة محددة' : 'image(s) selected'}`
                               : language === 'ar'
@@ -899,19 +899,19 @@ export default function PurchaseInvoices() {
                               <img
                                 src={URL.createObjectURL(image)}
                                 alt={`Preview ${index + 1}`}
-                                className="w-full h-20 object-cover rounded-lg border border-cyan-300"
+                                className="w-full h-20 object-cover rounded-lg border border-border"
                               />
                               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveImage(index)}
-                                  className="bg-red-500 hover:bg-red-600 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
+                                  className="bg-destructive hover:bg-destructive/90 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
                                   title={getText('delete_image')}
                                 >
                                   
                                 </button>
                               </div>
-                              <p className="text-xs text-cyan-700 mt-1 truncate">{image.name}</p>
+                              <p className="text-xs text-electric mt-1 truncate">{image.name}</p>
                             </div>
                           ))}
                         </div>
@@ -923,30 +923,30 @@ export default function PurchaseInvoices() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05 }}
-                      className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+                      className="p-4 rounded-xl border border-border bg-card"
                     >
-                      <h3 className="text-lg font-bold text-blue-900 mb-4">{language === 'ar' ? 'معلومات المنتج' : 'Product Information'}</h3>
+                      <h3 className="text-lg font-bold text-electric mb-4">{language === 'ar' ? 'معلومات المنتج' : 'Product Information'}</h3>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-blue-900">
+                          <label className="block text-sm font-semibold mb-2 text-electric">
                             {language === 'ar' ? 'اسم المنتج' : 'Product Name'}
                           </label>
                           <input
                             type="text"
                             value={selectedProduct?.name || ''}
                             disabled
-                            className="w-full px-4 py-2 border border-blue-300 rounded-lg bg-slate-100 text-slate-600"
+                            className="w-full px-4 py-2 border border-border rounded-lg bg-surface-2 text-muted-foreground"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-blue-900">
+                          <label className="block text-sm font-semibold mb-2 text-electric">
                             {language === 'ar' ? 'الوصف' : 'Description'}
                           </label>
                           <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={3}
-                            className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-card"
                           />
                         </div>
                       </div>
@@ -957,19 +957,19 @@ export default function PurchaseInvoices() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
-                      className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200"
+                      className="p-4 rounded-xl border border-border bg-card"
                     >
-                      <h3 className="text-lg font-bold text-purple-900 mb-4">{language === 'ar' ? 'الماركة والموصل' : 'Brand & Connector'}</h3>
+                      <h3 className="text-lg font-bold text-electric mb-4">{language === 'ar' ? 'الماركة والموصل' : 'Brand & Connector'}</h3>
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-purple-900">
+                          <label className="block text-sm font-semibold mb-2 text-electric">
                             {language === 'ar' ? 'الماركة' : 'Mark / Brand'}
                           </label>
                           <div className="flex gap-2">
                             <select
                               value={formData.mark_id}
                               onChange={(e) => setFormData({ ...formData, mark_id: e.target.value })}
-                              className="flex-1 px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white"
+                              className="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                             >
                               <option value="">{language === 'ar' ? 'اختر' : 'Select'}</option>
                               {marks.map((mark) => (
@@ -981,7 +981,7 @@ export default function PurchaseInvoices() {
                             <Button
                               onClick={() => setShowAddMarkModal(true)}
                               variant="outline"
-                              className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
+                              className="px-3 border-border text-electric hover:bg-surface-2"
                             >
                               
                             </Button>
@@ -989,14 +989,14 @@ export default function PurchaseInvoices() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-purple-900">
+                          <label className="block text-sm font-semibold mb-2 text-electric">
                             {language === 'ar' ? 'نوع الموصل' : 'Connector Type'}
                           </label>
                           <div className="flex gap-2">
                             <select
                               value={formData.connector_type_id}
                               onChange={(e) => setFormData({ ...formData, connector_type_id: e.target.value })}
-                              className="flex-1 px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white"
+                              className="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                             >
                               <option value="">{language === 'ar' ? 'اختر' : 'Select'}</option>
                               {connectorTypes.map((type) => (
@@ -1008,7 +1008,7 @@ export default function PurchaseInvoices() {
                             <Button
                               onClick={() => setShowAddConnectorModal(true)}
                               variant="outline"
-                              className="px-3 border-purple-300 text-purple-600 hover:bg-purple-100"
+                              className="px-3 border-border text-electric hover:bg-surface-2"
                             >
                               
                             </Button>
@@ -1016,13 +1016,13 @@ export default function PurchaseInvoices() {
                         </div>
 
                         <div className="col-span-2">
-                          <label className="block text-sm font-semibold mb-2 text-indigo-900">
+                          <label className="block text-sm font-semibold mb-2 text-electric">
                             {language === 'ar' ? 'المورد' : 'Supplier'}
                           </label>
                           <select
                             value={formData.supplier_id}
                             onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
-                            className="w-full px-4 py-2 border border-indigo-300 dark:border-indigo-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card text-foreground"
                           >
                             <option value="">{language === 'ar' ? 'اختر المورد' : 'Select Supplier'}</option>
                             {suppliers.map((supplier) => (
@@ -1040,48 +1040,48 @@ export default function PurchaseInvoices() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15 }}
-                      className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200"
+                      className="p-4 rounded-xl border border-border bg-card"
                     >
-                      <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-300 mb-4">{language === 'ar' ? 'المواصفات الكهربائية' : 'Electrical Specs'}</h3>
+                      <h3 className="text-lg font-bold text-warning mb-4">{language === 'ar' ? 'المواصفات الكهربائية' : 'Electrical Specs'}</h3>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">{language === 'ar' ? 'الجهد' : 'Voltage'} (V)</label>
+                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'الجهد' : 'Voltage'} (V)</label>
                           <input
                             type="number"
                             step="0.1"
                             value={formData.voltage}
                             onChange={(e) => setFormData({ ...formData, voltage: e.target.value })}
-                            className="w-full px-4 py-2 border border-yellow-300 dark:border-yellow-600 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card text-foreground"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900 dark:text-yellow-300">{language === 'ar' ? 'القدرة' : 'Wattage'} (W)</label>
+                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'القدرة' : 'Wattage'} (W)</label>
                           <input
                             type="number"
                             step="0.1"
                             value={formData.wattage}
                             onChange={(e) => setFormData({ ...formData, wattage: e.target.value })}
-                            className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-yellow-900">{language === 'ar' ? 'التيار' : 'Amperage'} (A)</label>
+                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'التيار' : 'Amperage'} (A)</label>
                           <input
                             type="number"
                             step="0.1"
                             value={formData.amperage}
                             onChange={(e) => setFormData({ ...formData, amperage: e.target.value })}
-                            className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                           />
                         </div>
                       </div>
                       <div className="mt-4">
-                        <label className="block text-sm font-semibold mb-2 text-yellow-900">{language === 'ar' ? 'رقم الموديل' : 'Model Number'}</label>
+                        <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'رقم الموديل' : 'Model Number'}</label>
                         <input
                           type="text"
                           value={formData.model_number}
                           onChange={(e) => setFormData({ ...formData, model_number: e.target.value })}
-                          className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 bg-white"
+                          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                         />
                       </div>
                     </motion.div>
@@ -1091,35 +1091,35 @@ export default function PurchaseInvoices() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
-                      className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200"
+                      className="p-4 rounded-xl border border-border bg-card"
                     >
-                      <h3 className="text-lg font-bold text-green-900 mb-4">{language === 'ar' ? 'المخزون' : 'Inventory'}</h3>
+                      <h3 className="text-lg font-bold text-success mb-4">{language === 'ar' ? 'المخزون' : 'Inventory'}</h3>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-green-900">{language === 'ar' ? 'الكمية الأولية' : 'Initial Qty'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-success">{language === 'ar' ? 'الكمية الأولية' : 'Initial Qty'}</label>
                           <input
                             type="number"
                             value={formData.quantity_initial}
                             onChange={(e) => setFormData({ ...formData, quantity_initial: e.target.value, quantity_actual: e.target.value })}
-                            className="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-green-900">{language === 'ar' ? 'الكمية الفعلية' : 'Actual Qty'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-success">{language === 'ar' ? 'الكمية الفعلية' : 'Actual Qty'}</label>
                           <input
                             type="number"
                             value={formData.quantity_actual}
                             onChange={(e) => setFormData({ ...formData, quantity_actual: e.target.value })}
-                            className="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-green-900">{language === 'ar' ? 'الحد الأدنى' : 'Minimal Qty'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-success">{language === 'ar' ? 'الحد الأدنى' : 'Minimal Qty'}</label>
                           <input
                             type="number"
                             value={formData.quantity_minimal}
                             onChange={(e) => setFormData({ ...formData, quantity_minimal: e.target.value })}
-                            className="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                           />
                         </div>
                       </div>
@@ -1130,53 +1130,53 @@ export default function PurchaseInvoices() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.25 }}
-                      className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200"
+                      className="p-4 rounded-xl border border-border bg-card"
                     >
-                      <h3 className="text-lg font-bold text-orange-900 mb-4">{language === 'ar' ? 'السعر والدفع' : 'Payment & Pricing'}</h3>
+                      <h3 className="text-lg font-bold text-warning mb-4">{language === 'ar' ? 'السعر والدفع' : 'Payment & Pricing'}</h3>
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-orange-900">{language === 'ar' ? 'سعر الشراء' : 'Purchase Price'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'سعر الشراء' : 'Purchase Price'}</label>
                           <input
                             type="number"
                             step="0.01"
                             value={formData.purchase_price}
                             onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })}
-                            className="w-full px-4 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-orange-900">{language === 'ar' ? 'سعر البيع' : 'Selling Price'}</label>
+                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'سعر البيع' : 'Selling Price'}</label>
                           <input
                             type="number"
                             step="0.01"
                             value={formData.selling_price}
                             onChange={(e) => setFormData({ ...formData, selling_price: e.target.value })}
-                            className="w-full px-4 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 bg-white"
+                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                           />
                         </div>
                       </div>
 
                       {/* Payment Summary */}
-                      <div className="border-2 border-emerald-300 bg-emerald-50 p-4 rounded-lg mb-4">
+                      <div className="border-2 border-border bg-surface-2 p-4 rounded-lg mb-4">
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
-                            <p className="text-sm text-slate-600 mb-1">{language === 'ar' ? 'السعر الإجمالي' : 'Total Price'}</p>
-                            <p className="text-2xl font-bold text-emerald-600">{totalPrice.toFixed(2)}</p>
+                            <p className="text-sm text-muted-foreground mb-1">{language === 'ar' ? 'السعر الإجمالي' : 'Total Price'}</p>
+                            <p className="text-2xl font-bold text-success">{totalPrice.toFixed(2)}</p>
                           </div>
                           <div>
-                            <label className="block text-sm font-semibold mb-2 text-orange-900">{language === 'ar' ? 'المبلغ المدفوع' : 'Amount Paid'}</label>
+                            <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'المبلغ المدفوع' : 'Amount Paid'}</label>
                             <input
                               type="number"
                               step="0.01"
                               value={formData.amount_paid}
                               onChange={(e) => setFormData({ ...formData, amount_paid: e.target.value })}
-                              className="w-full px-4 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 bg-white"
+                              className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
                             />
                           </div>
                         </div>
-                        <div className="text-right border-t border-emerald-300 pt-3">
-                          <p className="text-sm text-slate-600 mb-1">{language === 'ar' ? 'المتبقي' : 'Balance Remaining'}</p>
-                          <p className={`text-2xl font-bold ${restToPay > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        <div className="text-right border-t border-border pt-3">
+                          <p className="text-sm text-muted-foreground mb-1">{language === 'ar' ? 'المتبقي' : 'Balance Remaining'}</p>
+                          <p className={`text-2xl font-bold ${restToPay > 0 ? 'text-destructive' : 'text-success'}`}>
                             {restToPay.toFixed(2)}
                           </p>
                         </div>
@@ -1188,7 +1188,7 @@ export default function PurchaseInvoices() {
                       <Button
                         onClick={handleSavePurchase}
                         disabled={loading}
-                        className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3"
+                        className="flex-1 text-primary-foreground font-bold py-3 bg-primary"
                       >
                         {loading ? getText('loading') : getText('save')}
                       </Button>
@@ -1222,7 +1222,7 @@ export default function PurchaseInvoices() {
           <motion.div
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
-            className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full"
+            className="bg-card rounded-xl p-6 max-w-md w-full"
           >
             <h3 className="text-xl font-bold mb-4">{getText('add_new_mark')}</h3>
             <Input
@@ -1234,7 +1234,7 @@ export default function PurchaseInvoices() {
             <div className="flex gap-2">
               <Button
                 onClick={handleAddMark}
-                className="flex-1 bg-blue-500 hover:bg-blue-600"
+                className="flex-1 bg-primary hover:bg-primary/90"
               >
                 {language === 'ar' ? 'إضافة' : 'Add'}
               </Button>
@@ -1261,7 +1261,7 @@ export default function PurchaseInvoices() {
           <motion.div
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
-            className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full"
+            className="bg-card rounded-xl p-6 max-w-md w-full"
           >
             <h3 className="text-xl font-bold mb-4">{getText('add_new_connector')}</h3>
             <Input
@@ -1273,7 +1273,7 @@ export default function PurchaseInvoices() {
             <div className="flex gap-2">
               <Button
                 onClick={handleAddConnectorType}
-                className="flex-1 bg-blue-500 hover:bg-blue-600"
+                className="flex-1 bg-primary hover:bg-primary/90"
               >
                 {language === 'ar' ? 'إضافة' : 'Add'}
               </Button>
@@ -1295,12 +1295,12 @@ export default function PurchaseInvoices() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="mt-12 bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8"
+        className="mt-12 bg-card rounded-2xl shadow-sm p-8"
       >
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{getText('recent_invoices')}</h2>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
+            <h2 className="text-3xl font-bold text-foreground">{getText('recent_invoices')}</h2>
+            <p className="text-muted-foreground mt-2">
               {getText('showing_invoices').replace('{count}', Math.min(10, invoices.length).toString()).replace('{total}', invoices.length.toString())}
             </p>
           </div>
@@ -1313,8 +1313,8 @@ export default function PurchaseInvoices() {
             animate={{ opacity: 1 }}
             className="text-center py-12"
           >
-            <p className="text-2xl text-slate-400">{getText('no_invoices')}</p>
-            <p className="text-slate-500 mt-2">{getText('start_creating')}</p>
+            <p className="text-2xl text-muted-foreground">{getText('no_invoices')}</p>
+            <p className="text-muted-foreground mt-2">{getText('start_creating')}</p>
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1326,40 +1326,40 @@ export default function PurchaseInvoices() {
                 transition={{ delay: index * 0.05 }}
                 whileHover={{ y: -5 }}
               >
-                <Card className={`border-2 overflow-hidden hover:shadow-xl transition-all h-full ${
+                <Card className={`border-2 overflow-hidden hover:shadow-md transition-all h-full ${
                   invoice.status === 'paid' 
-                    ? 'border-green-200 dark:border-green-700 bg-gradient-to-br from-green-50 to-green-50/50 dark:from-green-900/10 dark:to-green-900/5' 
-                    : 'border-yellow-200 dark:border-yellow-700 bg-gradient-to-br from-yellow-50 to-yellow-50/50 dark:from-yellow-900/10 dark:to-yellow-900/5'
+                    ? 'border-border bg-card' 
+                    : 'border-border bg-card'
                 }`}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{language === 'ar' ? 'فاتورة رقم' : 'Invoice #'}</p>
-                        <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{invoice.invoice_number}</p>
+                        <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{language === 'ar' ? 'فاتورة رقم' : 'Invoice #'}</p>
+                        <p className="text-2xl font-bold text-foreground mt-1">{invoice.invoice_number}</p>
                       </div>
                       <Badge className={`px-3 py-1 font-bold ${
                         invoice.status === 'paid' 
-                          ? 'bg-green-500 hover:bg-green-600 text-white' 
-                          : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                          ? 'bg-success hover:bg-success/90 text-white' 
+                          : 'bg-warning hover:bg-warning/90 text-white'
                       }`}>
                         {invoice.status === 'paid' ? 'Paid' : 'Pending'}
                       </Badge>
                     </div>
 
-                    <div className="space-y-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                    <div className="space-y-3 mb-4 pb-4 border-b border-border">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <span></span>
                         <span className="text-sm">{new Date(invoice.invoice_date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <span></span>
                         <span className="text-sm">{invoice.store_name || 'Unknown Store'}</span>
                       </div>
                     </div>
 
                     <div className="pt-4">
-                      <p className="text-xs text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-2">{language === 'ar' ? 'المجموع' : 'Total Amount'}</p>
-                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{language === 'ar' ? 'المجموع' : 'Total Amount'}</p>
+                      <p className="text-3xl font-bold text-electric">
                         {parseFloat(invoice.total_amount).toFixed(2)}
                       </p>
                     </div>

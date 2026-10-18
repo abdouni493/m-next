@@ -136,7 +136,7 @@ export default function Barcodes() {
       {/* Header */}
       <div className="flex items-center justify-between border-b pb-4 mb-6">
         <div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">
+          <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">
             {texts[language].headerTitle}
           </h1>
           <p className="text-muted-foreground text-lg">
@@ -146,15 +146,15 @@ export default function Barcodes() {
       </div>
 
       {/* Input */}
-      <Card className="shadow-lg rounded-xl border-0">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-t-xl p-4">
+      <Card className="shadow-sm rounded-xl border border-border">
+        <CardHeader className="rounded-t-xl p-4 border-b border-border">
           <CardTitle className="text-xl font-semibold">
             {texts[language].generateCardTitle}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-5">
           <div>
-            <Label htmlFor="barcodeText" className="font-medium text-gray-700">
+            <Label htmlFor="barcodeText" className="font-medium text-foreground">
               {texts[language].barcodeLabel}
             </Label>
             <div className="flex mt-1">
@@ -170,7 +170,7 @@ export default function Barcodes() {
               />
               <Button
                 onClick={generateRandomBarcodeText}
-                className="rounded-r-md bg-gray-200 text-gray-800"
+                className="rounded-r-md bg-surface-2 text-foreground"
               >
                 {texts[language].randomButton}
               </Button>
@@ -178,7 +178,7 @@ export default function Barcodes() {
           </div>
           <Button
             onClick={generateBarcode}
-            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg rounded-lg py-3"
+            className="w-full text-primary-foreground font-semibold shadow-sm rounded-lg py-3 bg-primary"
             disabled={!barcodeText}
           >
             <Printer className="mr-2 h-5 w-5" /> {texts[language].generateButton}
@@ -197,12 +197,12 @@ export default function Barcodes() {
 
           <div
             ref={printAreaRef}
-            className="flex justify-center items-center p-4 border rounded bg-gray-50"
+            className="flex justify-center items-center p-4 border rounded bg-surface-2"
           >
             {barcodeImage ? (
               <img src={barcodeImage} alt="Generated Barcode" />
             ) : (
-              <p className="text-gray-400">{texts[language].noCode}</p>
+              <p className="text-muted-foreground">{texts[language].noCode}</p>
             )}
           </div>
 
@@ -212,7 +212,7 @@ export default function Barcodes() {
             </Button>
             <Button
               onClick={handlePrint}
-              className="bg-primary text-white"
+              className="bg-primary text-primary-foreground"
               disabled={!barcodeImage}
             >
               <Printer className="mr-2 h-4 w-4" />{" "}

@@ -457,17 +457,17 @@ export function ProductFormDialog({
                       placeholder="0.00"
                     />
                   </div>
-                  <div className="w-full p-3 border-2 border-purple-200 dark:border-purple-700 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                    <Label className="text-purple-700 dark:text-purple-300">{language === "ar" ? "آخر سعر بيع" : "Dernier Prix Vente"}</Label>
+                  <div className="w-full p-3 border-2 border-border rounded-lg bg-surface-2">
+                    <Label className="text-electric">{language === "ar" ? "آخر سعر بيع" : "Dernier Prix Vente"}</Label>
                     <Input
                       type="number"
                       step="0.01"
                       value={formData.last_price_to_sell || 0}
                       onChange={(e) => setFormData({ ...formData, last_price_to_sell: Number(e.target.value) })}
                       placeholder="0.00"
-                      className="mt-2 border-purple-400 dark:border-purple-600 focus:border-purple-600 dark:focus:border-purple-500 bg-white dark:bg-slate-700"
+                      className="mt-2 border-border focus:border-electric bg-card"
                     />
-                    <p className="text-xs text-purple-600 dark:text-purple-300 mt-2">
+                    <p className="text-xs text-electric mt-2">
                       {language === "ar" ? "آخر سعر بيع للمنتج" : "Dernier prix de vente du produit"}
                     </p>
                   </div>

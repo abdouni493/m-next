@@ -581,7 +581,7 @@ export default function POS() {
             >
               <Card className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-slate-700 border-2 border-blue-200 dark:border-blue-700 shadow-xl hover:shadow-2xl transition-all">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-2xl text-blue-600 dark:text-blue-400">
+                  <CardTitle className="flex items-center gap-2 text-lg text-blue-600 dark:text-blue-400">
                     <Search className="w-6 h-6" />
                     {language === 'ar' ? '🔍 ابحث عن المنتجات' : '🔍 Recherche'}
                   </CardTitle>
@@ -845,7 +845,7 @@ export default function POS() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 dark:from-emerald-700 dark:via-green-700 dark:to-teal-800 text-white shadow-2xl border-0">
+                <Card className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 dark:from-emerald-700 dark:via-green-700 dark:to-teal-800 text-white shadow-2xl border border-border">
                   <CardContent className="p-6 space-y-4">
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">

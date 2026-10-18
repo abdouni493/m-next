@@ -353,14 +353,14 @@ export default function Employees() {
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between p-8 rounded-3xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white shadow-2xl backdrop-blur-sm border border-white/20 overflow-hidden relative"
+        className="flex items-center justify-between p-8 rounded-2xl text-primary-foreground shadow-sm backdrop-blur-sm border border-white/20 overflow-hidden relative bg-primary"
       >
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full mix-blend-overlay blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-200 rounded-full mix-blend-overlay blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-card rounded-full mix-blend-overlay blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-surface-2 rounded-full mix-blend-overlay blur-3xl"></div>
         </div>
         <div className="relative z-10">
-          <h1 className="text-5xl font-black mb-2">
+          <h1 className="text-2xl md:text-[28px] tracking-tight font-black mb-2">
             {language === 'ar' ? 'إدارة الموظفين' : 'Gestion des Employés'}
           </h1>
           <p className="text-white/90 text-lg">{language === 'ar' ? 'ادارة فريقك والرواتب والصلاحيات' : 'Gérez votre équipe, salaires et permissions'}</p>
@@ -371,9 +371,9 @@ export default function Employees() {
         >
           <Button 
             onClick={handleCreateEmployee} 
-            className="relative bg-gradient-to-r from-cyan-400 to-green-400 hover:from-cyan-500 hover:to-green-500 text-gray-900 font-bold shadow-xl rounded-2xl px-8 py-6 text-lg group overflow-hidden"
+            className="relative text-foreground font-bold shadow-sm rounded-2xl px-8 py-6 text-lg group overflow-hidden bg-primary text-primary-foreground"
           >
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity"></div>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-card transition-opacity"></div>
             <Plus className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5`} />
             <span className="relative">
               {language === 'ar' ? 'موظف جديد' : 'Nouvel Employé'}
@@ -389,8 +389,8 @@ export default function Employees() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-4 gap-6"
       >
-        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
-          <Card className="border-0 shadow-md bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-sm border-0">
+          <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي الموظفين' : 'Total Employés'}</CardTitle>
             </CardHeader>
@@ -401,8 +401,8 @@ export default function Employees() {
           </Card>
         </motion.div>
 
-        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
-          <Card className="border-0 shadow-md bg-gradient-to-br from-emerald-600 to-green-600 text-white">
+        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-sm border-0">
+          <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{language === 'ar' ? 'ميزانية الرواتب' : 'Budget Salaires'}</CardTitle>
             </CardHeader>
@@ -413,8 +413,8 @@ export default function Employees() {
           </Card>
         </motion.div>
 
-        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
-          <Card className="border-0 shadow-md bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
+        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-sm border-0">
+          <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{language === 'ar' ? 'حسابات نشطة' : 'Comptes Actifs'}</CardTitle>
             </CardHeader>
@@ -425,8 +425,8 @@ export default function Employees() {
           </Card>
         </motion.div>
 
-        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-xl border-0">
-          <Card className="border-0 shadow-md bg-gradient-to-br from-rose-600 to-pink-600 text-white">
+        <motion.div whileHover={{ y: -8 }} className="rounded-2xl overflow-hidden shadow-sm border-0">
+          <Card className="border border-border shadow-sm text-primary-foreground bg-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{language === 'ar' ? 'إجمالي المدفوعات' : 'Total Paiements'}</CardTitle>
             </CardHeader>
@@ -469,7 +469,7 @@ export default function Employees() {
       {/* Employees Card Grid */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+          <h2 className="text-2xl font-bold text-foreground">
             {language === 'ar' ? 'فريق العمل' : 'Équipe de Travail'} ({filteredEmployees.length})
           </h2>
         </div>
@@ -477,7 +477,7 @@ export default function Employees() {
         {isLoading ? (
           <div className="text-center py-12">
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }} className="inline-block">
-              <div className="h-12 w-12 border-4 border-purple-200 border-t-purple-600 rounded-full"></div>
+              <div className="h-12 w-12 border-4 border-border border-t-purple-600 rounded-full"></div>
             </motion.div>
             <p className="mt-4 text-muted-foreground">{language === 'ar' ? 'جارٍ تحميل البيانات...' : 'Chargement des données...'}</p>
           </div>
@@ -485,15 +485,15 @@ export default function Employees() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-12 px-6 rounded-2xl bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700"
+            className="text-center py-12 px-6 rounded-2xl bg-surface-2 border-2 border-border"
           >
-            <p className="text-lg font-bold text-red-700 dark:text-red-400">{error}</p>
+            <p className="text-lg font-bold text-destructive">{error}</p>
           </motion.div>
         ) : filteredEmployees.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-12 px-6 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-dashed border-purple-300 dark:border-purple-700"
+            className="text-center py-12 px-6 rounded-2xl border-2 border-dashed border-border bg-card"
           >
             <p className="text-lg text-muted-foreground">
               {language === 'ar' ? 'لا توجد موظفين يطابقون معايير البحث' : 'Aucun employé ne correspond à votre recherche'}
@@ -516,15 +516,15 @@ export default function Employees() {
                 className="group relative h-full"
               >
                 {/* Card Background Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity"></div>
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity bg-primary text-primary-foreground"></div>
 
-                <Card className="h-full border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-white/95 to-purple-50/95 dark:from-gray-900/95 dark:to-purple-900/30 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                <Card className="h-full border-2 border-border backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden bg-card">
                   {/* Card Header with Role Badge */}
-                  <div className="relative p-6 pb-4 border-b-2 border-purple-100 dark:border-purple-800">
+                  <div className="relative p-6 pb-4 border-b-2 border-border">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <motion.h3 
-                          className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 mb-1"
+                          className="text-xl font-black mb-1 text-foreground"
                         >
                           {employee.position === 'admin' ? '' : ''}{employee.full_name}
                         </motion.h3>
@@ -535,10 +535,10 @@ export default function Employees() {
                       </div>
                       <motion.div
                         whileHover={{ scale: 1.1, rotate: 5 }}
-                        className={`px-4 py-2 rounded-xl font-bold text-white text-sm shadow-md ${
+                        className={`px-4 py-2 rounded-xl font-bold text-white text-sm shadow-sm ${
                           employee.position === 'admin' 
-                            ? 'bg-gradient-to-r from-red-500 to-pink-500' 
-                            : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'bg-primary text-primary-foreground'
                         }`}
                       >
                         {employee.position === 'admin' ? 'Admin' : 'Staff'}
@@ -551,67 +551,67 @@ export default function Employees() {
                     {/* Contact Info */}
                     <motion.div 
                       whileHover={{ x: 5 }}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
                     >
-                      <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                      <Phone className="h-5 w-5 text-electric flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-muted-foreground">{language === 'ar' ? 'الهاتف' : 'Téléphone'}</p>
-                        <p className="font-semibold text-blue-700 dark:text-blue-400 truncate">{employee.phone}</p>
+                        <p className="font-semibold text-electric truncate">{employee.phone}</p>
                       </div>
                     </motion.div>
 
                     {/* Salary Info */}
                     <motion.div 
                       whileHover={{ x: 5 }}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
                     >
-                      <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <DollarSign className="h-5 w-5 text-success flex-shrink-0" />
                       <div className="flex-1">
                         <p className="text-xs text-muted-foreground">{language === 'ar' ? 'الراتب الشهري' : 'Salaire Mensuel'}</p>
-                        <p className="font-bold text-green-700 dark:text-green-400 text-lg">{formatCurrency(employee.salary)}</p>
+                        <p className="font-bold text-success text-lg">{formatCurrency(employee.salary)}</p>
                       </div>
                     </motion.div>
 
                     {/* Hire Date */}
                     <motion.div 
                       whileHover={{ x: 5 }}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200 dark:border-orange-800"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
                     >
-                      <Calendar className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                      <Calendar className="h-5 w-5 text-warning flex-shrink-0" />
                       <div className="flex-1">
                         <p className="text-xs text-muted-foreground">{language === 'ar' ? 'تاريخ التوظيف' : 'Date d\'embauche'}</p>
-                        <p className="font-semibold text-orange-700 dark:text-orange-400">{formatDate(employee.hire_date)}</p>
+                        <p className="font-semibold text-warning">{formatDate(employee.hire_date)}</p>
                       </div>
                     </motion.div>
 
                     {/* Last Payment Status */}
                     <motion.div 
                       whileHover={{ x: 5 }}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
                     >
-                      <CreditCard className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                      <CreditCard className="h-5 w-5 text-electric flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-muted-foreground">{language === 'ar' ? 'آخر دفعة' : 'Dernier paiement'}</p>
                         {employee.lastPayment && employee.lastPayment.amount > 0 ? (
                           <div>
-                            <p className="font-bold text-indigo-700 dark:text-indigo-400">{formatCurrency(employee.lastPayment.amount)}</p>
+                            <p className="font-bold text-electric">{formatCurrency(employee.lastPayment.amount)}</p>
                             <p className="text-xs text-muted-foreground">{formatDate(employee.lastPayment.date)}</p>
                           </div>
                         ) : (
-                          <p className="font-semibold text-amber-600 dark:text-amber-400">{language === 'ar' ? 'قيد الانتظار' : 'En attente'}</p>
+                          <p className="font-semibold text-warning">{language === 'ar' ? 'قيد الانتظار' : 'En attente'}</p>
                         )}
                       </div>
                     </motion.div>
                   </CardContent>
 
                   {/* Card Actions Footer */}
-                  <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-t-2 border-purple-100 dark:border-purple-800">
+                  <div className="px-6 py-4 border-t-2 border-border bg-card">
                     <div className="grid grid-cols-4 gap-2">
                       {/* View History Button */}
                       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handleViewHistory(employee)}
-                          className="w-full h-12 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
+                          className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
                           title={language === 'ar' ? 'سجل الدفع' : 'Historique'}
                         >
                           <span className="text-lg"></span>
@@ -623,7 +623,7 @@ export default function Employees() {
                       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handlePayment(employee)}
-                          className="w-full h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
+                          className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
                           title={language === 'ar' ? 'دفع' : 'Paiement'}
                         >
                           <span className="text-lg"></span>
@@ -635,7 +635,7 @@ export default function Employees() {
                       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handleEditEmployee(employee)}
-                          className="w-full h-12 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
+                          className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
                           title={language === 'ar' ? 'تعديل' : 'Éditer'}
                         >
                           <span className="text-lg"></span>
@@ -647,7 +647,7 @@ export default function Employees() {
                       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handleDeleteEmployee(employee.id)}
-                          className="w-full h-12 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-bold shadow-lg flex flex-col items-center justify-center gap-0.5 transition-all"
+                          className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
                           title={language === 'ar' ? 'حذف' : 'Supprimer'}
                         >
                           <span className="text-lg"></span>
@@ -665,11 +665,11 @@ export default function Employees() {
 
       {/* Dialog for Create/Edit/Payment */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-800">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-border bg-card">
           {/* Dialog Header with Gradient Background */}
-          <div className="absolute inset-0 h-24 bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 rounded-t-lg opacity-10 pointer-events-none"></div>
+          <div className="absolute inset-0 h-24 rounded-t-lg opacity-10 pointer-events-none bg-primary text-primary-foreground"></div>
           
-          <DialogHeader className="relative z-10 pb-6 border-b-2 border-purple-200 dark:border-purple-800">
+          <DialogHeader className="relative z-10 pb-6 border-b-2 border-border">
             <div className="flex items-center gap-3">
               <div className="text-3xl">
                 {dialogMode === 'create' && ''}
@@ -699,27 +699,27 @@ export default function Employees() {
             >
               {/* Payment Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                <h3 className="text-lg font-bold text-electric">
                   {language === 'ar' ? 'تفاصيل الدفعة' : 'Détails du paiement'}
                 </h3>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2 p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
-                    <Label htmlFor="amount" className="font-bold text-green-700 dark:text-green-400">{language === 'ar' ? 'المبلغ (د.ج)' : 'Montant (DZD)'}</Label>
+                  <div className="space-y-2 p-4 rounded-xl border border-border bg-card">
+                    <Label htmlFor="amount" className="font-bold text-success">{language === 'ar' ? 'المبلغ (د.ج)' : 'Montant (DZD)'}</Label>
                     <Input
                       id="amount"
                       type="number"
                       value={paymentData.amount}
                       onChange={(e) => setPaymentData({...paymentData, amount: Number(e.target.value)})}
-                      className="border-2 border-green-300 dark:border-green-700 rounded-lg font-bold text-lg"
+                      className="border-2 border-border rounded-lg font-bold text-lg"
                       placeholder="0.00"
                     />
                   </div>
                   
-                  <div className="space-y-2 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800">
-                    <Label htmlFor="paymentType" className="font-bold text-blue-700 dark:text-blue-400">{language === 'ar' ? 'نوع الدفعة' : 'Type de Paiement'}</Label>
+                  <div className="space-y-2 p-4 rounded-xl border border-border bg-card">
+                    <Label htmlFor="paymentType" className="font-bold text-electric">{language === 'ar' ? 'نوع الدفعة' : 'Type de Paiement'}</Label>
                     <Select value={paymentData.type} onValueChange={(value: any) => setPaymentData({...paymentData, type: value})}>
-                      <SelectTrigger className="border-2 border-blue-300 dark:border-blue-700 rounded-lg font-bold">
+                      <SelectTrigger className="border-2 border-border rounded-lg font-bold">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -731,14 +731,14 @@ export default function Employees() {
                   </div>
                 </div>
 
-                <div className="space-y-2 p-4 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200 dark:border-orange-800">
-                  <Label htmlFor="paymentDate" className="font-bold text-orange-700 dark:text-orange-400">{language === 'ar' ? 'تاريخ الدفعة' : 'Date de Paiement'}</Label>
+                <div className="space-y-2 p-4 rounded-xl border border-border bg-card">
+                  <Label htmlFor="paymentDate" className="font-bold text-warning">{language === 'ar' ? 'تاريخ الدفعة' : 'Date de Paiement'}</Label>
                   <Input
                     id="paymentDate"
                     type="date"
                     value={paymentData.date}
                     onChange={(e) => setPaymentData({...paymentData, date: e.target.value})}
-                    className="border-2 border-orange-300 dark:border-orange-700 rounded-lg font-bold"
+                    className="border-2 border-border rounded-lg font-bold"
                   />
                 </div>
               </div>
@@ -750,36 +750,36 @@ export default function Employees() {
               className="p-6"
             >
               <Tabs defaultValue="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/40 dark:to-blue-900/40 mb-6">
-                  <TabsTrigger value="personal" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white">
+                <TabsList className="grid w-full grid-cols-3 mb-6 bg-card">
+                  <TabsTrigger value="personal" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     {language === 'ar' ? 'شخصي' : 'Personnel'}
                   </TabsTrigger>
-                  <TabsTrigger value="job" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white">
+                  <TabsTrigger value="job" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     {language === 'ar' ? 'المنصب' : 'Poste'}
                   </TabsTrigger>
-                  <TabsTrigger value="account" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                  <TabsTrigger value="account" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     {language === 'ar' ? 'الحساب' : 'Compte'}
                   </TabsTrigger>
                 </TabsList>
 
                 {/* Personal Tab */}
                 <TabsContent value="personal" className="space-y-5">
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800">
-                    <Label htmlFor="full_name" className="font-bold text-lg text-purple-700 dark:text-purple-400">
-                      {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'} <span className="text-red-500">*</span>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="full_name" className="font-bold text-lg text-electric">
+                      {language === 'ar' ? 'الاسم الكامل' : 'Nom Complet'} <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="full_name"
                       value={formData.full_name}
                       onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                       placeholder={language === 'ar' ? 'مثال: محمد علامي' : 'Ex: Mohamed Alami'}
-                      className="border-2 border-purple-300 dark:border-purple-700 rounded-lg font-semibold text-base"
+                      className="border-2 border-border rounded-lg font-semibold text-base"
                     />
                   </motion.div>
 
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 gap-4">
-                    <div className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-800">
-                      <Label htmlFor="phone" className="font-bold text-lg text-blue-700 dark:text-blue-400">
+                    <div className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                      <Label htmlFor="phone" className="font-bold text-lg text-electric">
                         {language === 'ar' ? 'الهاتف' : 'Téléphone'}
                       </Label>
                       <Input
@@ -787,12 +787,12 @@ export default function Employees() {
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
                         placeholder={language === 'ar' ? '+212 6 12 34 56 78' : '+212 6 12 34 56 78'}
-                        className="border-2 border-blue-300 dark:border-blue-700 rounded-lg font-semibold"
+                        className="border-2 border-border rounded-lg font-semibold"
                       />
                     </div>
 
-                    <div className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800">
-                      <Label htmlFor="email" className="font-bold text-lg text-green-700 dark:text-green-400">
+                    <div className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                      <Label htmlFor="email" className="font-bold text-lg text-success">
                         {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                       </Label>
                       <Input
@@ -801,13 +801,13 @@ export default function Employees() {
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         placeholder={language === 'ar' ? 'example@email.com' : 'example@email.com'}
-                        className="border-2 border-green-300 dark:border-green-700 rounded-lg font-semibold"
+                        className="border-2 border-border rounded-lg font-semibold"
                       />
                     </div>
                   </motion.div>
 
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border-2 border-orange-200 dark:border-orange-800">
-                    <Label htmlFor="address" className="font-bold text-lg text-orange-700 dark:text-orange-400">
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="address" className="font-bold text-lg text-warning">
                       {language === 'ar' ? 'العنوان' : 'Adresse'}
                     </Label>
                     <Input
@@ -815,12 +815,12 @@ export default function Employees() {
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: e.target.value})}
                       placeholder={language === 'ar' ? 'حي الرياض، الرباط' : 'Hay Riad, Rabat'}
-                      className="border-2 border-orange-300 dark:border-orange-700 rounded-lg font-semibold"
+                      className="border-2 border-border rounded-lg font-semibold"
                     />
                   </motion.div>
 
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 border-2 border-pink-200 dark:border-pink-800">
-                    <Label htmlFor="birth_date" className="font-bold text-lg text-pink-700 dark:text-pink-400">
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="birth_date" className="font-bold text-lg text-electric">
                       {language === 'ar' ? 'تاريخ الميلاد' : 'Date de naissance'}
                     </Label>
                     <Input
@@ -828,19 +828,19 @@ export default function Employees() {
                       type="date"
                       value={formData.birth_date}
                       onChange={(e) => setFormData({...formData, birth_date: e.target.value})}
-                      className="border-2 border-pink-300 dark:border-pink-700 rounded-lg font-semibold"
+                      className="border-2 border-border rounded-lg font-semibold"
                     />
                   </motion.div>
                 </TabsContent>
 
                 {/* Job Tab */}
                 <TabsContent value="job" className="space-y-5">
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border-2 border-indigo-200 dark:border-indigo-800">
-                    <Label htmlFor="position" className="font-bold text-lg text-indigo-700 dark:text-indigo-400">
-                      {language === 'ar' ? 'المنصب الوظيفي' : 'Poste Professionnel'} <span className="text-red-500">*</span>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="position" className="font-bold text-lg text-electric">
+                      {language === 'ar' ? 'المنصب الوظيفي' : 'Poste Professionnel'} <span className="text-destructive">*</span>
                     </Label>
                     <Select value={formData.position} onValueChange={(value: any) => setFormData({...formData, position: value})}>
-                      <SelectTrigger className="border-2 border-indigo-300 dark:border-indigo-700 rounded-lg font-bold text-base">
+                      <SelectTrigger className="border-2 border-border rounded-lg font-bold text-base">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -850,9 +850,9 @@ export default function Employees() {
                     </Select>
                   </motion.div>
 
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-yellow-200 dark:border-yellow-800">
-                    <Label htmlFor="salary" className="font-bold text-lg text-yellow-700 dark:text-yellow-400">
-                      {language === 'ar' ? 'الراتب الشهري' : 'Salaire Mensuel'} <span className="text-red-500">*</span>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="salary" className="font-bold text-lg text-warning">
+                      {language === 'ar' ? 'الراتب الشهري' : 'Salaire Mensuel'} <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="salary"
@@ -860,9 +860,9 @@ export default function Employees() {
                       value={formData.salary}
                       onChange={(e) => setFormData({...formData, salary: Number(e.target.value)})}
                       placeholder={language === 'ar' ? '8000' : '8000'}
-                      className="border-2 border-yellow-300 dark:border-yellow-700 rounded-lg font-bold text-lg"
+                      className="border-2 border-border rounded-lg font-bold text-lg"
                     />
-                    <div className="text-sm text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
+                    <div className="text-sm text-warning flex items-center gap-2">
                       <span></span>
                       {language === 'ar' ? 'بالدينار الجزائري (د.ج)' : 'En dinars algériens (DZD)'}
                     </div>
@@ -874,23 +874,23 @@ export default function Employees() {
                   <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-300 dark:border-blue-700"
+                    className="p-6 rounded-xl border-2 border-border bg-card"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-3xl"></span>
-                      <h3 className="text-lg font-bold text-blue-700 dark:text-blue-400">
+                      <h3 className="text-lg font-bold text-electric">
                         {language === 'ar' ? 'بيانات الحساب' : 'Données du Compte'}
                       </h3>
                     </div>
-                    <p className="text-blue-600 dark:text-blue-300 text-sm">
+                    <p className="text-electric text-sm">
                       {language === 'ar' 
                         ? 'أنشئ بيانات تسجيل الدخول للموظف. سيتمكن من الوصول إلى النظام باستخدام اسم المستخدم وكلمة المرور.' 
                         : 'Créez les identifiants de connexion de l\'employé. Il pourra accéder au système en utilisant ces informations.'}
                     </p>
                   </motion.div>
 
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 border-2 border-cyan-200 dark:border-cyan-800">
-                    <Label htmlFor="username" className="font-bold text-lg text-cyan-700 dark:text-cyan-400">
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="username" className="font-bold text-lg text-electric">
                       {language === 'ar' ? 'اسم المستخدم' : 'Identifiant'}
                     </Label>
                     <Input
@@ -898,16 +898,16 @@ export default function Employees() {
                       value={formData.username}
                       onChange={(e) => setFormData({...formData, username: e.target.value})}
                       placeholder={language === 'ar' ? 'مثال: محمد_علامي' : 'Ex: mohamed.alami'}
-                      className="border-2 border-cyan-300 dark:border-cyan-700 rounded-lg font-semibold"
+                      className="border-2 border-border rounded-lg font-semibold"
                     />
-                    <div className="text-sm text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
+                    <div className="text-sm text-electric flex items-center gap-2">
                       <span></span>
                       {language === 'ar' ? 'يستخدم لتسجيل الدخول إلى النظام' : 'Utilisé pour se connecter au système'}
                     </div>
                   </motion.div>
 
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border-2 border-rose-200 dark:border-rose-800">
-                    <Label htmlFor="password" className="font-bold text-lg text-rose-700 dark:text-rose-400">
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="password" className="font-bold text-lg text-destructive">
                       {language === 'ar' ? 'كلمة المرور' : 'Mot de passe'}
                     </Label>
                     <div className="relative">
@@ -917,26 +917,26 @@ export default function Employees() {
                         value={formData.password}
                         onChange={(e) => setFormData({...formData, password: e.target.value})}
                         placeholder={language === 'ar' ? 'كلمة مرور قوية' : 'Mot de passe sécurisé'}
-                        className="border-2 border-rose-300 dark:border-rose-700 rounded-lg font-semibold pr-10"
+                        className="border-2 border-border rounded-lg font-semibold pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className={`${isRTL ? 'left-0' : 'right-0'} absolute top-0 h-full w-10 text-rose-600 hover:text-rose-700`}
+                        className={`${isRTL ? 'left-0' : 'right-0'} absolute top-0 h-full w-10 text-destructive hover:text-destructive`}
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
-                    <div className="text-sm text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                    <div className="text-sm text-destructive flex items-center gap-2">
                       <span></span>
                       {language === 'ar' ? 'استخدم حروف وأرقام ورموز خاصة' : 'Utilisez des majuscules, minuscules et chiffres'}
                     </div>
                   </motion.div>
 
-                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-3 p-5 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-800">
-                    <Label htmlFor="confirmPassword" className="font-bold text-lg text-violet-700 dark:text-violet-400">
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="space-y-3 p-5 rounded-xl border-2 border-border bg-card">
+                    <Label htmlFor="confirmPassword" className="font-bold text-lg text-electric">
                       {language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}
                     </Label>
                     <div className="relative">
@@ -946,13 +946,13 @@ export default function Employees() {
                         value={formData.confirmPassword}
                         onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                         placeholder={language === 'ar' ? 'أعد كتابة كلمة المرور' : 'Confirmez le mot de passe'}
-                        className="border-2 border-violet-300 dark:border-violet-700 rounded-lg font-semibold pr-10"
+                        className="border-2 border-border rounded-lg font-semibold pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className={`${isRTL ? 'left-0' : 'right-0'} absolute top-0 h-full w-10 text-violet-600 hover:text-violet-700`}
+                        className={`${isRTL ? 'left-0' : 'right-0'} absolute top-0 h-full w-10 text-electric hover:text-electric`}
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -964,10 +964,10 @@ export default function Employees() {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center gap-3 p-4 rounded-lg bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700"
+                      className="flex items-center gap-3 p-4 rounded-lg bg-surface-2 border-2 border-border"
                     >
-                      <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                      <span className="text-red-700 dark:text-red-400 font-semibold">
+                      <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      <span className="text-destructive font-semibold">
                         {language === 'ar' ? 'كلمات المرور غير متطابقة' : 'Les mots de passe ne correspondent pas'}
                       </span>
                     </motion.div>
@@ -977,10 +977,10 @@ export default function Employees() {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center gap-3 p-4 rounded-lg bg-green-100 dark:bg-green-900/30 border-2 border-green-300 dark:border-green-700"
+                      className="flex items-center gap-3 p-4 rounded-lg bg-surface-2 border-2 border-border"
                     >
-                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                      <span className="text-green-700 dark:text-green-400 font-semibold">
+                      <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      <span className="text-success font-semibold">
                         {language === 'ar' ? 'كلمات المرور متطابقة' : 'Mots de passe correspondants'}
                       </span>
                     </motion.div>
@@ -991,7 +991,7 @@ export default function Employees() {
           )}
 
           {/* Dialog Footer */}
-          <DialogFooter className="mt-6 pt-6 border-t-2 border-purple-200 dark:border-purple-800 flex gap-3">
+          <DialogFooter className="mt-6 pt-6 border-t-2 border-border flex gap-3">
             <Button
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
@@ -1002,7 +1002,7 @@ export default function Employees() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={handleSubmit}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-lg px-8 py-2"
+                className="text-primary-foreground font-bold rounded-lg px-8 py-2 bg-primary"
               >
                 {dialogMode === 'create' && '' + (language === 'ar' ? 'إنشاء الموظف' : 'Créer Employé')}
                 {dialogMode === 'edit' && '' + (language === 'ar' ? 'حفظ التغييرات' : 'Enregistrer')}
@@ -1015,21 +1015,21 @@ export default function Employees() {
 
       {/* Payment History Dialog */}
       <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-800">
-          <DialogHeader className="pb-6 border-b-2 border-purple-200 dark:border-purple-800">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto border-2 border-border bg-card">
+          <DialogHeader className="pb-6 border-b-2 border-border">
             <DialogTitle className="text-2xl font-black flex items-center gap-2">
               {language === 'ar' ? 'سجل الدفع' : 'Historique de paiements'}
             </DialogTitle>
             <DialogDescription className="text-base mt-2">
-              {language === 'ar' ? 'جميع المدفوعات المسجلة لـ' : 'Tous les paiements enregistrés pour'} <strong className="text-purple-600 dark:text-purple-400">{selectedEmployee?.full_name}</strong>
+              {language === 'ar' ? 'جميع المدفوعات المسجلة لـ' : 'Tous les paiements enregistrés pour'} <strong className="text-electric">{selectedEmployee?.full_name}</strong>
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 p-6">
             {paymentHistory.length > 0 ? (
-              <div className="rounded-xl overflow-hidden border-2 border-purple-200 dark:border-purple-800">
+              <div className="rounded-xl overflow-hidden border-2 border-border">
                 <Table>
-                  <TableHeader className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40">
+                  <TableHeader className="bg-card">
                     <TableRow>
                       <TableHead className="font-bold">{language === 'ar' ? 'التاريخ' : 'Date'}</TableHead>
                       <TableHead className="font-bold">{language === 'ar' ? 'النوع' : 'Type'}</TableHead>
@@ -1039,14 +1039,14 @@ export default function Employees() {
                   </TableHeader>
                   <TableBody>
                     {paymentHistory.map(payment => (
-                      <TableRow key={payment.id} className="hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                      <TableRow key={payment.id} className="hover:bg-surface-2">
                         <TableCell>{formatDate(payment.date)}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-700">
+                          <Badge variant="outline" className="bg-surface-2 text-electric border-border">
                             {payment.type === 'salary' ? '' + (language === 'ar' ? 'راتب' : 'Salaire') : payment.type === 'bonus' ? '' + (language === 'ar' ? 'مكافأة' : 'Prime') : '' + (language === 'ar' ? 'عمولة' : 'Commission')}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right font-bold text-green-600 dark:text-green-400">
+                        <TableCell className="text-right font-bold text-success">
                           {formatCurrency(payment.amount)}
                         </TableCell>
                         <TableCell className="text-center">
@@ -1070,7 +1070,7 @@ export default function Employees() {
                                 });
                               }
                             }}
-                            className="px-3 py-1 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 font-bold text-sm"
+                            className="px-3 py-1 rounded-lg bg-surface-2 hover:bg-surface-2 text-destructive font-bold text-sm"
                           >
                             {language === 'ar' ? 'حذف' : 'Supprimer'}
                           </motion.button>
@@ -1081,7 +1081,7 @@ export default function Employees() {
                 </Table>
               </div>
             ) : (
-              <div className="text-center py-12 px-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-dashed border-purple-300 dark:border-purple-700">
+              <div className="text-center py-12 px-6 rounded-xl border-2 border-dashed border-border bg-card">
                 <p className="text-lg text-muted-foreground">
                   {language === 'ar' ? 'لم يتم تسجيل أي مدفوعات' : 'Aucun paiement enregistré'}
                 </p>
@@ -1089,7 +1089,7 @@ export default function Employees() {
             )}
           </div>
 
-          <DialogFooter className="mt-6 pt-6 border-t-2 border-purple-200 dark:border-purple-800">
+          <DialogFooter className="mt-6 pt-6 border-t-2 border-border">
             <Button 
               variant="outline" 
               onClick={() => setIsHistoryDialogOpen(false)}

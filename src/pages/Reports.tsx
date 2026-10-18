@@ -96,8 +96,8 @@ const ReportSection = ({ icon, title, children, delay = 0 }: { icon: string; tit
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay }}
   >
-    <Card className="border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 hover:shadow-2xl transition-shadow">
-      <CardHeader className="bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 text-white pb-4">
+    <Card className="border border-border shadow-sm overflow-hidden hover:shadow-md transition-shadow bg-card">
+      <CardHeader className="pb-4 border-b border-border">
         <CardTitle className="flex items-center gap-3">
           <span className="text-3xl">{icon}</span>
           <span className="text-xl font-bold">{title}</span>
@@ -112,17 +112,17 @@ const ReportSection = ({ icon, title, children, delay = 0 }: { icon: string; tit
 
 const StatBox = ({ icon, label, value, color = 'blue', subtext = '' }: { icon: string; label: string; value: string; color?: string; subtext?: string }) => {
   const colorMap = {
-    blue: 'from-blue-600 to-cyan-600',
-    green: 'from-emerald-600 to-green-600',
-    orange: 'from-amber-600 to-orange-600',
-    red: 'from-red-600 to-pink-600',
-    purple: 'from-purple-600 to-violet-600',
+    blue: '',
+    green: '',
+    orange: '',
+    red: '',
+    purple: '',
   };
 
   return (
     <motion.div
       whileHover={{ y: -8, scale: 1.02 }}
-      className={`bg-gradient-to-br ${colorMap[color as keyof typeof colorMap]} text-white p-8 rounded-xl shadow-lg border-2 border-white/20`}
+      className={`bg-card ${colorMap[color as keyof typeof colorMap]} text-white p-8 rounded-xl shadow-sm border-2 border-white/20`}
     >
       <p className="text-5xl mb-3">{icon}</p>
       <p className="text-sm text-white/80 mb-3 font-semibold">{label}</p>
@@ -302,7 +302,7 @@ export default function Reports() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">
+        <h1 className="text-2xl md:text-[28px] tracking-tight font-bold text-foreground">
           {getText('reports')}
         </h1>
         <p className="text-muted-foreground text-lg">{getText('reportDesc')}</p>
@@ -315,9 +315,9 @@ export default function Reports() {
           animate={{ opacity: 1, scale: 1 }}
           className="space-y-6"
         >
-          <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
-            <CardHeader className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white p-8">
-              <CardTitle className="text-3xl flex items-center gap-3">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardHeader className="p-5 border-b border-border">
+              <CardTitle className="text-lg flex items-center gap-3">
                 <span></span>
                 {getText('selectDate')}
               </CardTitle>
@@ -325,25 +325,25 @@ export default function Reports() {
             <CardContent className="pt-8 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <motion.div whileHover={{ scale: 1.02 }} className="space-y-3">
-                  <Label className="text-lg font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Label className="text-lg font-bold text-foreground flex items-center gap-2">
                     {getText('startDate')}
                   </Label>
                   <Input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="border-2 border-blue-300 dark:border-blue-700 focus:border-blue-600 h-12 rounded-lg text-base bg-white dark:bg-slate-700"
+                    className="border-2 border-border focus:border-electric h-12 rounded-lg text-base bg-card"
                   />
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.02 }} className="space-y-3">
-                  <Label className="text-lg font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Label className="text-lg font-bold text-foreground flex items-center gap-2">
                     {getText('endDate')}
                   </Label>
                   <Input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="border-2 border-cyan-300 dark:border-cyan-700 focus:border-cyan-600 h-12 rounded-lg text-base bg-white dark:bg-slate-700"
+                    className="border-2 border-border focus:border-electric h-12 rounded-lg text-base bg-card"
                   />
                 </motion.div>
               </div>
@@ -352,7 +352,7 @@ export default function Reports() {
                 <Button
                   onClick={generateReport}
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-600 hover:from-blue-700 hover:via-blue-600 hover:to-cyan-700 text-white font-bold py-7 text-xl rounded-xl shadow-2xl hover:shadow-3xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full text-primary-foreground font-bold py-7 text-xl rounded-xl shadow-sm hover:shadow-3xl transition-all disabled:opacity-50 flex items-center justify-center gap-3 bg-primary"
                 >
                   <FileText className="h-6 w-6" />
                   {isLoading ? getText('loading') : getText('generate')}
@@ -372,13 +372,13 @@ export default function Reports() {
             <Button
               onClick={() => setReportGenerated(false)}
               variant="outline"
-              className="px-8 py-6 text-lg border-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="px-8 py-6 text-lg border-2 border-electric text-electric hover:bg-surface-2"
             >
               <RefreshCw className={`${isRTL ? 'ml-3' : 'mr-3'} h-5 w-5`} />
               {getText('newReport')}
             </Button>
             <Button
-              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold px-8 py-6 text-lg rounded-lg shadow-xl hover:shadow-2xl transition-all"
+              className="text-primary-foreground font-bold px-8 py-6 text-lg rounded-lg shadow-sm hover:shadow-md transition-all bg-primary"
             >
               <Download className={`${isRTL ? 'ml-3' : 'mr-3'} h-5 w-5`} />
               {getText('download')}
@@ -395,41 +395,41 @@ export default function Reports() {
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
               >
                 <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl blur-xl opacity-30"></div>
-                  <div className="relative bg-gradient-to-br from-emerald-600 to-green-600 text-white p-8 rounded-2xl shadow-2xl border-2 border-white/20">
+                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 bg-primary text-primary-foreground"></div>
+                  <div className="relative text-primary-foreground p-8 rounded-2xl shadow-sm border-2 border-white/20 bg-primary">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-5xl"></span>
-                      <ArrowUpRight className="h-6 w-6 text-green-100" />
+                      <ArrowUpRight className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <p className="text-green-100 text-sm font-semibold mb-2">{getText('totalSales')}</p>
+                    <p className="text-primary-foreground text-sm font-semibold mb-2">{getText('totalSales')}</p>
                     <p className="text-4xl font-bold">{formatCurrency(reportData.totalSales)}</p>
-                    <p className="text-xs text-green-100 mt-3">{reportData.salesCount} {language === 'ar' ? 'معاملة بيع' : 'transactions'}</p>
+                    <p className="text-xs text-primary-foreground mt-3">{reportData.salesCount} {language === 'ar' ? 'معاملة بيع' : 'transactions'}</p>
                   </div>
                 </motion.div>
 
                 <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 rounded-2xl blur-xl opacity-30"></div>
-                  <div className="relative bg-gradient-to-br from-orange-600 to-red-600 text-white p-8 rounded-2xl shadow-2xl border-2 border-white/20">
+                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 bg-primary text-primary-foreground"></div>
+                  <div className="relative text-primary-foreground p-8 rounded-2xl shadow-sm border-2 border-white/20 bg-primary">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-5xl"></span>
-                      <ArrowDownLeft className="h-6 w-6 text-orange-100" />
+                      <ArrowDownLeft className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <p className="text-orange-100 text-sm font-semibold mb-2">{getText('totalPurchases')}</p>
+                    <p className="text-primary-foreground text-sm font-semibold mb-2">{getText('totalPurchases')}</p>
                     <p className="text-4xl font-bold">{formatCurrency(reportData.totalPurchases)}</p>
-                    <p className="text-xs text-orange-100 mt-3">{reportData.purchasesCount} {language === 'ar' ? 'فاتورة شراء' : 'factures'}</p>
+                    <p className="text-xs text-primary-foreground mt-3">{reportData.purchasesCount} {language === 'ar' ? 'فاتورة شراء' : 'factures'}</p>
                   </div>
                 </motion.div>
 
                 <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl blur-xl opacity-30"></div>
-                  <div className="relative bg-gradient-to-br from-blue-600 to-cyan-600 text-white p-8 rounded-2xl shadow-2xl border-2 border-white/20">
+                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 bg-primary text-primary-foreground"></div>
+                  <div className="relative text-primary-foreground p-8 rounded-2xl shadow-sm border-2 border-white/20 bg-primary">
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-5xl"></span>
-                      <TrendingUp className="h-6 w-6 text-cyan-100" />
+                      <TrendingUp className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <p className="text-cyan-100 text-sm font-semibold mb-2">{getText('profit')}</p>
+                    <p className="text-primary-foreground text-sm font-semibold mb-2">{getText('profit')}</p>
                     <p className="text-4xl font-bold">{formatCurrency(reportData.netProfit)}</p>
-                    <p className="text-xs text-cyan-100 mt-3">{((reportData.netProfit / (reportData.totalSales || 1)) * 100).toFixed(1)}% {language === 'ar' ? 'هامش ربح' : 'marge'}</p>
+                    <p className="text-xs text-primary-foreground mt-3">{((reportData.netProfit / (reportData.totalSales || 1)) * 100).toFixed(1)}% {language === 'ar' ? 'هامش ربح' : 'marge'}</p>
                   </div>
                 </motion.div>
               </motion.div>
@@ -441,22 +441,22 @@ export default function Reports() {
                 transition={{ delay: 0.2 }}
                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
               >
-                <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 p-8 rounded-2xl border-2 border-teal-200 dark:border-teal-800">
+                <motion.div whileHover={{ scale: 1.02 }} className="p-8 rounded-2xl border-2 border-border bg-card">
                   <div className="flex items-center gap-4 mb-4">
                     <span className="text-4xl"></span>
                     <div>
-                      <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">{language === 'ar' ? 'المدفوع' : 'Payé'}</p>
-                      <p className="text-3xl font-bold text-teal-900 dark:text-teal-100">{formatCurrency(reportData.totalPaid)}</p>
+                      <p className="text-sm font-semibold text-electric">{language === 'ar' ? 'المدفوع' : 'Payé'}</p>
+                      <p className="text-3xl font-bold text-electric">{formatCurrency(reportData.totalPaid)}</p>
                     </div>
                   </div>
                 </motion.div>
 
-                <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-8 rounded-2xl border-2 border-red-200 dark:border-red-800">
+                <motion.div whileHover={{ scale: 1.02 }} className="p-8 rounded-2xl border-2 border-border bg-card">
                   <div className="flex items-center gap-4 mb-4">
                     <span className="text-4xl"></span>
                     <div>
-                      <p className="text-sm font-semibold text-red-700 dark:text-red-300">{language === 'ar' ? 'غير مدفوع' : 'Non payé'}</p>
-                      <p className="text-3xl font-bold text-red-900 dark:text-red-100">{formatCurrency(reportData.totalUnpaid)}</p>
+                      <p className="text-sm font-semibold text-destructive">{language === 'ar' ? 'غير مدفوع' : 'Non payé'}</p>
+                      <p className="text-3xl font-bold text-destructive">{formatCurrency(reportData.totalUnpaid)}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -498,18 +498,18 @@ export default function Reports() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-2 border-orange-300 dark:border-orange-700 rounded-2xl p-6"
+                        className="border-2 border-border rounded-2xl p-6 bg-card"
                       >
                         <div className="flex items-center gap-3 mb-6">
                           <span className="text-4xl"></span>
                           <div>
-                            <h3 className="text-lg font-bold text-orange-900 dark:text-orange-100">{language === 'ar' ? 'تنبيهات المخزون المنخفض' : 'Alertes Stock Bas'}</h3>
-                            <p className="text-sm text-orange-700 dark:text-orange-200">{language === 'ar' ? 'المنتجات التي تحتاج إعادة تخزين فوراً' : 'Produits nécessitant un réapprovisionnement'}</p>
+                            <h3 className="text-lg font-bold text-warning">{language === 'ar' ? 'تنبيهات المخزون المنخفض' : 'Alertes Stock Bas'}</h3>
+                            <p className="text-sm text-warning">{language === 'ar' ? 'المنتجات التي تحتاج إعادة تخزين فوراً' : 'Produits nécessitant un réapprovisionnement'}</p>
                           </div>
                         </div>
                         <Table>
                           <TableHeader>
-                            <TableRow className="hover:bg-orange-100 dark:hover:bg-orange-900/30">
+                            <TableRow className="hover:bg-surface-2">
                               <TableHead className="font-bold">{language === 'ar' ? 'اسم المنتج' : 'Produit'}</TableHead>
                               <TableHead className="font-bold">{language === 'ar' ? 'الكمية الحالية' : 'Stock Actuel'}</TableHead>
                               <TableHead className="font-bold">{language === 'ar' ? 'الحد الأدنى' : 'Minimum'}</TableHead>
@@ -526,14 +526,14 @@ export default function Reports() {
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: idx * 0.05 }}
-                                  className="border-b hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                                  className="border-b hover:bg-surface-2 transition-colors"
                                 >
-                                  <TableCell className="font-bold text-orange-900 dark:text-orange-100">{p.name}</TableCell>
-                                  <TableCell className="text-red-600 dark:text-red-400 font-bold">{p.current_quantity} </TableCell>
-                                  <TableCell className="text-green-600 dark:text-green-400">{p.min_quantity}</TableCell>
-                                  <TableCell className="text-slate-600 dark:text-slate-300">{p.category || '-'}</TableCell>
-                                  <TableCell className="text-right font-bold text-orange-600 dark:text-orange-400">
-                                    <Badge className="bg-orange-600 text-white">+{shortage}</Badge>
+                                  <TableCell className="font-bold text-warning">{p.name}</TableCell>
+                                  <TableCell className="text-destructive font-bold">{p.current_quantity} </TableCell>
+                                  <TableCell className="text-success">{p.min_quantity}</TableCell>
+                                  <TableCell className="text-muted-foreground">{p.category || '-'}</TableCell>
+                                  <TableCell className="text-right font-bold text-warning">
+                                    <Badge className="bg-warning text-white">+{shortage}</Badge>
                                   </TableCell>
                                 </motion.tr>
                               );
@@ -549,17 +549,17 @@ export default function Reports() {
                 <ReportSection icon="" title={getText('purchases')} delay={0.4}>
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border-2 border-blue-200 dark:border-blue-700">
-                        <p className="text-sm text-blue-600 dark:text-blue-300 mb-2">{language === 'ar' ? 'إجمالي الفواتير' : 'Nombre de factures'}</p>
-                        <p className="text-4xl font-bold text-blue-700 dark:text-blue-200">{reportData.purchasesCount}</p>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <p className="text-sm text-electric mb-2">{language === 'ar' ? 'إجمالي الفواتير' : 'Nombre de factures'}</p>
+                        <p className="text-4xl font-bold text-electric">{reportData.purchasesCount}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-xl border-2 border-orange-200 dark:border-orange-700">
-                        <p className="text-sm text-orange-600 dark:text-orange-300 mb-2">{language === 'ar' ? 'إجمالي المشتريات' : 'Montant total'}</p>
-                        <p className="text-3xl font-bold text-orange-700 dark:text-orange-200">{formatCurrency(reportData.totalPurchases)}</p>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <p className="text-sm text-warning mb-2">{language === 'ar' ? 'إجمالي المشتريات' : 'Montant total'}</p>
+                        <p className="text-3xl font-bold text-warning">{formatCurrency(reportData.totalPurchases)}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border-2 border-green-200 dark:border-green-700">
-                        <p className="text-sm text-green-600 dark:text-green-300 mb-2">{language === 'ar' ? 'المتوسط لكل فاتورة' : 'Montant moyen'}</p>
-                        <p className="text-3xl font-bold text-green-700 dark:text-green-200">{formatCurrency((reportData.totalPurchases || 0) / (reportData.purchasesCount || 1))}</p>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <p className="text-sm text-success mb-2">{language === 'ar' ? 'المتوسط لكل فاتورة' : 'Montant moyen'}</p>
+                        <p className="text-3xl font-bold text-success">{formatCurrency((reportData.totalPurchases || 0) / (reportData.purchasesCount || 1))}</p>
                       </motion.div>
                     </div>
 
@@ -567,7 +567,7 @@ export default function Reports() {
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
-                            <TableRow className="bg-slate-100 dark:bg-slate-700">
+                            <TableRow className="bg-surface-2">
                               <TableHead className="font-bold">{getText('supplier')}</TableHead>
                               <TableHead className="font-bold">{getText('amount')}</TableHead>
                               <TableHead className="font-bold">{language === 'ar' ? 'المدفوع' : 'Payé'}</TableHead>
@@ -582,14 +582,14 @@ export default function Reports() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: idx * 0.05 }}
-                                className="border-b hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                className="border-b hover:bg-surface-2 transition-colors"
                               >
-                                <TableCell className="font-bold text-slate-900 dark:text-slate-100">{inv.supplier_name}</TableCell>
-                                <TableCell className="font-bold text-orange-600 dark:text-orange-400">{formatCurrency(inv.total_amount)}</TableCell>
-                                <TableCell className={`font-bold ${inv.amount_paid > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{formatCurrency(inv.amount_paid)}</TableCell>
-                                <TableCell className="text-slate-600 dark:text-slate-300">{formatDate(inv.invoice_date)}</TableCell>
+                                <TableCell className="font-bold text-foreground">{inv.supplier_name}</TableCell>
+                                <TableCell className="font-bold text-warning">{formatCurrency(inv.total_amount)}</TableCell>
+                                <TableCell className={`font-bold ${inv.amount_paid > 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(inv.amount_paid)}</TableCell>
+                                <TableCell className="text-muted-foreground">{formatDate(inv.invoice_date)}</TableCell>
                                 <TableCell>
-                                  <Badge className={inv.status === 'paid' ? 'bg-green-600' : inv.status === 'partial' ? 'bg-yellow-600' : 'bg-red-600'}>
+                                  <Badge className={inv.status === 'paid' ? 'bg-success' : inv.status === 'partial' ? 'bg-warning' : 'bg-destructive'}>
                                     {inv.status === 'paid' ? '' : inv.status === 'partial' ? '' : ''} {inv.status}
                                   </Badge>
                                 </TableCell>
@@ -599,7 +599,7 @@ export default function Reports() {
                         </Table>
                       </div>
                     ) : (
-                      <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                      <div className="text-center py-12 bg-surface-2 rounded-xl">
                         <p className="text-2xl"></p>
                         <p className="text-muted-foreground mt-3">{getText('noData')}</p>
                       </div>
@@ -611,17 +611,17 @@ export default function Reports() {
                 <ReportSection icon="" title={getText('sales')} delay={0.5}>
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border-2 border-green-200 dark:border-green-700">
-                        <p className="text-sm text-green-600 dark:text-green-300 mb-2">{language === 'ar' ? 'عدد المبيعات' : 'Nombre de ventes'}</p>
-                        <p className="text-4xl font-bold text-green-700 dark:text-green-200">{reportData.salesCount}</p>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <p className="text-sm text-success mb-2">{language === 'ar' ? 'عدد المبيعات' : 'Nombre de ventes'}</p>
+                        <p className="text-4xl font-bold text-success">{reportData.salesCount}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-xl border-2 border-emerald-200 dark:border-emerald-700">
-                        <p className="text-sm text-emerald-600 dark:text-emerald-300 mb-2">{language === 'ar' ? 'إجمالي المبيعات' : 'Montant total'}</p>
-                        <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-200">{formatCurrency(reportData.totalSales)}</p>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <p className="text-sm text-success mb-2">{language === 'ar' ? 'إجمالي المبيعات' : 'Montant total'}</p>
+                        <p className="text-3xl font-bold text-success">{formatCurrency(reportData.totalSales)}</p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }} className="bg-teal-50 dark:bg-teal-900/20 p-6 rounded-xl border-2 border-teal-200 dark:border-teal-700">
-                        <p className="text-sm text-teal-600 dark:text-teal-300 mb-2">{language === 'ar' ? 'المتوسط لكل بيع' : 'Montant moyen'}</p>
-                        <p className="text-3xl font-bold text-teal-700 dark:text-teal-200">{formatCurrency((reportData.totalSales || 0) / (reportData.salesCount || 1))}</p>
+                      <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                        <p className="text-sm text-electric mb-2">{language === 'ar' ? 'المتوسط لكل بيع' : 'Montant moyen'}</p>
+                        <p className="text-3xl font-bold text-electric">{formatCurrency((reportData.totalSales || 0) / (reportData.salesCount || 1))}</p>
                       </motion.div>
                     </div>
 
@@ -629,7 +629,7 @@ export default function Reports() {
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
-                            <TableRow className="bg-slate-100 dark:bg-slate-700">
+                            <TableRow className="bg-surface-2">
                               <TableHead className="font-bold">{language === 'ar' ? 'العميل' : 'Client'}</TableHead>
                               <TableHead className="font-bold">{getText('amount')}</TableHead>
                               <TableHead className="font-bold">{language === 'ar' ? 'المدفوع' : 'Payé'}</TableHead>
@@ -644,14 +644,14 @@ export default function Reports() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: idx * 0.05 }}
-                                className="border-b hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                                className="border-b hover:bg-surface-2 transition-colors"
                               >
-                                <TableCell className="font-bold text-slate-900 dark:text-slate-100">{inv.supplier_name}</TableCell>
-                                <TableCell className="font-bold text-green-600 dark:text-green-400">{formatCurrency(inv.total_amount)}</TableCell>
-                                <TableCell className={`font-bold ${inv.amount_paid > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{formatCurrency(inv.amount_paid)}</TableCell>
-                                <TableCell className="text-slate-600 dark:text-slate-300">{formatDate(inv.invoice_date)}</TableCell>
+                                <TableCell className="font-bold text-foreground">{inv.supplier_name}</TableCell>
+                                <TableCell className="font-bold text-success">{formatCurrency(inv.total_amount)}</TableCell>
+                                <TableCell className={`font-bold ${inv.amount_paid > 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(inv.amount_paid)}</TableCell>
+                                <TableCell className="text-muted-foreground">{formatDate(inv.invoice_date)}</TableCell>
                                 <TableCell>
-                                  <Badge className={inv.status === 'paid' ? 'bg-green-600' : inv.status === 'partial' ? 'bg-yellow-600' : 'bg-red-600'}>
+                                  <Badge className={inv.status === 'paid' ? 'bg-success' : inv.status === 'partial' ? 'bg-warning' : 'bg-destructive'}>
                                     {inv.status === 'paid' ? '' : inv.status === 'partial' ? '' : ''} {inv.status}
                                   </Badge>
                                 </TableCell>
@@ -661,7 +661,7 @@ export default function Reports() {
                         </Table>
                       </div>
                     ) : (
-                      <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                      <div className="text-center py-12 bg-surface-2 rounded-xl">
                         <p className="text-2xl"></p>
                         <p className="text-muted-foreground mt-3">{getText('noData')}</p>
                       </div>
@@ -682,27 +682,27 @@ export default function Reports() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-6 rounded-2xl border-2 border-blue-200 dark:border-blue-700 hover:shadow-lg transition-all"
+                            className="p-6 rounded-2xl border-2 border-border hover:shadow-md transition-all bg-card"
                           >
                             <div className="flex items-start justify-between mb-4">
                               <div>
-                                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{supplier.name}</p>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{supplier.contact_person}</p>
+                                <p className="text-2xl font-bold text-foreground">{supplier.name}</p>
+                                <p className="text-sm text-muted-foreground mt-1">{supplier.contact_person}</p>
                               </div>
                               <span className="text-3xl"></span>
                             </div>
-                            <div className="space-y-3 border-t border-blue-200 dark:border-blue-700 pt-4">
+                            <div className="space-y-3 border-t border-border pt-4">
                               <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'ar' ? 'الهاتف' : 'Téléphone'}</p>
-                                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{supplier.phone}</p>
+                                <p className="text-xs text-muted-foreground">{language === 'ar' ? 'الهاتف' : 'Téléphone'}</p>
+                                <p className="text-sm font-semibold text-foreground">{supplier.phone}</p>
                               </div>
                               <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'ar' ? 'الفواتير' : 'Factures'}</p>
-                                <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{supplierInvoices.length} {language === 'ar' ? 'فاتورة' : 'factures'}</p>
+                                <p className="text-xs text-muted-foreground">{language === 'ar' ? 'الفواتير' : 'Factures'}</p>
+                                <p className="text-sm font-semibold text-electric">{supplierInvoices.length} {language === 'ar' ? 'فاتورة' : 'factures'}</p>
                               </div>
                               <div>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'ar' ? 'الإجمالي' : 'Montant'}</p>
-                                <p className="text-lg font-bold text-orange-600 dark:text-orange-400">{formatCurrency(totalAmount)}</p>
+                                <p className="text-xs text-muted-foreground">{language === 'ar' ? 'الإجمالي' : 'Montant'}</p>
+                                <p className="text-lg font-bold text-warning">{formatCurrency(totalAmount)}</p>
                               </div>
                             </div>
                           </motion.div>
@@ -710,7 +710,7 @@ export default function Reports() {
                       })}
                     </div>
                   ) : (
-                    <div className="text-center py-12 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                    <div className="text-center py-12 bg-surface-2 rounded-xl">
                       <p className="text-2xl"></p>
                       <p className="text-muted-foreground mt-3">{getText('noData')}</p>
                     </div>
@@ -723,7 +723,7 @@ export default function Reports() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       onClick={() => setShowInventoryValuation(!showInventoryValuation)}
-                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all"
+                      className="w-full text-primary-foreground font-bold py-4 px-6 rounded-xl shadow-sm flex items-center justify-center gap-3 transition-all bg-primary"
                     >
                       {showInventoryValuation ? '' : ''} {language === 'ar' ? (showInventoryValuation ? 'إخفاء التفاصيل' : 'عرض جميع المنتجات') : (showInventoryValuation ? 'Masquer les détails' : 'Afficher tous les produits')}
                     </motion.button>
@@ -736,12 +736,12 @@ export default function Reports() {
                       >
                         <Table>
                           <TableHeader>
-                            <TableRow className="bg-indigo-100 dark:bg-indigo-900/30">
-                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100">{language === 'ar' ? 'اسم المنتج' : 'Produit'}</TableHead>
-                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100">{language === 'ar' ? 'الماركة' : 'Marque'}</TableHead>
-                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100 text-center">{language === 'ar' ? 'الكمية الحالية' : 'Quantité'}</TableHead>
-                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100 text-right">{language === 'ar' ? 'سعر الوحدة' : 'Prix/Unité'}</TableHead>
-                              <TableHead className="font-bold text-indigo-900 dark:text-indigo-100 text-right">{language === 'ar' ? 'القيمة الإجمالية' : 'Valeur Total'}</TableHead>
+                            <TableRow className="bg-surface-2">
+                              <TableHead className="font-bold text-electric">{language === 'ar' ? 'اسم المنتج' : 'Produit'}</TableHead>
+                              <TableHead className="font-bold text-electric">{language === 'ar' ? 'الماركة' : 'Marque'}</TableHead>
+                              <TableHead className="font-bold text-electric text-center">{language === 'ar' ? 'الكمية الحالية' : 'Quantité'}</TableHead>
+                              <TableHead className="font-bold text-electric text-right">{language === 'ar' ? 'سعر الوحدة' : 'Prix/Unité'}</TableHead>
+                              <TableHead className="font-bold text-electric text-right">{language === 'ar' ? 'القيمة الإجمالية' : 'Valeur Total'}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -755,17 +755,17 @@ export default function Reports() {
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   transition={{ delay: idx * 0.02 }}
-                                  className="border-b hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                                  className="border-b hover:bg-surface-2 transition-colors"
                                 >
-                                  <TableCell className="font-bold text-slate-900 dark:text-slate-100">{product.name}</TableCell>
-                                  <TableCell className="text-slate-600 dark:text-slate-400">{product.mark?.name || '-'}</TableCell>
+                                  <TableCell className="font-bold text-foreground">{product.name}</TableCell>
+                                  <TableCell className="text-muted-foreground">{product.mark?.name || '-'}</TableCell>
                                   <TableCell className="text-center">
-                                    <Badge className={quantity <= (product.min_quantity || 10) ? 'bg-red-600' : 'bg-green-600'}>
+                                    <Badge className={quantity <= (product.min_quantity || 10) ? 'bg-destructive' : 'bg-success'}>
                                       {quantity} {language === 'ar' ? 'وحدة' : 'unités'}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell className="text-right font-semibold text-blue-600 dark:text-blue-400">{formatCurrency(price)}</TableCell>
-                                  <TableCell className="text-right font-bold text-purple-600 dark:text-purple-400 text-lg">{formatCurrency(totalValue)}</TableCell>
+                                  <TableCell className="text-right font-semibold text-electric">{formatCurrency(price)}</TableCell>
+                                  <TableCell className="text-right font-bold text-electric text-lg">{formatCurrency(totalValue)}</TableCell>
                                 </motion.tr>
                               );
                             })}
@@ -773,12 +773,12 @@ export default function Reports() {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ delay: products.length * 0.02 }}
-                              className="bg-gradient-to-r from-indigo-200 to-purple-200 dark:from-indigo-900/50 dark:to-purple-900/50 font-bold text-lg border-t-2 border-indigo-400 dark:border-indigo-600"
+                              className="font-bold text-lg border-t-2 border-border bg-card"
                             >
-                              <TableCell colSpan={4} className="text-right text-indigo-900 dark:text-indigo-100 py-4">
+                              <TableCell colSpan={4} className="text-right text-electric py-4">
                                 {language === 'ar' ? 'إجمالي قيمة المخزون:' : 'Valeur Total du Stock:'}
                               </TableCell>
-                              <TableCell className="text-right text-indigo-900 dark:text-indigo-100 py-4">
+                              <TableCell className="text-right text-electric py-4">
                                 {formatCurrency(
                                   products.reduce((sum, p) => {
                                     const qty = p.current_quantity || 0;
@@ -800,21 +800,21 @@ export default function Reports() {
                   <ReportSection icon="" title={language === 'ar' ? 'ملخص الصندوق' : 'Résumé Caisse'} delay={0.8}>
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <motion.div whileHover={{ scale: 1.05 }} className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border-2 border-green-200 dark:border-green-700">
-                          <p className="text-sm text-green-600 dark:text-green-300 mb-2">{language === 'ar' ? 'إجمالي الإيداعات' : 'Dépôts'}</p>
-                          <p className="text-3xl font-bold text-green-700 dark:text-green-200">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                          <p className="text-sm text-success mb-2">{language === 'ar' ? 'إجمالي الإيداعات' : 'Dépôts'}</p>
+                          <p className="text-3xl font-bold text-success">
                             {formatCurrency(caisseTransactions.filter(t => t.transaction_type === 'encaissement').reduce((sum, t) => sum + t.amount, 0))}
                           </p>
                         </motion.div>
-                        <motion.div whileHover={{ scale: 1.05 }} className="bg-red-50 dark:bg-red-900/20 p-6 rounded-xl border-2 border-red-200 dark:border-red-700">
-                          <p className="text-sm text-red-600 dark:text-red-300 mb-2">{language === 'ar' ? 'إجمالي السحوبات' : 'Retraits'}</p>
-                          <p className="text-3xl font-bold text-red-700 dark:text-red-200">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                          <p className="text-sm text-destructive mb-2">{language === 'ar' ? 'إجمالي السحوبات' : 'Retraits'}</p>
+                          <p className="text-3xl font-bold text-destructive">
                             {formatCurrency(caisseTransactions.filter(t => t.transaction_type === 'decaissement').reduce((sum, t) => sum + t.amount, 0))}
                           </p>
                         </motion.div>
-                        <motion.div whileHover={{ scale: 1.05 }} className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border-2 border-blue-200 dark:border-blue-700">
-                          <p className="text-sm text-blue-600 dark:text-blue-300 mb-2">{language === 'ar' ? 'الرصيد' : 'Solde'}</p>
-                          <p className="text-3xl font-bold text-blue-700 dark:text-blue-200">
+                        <motion.div whileHover={{ scale: 1.05 }} className="bg-surface-2 p-6 rounded-xl border-2 border-border">
+                          <p className="text-sm text-electric mb-2">{language === 'ar' ? 'الرصيد' : 'Solde'}</p>
+                          <p className="text-3xl font-bold text-electric">
                             {formatCurrency(
                               caisseTransactions.filter(t => t.transaction_type === 'encaissement').reduce((sum, t) => sum + t.amount, 0) -
                               caisseTransactions.filter(t => t.transaction_type === 'decaissement').reduce((sum, t) => sum + t.amount, 0)
@@ -825,7 +825,7 @@ export default function Reports() {
 
                       <Table>
                         <TableHeader>
-                          <TableRow className="bg-slate-100 dark:bg-slate-700">
+                          <TableRow className="bg-surface-2">
                             <TableHead className="font-bold">{language === 'ar' ? 'النوع' : 'Type'}</TableHead>
                             <TableHead className="font-bold">{getText('amount')}</TableHead>
                             <TableHead className="font-bold">{getText('date')}</TableHead>
@@ -839,16 +839,16 @@ export default function Reports() {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ delay: idx * 0.03 }}
-                              className="border-b hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                              className="border-b hover:bg-surface-2"
                             >
                               <TableCell className="font-bold">
                                 {trans.transaction_type === 'encaissement' ? 'Dépôt' : 'Retrait'}
                               </TableCell>
-                              <TableCell className={`font-bold ${trans.transaction_type === 'encaissement' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              <TableCell className={`font-bold ${trans.transaction_type === 'encaissement' ? 'text-success' : 'text-destructive'}`}>
                                 {formatCurrency(trans.amount)}
                               </TableCell>
                               <TableCell>{formatDate(trans.transaction_date)}</TableCell>
-                              <TableCell className="text-slate-600 dark:text-slate-400">{trans.description}</TableCell>
+                              <TableCell className="text-muted-foreground">{trans.description}</TableCell>
                             </motion.tr>
                           ))}
                         </TableBody>
