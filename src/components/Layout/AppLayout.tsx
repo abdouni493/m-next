@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Helmet } from 'react-helmet-async';
 import { findNavItem } from '@/admin/nav';
@@ -25,6 +25,10 @@ export const AppLayout = () => {
   const isDesktop = useIsDesktop();
   const { isRTL } = useLanguage();
   const location = useLocation();
+  const reduceMotion = useReducedMotion();
+  const mainRef = useRef<HTMLElement>(null);
+  // Each screen opens at the top instead of keeping the previous screen's scroll position.
+  useEffect(() => { mainRef.current?.scrollTo({ top: 0 }); }, [location.pathname]);
   // Desktop remembers the user's choice; phones/tablets always start with the menu hidden.
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (!window.matchMedia(DESKTOP_QUERY).matches) return false;
@@ -109,20 +113,22 @@ export const AppLayout = () => {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen((o) => !o)} sidebarOpen={sidebarOpen} />
-        <main className="admin-main custom-scrollbar flex-1 overflow-auto px-3 py-4 sm:px-6 md:py-6">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              className="mx-auto max-w-[1440px]"
-              initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
-              // transitionEnd clears transform/filter: while set, they make this wrapper the containing block
-              // for `position: fixed`, so page modals opened at the page top instead of over the viewport.
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] }, transitionEnd: { transform: 'none', filter: 'none' } }}
-              exit={{ opacity: 0, y: -6, transition: { duration: 0.16, ease: [0.55, 0, 1, 0.45] } }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+        <main ref={mainRef} className="admin-main custom-scrollbar flex-1 overflow-auto px-3 py-4 sm:px-6 md:py-6">
+          {/* Enter-only transition: the new screen replaces the old one at once (no blank gap while the old one
+              fades out), then eases in. Only opacity/transform are animated (GPU-cheap, no blur). transitionEnd
+              clears the transform so it never becomes the containing block for position:fixed modals. */}
+          <motion.div
+            key={location.pathname}
+            className="mx-auto max-w-[1440px]"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.995 }}
+            animate={{
+              opacity: 1, y: 0, scale: 1,
+              transition: { duration: reduceMotion ? 0.12 : 0.38, ease: [0.16, 1, 0.3, 1] },
+              transitionEnd: { transform: 'none' },
+            }}
+          >
+            <Outlet />
+          </motion.div>
         </main>
       </div>
     </div>
