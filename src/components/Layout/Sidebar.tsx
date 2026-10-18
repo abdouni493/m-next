@@ -58,7 +58,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
   }, []);
 
   const navigationItems: NavItem[] = [
-    { title: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
+    { title: t('nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
     { title: t('nav.inventory'), href: '/inventory', icon: Boxes },
     { title: 'Clients', href: '/clients', icon: UsersRound },
     { title: "Factures d'Achat", href: '/purchase-invoices', icon: Truck },

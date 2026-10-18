@@ -1,362 +1,198 @@
-import { useState, useEffect } from "react";
-import { 
-  Lock,
-  Eye,
-  EyeOff,
-  Mail,
-  UserPlus,
-  Zap,
-  BatteryCharging,
-  Boxes,
-  ScanLine,
-  ShieldCheck,
-  ArrowRight,
-  Store
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { signIn, signUp, getWebsiteSettingsREST } from "@/lib/supabaseClient";
+import { useEffect, useRef, useState } from "react";
+import { Lock, Eye, EyeOff, Mail, Zap, BatteryCharging, Boxes, ScanLine, ShieldCheck, ArrowRight, Store, AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getWebsiteSettingsREST } from "@/lib/supabaseClient";
+import { useAuth, homeForRole } from "@/contexts/AuthContext";
 
-interface LoginProps {
-  onLogin: (user: any) => void;
-}
+const MAX_ATTEMPTS = 5;
+const LOCK_MS = 60_000;
+const ATTEMPTS_KEY = "auth:failures";
 
-export default function Login({ onLogin }: LoginProps) {
-  const { toast } = useToast();
+const readFailures = (): { count: number; until: number } => {
+  try { return JSON.parse(localStorage.getItem(ATTEMPTS_KEY) || "") || { count: 0, until: 0 }; } catch { return { count: 0, until: 0 }; }
+};
+
+const errorMessage = (err: unknown): string => {
+  const msg = String((err as { message?: string })?.message || "");
+  if (/invalid login credentials|invalid_credentials/i.test(msg)) return "Email ou mot de passe incorrect.";
+  if (/email not confirmed/i.test(msg)) return "Adresse email non confirmée. Vérifiez votre boîte mail.";
+  if (/fetch|network/i.test(msg)) return "Connexion au serveur impossible. Vérifiez votre connexion internet.";
+  if (/rate limit|too many/i.test(msg)) return "Trop de tentatives. Réessayez dans quelques minutes.";
+  return "Connexion impossible. Réessayez.";
+};
+
+export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
+  const emailRef = useRef<HTMLInputElement>(null);
 
-  const [storeName, setStoreName] = useState('Chargers');
+  const [storeName, setStoreName] = useState("M NEXT");
   const [storeLogoUrl, setStoreLogoUrl] = useState<string | null>(null);
-  
-  const [isSignUp, setIsSignUp] = useState(false);
-  
-  const [loginCredentials, setLoginCredentials] = useState({
-    email: "",
-    password: ""
-  });
-
-  const [signUpCredentials, setSignUpCredentials] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    username: ""
-  });
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(() => localStorage.getItem("auth:remember") !== "0");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [touched, setTouched] = useState({ email: false, password: false });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lockedFor, setLockedFor] = useState(0);
 
+  useEffect(() => { emailRef.current?.focus(); }, []);
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const settings = await getWebsiteSettingsREST();
-        if (settings) {
-          if (settings.store_name) {
-            setStoreName(settings.store_name);
-          }
-          if (settings.logo_url) {
-            setStoreLogoUrl(settings.logo_url);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching website settings:', error);
-        const localStoreName = localStorage.getItem('storeName');
-        if (localStoreName) setStoreName(localStoreName);
-      }
-    };
-    fetchSettings();
+    getWebsiteSettingsREST().then((s) => {
+      if (s?.store_name) setStoreName(String(s.store_name).trim());
+      if (s?.logo_url) setStoreLogoUrl(s.logo_url);
+    }).catch(() => {});
+  }, []);
+  // Countdown while locked after too many failures
+  useEffect(() => {
+    const tick = () => setLockedFor(Math.max(0, Math.ceil((readFailures().until - Date.now()) / 1000)));
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
   }, []);
 
-  // ===== SIGNUP HANDLER =====
-  const handleSignUp = async (e: React.FormEvent) => {
+  const emailError = !email.trim() ? "Entrez votre email." : !/^\S+@\S+\.\S+$/.test(email.trim()) ? "Format d'email invalide." : null;
+  const passwordError = !password ? "Entrez votre mot de passe." : null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setTouched({ email: true, password: true });
+    setError(null);
+    if (emailError || passwordError || submitting || lockedFor > 0) return;
 
+    setSubmitting(true);
     try {
-      // Validate inputs
-      if (!signUpCredentials.email || !signUpCredentials.password || !signUpCredentials.username) {
-        toast({
-          title: "❌ Erreur",
-          description: "Tous les champs sont requis",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      if (signUpCredentials.password !== signUpCredentials.confirmPassword) {
-        toast({
-          title: "❌ Erreur",
-          description: "Les mots de passe ne correspondent pas",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      if (signUpCredentials.password.length < 6) {
-        toast({
-          title: "❌ Erreur",
-          description: "Le mot de passe doit contenir au moins 6 caractères",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const { user } = await signUp(
-        signUpCredentials.email,
-        signUpCredentials.password,
-        signUpCredentials.username
-      );
-
-      toast({
-        title: "✅ Compte créé avec succès",
-        description: "Votre compte administrateur a été créé. Connectez-vous maintenant.",
-      });
-
-      // Reset signup form and switch to login
-      setSignUpCredentials({
-        email: "",
-        password: "",
-        confirmPassword: "",
-        username: ""
-      });
-      
-      // Switch to login mode with email pre-filled
-      setIsSignUp(false);
-      setLoginCredentials({
-        email: signUpCredentials.email,
-        password: ""
-      });
-    } catch (err: any) {
-      console.error("Signup error:", err);
-      
-      let errorMessage = "Erreur lors de la création du compte";
-      if (err.message?.includes("User already registered")) {
-        errorMessage = "Cet email est déjà utilisé";
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      
-      toast({
-        title: "❌ Erreur",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      const user = await signIn(email, password, remember);
+      localStorage.removeItem(ATTEMPTS_KEY);
+      const from = (location.state as { from?: string } | null)?.from;
+      const home = homeForRole(user.role);
+      // Return to the protected page that sent us here, if the role may open it.
+      const target = from && from !== "/login" && (home === "/dashboard" ? !from.startsWith("/employee") : from.startsWith("/employee")) ? from : home;
+      navigate(target, { replace: true });
+    } catch (err) {
+      const f = readFailures();
+      const count = f.count + 1;
+      const until = count >= MAX_ATTEMPTS ? Date.now() + LOCK_MS : 0;
+      localStorage.setItem(ATTEMPTS_KEY, JSON.stringify({ count: until ? 0 : count, until }));
+      setLockedFor(until ? Math.ceil(LOCK_MS / 1000) : 0);
+      setError(until ? "Trop de tentatives échouées. Réessayez dans 1 minute." : errorMessage(err));
+      setPassword("");
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   };
 
-  // ===== LOGIN HANDLER =====
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { user } = await signIn(
-        loginCredentials.email,
-        loginCredentials.password
-      );
-
-      // Create user object with proper structure for AuthContext
-      const userData = {
-        id: user?.id || '',
-        username: user?.username || user?.email || '',
-        email: user?.email || '',
-        role: user?.role || 'admin',
-        name: user?.username || user?.email || ''
-      };
-
-      toast({
-        title: "✅ Connexion réussie",
-        description: `Bienvenue ${userData.username}! Redirection en cours...`,
-      });
-
-      onLogin(userData);
-      
-      // Small delay to ensure auth context updates
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 500);
-    } catch (err: any) {
-      console.error("Login error:", err);
-      toast({
-        title: "❌ Erreur de connexion",
-        description: err.message || "Email ou mot de passe incorrect",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const field = "h-12 rounded-xl border-white/10 bg-white/[0.04] pl-11 text-[15px] text-white placeholder:text-slate-500 hover:border-white/20 focus-visible:ring-[#C6F432]/60 focus-visible:ring-offset-0";
-  const labelCls = "text-sm font-medium text-slate-300";
+  const fieldBase = "h-12 w-full rounded-[10px] border bg-background pl-11 pr-3 text-[16px] text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--electric))]/30 focus:border-[hsl(var(--electric))] md:text-[15px]";
+  const showEmailErr = touched.email && emailError;
+  const showPwdErr = touched.password && passwordError;
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-[#070A10] text-white">
-      {/* ambient volt glow + grid */}
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[#C6F432]/10 blur-[120px]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:44px_44px]" />
-
-      <div className="relative mx-auto grid min-h-dvh max-w-6xl items-center gap-10 px-4 py-8 lg:grid-cols-2 lg:px-8">
-        {/* Brand / charging panel */}
-        <motion.div
-          className="hidden lg:block"
-          initial={{ opacity: 0, x: -24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-[#C6F432]">
-              {storeLogoUrl ? <img src={storeLogoUrl} alt="" className="h-full w-full object-cover" /> : <Zap className="h-6 w-6 text-[#0B1220]" fill="currentColor" />}
-            </div>
-            <span className="font-sora text-2xl font-bold tracking-tight">{storeName}</span>
+    <div className="grid min-h-dvh bg-background text-foreground lg:grid-cols-[1.05fr_1fr]">
+      {/* Brand panel */}
+      <aside className="relative hidden overflow-hidden bg-[#0B1220] p-12 text-white lg:flex lg:flex-col">
+        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#C6F432]/15 blur-3xl" />
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[12px] bg-[#C6F432]">
+            {storeLogoUrl ? <img src={storeLogoUrl} alt="" className="h-full w-full object-cover" /> : <Zap className="h-6 w-6 text-[#0B1220]" fill="currentColor" />}
           </div>
-          <h1 className="mt-10 font-sora text-5xl font-bold leading-[1.1] tracking-tight">
-            Gérez votre stock de <span className="text-[#C6F432]">chargeurs</span> à pleine puissance.
+          <span className="font-sora text-xl font-bold">{storeName}</span>
+        </div>
+
+        <div className="relative my-auto max-w-lg">
+          <h1 className="font-sora text-[44px] font-bold leading-[1.1] tracking-tight">
+            Votre stock de chargeurs, <span className="text-[#C6F432]">sous contrôle.</span>
           </h1>
-          <p className="mt-5 max-w-md text-lg text-slate-400">Inventaire, ventes, caisse et commandes de la boutique en ligne, au même endroit.</p>
+          <p className="mt-5 text-lg text-[#9AA3B5]">Commandes, inventaire, caisse et boutique en ligne réunis dans un seul espace.</p>
 
-          {/* charging card */}
-          <div className="mt-10 max-w-md rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+          <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5"><BatteryCharging className="h-6 w-6 text-[#C6F432]" /></div>
-                <div>
-                  <p className="text-sm font-semibold">Session sécurisée</p>
-                  <p className="text-xs text-slate-500">19.5V · 3.34A · 65W</p>
-                </div>
-              </div>
-              <span className="font-sora text-2xl font-bold tabular-nums text-[#C6F432]">100%</span>
+              <span className="flex items-center gap-2 text-sm font-medium"><BatteryCharging className="h-5 w-5 text-[#C6F432]" /> Session sécurisée</span>
+              <span className="font-sora text-lg font-bold tabular-nums text-[#C6F432]">100%</span>
             </div>
-            <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
-              <motion.div className="h-full rounded-full bg-[#C6F432]" initial={{ width: "8%" }} animate={{ width: "100%" }} transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }} />
+            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <motion.div className="h-full rounded-full bg-[#C6F432]" initial={{ width: "10%" }} animate={{ width: "100%" }} transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }} />
             </div>
-            <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-              {[{ i: Boxes, t: "Inventaire" }, { i: ScanLine, t: "Caisse" }, { i: ShieldCheck, t: "Sécurisé" }].map(({ i: Icon, t }) => (
-                <div key={t} className="rounded-xl bg-white/[0.04] px-2 py-3"><Icon className="mx-auto h-5 w-5 text-slate-300" /><p className="mt-1.5 text-xs text-slate-400">{t}</p></div>
+            <ul className="mt-5 grid grid-cols-3 gap-2 text-center text-xs text-[#9AA3B5]">
+              {[{ i: Boxes, t: "Inventaire" }, { i: ScanLine, t: "Caisse" }, { i: ShieldCheck, t: "Protégé" }].map(({ i: Icon, t }) => (
+                <li key={t} className="rounded-xl bg-white/[0.04] py-3"><Icon className="mx-auto mb-1.5 h-5 w-5 text-white/80" />{t}</li>
               ))}
-            </div>
+            </ul>
           </div>
-        </motion.div>
+        </div>
+        <p className="relative text-xs text-[#9AA3B5]">© {new Date().getFullYear()} {storeName}</p>
+      </aside>
 
-        {/* Form */}
-        <motion.div
-          className="mx-auto w-full max-w-md"
-          initial={{ opacity: 0, y: 24, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-[#C6F432] shadow-[0_0_40px_rgba(198,244,50,0.35)]">
-              {storeLogoUrl ? <img src={storeLogoUrl} alt="" className="h-full w-full object-cover" /> : <Zap className="h-8 w-8 text-[#0B1220]" fill="currentColor" />}
+      {/* Form */}
+      <main className="flex items-center justify-center px-4 py-10 sm:px-8">
+        <motion.div className="w-full max-w-[400px]" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
+            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[12px] bg-[#0B1220] dark:bg-[#C6F432]">
+              {storeLogoUrl ? <img src={storeLogoUrl} alt="" className="h-full w-full object-cover" /> : <Zap className="h-6 w-6 text-[#C6F432] dark:text-[#0B1220]" fill="currentColor" />}
             </div>
-            <span className="mt-3 font-sora text-2xl font-bold">{storeName}</span>
-            <span className="text-sm text-slate-400">Espace de gestion des chargeurs</span>
+            <span className="font-sora text-xl font-bold">{storeName}</span>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-[#0E131D]/90 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
-            <div className="mb-6">
-              <h2 className="font-sora text-2xl font-bold">{isSignUp ? "Créer un compte" : "Connexion"}</h2>
-              <p className="mt-1 text-sm text-slate-400">{isSignUp ? "Compte administrateur de la boutique." : "Accédez à votre espace de gestion."}</p>
+          <h2 className="font-sora text-[28px] font-bold tracking-tight">Connexion</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Accédez à votre espace de gestion.</p>
+
+          <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+            {error && (
+              <div role="alert" className="flex items-start gap-2 rounded-[10px] border border-destructive/30 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground" />
+                <input ref={emailRef} id="email" type="email" inputMode="email" autoComplete="username" value={email}
+                  onChange={(e) => setEmail(e.target.value)} onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+                  aria-invalid={!!showEmailErr} aria-describedby={showEmailErr ? "email-err" : undefined}
+                  className={`${fieldBase} ${showEmailErr ? "border-destructive" : "border-input"}`} placeholder="vous@exemple.com" />
+              </div>
+              {showEmailErr && <p id="email-err" className="text-xs font-medium text-destructive">{emailError}</p>}
             </div>
 
-            <AnimatePresence mode="wait" initial={false}>
-              {!isSignUp ? (
-                <motion.form key="login" onSubmit={handleLogin} className="space-y-4"
-                  initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className={labelCls}>Email</Label>
-                    <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
-                      <Input id="email" type="email" autoComplete="email" placeholder="vous@exemple.com" value={loginCredentials.email}
-                        onChange={(e) => setLoginCredentials({ ...loginCredentials, email: e.target.value })} className={field} required />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className={labelCls}>Mot de passe</Label>
-                    <div className="relative">
-                      <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
-                      <Input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="••••••••" value={loginCredentials.password}
-                        onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })} className={`${field} pr-11`} required />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white" aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}>
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </div>
-                  <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-xl bg-[#C6F432] text-[15px] font-semibold text-[#0B1220] shadow-[0_8px_30px_-8px_rgba(198,244,50,0.6)] hover:bg-[#C6F432] hover:brightness-95">
-                    {isLoading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#0B1220]/30 border-t-[#0B1220]" /> : <>Se connecter <ArrowRight className="h-4 w-4" /></>}
-                  </Button>
-                  <p className="text-center text-sm text-slate-400">
-                    Pas encore de compte ?{" "}
-                    <button type="button" onClick={() => setIsSignUp(true)} className="font-semibold text-[#C6F432] hover:underline">Créer un compte</button>
-                  </p>
-                </motion.form>
-              ) : (
-                <motion.form key="signup" onSubmit={handleSignUp} className="space-y-4"
-                  initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
-                  <div className="space-y-2">
-                    <Label htmlFor="username" className={labelCls}>Nom d'utilisateur</Label>
-                    <div className="relative">
-                      <UserPlus className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
-                      <Input id="username" autoComplete="username" value={signUpCredentials.username}
-                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, username: e.target.value })} className={field} required />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className={labelCls}>Email</Label>
-                    <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
-                      <Input id="signup-email" type="email" autoComplete="email" value={signUpCredentials.email}
-                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, email: e.target.value })} className={field} required />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className={labelCls}>Mot de passe</Label>
-                    <div className="relative">
-                      <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
-                      <Input id="signup-password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={signUpCredentials.password}
-                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, password: e.target.value })} className={`${field} pr-11`} required minLength={6} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white" aria-label="Afficher ou masquer le mot de passe">
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password" className={labelCls}>Confirmer le mot de passe</Label>
-                    <div className="relative">
-                      <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
-                      <Input id="confirm-password" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" value={signUpCredentials.confirmPassword}
-                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, confirmPassword: e.target.value })} className={`${field} pr-11`} required />
-                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white" aria-label="Afficher ou masquer la confirmation">
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                  </div>
-                  <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-xl bg-[#C6F432] text-[15px] font-semibold text-[#0B1220] hover:bg-[#C6F432] hover:brightness-95">
-                    {isLoading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#0B1220]/30 border-t-[#0B1220]" /> : "Créer le compte"}
-                  </Button>
-                  <p className="text-center text-sm text-slate-400">
-                    Déjà un compte ?{" "}
-                    <button type="button" onClick={() => setIsSignUp(false)} className="font-semibold text-[#C6F432] hover:underline">Se connecter</button>
-                  </p>
-                </motion.form>
-              )}
-            </AnimatePresence>
-          </div>
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="text-sm font-medium">Mot de passe</label>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground" />
+                <input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password}
+                  onChange={(e) => setPassword(e.target.value)} onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+                  aria-invalid={!!showPwdErr} aria-describedby={showPwdErr ? "pwd-err" : undefined}
+                  className={`${fieldBase} pr-12 ${showPwdErr ? "border-destructive" : "border-input"}`} placeholder="••••••••" />
+                <button type="button" onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {showPwdErr && <p id="pwd-err" className="text-xs font-medium text-destructive">{passwordError}</p>}
+            </div>
 
-          <button onClick={() => navigate("/website-shop")} className="mx-auto mt-6 flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">
-            <Store className="h-4 w-4" /> Voir la boutique en ligne
+            <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-[18px] w-[18px] rounded accent-[#0B1220] dark:accent-[#C6F432]" />
+              Se souvenir de moi
+            </label>
+
+            <button type="submit" disabled={submitting || lockedFor > 0}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-primary text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
+              {submitting ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-current/30 border-t-current" aria-label="Connexion en cours" />
+                : lockedFor > 0 ? <span className="tabular-nums">Réessayez dans {lockedFor} s</span>
+                : <>Se connecter <ArrowRight className="h-4 w-4" /></>}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-xs text-muted-foreground">Accès réservé à l'équipe. Mot de passe oublié ? Contactez l'administrateur.</p>
+          <button onClick={() => navigate("/website-shop")} className="mx-auto mt-4 flex h-11 items-center gap-2 rounded-[10px] px-4 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
+            <Store className="h-4 w-4" /> Voir la boutique
           </button>
         </motion.div>
-      </div>
+      </main>
     </div>
   );
 }

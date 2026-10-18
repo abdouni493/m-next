@@ -77,9 +77,9 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
     localStorage.setItem('theme', !isDarkMode ? 'dark' : 'light');
   };
 
-  const handleLogout = () => {
-    logout();                 // ✅ clear auth state
-    navigate("/login");       // ✅ go to login page
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
   };
 
   // Get user initials for avatar
@@ -157,14 +157,14 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
                 </div>
                 <DropdownMenuItem 
                   className="cursor-pointer"
-                  onClick={() => window.location.href = '/settings'}
+                  onClick={() => navigate('/settings')}
                 >
                   <User className="mr-2 h-4 w-4" />
                   {language === 'ar' ? 'الملف الشخصي' : 'Profil'}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="cursor-pointer"
-                  onClick={() => window.location.href = '/settings'}
+                  onClick={() => navigate('/settings')}
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   {t('nav.settings')}

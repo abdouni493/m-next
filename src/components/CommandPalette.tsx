@@ -44,7 +44,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           id: 'dashboard',
           label: t('nav.dashboard'),
           icon: BarChart3,
-          action: () => navigate('/'),
+          action: () => navigate('/dashboard'),
           keywords: ['tableau', 'bord', 'dashboard', 'home', 'accueil'],
         },
         {

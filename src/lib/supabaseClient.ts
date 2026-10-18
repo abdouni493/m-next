@@ -6,7 +6,6 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 // Validate environment variables
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -18,11 +17,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Supabase credentials not configured!');
 }
 
-// Use service role key if available for unrestricted access, otherwise use anon key
-const authKey = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
-const isUsingServiceRole = !!SUPABASE_SERVICE_ROLE_KEY;
-
-export const supabase = createClient(SUPABASE_URL, authKey, {
+// The browser only ever uses the public anon key. Access control is enforced by
+// Supabase Auth + Row Level Security. Never ship a service-role key to the client.
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -38,8 +35,6 @@ export const supabase = createClient(SUPABASE_URL, authKey, {
   },
 });
 
-// Log which key is being used
-console.log(`🔑 Supabase initialized with ${isUsingServiceRole ? 'SERVICE ROLE KEY' : 'ANON KEY'}`);
 
 // ========== USER MANAGEMENT ==========
 

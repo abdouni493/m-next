@@ -27,6 +27,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Website_Enhanced = lazy(() => import("./pages/Website_Enhanced"));
 const Commands = lazy(() => import("./pages/Commands"));
 const Clients = lazy(() => import("./pages/Clients"));
+const AccessDenied = lazy(() => import("./pages/AccessDenied"));
 
 const ShopLayout = lazy(() => import("@/shop/components/ShopLayout").then((m) => ({ default: m.ShopLayout })));
 const ShopHome = lazy(() => import("@/shop/pages/Home"));
@@ -36,7 +37,7 @@ const ShopPromotions = lazy(() => import("@/shop/pages/Promotions"));
 const ShopPacks = lazy(() => import("@/shop/pages/Packs"));
 const ShopContact = lazy(() => import("@/shop/pages/Contact"));
 const ShopCheckout = lazy(() => import("@/shop/pages/Checkout"));
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider, useAuth, isAdminRole, homeForRole } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import NotFound from "./pages/NotFound";
 import { CommandPalette, useCommandPalette } from "./components/CommandPalette";
@@ -48,31 +49,30 @@ const WorkerLayout = lazy(() => import("@/workers/WorkerLayout").then((m) => ({ 
 
 const queryClient = new QueryClient();
 
-// Protected Route Component
-const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
+const FullScreenLoader = () => (
+  <div className="flex h-dvh w-screen items-center justify-center bg-background" role="status" aria-label="Chargement">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
+  </div>
+);
+
+// Protected Route Component — waits for the Supabase session to be restored before deciding.
+const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: "admin" | "employee" }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
-  
-  // Don't redirect while checking auth status
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/login" replace />;
-  }
-  
+  const location = useLocation();
+
+  if (isLoading) return <FullScreenLoader />;
+  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  const allowed = requiredRole === "admin" ? isAdminRole(user?.role) : requiredRole ? user?.role === requiredRole : true;
+  if (!allowed) return <Navigate to={homeForRole(user?.role)} replace />;
   return <>{children}</>;
+};
+
+/** /login: already signed-in users go straight to their home page. */
+const LoginRoute = () => {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  if (isLoading) return <FullScreenLoader />;
+  if (isAuthenticated) return <Navigate to={homeForRole(user?.role)} replace />;
+  return <Login />;
 };
 
 const RouteFallback = () => (
@@ -82,22 +82,13 @@ const RouteFallback = () => (
 );
 
 const AppContent = () => {
-  const { isAuthenticated, login, user, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   const { open, setOpen } = useCommandPalette();
   const { pathname } = useLocation();
   const isShop = pathname.startsWith("/website-shop");
 
-  // Show loading screen while checking authentication (the public shop never waits for auth)
-  if (isLoading && !isShop) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading application...</p>
-        </div>
-      </div>
-    );
-  }
+  // Each guard (ProtectedRoute / LoginRoute) shows its own loader while the session is restored.
+  void isLoading;
 
   return (
     <>
@@ -105,7 +96,8 @@ const AppContent = () => {
       <Suspense fallback={<RouteFallback />}>
       <Routes>
         {/* LOGIN ROUTE */}
-        <Route path="/login" element={<Login onLogin={login} />} />
+        <Route path="/login" element={<LoginRoute />} />
+        <Route path="/acces-refuse" element={<AccessDenied />} />
 
         {/* WEBSITE SHOP - PUBLIC ROUTES */}
         <Route element={<ShopLayout />}>
@@ -118,7 +110,7 @@ const AppContent = () => {
           <Route path="/website-shop/order" element={<ShopCheckout />} />
           <Route path="/website-shop/checkout" element={<Navigate to="/website-shop/order" replace />} />
         </Route>
-        <Route path="/admin" element={<Navigate to="/login" replace />} />
+        <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
 
         {/* DEFAULT ROUTE - REDIRECT TO WEBSITE SHOP */}
         <Route path="/" element={<Navigate to="/website-shop" replace />} />
@@ -132,7 +124,8 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="clients" element={<Clients />} />
           <Route path="facturedustock" element={<FactureDuStock />} />

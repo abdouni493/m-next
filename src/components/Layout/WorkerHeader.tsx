@@ -39,9 +39,9 @@ export const WorkerHeader = ({ onMenuClick, sidebarOpen }: WorkerHeaderProps) =>
     localStorage.setItem('theme', !isDarkMode ? 'dark' : 'light');
   };
 
-  const handleLogout = () => {
-    logout();                 // ✅ clear auth state
-    navigate("/login");       // ✅ go to login page
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
   };
 
   return (
