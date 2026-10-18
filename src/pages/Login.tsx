@@ -4,13 +4,18 @@ import {
   Eye,
   EyeOff,
   Mail,
-  Globe,
-  UserPlus
+  UserPlus,
+  Zap,
+  BatteryCharging,
+  Boxes,
+  ScanLine,
+  ShieldCheck,
+  ArrowRight,
+  Store
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -191,216 +196,167 @@ export default function Login({ onLogin }: LoginProps) {
     }
   };
 
+  const field = "h-12 rounded-xl border-white/10 bg-white/[0.04] pl-11 text-[15px] text-white placeholder:text-slate-500 hover:border-white/20 focus-visible:ring-[#C6F432]/60 focus-visible:ring-offset-0";
+  const labelCls = "text-sm font-medium text-slate-300";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-background to-emerald-50 dark:from-slate-950 dark:via-background dark:to-slate-900 p-4">
-      <motion.div
-        className="w-full max-w-md space-y-6"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
-        {/* Logo & Header with Store Logo in Circle */}
+    <div className="relative min-h-dvh overflow-hidden bg-[#070A10] text-white">
+      {/* ambient volt glow + grid */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[#C6F432]/10 blur-[120px]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:44px_44px]" />
+
+      <div className="relative mx-auto grid min-h-dvh max-w-6xl items-center gap-10 px-4 py-8 lg:grid-cols-2 lg:px-8">
+        {/* Brand / charging panel */}
         <motion.div
-          className="text-center space-y-4"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="hidden lg:block"
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex justify-center">
-            <div className="w-24 h-24 rounded-full overflow-hidden shadow-2xl border-4 border-blue-500 bg-white flex items-center justify-center">
-              {storeLogoUrl ? (
-                <img src={storeLogoUrl} alt="Store Logo" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-emerald-600 flex items-center justify-center text-white">
-                  <Globe className="w-12 h-12" />
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-[#C6F432]">
+              {storeLogoUrl ? <img src={storeLogoUrl} alt="" className="h-full w-full object-cover" /> : <Zap className="h-6 w-6 text-[#0B1220]" fill="currentColor" />}
+            </div>
+            <span className="font-sora text-2xl font-bold tracking-tight">{storeName}</span>
+          </div>
+          <h1 className="mt-10 font-sora text-5xl font-bold leading-[1.1] tracking-tight">
+            Gérez votre stock de <span className="text-[#C6F432]">chargeurs</span> à pleine puissance.
+          </h1>
+          <p className="mt-5 max-w-md text-lg text-slate-400">Inventaire, ventes, caisse et commandes de la boutique en ligne, au même endroit.</p>
+
+          {/* charging card */}
+          <div className="mt-10 max-w-md rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5"><BatteryCharging className="h-6 w-6 text-[#C6F432]" /></div>
+                <div>
+                  <p className="text-sm font-semibold">Session sécurisée</p>
+                  <p className="text-xs text-slate-500">19.5V · 3.34A · 65W</p>
                 </div>
-              )}
+              </div>
+              <span className="font-sora text-2xl font-bold tabular-nums text-[#C6F432]">100%</span>
+            </div>
+            <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
+              <motion.div className="h-full rounded-full bg-[#C6F432]" initial={{ width: "8%" }} animate={{ width: "100%" }} transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }} />
+            </div>
+            <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+              {[{ i: Boxes, t: "Inventaire" }, { i: ScanLine, t: "Caisse" }, { i: ShieldCheck, t: "Sécurisé" }].map(({ i: Icon, t }) => (
+                <div key={t} className="rounded-xl bg-white/[0.04] px-2 py-3"><Icon className="mx-auto h-5 w-5 text-slate-300" /><p className="mt-1.5 text-xs text-slate-400">{t}</p></div>
+              ))}
             </div>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">{storeName}</h1>
-          <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            {isSignUp ? "📝 Créer un compte administrateur" : "🔐 Connexion"}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {isSignUp ? "Créez votre compte pour accéder à la gestion" : "Accédez à votre espace de gestion"}
-          </p>
         </motion.div>
 
-        {/* Form Card */}
+        {/* Form */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          className="mx-auto w-full max-w-md"
+          initial={{ opacity: 0, y: 24, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Card className="border-blue-200 dark:border-blue-900 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-950 dark:to-emerald-950 rounded-t-lg">
-              <CardTitle className="text-center text-xl">
-                {isSignUp ? "🔑 Créer un compte" : "🔑 Se Connecter"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-4">
-                {/* Signup - Username Input */}
-                {isSignUp && (
-                  <div>
-                    <Label htmlFor="signup-username" className="flex items-center gap-2 mb-2">
-                      👤 Nom d'utilisateur
-                    </Label>
+          <div className="mb-8 flex flex-col items-center text-center lg:hidden">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-[#C6F432] shadow-[0_0_40px_rgba(198,244,50,0.35)]">
+              {storeLogoUrl ? <img src={storeLogoUrl} alt="" className="h-full w-full object-cover" /> : <Zap className="h-8 w-8 text-[#0B1220]" fill="currentColor" />}
+            </div>
+            <span className="mt-3 font-sora text-2xl font-bold">{storeName}</span>
+            <span className="text-sm text-slate-400">Espace de gestion des chargeurs</span>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-[#0E131D]/90 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+            <div className="mb-6">
+              <h2 className="font-sora text-2xl font-bold">{isSignUp ? "Créer un compte" : "Connexion"}</h2>
+              <p className="mt-1 text-sm text-slate-400">{isSignUp ? "Compte administrateur de la boutique." : "Accédez à votre espace de gestion."}</p>
+            </div>
+
+            <AnimatePresence mode="wait" initial={false}>
+              {!isSignUp ? (
+                <motion.form key="login" onSubmit={handleLogin} className="space-y-4"
+                  initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className={labelCls}>Email</Label>
                     <div className="relative">
-                      <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-500" />
-                      <Input
-                        id="signup-username"
-                        type="text"
-                        value={signUpCredentials.username}
-                        onChange={(e) => setSignUpCredentials(prev => ({ ...prev, username: e.target.value }))}
-                        placeholder="Votre nom d'utilisateur"
-                        className="pl-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500"
-                        required
-                      />
+                      <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
+                      <Input id="email" type="email" autoComplete="email" placeholder="vous@exemple.com" value={loginCredentials.email}
+                        onChange={(e) => setLoginCredentials({ ...loginCredentials, email: e.target.value })} className={field} required />
                     </div>
                   </div>
-                )}
-
-                {/* Email Input */}
-                <div>
-                  <Label htmlFor={isSignUp ? "signup-email" : "login-email"} className="flex items-center gap-2 mb-2">
-                    📧 Email
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-500" />
-                    <Input
-                      id={isSignUp ? "signup-email" : "login-email"}
-                      type="email"
-                      value={isSignUp ? signUpCredentials.email : loginCredentials.email}
-                      onChange={(e) => isSignUp 
-                        ? setSignUpCredentials(prev => ({ ...prev, email: e.target.value }))
-                        : setLoginCredentials(prev => ({ ...prev, email: e.target.value }))
-                      }
-                      placeholder="votre@email.com"
-                      className="pl-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Password Input */}
-                <div>
-                  <Label htmlFor={isSignUp ? "signup-password" : "login-password"} className="flex items-center gap-2 mb-2">
-                    🔒 Mot de passe
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-500" />
-                    <Input
-                      id={isSignUp ? "signup-password" : "login-password"}
-                      type={showPassword ? "text" : "password"}
-                      value={isSignUp ? signUpCredentials.password : loginCredentials.password}
-                      onChange={(e) => isSignUp 
-                        ? setSignUpCredentials(prev => ({ ...prev, password: e.target.value }))
-                        : setLoginCredentials(prev => ({ ...prev, password: e.target.value }))
-                      }
-                      placeholder="Votre mot de passe"
-                      className="pl-10 pr-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500"
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full w-10"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4 text-blue-500" /> : <Eye className="h-4 w-4 text-blue-500" />}
-                    </Button>
-                  </div>
-                  {isSignUp && (
-                    <p className="text-xs text-muted-foreground mt-1">Minimum 6 caractères</p>
-                  )}
-                </div>
-
-                {/* Signup - Confirm Password Input */}
-                {isSignUp && (
-                  <div>
-                    <Label htmlFor="signup-confirm-password" className="flex items-center gap-2 mb-2">
-                      🔒 Confirmer le mot de passe
-                    </Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className={labelCls}>Mot de passe</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-500" />
-                      <Input
-                        id="signup-confirm-password"
-                        type={showConfirmPassword ? "text" : "password"}
-                        value={signUpCredentials.confirmPassword}
-                        onChange={(e) => setSignUpCredentials(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        placeholder="Confirmez votre mot de passe"
-                        className="pl-10 pr-10 border-blue-200 focus:border-blue-500 focus:ring-blue-500"
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full w-10"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4 text-blue-500" /> : <Eye className="h-4 w-4 text-blue-500" />}
-                      </Button>
+                      <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
+                      <Input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="••••••••" value={loginCredentials.password}
+                        onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })} className={`${field} pr-11`} required />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white" aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}>
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
                   </div>
-                )}
-
-                {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white font-semibold text-base py-6"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      {isSignUp ? "Création..." : "Connexion..."}
-                    </div>
-                  ) : (
-                    isSignUp ? <>👤 Créer mon compte</> : <>🔐 Se connecter</>
-                  )}
-                </Button>
-
-                {/* Toggle between Login and Signup */}
-                <div className="text-center pt-2">
-                  <p className="text-sm text-muted-foreground">
-                    {isSignUp ? "Vous avez déjà un compte?" : "Vous n'avez pas de compte?"}
-                    {" "}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsSignUp(!isSignUp);
-                        setLoginCredentials({ email: "", password: "" });
-                        setSignUpCredentials({ email: "", password: "", confirmPassword: "", username: "" });
-                      }}
-                      className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                    >
-                      {isSignUp ? "Se connecter" : "Créer un compte"}
-                    </button>
+                  <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-xl bg-[#C6F432] text-[15px] font-semibold text-[#0B1220] shadow-[0_8px_30px_-8px_rgba(198,244,50,0.6)] hover:bg-[#C6F432] hover:brightness-95">
+                    {isLoading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#0B1220]/30 border-t-[#0B1220]" /> : <>Se connecter <ArrowRight className="h-4 w-4" /></>}
+                  </Button>
+                  <p className="text-center text-sm text-slate-400">
+                    Pas encore de compte ?{" "}
+                    <button type="button" onClick={() => setIsSignUp(true)} className="font-semibold text-[#C6F432] hover:underline">Créer un compte</button>
                   </p>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
+                </motion.form>
+              ) : (
+                <motion.form key="signup" onSubmit={handleSignUp} className="space-y-4"
+                  initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
+                  <div className="space-y-2">
+                    <Label htmlFor="username" className={labelCls}>Nom d'utilisateur</Label>
+                    <div className="relative">
+                      <UserPlus className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
+                      <Input id="username" autoComplete="username" value={signUpCredentials.username}
+                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, username: e.target.value })} className={field} required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email" className={labelCls}>Email</Label>
+                    <div className="relative">
+                      <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
+                      <Input id="signup-email" type="email" autoComplete="email" value={signUpCredentials.email}
+                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, email: e.target.value })} className={field} required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password" className={labelCls}>Mot de passe</Label>
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
+                      <Input id="signup-password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={signUpCredentials.password}
+                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, password: e.target.value })} className={`${field} pr-11`} required minLength={6} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white" aria-label="Afficher ou masquer le mot de passe">
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className={labelCls}>Confirmer le mot de passe</Label>
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500" />
+                      <Input id="confirm-password" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" value={signUpCredentials.confirmPassword}
+                        onChange={(e) => setSignUpCredentials({ ...signUpCredentials, confirmPassword: e.target.value })} className={`${field} pr-11`} required />
+                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white" aria-label="Afficher ou masquer la confirmation">
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-xl bg-[#C6F432] text-[15px] font-semibold text-[#0B1220] hover:bg-[#C6F432] hover:brightness-95">
+                    {isLoading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#0B1220]/30 border-t-[#0B1220]" /> : "Créer le compte"}
+                  </Button>
+                  <p className="text-center text-sm text-slate-400">
+                    Déjà un compte ?{" "}
+                    <button type="button" onClick={() => setIsSignUp(false)} className="font-semibold text-[#C6F432] hover:underline">Se connecter</button>
+                  </p>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </div>
 
-        {/* Visit Website Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Button 
-            type="button"
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
-            onClick={() => navigate('/website-shop')}
-          >
-            🌐 Visiter le Site Web
-          </Button>
+          <button onClick={() => navigate("/website-shop")} className="mx-auto mt-6 flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">
+            <Store className="h-4 w-4" /> Voir la boutique en ligne
+          </button>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }

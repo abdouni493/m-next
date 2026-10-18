@@ -449,3 +449,30 @@ All colors MUST be HSL.
 
 /* Font helpers */
 .font-grotesk { font-family: 'Space Grotesk', sans-serif; }
+/* ====== Admin: dark-mode fallbacks for screens that hard-code light colours ====== */
+.dark .bg-white:not([class*='dark:bg-']) { background-color: hsl(var(--card)); }
+.dark .bg-slate-50:not([class*='dark:bg-']),
+.dark .bg-gray-50:not([class*='dark:bg-']),
+.dark .bg-gray-100:not([class*='dark:bg-']) { background-color: hsl(var(--muted)); }
+.dark .text-slate-900:not([class*='dark:text-']),
+.dark .text-gray-900:not([class*='dark:text-']),
+.dark .text-gray-800:not([class*='dark:text-']) { color: hsl(var(--foreground)); }
+.dark .border-gray-200:not([class*='dark:border-']),
+.dark .border-slate-200:not([class*='dark:border-']) { border-color: hsl(var(--border)); }
+
+/* ====== Admin: phone layout safety nets ====== */
+@media (max-width: 639px) {
+  /* Fixed multi-column grids without responsive variants collapse to 2 columns */
+  .admin-main .grid-cols-3:not([class*='sm:grid-cols']):not([class*='md:grid-cols']):not([class*='lg:grid-cols']),
+  .admin-main .grid-cols-4:not([class*='sm:grid-cols']):not([class*='md:grid-cols']):not([class*='lg:grid-cols']),
+  .admin-main .grid-cols-5:not([class*='sm:grid-cols']):not([class*='md:grid-cols']):not([class*='lg:grid-cols']),
+  .admin-main .grid-cols-6:not([class*='sm:grid-cols']):not([class*='md:grid-cols']):not([class*='lg:grid-cols']) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Large page titles scale down */
+  .admin-main h1.text-4xl, .admin-main h1.text-3xl { font-size: 1.5rem; line-height: 2rem; }
+  /* Wide tables scroll horizontally instead of squashing */
+  .admin-main table { min-width: 560px; }
+  /* Comfortable touch targets */
+  .admin-main button, .admin-main [role='button'] { min-height: 40px; }
+}

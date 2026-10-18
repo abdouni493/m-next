@@ -23,8 +23,8 @@ export default function WorkerSidebar({ isOpen }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-[width] duration-300 ease-out flex flex-col",
-        isOpen ? "w-64" : "w-20"
+        "h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col",
+        "w-64"
       )}
     >
       {/* Logo */}

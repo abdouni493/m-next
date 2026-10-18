@@ -1,26 +1,111 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+const DESKTOP_QUERY = '(min-width: 1024px)';
+const STORAGE_KEY = 'admin:sidebar';
+
+export const useIsDesktop = () => {
+  const [desktop, setDesktop] = useState(() => typeof window !== 'undefined' && window.matchMedia(DESKTOP_QUERY).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_QUERY);
+    const on = () => setDesktop(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return desktop;
+};
 
 export const AppLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isDesktop = useIsDesktop();
+  const { isRTL } = useLanguage();
   const location = useLocation();
+  // Desktop remembers the user's choice; phones/tablets always start with the menu hidden.
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (!window.matchMedia(DESKTOP_QUERY).matches) return false;
+    try { return localStorage.getItem(STORAGE_KEY) !== 'closed'; } catch { return true; }
+  });
+
+  useEffect(() => { if (!isDesktop) setSidebarOpen(false); }, [isDesktop]);
+  // Opening a screen from the menu closes it on mobile so the screen gets the full width.
+  useEffect(() => { if (!isDesktop) setSidebarOpen(false); }, [location.pathname, isDesktop]);
+  useEffect(() => {
+    if (!isDesktop) return;
+    try { localStorage.setItem(STORAGE_KEY, sidebarOpen ? 'open' : 'closed'); } catch { /* ignore */ }
+  }, [sidebarOpen, isDesktop]);
+  useEffect(() => {
+    if (isDesktop || !sidebarOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setSidebarOpen(false);
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [sidebarOpen, isDesktop]);
+
+  const slideFrom = isRTL ? '100%' : '-100%';
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar isOpen={sidebarOpen} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-          sidebarOpen={sidebarOpen}
-        />
-        <main className="custom-scrollbar flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+    <div className="flex h-dvh bg-background">
+      {/* Desktop: sidebar pushes content and hides completely when closed */}
+      {isDesktop && (
+        <AnimatePresence initial={false}>
+          {sidebarOpen && (
+            <motion.div
+              key="sidebar"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 272, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 38 }}
+              className="shrink-0 overflow-hidden"
+            >
+              <Sidebar />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
+
+      {/* Mobile / tablet: overlay drawer */}
+      {!isDesktop && (
+        <AnimatePresence>
+          {sidebarOpen && (
+            <>
+              <motion.div
+                key="backdrop"
+                className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setSidebarOpen(false)}
+                aria-hidden
+              />
+              <motion.div
+                key="drawer"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu"
+                className={`fixed inset-y-0 z-50 w-[min(84vw,300px)] shadow-elegant ${isRTL ? 'right-0' : 'left-0'}`}
+                initial={{ x: slideFrom }}
+                animate={{ x: 0 }}
+                exit={{ x: slideFrom }}
+                transition={{ type: 'spring', stiffness: 420, damping: 40 }}
+              >
+                <Sidebar onClose={() => setSidebarOpen(false)} />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Header onMenuClick={() => setSidebarOpen((o) => !o)} sidebarOpen={sidebarOpen} />
+        <main className="admin-main custom-scrollbar flex-1 overflow-auto px-3 py-4 sm:px-5 md:py-6 lg:px-8">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
-              className="max-w-7xl mx-auto"
+              className="mx-auto max-w-7xl"
               initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
               exit={{ opacity: 0, y: -6, transition: { duration: 0.16, ease: [0.55, 0, 1, 0.45] } }}

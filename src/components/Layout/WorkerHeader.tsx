@@ -46,7 +46,7 @@ export const WorkerHeader = ({ onMenuClick, sidebarOpen }: WorkerHeaderProps) =>
 
   return (
     <header className="bg-card border-b border-border shadow-sm">
-      <div className="flex items-center justify-between h-16 px-6">
+      <div className="flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-6">
         {/* Left Section */}
         <div className="flex items-center gap-4">
           <Button

@@ -92,17 +92,19 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
 
   return (
     <header className="sticky top-0 z-10 border-b border-border/60 bg-background/75 backdrop-blur-xl">
-      <div className="flex items-center justify-between h-16 px-6">
+      <div className="flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-6">
         {/* Left Section */}
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={onMenuClick}
             className="rounded-xl hover:bg-accent"
-            aria-label="Toggle sidebar"
+            aria-label={sidebarOpen ? 'Masquer le menu' : 'Afficher le menu'}
+            aria-expanded={sidebarOpen}
           >
-            {sidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+            <Menu className="w-5 h-5 lg:hidden" />
+            <span className="hidden lg:inline-flex">{sidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}</span>
           </Button>
 
           <div className="hidden sm:flex items-center gap-2">
@@ -118,7 +120,7 @@ export const Header = ({ onMenuClick, sidebarOpen }: HeaderProps) => {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
           {/* Dark Mode Toggle */}
           <Button
             variant="ghost"

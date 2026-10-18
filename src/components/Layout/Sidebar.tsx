@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Boxes, UsersRound, Truck, Receipt, Store, LineChart, PackageCheck,
-  Globe2, ScanLine, Wallet, Barcode, Settings2, Zap, Crown, UserRound, type LucideIcon,
+  Globe2, ScanLine, Wallet, Barcode, Settings2, Zap, Crown, UserRound, X, type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,12 +11,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getWebsiteSettingsREST } from '@/lib/supabaseClient';
 
 interface SidebarProps {
-  isOpen: boolean;
+  /** Present when rendered as the mobile drawer. */
+  onClose?: () => void;
 }
 
 type NavItem = { title: string; href: string; icon: LucideIcon };
 
-export const Sidebar = ({ isOpen }: SidebarProps) => {
+export const Sidebar = ({ onClose }: SidebarProps) => {
+  // The parent layout fully shows/hides the sidebar, so it always renders expanded.
+  const isOpen = true;
   const location = useLocation();
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
@@ -138,12 +141,9 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
   );
 
   return (
-    <motion.aside
-      initial={false}
-      animate={{ width: isOpen ? 272 : 80 }}
-      transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+    <aside
       className={cn(
-        'relative z-20 flex shrink-0 flex-col overflow-hidden bg-sidebar text-sidebar-foreground',
+        'relative z-20 flex h-full w-[272px] max-w-full flex-col overflow-hidden bg-sidebar text-sidebar-foreground',
         isRTL ? 'border-l border-sidebar-border' : 'border-r border-sidebar-border'
       )}
     >
@@ -172,6 +172,15 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
             </motion.div>
           )}
         </AnimatePresence>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className={cn('ms-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white', isRTL && 'me-auto ms-0')}
+            aria-label="Fermer le menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -198,6 +207,6 @@ export const Sidebar = ({ isOpen }: SidebarProps) => {
           )}
         </div>
       </div>
-    </motion.aside>
+    </aside>
   );
 };
