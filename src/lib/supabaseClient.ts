@@ -1343,6 +1343,10 @@ export const finalizeOrder = async (id: string) => {
 
     console.log('✅ Order delivered:', updatedOrder.id);
 
+    // Quotas: order lines assigned to a quota at confirmation are recorded as quota sales (idempotent).
+    const { error: quotaError } = await supabase.rpc('apply_order_quotas', { p_order_id: String(id) });
+    if (quotaError) console.warn('⚠️ Quota sales not recorded:', quotaError.message);
+
     console.log('✅ Order finalized successfully!');
     return updatedOrder;
   } catch (error) {

@@ -1,1399 +1,308 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Truck, Plus, Layers, ShoppingBag, CalendarDays, Wallet, Receipt, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { uploadImage } from '@/lib/imageUpload';
 import { supabase } from '@/lib/supabaseClient';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { todayISO } from '@/lib/quotas';
+import { cn } from '@/lib/utils';
+import { PageHero, Panel, EmptyState, formatDA } from '@/admin/ui';
+import { ChargerLinesEditor, lineTotal, type ChargerLine } from '@/admin/ChargerLinesEditor';
 
-interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  mark?: { id: string; name: string };
-  mark_id?: string;
-  connector_type?: { id: string; name: string };
-  connector_type_id?: string;
-  voltage: number;
-  wattage: number;
-  amperage: number;
-  model_number?: string;
-  quantity_initial: number;
-  quantity_actual: number;
-  quantity_minimal: number;
-  purchase_price: number;
-  selling_price: number;
-  primary_image?: string;
-  margin?: number;
+interface Supplier { id: string; name: string }
+interface Invoice {
+  id: string; invoice_number: string; invoice_date: string; status: string; total_amount: number; amount_paid?: number;
+  supplier_id?: string | null; notes?: string | null;
 }
 
-interface Supplier {
-  id: string;
-  name: string;
-}
-
-interface Mark {
-  id: string;
-  name: string;
-}
-
-interface ConnectorType {
-  id: string;
-  name: string;
-}
-
-interface FormData {
-  product_id?: string;
-  quantity_initial: string;
-  quantity_actual: string;
-  quantity_minimal: string;
-  purchase_price: string;
-  selling_price: string;
-  mark_id: string;
-  connector_type_id: string;
-  supplier_id: string;
-  voltage: string;
-  wattage: string;
-  amperage: string;
-  description: string;
-  model_number: string;
-  amount_paid: string;
-  images: File[];
-}
+const emptyQuota = () => ({ name: '', description: '', date: todayISO() });
 
 export default function PurchaseInvoices() {
   const { toast } = useToast();
-  const { language, isRTL } = useLanguage();
-
-  // Loading & UI States
-  const [loading, setLoading] = useState(false);
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [step, setStep] = useState<'search' | 'form'>('search'); // search for product or form to fill
-
-  // Data States
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [marks, setMarks] = useState<Mark[]>([]);
-  const [connectorTypes, setConnectorTypes] = useState<ConnectorType[]>([]);
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [chargerImages, setChargerImages] = useState<Array<{ id: string; image_url: string; file_path: string; display_order: number; is_primary: boolean }>>([]); // Store existing product images
+  const [quotaByInvoice, setQuotaByInvoice] = useState<Record<string, { id: string; name: string }>>({});
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Form States
-  const [formData, setFormData] = useState<FormData>({
-    product_id: '',
-    quantity_initial: '',
-    quantity_actual: '',
-    quantity_minimal: '',
-    purchase_price: '',
-    selling_price: '',
-    mark_id: '',
-    connector_type_id: '',
-    supplier_id: '',
-    voltage: '',
-    wattage: '',
-    amperage: '',
-    description: '',
-    model_number: '',
-    amount_paid: '',
-    images: [],
-  });
+  // Create form
+  const [useQuota, setUseQuota] = useState(false);
+  const [quota, setQuota] = useState(emptyQuota);
+  const [lines, setLines] = useState<ChargerLine[]>([]);
+  const [supplierId, setSupplierId] = useState('');
+  const [amountPaid, setAmountPaid] = useState('0');
+  const [notes, setNotes] = useState('');
 
-  const [showAddMarkModal, setShowAddMarkModal] = useState(false);
-  const [newMarkName, setNewMarkName] = useState('');
-  const [showAddConnectorModal, setShowAddConnectorModal] = useState(false);
-  const [newConnectorName, setNewConnectorName] = useState('');
-
-  // Load initial data
-  useEffect(() => {
-    loadSuppliers();
-    loadMarks();
-    loadConnectorTypes();
-    loadInvoices();
-  }, []);
-
-  // Search products
-  useEffect(() => {
-    if (searchTerm.trim()) {
-      searchProducts();
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchTerm]);
-
-  const getText = (key: string): string => {
-    const translations: { [key: string]: { [key: string]: string } } = {
-      en: {
-        title: 'Purchase Management',
-        new_purchase: 'New Purchase',
-        total_invoices: 'Total Invoices',
-        paid_invoices: 'Paid Invoices',
-        pending_invoices: 'Pending Invoices',
-        total_amount: 'Total Amount',
-        recent_invoices: 'Recent Invoices',
-        showing_invoices: 'Showing latest {count} of {total} invoices',
-        no_invoices: 'No invoices yet',
-        start_creating: 'Start by creating a new purchase invoice',
-        search_charger: 'Search Chargers...',
-        no_results: 'No chargers found',
-        mark: 'Mark',
-        connector: 'Connector Type',
-        voltage: 'Voltage (V)',
-        wattage: 'Wattage (W)',
-        amperage: 'Amperage (A)',
-        model: 'Model Number',
-        initial_qty: 'Initial Quantity',
-        actual_qty: 'Actual Quantity',
-        minimal_qty: 'Minimal Quantity',
-        purchase_price: 'Purchase Price',
-        selling_price: 'Selling Price',
-        supplier: 'Supplier',
-        amount_paid: 'Amount Paid',
-        total_rest: 'Rest to Pay',
-        save: 'Save Purchase',
-        cancel: 'Cancel',
-        loading: 'Loading...',
-        error: 'Error',
-        success: 'Success',
-        add_new_mark: 'Add New Mark',
-        add_new_connector: 'Add Connector Type',
-        description: 'Description (Optional)',
-        images: 'Product Images',
-        upload_images: 'Upload Images',
-        search_by_name_mark: 'Search by name or mark...',
-        select_product_first: 'Please select a charger first',
-        charger_selected: 'Charger selected successfully',
-        purchase_created: 'Purchase created successfully',
-        purchase_updated: 'Product updated successfully',
-        delete_image: 'Delete image',
-      },
-      fr: {
-        title: 'Gestion des Achats',
-        new_purchase: 'Nouvel Achat',
-        total_invoices: 'Total des factures',
-        paid_invoices: 'Factures payées',
-        pending_invoices: 'Factures en attente',
-        total_amount: 'Montant total',
-        recent_invoices: 'Factures récentes',
-        showing_invoices: 'Affichage des {count} dernières sur {total} factures',
-        no_invoices: 'Aucune facture',
-        start_creating: 'Commencez par créer une nouvelle facture d\'achat',
-        search_charger: 'Rechercher des chargeurs...',
-        no_results: 'Aucun chargeur trouvé',
-        mark: 'Marque',
-        connector: 'Type de connecteur',
-        voltage: 'Tension (V)',
-        wattage: 'Puissance (W)',
-        amperage: 'Intensité (A)',
-        model: 'Numéro de modèle',
-        initial_qty: 'Quantité initiale',
-        actual_qty: 'Quantité actuelle',
-        minimal_qty: 'Quantité minimale',
-        purchase_price: 'Prix d\'achat',
-        selling_price: 'Prix de vente',
-        supplier: 'Fournisseur',
-        amount_paid: 'Montant payé',
-        total_rest: 'Reste à payer',
-        save: 'Sauvegarder l\'achat',
-        cancel: 'Annuler',
-        loading: 'Chargement...',
-        error: 'Erreur',
-        success: 'Succès',
-        add_new_mark: 'Ajouter une nouvelle marque',
-        add_new_connector: 'Ajouter un type de connecteur',
-        description: 'Description (optionnel)',
-        images: 'Images du produit',
-        upload_images: 'Télécharger des images',
-        search_by_name_mark: 'Rechercher par nom ou marque...',
-        select_product_first: 'Veuillez d\'abord sélectionner un chargeur',
-        charger_selected: 'Chargeur sélectionné avec succès',
-        purchase_created: 'Achat créé avec succès',
-        purchase_updated: 'Produit mis à jour avec succès',
-        delete_image: 'Supprimer l\'image',
-      },
-      ar: {
-        title: 'إدارة الشراء',
-        new_purchase: 'شراء جديد',
-        total_invoices: 'إجمالي الفواتير',
-        paid_invoices: 'فواتير مدفوعة',
-        pending_invoices: 'فواتير معلقة',
-        total_amount: 'المجموع',
-        recent_invoices: 'الفواتير الأخيرة',
-        showing_invoices: 'عرض آخر {count} من أصل {total} فاتورة',
-        no_invoices: 'لا توجد فواتير',
-        start_creating: 'ابدأ بإنشاء فاتورة شراء جديدة',
-        search_charger: 'البحث عن الشواحن...',
-        no_results: 'لم يتم العثور على شواحن',
-        mark: 'العلامة',
-        connector: 'نوع الموصل',
-        voltage: 'الجهد (V)',
-        wattage: 'القوة (W)',
-        amperage: 'التيار (A)',
-        model: 'رقم الموديل',
-        initial_qty: 'الكمية الأولية',
-        actual_qty: 'الكمية الحالية',
-        minimal_qty: 'الحد الأدنى للكمية',
-        purchase_price: 'سعر الشراء',
-        selling_price: 'سعر البيع',
-        supplier: 'المورد',
-        amount_paid: 'المبلغ المدفوع',
-        total_rest: 'الباقي',
-        save: 'حفظ الشراء',
-        cancel: 'إلغاء',
-        loading: 'جاري التحميل...',
-        error: 'خطأ',
-        success: 'نجاح',
-        add_new_mark: 'إضافة علامة جديدة',
-        add_new_connector: 'إضافة نوع موصل',
-        description: 'الوصف (اختياري)',
-        images: 'صور المنتج',
-        upload_images: 'تحميل الصور',
-        search_by_name_mark: 'البحث بالاسم أو العلامة...',
-        select_product_first: 'يرجى تحديد شاحن أولاً',
-        charger_selected: 'تم تحديد الشاحن بنجاح',
-        purchase_created: 'تم إنشاء الشراء بنجاح',
-        purchase_updated: 'تم تحديث المنتج بنجاح',
-        delete_image: 'حذف الصورة',
-      },
-    };
-
-    return translations[language]?.[key] || key;
-  };
+  useEffect(() => { loadSuppliers(); loadInvoices(); }, []);
 
   const loadSuppliers = async () => {
-    try {
-      const { data } = await supabase
-        .from('suppliers')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name');
-      setSuppliers(data || []);
-    } catch (error) {
-      console.error('Error loading suppliers:', error);
-    }
-  };
-
-  const loadMarks = async () => {
-    try {
-      const { data } = await supabase
-        .from('marks')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name');
-      setMarks(data || []);
-    } catch (error) {
-      console.error('Error loading marks:', error);
-    }
-  };
-
-  const loadConnectorTypes = async () => {
-    try {
-      const { data } = await supabase
-        .from('connector_types')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name');
-      setConnectorTypes(data || []);
-    } catch (error) {
-      console.error('Error loading connector types:', error);
-    }
+    const { data } = await supabase.from('suppliers').select('id, name').eq('is_active', true).order('name');
+    setSuppliers(data || []);
   };
 
   const loadInvoices = async () => {
+    const { data } = await supabase.from('invoices').select('*').eq('type', 'purchase').order('invoice_date', { ascending: false });
+    setInvoices(data || []);
+    const { data: qs } = await supabase.from('quotas').select('id, name, invoice_id');
+    setQuotaByInvoice(Object.fromEntries((qs || []).filter((q: any) => q.invoice_id).map((q: any) => [q.invoice_id, { id: q.id, name: q.name }])));
+  };
+
+  const supplierName = useMemo(() => Object.fromEntries(suppliers.map((s) => [s.id, s.name])), [suppliers]);
+  const total = lines.reduce((s, l) => s + lineTotal(l), 0);
+  const totalQty = lines.reduce((s, l) => s + (parseInt(l.quantity) || 0), 0);
+  const paid = parseFloat(amountPaid) || 0;
+  const rest = Math.max(0, total - paid);
+
+  const reset = () => {
+    setUseQuota(false); setQuota(emptyQuota()); setLines([]); setSupplierId(''); setAmountPaid('0'); setNotes('');
+  };
+  const close = () => { setOpen(false); reset(); };
+
+  const save = async () => {
+    if (lines.length === 0) return toast({ title: 'Erreur', description: 'Sélectionnez au moins un chargeur.', variant: 'destructive' });
+    if (lines.some((l) => (parseInt(l.quantity) || 0) <= 0)) return toast({ title: 'Erreur', description: 'Chaque chargeur doit avoir une quantité positive.', variant: 'destructive' });
+    if (!supplierId) return toast({ title: 'Erreur', description: 'Choisissez un fournisseur.', variant: 'destructive' });
+    if (useQuota && !quota.name.trim()) return toast({ title: 'Erreur', description: 'Donnez un nom au quota.', variant: 'destructive' });
+
+    setSaving(true);
     try {
-      const { data } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('type', 'purchase')
-        .order('invoice_date', { ascending: false });
-      setInvoices(data || []);
-    } catch (error) {
-      console.error('Error loading invoices:', error);
-    }
-  };
+      const now = new Date().toISOString();
+      const { data: inv, error: invErr } = await supabase.from('invoices').insert([{
+        invoice_number: `PUR-${Date.now()}`,
+        type: 'purchase',
+        supplier_id: supplierId,
+        subtotal: total,
+        discount_amount: 0,
+        total_amount: total,
+        amount_paid: paid,
+        status: paid >= total ? 'paid' : 'pending',
+        payment_date: paid > 0 ? now : null,
+        invoice_date: useQuota ? new Date(quota.date).toISOString() : now,
+        notes: [useQuota ? `Quota : ${quota.name.trim()}` : '', notes.trim()].filter(Boolean).join(' — '),
+      }]).select().single();
+      if (invErr) throw invErr;
 
-  const searchProducts = async () => {
-    try {
-      const searchLower = searchTerm.toLowerCase();
-      const { data } = await supabase
-        .from('products')
-        .select(`
-          id,
-          name,
-          description,
-          mark_id,
-          connector_type_id,
-          voltage,
-          wattage,
-          amperage,
-          model_number,
-          quantity_initial,
-          quantity_actual,
-          quantity_minimal,
-          purchase_price,
-          selling_price,
-          primary_image,
-          marks(id, name),
-          connector_types(id, name)
-        `)
-        .eq('is_active', true)
-        .or(`name.ilike.%${searchLower}%,description.ilike.%${searchLower}%`)
-        .limit(10);
+      const { error: itemsErr } = await supabase.from('invoice_items').insert(lines.map((l) => ({
+        invoice_id: inv.id,
+        product_id: l.product.id,
+        product_name: l.product.name,
+        quantity: parseInt(l.quantity) || 0,
+        unit_price: parseFloat(l.purchase_price) || 0,
+        total_price: lineTotal(l),
+      })));
+      if (itemsErr) throw itemsErr;
 
-      if (data) {
-        const mapped = data.map((p: any) => ({
-          ...p,
-          mark: p.marks,
-          connector_type: p.connector_types,
-          margin: ((p.selling_price - p.purchase_price) / p.purchase_price) * 100,
-        }));
-        setSearchResults(mapped);
-      }
-    } catch (error) {
-      console.error('Error searching products:', error);
-    }
-  };
-
-  const handleSelectProduct = async (product: Product) => {
-    setSelectedProduct(product);
-    setFormData({
-      product_id: product.id,
-      quantity_initial: product.quantity_initial.toString(),
-      quantity_actual: product.quantity_actual.toString(),
-      quantity_minimal: product.quantity_minimal.toString(),
-      purchase_price: product.purchase_price.toString(),
-      selling_price: product.selling_price.toString(),
-      mark_id: product.mark_id || '',
-      connector_type_id: product.connector_type_id || '',
-      supplier_id: '',
-      voltage: product.voltage.toString(),
-      wattage: product.wattage.toString(),
-      amperage: product.amperage.toString(),
-      description: product.description || '',
-      model_number: product.model_number || '',
-      amount_paid: '0',
-      images: [],
-    });
-
-    // Fetch product images
-    try {
-      const { data: images } = await supabase
-        .from('product_images')
-        .select('id, image_url, file_path, display_order, is_primary')
-        .eq('product_id', product.id)
-        .order('display_order', { ascending: true });
-      setChargerImages(images || []);
-    } catch (error) {
-      console.error('Error loading product images:', error);
-      setChargerImages([]);
-    }
-
-    setStep('form');
-    toast({
-      title: getText('charger_selected'),
-      description: getText('charger_selected'),
-    });
-  };
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setFormData({
-      ...formData,
-      images: [...formData.images, ...files],
-    });
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setFormData({
-      ...formData,
-      images: formData.images.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleRemoveExistingImage = async (imageId: string) => {
-    if (!selectedProduct) return;
-    try {
-      // Delete from database
-      await supabase.from('product_images').delete().eq('id', imageId);
-      // Update the chargerImages state
-      setChargerImages(chargerImages.filter((img) => img.id !== imageId));
-      toast({
-        title: getText('success'),
-        description: language === 'ar' ? 'تم حذف الصورة' : 'Image deleted',
-      });
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      toast({
-        title: getText('error'),
-        description: language === 'ar' ? 'خطأ في حذف الصورة' : 'Error deleting image',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleAddMark = async () => {
-    if (!newMarkName.trim()) return;
-    try {
-      const { data } = await supabase
-        .from('marks')
-        .insert([{ name: newMarkName, is_active: true }])
-        .select()
-        .single();
-      if (data) {
-        setMarks([...marks, data]);
-        setFormData({ ...formData, mark_id: data.id });
-        setNewMarkName('');
-        setShowAddMarkModal(false);
-      }
-    } catch (error) {
-      console.error('Error adding mark:', error);
-    }
-  };
-
-  const handleAddConnectorType = async () => {
-    if (!newConnectorName.trim()) return;
-    try {
-      const { data } = await supabase
-        .from('connector_types')
-        .insert([{ name: newConnectorName, is_active: true }])
-        .select()
-        .single();
-      if (data) {
-        setConnectorTypes([...connectorTypes, data]);
-        setFormData({ ...formData, connector_type_id: data.id });
-        setNewConnectorName('');
-        setShowAddConnectorModal(false);
-      }
-    } catch (error) {
-      console.error('Error adding connector type:', error);
-    }
-  };
-
-  const uploadImages = async (productId: string) => {
-    if (formData.images.length === 0) return;
-
-    try {
-      for (let i = 0; i < formData.images.length; i++) {
-        const { publicUrl, path: fileName } = await uploadImage(formData.images[i], { folder: productId, preset: 'product' });
-
-        if (i === 0) {
-          await supabase
-            .from('products')
-            .update({ primary_image: publicUrl })
-            .eq('id', productId);
-        }
-
-        await supabase.from('product_images').insert([
-          {
-            product_id: productId,
-            image_url: publicUrl,
-            file_path: fileName,
-            display_order: i,
-            is_primary: i === 0,
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      throw error;
-    }
-  };
-
-  const handleSavePurchase = async () => {
-    if (!selectedProduct || !formData.supplier_id) {
-      toast({
-        title: getText('error'),
-        description: getText('select_product_first'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const quantityInitial = parseInt(formData.quantity_initial) || 0;
-      const quantityActual = parseInt(formData.quantity_actual) || 0;
-      const purchasePrice = parseFloat(formData.purchase_price) || 0;
-      const sellingPrice = parseFloat(formData.selling_price) || 0;
-      const amountPaid = parseFloat(formData.amount_paid) || 0;
-
-      // Update product with new information
-      await supabase.from('products').update({
-        mark_id: formData.mark_id || null,
-        connector_type_id: formData.connector_type_id || null,
-        voltage: parseFloat(formData.voltage) || 0,
-        wattage: parseFloat(formData.wattage) || 0,
-        amperage: parseFloat(formData.amperage) || 0,
-        model_number: formData.model_number,
-        description: formData.description,
-        quantity_initial: selectedProduct.quantity_initial + quantityInitial,
-        quantity_actual: selectedProduct.quantity_actual + quantityActual,
-        quantity_minimal: parseInt(formData.quantity_minimal) || 0,
-        purchase_price: purchasePrice,
-        selling_price: sellingPrice,
-      }).eq('id', selectedProduct.id);
-
-      // Create invoice
-      const invoiceNumber = `PUR-${Date.now()}`;
-      const { data: invoiceData } = await supabase
-        .from('invoices')
-        .insert([
-          {
-            invoice_number: invoiceNumber,
-            type: 'purchase',
-            supplier_id: formData.supplier_id,
-            subtotal: purchasePrice * (quantityInitial || 1),
-            discount_amount: 0,
-            total_amount: purchasePrice * (quantityInitial || 1),
-            amount_paid: amountPaid,
-            status: amountPaid >= purchasePrice * (quantityInitial || 1) ? 'paid' : 'pending',
-            payment_date: amountPaid > 0 ? new Date().toISOString() : null,
-            invoice_date: new Date().toISOString(),
-            notes: '',
-          },
-        ])
-        .select()
-        .single();
-
-      if (invoiceData) {
-        await supabase.from('invoice_items').insert([
-          {
-            invoice_id: invoiceData.id,
-            product_id: selectedProduct.id,
-            product_name: selectedProduct.name,
-            quantity: quantityInitial,
-            unit_price: purchasePrice,
-            total_price: purchasePrice * quantityInitial,
-          },
-        ]);
+      // Stock + prices: re-read the current quantities so concurrent sales are not overwritten.
+      for (const l of lines) {
+        const q = parseInt(l.quantity) || 0;
+        const { data: cur } = await supabase.from('products').select('quantity_initial, quantity_actual').eq('id', l.product.id).single();
+        await supabase.from('products').update({
+          quantity_initial: (cur?.quantity_initial || 0) + q,
+          quantity_actual: (cur?.quantity_actual || 0) + q,
+          purchase_price: parseFloat(l.purchase_price) || 0,
+          selling_price: parseFloat(l.selling_price) || 0,
+        }).eq('id', l.product.id);
       }
 
-      // Upload images if any
-      if (formData.images.length > 0) {
-        await uploadImages(selectedProduct.id);
+      if (useQuota) {
+        const { data: qrow, error: qErr } = await supabase.from('quotas').insert([{
+          name: quota.name.trim(),
+          description: quota.description.trim() || null,
+          quota_date: quota.date || todayISO(),
+          supplier_id: supplierId,
+          invoice_id: inv.id,
+          amount_paid: paid,
+        }]).select().single();
+        if (qErr) throw qErr;
+        const { error: qiErr } = await supabase.from('quota_items').insert(lines.map((l) => ({
+          quota_id: qrow.id,
+          product_id: l.product.id,
+          quantity: parseInt(l.quantity) || 0,
+          purchase_price: parseFloat(l.purchase_price) || 0,
+          selling_price: parseFloat(l.selling_price) || 0,
+        })));
+        if (qiErr) throw qiErr;
       }
 
-      toast({
-        title: getText('success'),
-        description: getText('purchase_created'),
-      });
-
-      // Reset
-      setStep('search');
-      setSearchTerm('');
-      setSelectedProduct(null);
-      setFormData({
-        product_id: '',
-        quantity_initial: '',
-        quantity_actual: '',
-        quantity_minimal: '',
-        purchase_price: '',
-        selling_price: '',
-        mark_id: '',
-        connector_type_id: '',
-        supplier_id: '',
-        voltage: '',
-        wattage: '',
-        amperage: '',
-        description: '',
-        model_number: '',
-        amount_paid: '',
-        images: [],
-      });
-      setShowCreateDialog(false);
+      toast({ title: 'Achat enregistré', description: useQuota ? `Quota « ${quota.name.trim()} » créé avec ${totalQty} chargeurs.` : `${totalQty} chargeurs ajoutés au stock.` });
+      close();
       loadInvoices();
-    } catch (error) {
-      console.error('Error saving purchase:', error);
-      toast({
-        title: getText('error'),
-        description: getText('error'),
-        variant: 'destructive',
-      });
+    } catch (e: any) {
+      console.error('Error saving purchase:', e);
+      toast({ title: 'Erreur', description: e?.message || "L'enregistrement a échoué.", variant: 'destructive' });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const totalPrice = selectedProduct ? parseFloat(formData.purchase_price) * parseInt(formData.quantity_initial) : 0;
-  const amountPaid = parseFloat(formData.amount_paid) || 0;
-  const restToPay = Math.max(0, totalPrice - amountPaid);
+  const paidCount = invoices.filter((i) => i.status === 'paid').length;
 
   return (
-    <div className={`${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header with Statistics */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <div className="admin-hero flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-2xl md:text-[28px] tracking-tight font-bold mb-2 text-foreground">
-              {getText('title')}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              {language === 'ar' ? 'إدارة فواتير الشراء والمخزون' : 'Manage purchase invoices and inventory'}
-            </p>
-          </div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Button
-              onClick={() => {
-                setShowCreateDialog(true);
-                setStep('search');
-              }}
-              className="text-primary-foreground px-8 py-3 rounded-lg font-bold text-lg flex items-center gap-2 shadow-sm hover:shadow-md transition-all bg-primary"
-            >
-              {getText('new_purchase')}
-            </Button>
-          </motion.div>
-        </div>
+    <div>
+      <PageHero
+        eyebrow="Stock"
+        icon={Truck}
+        title="Factures d'achat"
+        description="Enregistrez vos achats fournisseurs, en simple ou regroupés dans un quota."
+        actions={<Button onClick={() => setOpen(true)} className="bg-primary"><Plus className="h-4 w-4" />Nouvel achat</Button>}
+        stats={[
+          { label: 'Factures', value: invoices.length },
+          { label: 'Payées', value: paidCount },
+          { label: 'En attente', value: invoices.length - paidCount },
+          { label: 'Montant total', value: formatDA(invoices.reduce((s, i) => s + (Number(i.total_amount) || 0), 0)) },
+        ]}
+      />
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Total Invoices */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0 }}
-            className="p-6 rounded-xl border border-border bg-card"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm font-medium">{getText('total_invoices')}</p>
-                <p className="text-3xl font-bold text-electric mt-2">{invoices.length}</p>
-              </div>
-              <div className="text-5xl opacity-50"></div>
-            </div>
-          </motion.div>
-
-          {/* Paid Invoices */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="p-6 rounded-xl border border-border bg-card"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm font-medium">{getText('paid_invoices')}</p>
-                <p className="text-3xl font-bold text-success mt-2">{invoices.filter(inv => inv.status === 'paid').length}</p>
-              </div>
-              <div className="text-5xl opacity-50"></div>
-            </div>
-          </motion.div>
-
-          {/* Pending Invoices */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-6 rounded-xl border border-border bg-card"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm font-medium">{getText('pending_invoices')}</p>
-                <p className="text-3xl font-bold text-warning mt-2">{invoices.filter(inv => inv.status === 'pending').length}</p>
-              </div>
-              <div className="text-5xl opacity-50"></div>
-            </div>
-          </motion.div>
-
-          {/* Total Amount */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="p-6 rounded-xl border border-border bg-card"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm font-medium">{getText('total_amount')}</p>
-                <p className="text-3xl font-bold text-electric mt-2">{invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0).toFixed(2)}</p>
-              </div>
-              <div className="text-5xl opacity-50"></div>
-            </div>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Create Purchase Dialog */}
-      <AnimatePresence>
-        {showCreateDialog && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="admin-modal max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-            >
-              <div className="admin-modal-head sticky top-0 px-6 py-5 flex items-start justify-between z-10">
-                <div>
-                  <span className="admin-modal-eyebrow">{language === 'ar' ? 'شراء' : 'Achat'}</span>
-                  <h2 className="font-bold">{getText('new_purchase')}</h2>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowCreateDialog(false);
-                    setStep('search');
-                  }}
-                  className="p-2"
-                aria-label="Fermer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="p-8">
-                {step === 'search' ? (
-                  // Search Step
-                  <div className="space-y-6">
+      <Panel title="Factures récentes" description={`${invoices.length} facture(s) d'achat`}>
+        {invoices.length === 0 ? (
+          <EmptyState icon={Receipt} title="Aucune facture" text="Commencez par créer un nouvel achat." action={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" />Nouvel achat</Button>} />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {invoices.slice(0, 30).map((inv) => {
+              const q = quotaByInvoice[inv.id];
+              const isPaid = inv.status === 'paid';
+              return (
+                <div key={inv.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Facture</p>
+                      <p className="truncate font-mono text-sm font-semibold">{inv.invoice_number}</p>
+                    </div>
+                    <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold', isPaid ? 'bg-success/15 text-success' : 'bg-warning/15 text-warning')}>
+                      {isPaid ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}{isPaid ? 'Payée' : 'En attente'}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><CalendarDays className="h-3.5 w-3.5" />{new Date(inv.invoice_date).toLocaleDateString('fr-FR')}</span>
+                    {inv.supplier_id && supplierName[inv.supplier_id] && <span className="inline-flex items-center gap-1"><Truck className="h-3.5 w-3.5" />{supplierName[inv.supplier_id]}</span>}
+                  </div>
+                  {q && (
+                    <Link to={`/quotas/${q.id}`} className="mt-3 inline-flex items-center gap-1 rounded-full bg-volt px-2.5 py-0.5 text-xs font-semibold text-volt-foreground">
+                      <Layers className="h-3.5 w-3.5" />{q.name}
+                    </Link>
+                  )}
+                  <div className="mt-4 flex items-end justify-between border-t border-border pt-3">
                     <div>
-                      <Label className="text-lg font-semibold">{getText('search_by_name_mark')}</Label>
-                      <Input
-                        placeholder={getText('search_charger')}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="mt-3 p-4 text-lg"
-                      />
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Total</p>
+                      <p className="font-sora text-xl font-bold tabular-nums">{formatDA(inv.total_amount)}</p>
                     </div>
-
-                    {searchResults.length > 0 && (
-                      <div className="grid gap-4">
-                        {searchResults.map((product) => (
-                          <motion.div
-                            key={product.id}
-                            className="border border-border rounded-lg p-4 hover:border-electric hover:shadow-md transition-all cursor-pointer"
-                            onClick={() => handleSelectProduct(product)}
-                            whileHover={{ scale: 1.02 }}
-                          >
-                            <div className="flex gap-4">
-                              {product.primary_image && (
-                                <img
-                                  src={product.primary_image}
-                                  alt={product.name}
-                                  className="w-24 h-24 object-cover rounded-lg"
-                                />
-                              )}
-                              <div className="flex-1">
-                                <h3 className="text-lg font-bold text-foreground">{product.name}</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {product.mark?.name && `${product.mark.name}`}
-                                  {product.connector_type?.name && ` • ${product.connector_type.name}`}
-                                </p>
-                                <p className="text-sm mt-2">
-                                  {product.voltage}V • {product.wattage}W • {product.amperage}A
-                                </p>
-                                <p className="text-lg font-bold text-electric mt-2">{product.purchase_price}</p>
-                              </div>
-                              <Badge className="h-fit bg-primary">{language === 'ar' ? 'اختيار' : 'Select'}</Badge>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
-
-                    {searchTerm && searchResults.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <p className="text-3xl mb-2"></p>
-                        <p>{getText('no_results')}</p>
-                      </div>
-                    )}
+                    {!isPaid && <p className="text-xs text-destructive tabular-nums">Reste {formatDA((Number(inv.total_amount) || 0) - (Number(inv.amount_paid) || 0))}</p>}
                   </div>
-                ) : (
-                  // Form Step
-                  <div className="space-y-6">
-                    {selectedProduct && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 bg-surface-2 rounded-lg border border-border">
-                        <p className="font-bold text-lg">
-                          {language === 'ar' ? 'تم تحديد' : 'Selected'}: <span className="text-electric">{selectedProduct.name}</span>
-                        </p>
-                        <button
-                          onClick={() => setStep('search')}
-                          className="text-sm text-electric hover:underline mt-2"
-                        >
-                          {language === 'ar' ? 'تغيير المنتج' : 'Change Product'}
-                        </button>
-                      </motion.div>
-                    )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Panel>
 
-                    {/* Images Upload Section */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0 }}
-                      className="p-4 rounded-xl border border-border bg-card"
-                    >
-                      <h3 className="text-lg font-bold text-electric mb-4">{language === 'ar' ? 'صور المنتج' : 'Product Images'}</h3>
-                      
-                      {/* Current Images Preview */}
-                      {chargerImages.length > 0 && (
-                        <div className="mb-4 p-4 bg-card rounded-lg border border-border">
-                          <p className="text-xs font-semibold text-electric mb-3">{language === 'ar' ? 'الصور الحالية' : 'Current Images'}</p>
-                          <div className="grid grid-cols-4 gap-2">
-                            {chargerImages.map((image) => (
-                              <div key={image.id} className="relative group">
-                                <img
-                                  src={image.image_url}
-                                  alt="Product image"
-                                  className="w-full h-20 object-cover rounded-lg border border-border"
-                                />
-                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveExistingImage(image.id)}
-                                    className="bg-destructive hover:bg-destructive/90 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
-                                    title={getText('delete_image')}
-                                  >
-                                    
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Upload Section */}
-                      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-card mb-4">
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={handleImageSelect}
-                          id="imageInput"
-                          className="hidden"
-                        />
-                        <label htmlFor="imageInput" className="cursor-pointer block">
-                          <p className="text-electric font-semibold">
-                            {formData.images.length > 0
-                              ? `${formData.images.length} ${language === 'ar' ? 'صورة محددة' : 'image(s) selected'}`
-                              : language === 'ar'
-                              ? 'اضغط لتحديد الصور'
-                              : 'Click to select images'}
-                          </p>
-                        </label>
-                      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1220]/60 p-4 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }} className="admin-modal flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden">
+              <div className="admin-modal-head flex items-start justify-between px-6 py-5">
+                <div>
+                  <span className="admin-modal-eyebrow">Achat</span>
+                  <h2 className="font-bold">Nouvel achat</h2>
+                  <p className="text-sm">Sélectionnez les chargeurs, le fournisseur et le paiement.</p>
+                </div>
+                <button onClick={close} className="p-2" aria-label="Fermer"><X className="h-5 w-5" /></button>
+              </div>
 
-                      {/* New Images Preview */}
-                      {formData.images.length > 0 && (
-                        <div className="grid grid-cols-4 gap-3">
-                          {formData.images.map((image, index) => (
-                            <div key={index} className="relative group">
-                              <img
-                                src={URL.createObjectURL(image)}
-                                alt={`Preview ${index + 1}`}
-                                className="w-full h-20 object-cover rounded-lg border border-border"
-                              />
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveImage(index)}
-                                  className="bg-destructive hover:bg-destructive/90 text-white text-lg rounded-full w-8 h-8 flex items-center justify-center transition-colors font-bold"
-                                  title={getText('delete_image')}
-                                >
-                                  
-                                </button>
-                              </div>
-                              <p className="text-xs text-electric mt-1 truncate">{image.name}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </motion.div>
-
-                    {/* Product Info Section */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.05 }}
-                      className="p-4 rounded-xl border border-border bg-card"
-                    >
-                      <h3 className="text-lg font-bold text-electric mb-4">{language === 'ar' ? 'معلومات المنتج' : 'Product Information'}</h3>
-                      <div className="space-y-4">
+              <div className="grid flex-1 gap-5 overflow-y-auto p-5 lg:grid-cols-[1fr_340px] md:p-6">
+                <div className="space-y-5">
+                  {/* Mode */}
+                  <section className="rounded-2xl border border-border bg-card p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className={cn('flex h-10 w-10 items-center justify-center rounded-xl', useQuota ? 'bg-volt text-volt-foreground' : 'bg-surface-2')}>
+                          {useQuota ? <Layers className="h-5 w-5" /> : <ShoppingBag className="h-5 w-5" />}
+                        </span>
                         <div>
-                          <label className="block text-sm font-semibold mb-2 text-electric">
-                            {language === 'ar' ? 'اسم المنتج' : 'Product Name'}
-                          </label>
-                          <input
-                            type="text"
-                            value={selectedProduct?.name || ''}
-                            disabled
-                            className="w-full px-4 py-2 border border-border rounded-lg bg-surface-2 text-muted-foreground"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-electric">
-                            {language === 'ar' ? 'الوصف' : 'Description'}
-                          </label>
-                          <textarea
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            rows={3}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-card"
-                          />
+                          <p className="text-sm font-semibold">Achat en quota</p>
+                          <p className="text-xs text-muted-foreground">Regroupe ce lot pour suivre son stock restant et ses gains.</p>
                         </div>
                       </div>
-                    </motion.div>
-
-                    {/* Brand & Connector Section */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="p-4 rounded-xl border border-border bg-card"
-                    >
-                      <h3 className="text-lg font-bold text-electric mb-4">{language === 'ar' ? 'الماركة والموصل' : 'Brand & Connector'}</h3>
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-electric">
-                            {language === 'ar' ? 'الماركة' : 'Mark / Brand'}
-                          </label>
-                          <div className="flex gap-2">
-                            <select
-                              value={formData.mark_id}
-                              onChange={(e) => setFormData({ ...formData, mark_id: e.target.value })}
-                              className="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                            >
-                              <option value="">{language === 'ar' ? 'اختر' : 'Select'}</option>
-                              {marks.map((mark) => (
-                                <option key={mark.id} value={mark.id}>
-                                  {mark.name}
-                                </option>
-                              ))}
-                            </select>
-                            <Button
-                              onClick={() => setShowAddMarkModal(true)}
-                              variant="outline"
-                              className="px-3 border-border text-electric hover:bg-surface-2"
-                            >
-                              
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-electric">
-                            {language === 'ar' ? 'نوع الموصل' : 'Connector Type'}
-                          </label>
-                          <div className="flex gap-2">
-                            <select
-                              value={formData.connector_type_id}
-                              onChange={(e) => setFormData({ ...formData, connector_type_id: e.target.value })}
-                              className="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                            >
-                              <option value="">{language === 'ar' ? 'اختر' : 'Select'}</option>
-                              {connectorTypes.map((type) => (
-                                <option key={type.id} value={type.id}>
-                                  {type.name}
-                                </option>
-                              ))}
-                            </select>
-                            <Button
-                              onClick={() => setShowAddConnectorModal(true)}
-                              variant="outline"
-                              className="px-3 border-border text-electric hover:bg-surface-2"
-                            >
-                              
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="col-span-2">
-                          <label className="block text-sm font-semibold mb-2 text-electric">
-                            {language === 'ar' ? 'المورد' : 'Supplier'}
-                          </label>
-                          <select
-                            value={formData.supplier_id}
-                            onChange={(e) => setFormData({ ...formData, supplier_id: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card text-foreground"
-                          >
-                            <option value="">{language === 'ar' ? 'اختر المورد' : 'Select Supplier'}</option>
-                            {suppliers.map((supplier) => (
-                              <option key={supplier.id} value={supplier.id}>
-                                {supplier.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* Electrical Specs Section */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.15 }}
-                      className="p-4 rounded-xl border border-border bg-card"
-                    >
-                      <h3 className="text-lg font-bold text-warning mb-4">{language === 'ar' ? 'المواصفات الكهربائية' : 'Electrical Specs'}</h3>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'الجهد' : 'Voltage'} (V)</label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            value={formData.voltage}
-                            onChange={(e) => setFormData({ ...formData, voltage: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card text-foreground"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'القدرة' : 'Wattage'} (W)</label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            value={formData.wattage}
-                            onChange={(e) => setFormData({ ...formData, wattage: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'التيار' : 'Amperage'} (A)</label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            value={formData.amperage}
-                            onChange={(e) => setFormData({ ...formData, amperage: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'رقم الموديل' : 'Model Number'}</label>
-                        <input
-                          type="text"
-                          value={formData.model_number}
-                          onChange={(e) => setFormData({ ...formData, model_number: e.target.value })}
-                          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                        />
-                      </div>
-                    </motion.div>
-
-                    {/* Inventory Section */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="p-4 rounded-xl border border-border bg-card"
-                    >
-                      <h3 className="text-lg font-bold text-success mb-4">{language === 'ar' ? 'المخزون' : 'Inventory'}</h3>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-success">{language === 'ar' ? 'الكمية الأولية' : 'Initial Qty'}</label>
-                          <input
-                            type="number"
-                            value={formData.quantity_initial}
-                            onChange={(e) => setFormData({ ...formData, quantity_initial: e.target.value, quantity_actual: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-success">{language === 'ar' ? 'الكمية الفعلية' : 'Actual Qty'}</label>
-                          <input
-                            type="number"
-                            value={formData.quantity_actual}
-                            onChange={(e) => setFormData({ ...formData, quantity_actual: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-success">{language === 'ar' ? 'الحد الأدنى' : 'Minimal Qty'}</label>
-                          <input
-                            type="number"
-                            value={formData.quantity_minimal}
-                            onChange={(e) => setFormData({ ...formData, quantity_minimal: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* Payment & Pricing Section */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.25 }}
-                      className="p-4 rounded-xl border border-border bg-card"
-                    >
-                      <h3 className="text-lg font-bold text-warning mb-4">{language === 'ar' ? 'السعر والدفع' : 'Payment & Pricing'}</h3>
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'سعر الشراء' : 'Purchase Price'}</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.purchase_price}
-                            onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'سعر البيع' : 'Selling Price'}</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.selling_price}
-                            onChange={(e) => setFormData({ ...formData, selling_price: e.target.value })}
-                            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Payment Summary */}
-                      <div className="border border-border bg-surface-2 p-4 rounded-lg mb-4">
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <p className="text-sm text-muted-foreground mb-1">{language === 'ar' ? 'السعر الإجمالي' : 'Total Price'}</p>
-                            <p className="text-2xl font-bold text-success">{totalPrice.toFixed(2)}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-semibold mb-2 text-warning">{language === 'ar' ? 'المبلغ المدفوع' : 'Amount Paid'}</label>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={formData.amount_paid}
-                              onChange={(e) => setFormData({ ...formData, amount_paid: e.target.value })}
-                              className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring bg-card"
-                            />
-                          </div>
-                        </div>
-                        <div className="text-right border-t border-border pt-3">
-                          <p className="text-sm text-muted-foreground mb-1">{language === 'ar' ? 'المتبقي' : 'Balance Remaining'}</p>
-                          <p className={`text-2xl font-bold ${restToPay > 0 ? 'text-destructive' : 'text-success'}`}>
-                            {restToPay.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-4">
-                      <Button
-                        onClick={handleSavePurchase}
-                        disabled={loading}
-                        className="flex-1 text-primary-foreground font-bold py-3 bg-primary"
-                      >
-                        {loading ? getText('loading') : getText('save')}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setShowCreateDialog(false);
-                          setStep('search');
-                        }}
-                        variant="outline"
-                        className="flex-1 py-3"
-                      >
-                        {getText('cancel')}
-                      </Button>
+                      <Switch checked={useQuota} onCheckedChange={setUseQuota} aria-label="Activer le quota" />
                     </div>
-                  </div>
-                )}
+                    <AnimatePresence initial={false}>
+                      {useQuota && (
+                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                          <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-[1fr_180px]">
+                            <label className="text-xs">
+                              <span className="mb-1 block font-medium">Nom du quota *</span>
+                              <input value={quota.name} onChange={(e) => setQuota({ ...quota, name: e.target.value })} placeholder="ex. Lot Octobre — 50 chargeurs" className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                            </label>
+                            <label className="text-xs">
+                              <span className="mb-1 block font-medium">Date</span>
+                              <input type="date" value={quota.date} onChange={(e) => setQuota({ ...quota, date: e.target.value })} className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                            </label>
+                            <label className="text-xs sm:col-span-2">
+                              <span className="mb-1 block font-medium">Description</span>
+                              <textarea rows={2} value={quota.description} onChange={(e) => setQuota({ ...quota, description: e.target.value })} className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                            </label>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </section>
+
+                  {/* Chargers */}
+                  <section className="rounded-2xl border border-border bg-card p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">Chargeurs</h3>
+                      <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-semibold tabular-nums">{lines.length} article(s) · {totalQty} pcs</span>
+                    </div>
+                    <ChargerLinesEditor lines={lines} onChange={setLines} />
+                  </section>
+                </div>
+
+                {/* Summary column */}
+                <aside className="space-y-5">
+                  <section className="rounded-2xl border border-border bg-card p-4">
+                    <h3 className="mb-3 text-sm font-semibold">Fournisseur</h3>
+                    <select value={supplierId} onChange={(e) => setSupplierId(e.target.value)} className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm">
+                      <option value="">Choisir un fournisseur</option>
+                      {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <label className="mt-3 block text-xs">
+                      <span className="mb-1 block font-medium">Notes</span>
+                      <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm" />
+                    </label>
+                  </section>
+
+                  <section className="relative overflow-hidden rounded-2xl bg-[#0B1220] p-5 text-white">
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#C6F432]/20 blur-3xl" />
+                    <p className="relative flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-[#9AA3B5]"><Wallet className="h-4 w-4 text-[#C6F432]" />Paiement</p>
+                    <dl className="relative mt-3 space-y-2 text-sm">
+                      <div className="flex justify-between text-[#9AA3B5]"><dt>Quantité totale</dt><dd className="tabular-nums text-white">{totalQty}</dd></div>
+                      <div className="flex justify-between text-[#9AA3B5]"><dt>Total achat</dt><dd className="font-sora text-lg font-bold tabular-nums text-white">{formatDA(total)}</dd></div>
+                    </dl>
+                    <label className="relative mt-4 block text-xs text-[#9AA3B5]">
+                      <span className="mb-1 block">Montant payé</span>
+                      <input type="number" step="0.01" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} className="w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-sm tabular-nums text-white" style={{ background: 'rgb(255 255 255 / 0.06)', color: '#fff' }} />
+                    </label>
+                    <div className="relative mt-2 flex gap-2">
+                      <button type="button" onClick={() => setAmountPaid(String(total))} className="rounded-lg bg-white/10 px-2.5 py-1 text-xs hover:bg-white/15">Tout payer</button>
+                      <button type="button" onClick={() => setAmountPaid('0')} className="rounded-lg bg-white/10 px-2.5 py-1 text-xs hover:bg-white/15">Rien</button>
+                    </div>
+                    <div className="relative mt-4 flex items-end justify-between border-t border-white/10 pt-3">
+                      <span className="text-xs text-[#9AA3B5]">Reste à payer</span>
+                      <span className={cn('font-sora text-xl font-bold tabular-nums', rest > 0 ? 'text-[#FF8A80]' : 'text-[#C6F432]')}>{formatDA(rest)}</span>
+                    </div>
+                  </section>
+                </aside>
+              </div>
+
+              <div className="admin-modal-foot flex justify-end gap-2 border-t border-border px-6 py-4">
+                <Button variant="outline" onClick={close}>Annuler</Button>
+                <Button onClick={save} disabled={saving} className="bg-primary">{saving ? 'Enregistrement…' : useQuota ? 'Créer le quota' : "Enregistrer l'achat"}</Button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Add Mark Modal */}
-      {showAddMarkModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        >
-          <motion.div
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            className="bg-card rounded-xl p-6 max-w-md w-full"
-          >
-            <h3 className="text-xl font-bold mb-4">{getText('add_new_mark')}</h3>
-            <Input
-              placeholder={language === 'ar' ? 'اسم العلامة' : 'Mark Name'}
-              value={newMarkName}
-              onChange={(e) => setNewMarkName(e.target.value)}
-              className="mb-4"
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={handleAddMark}
-                className="flex-1 bg-primary hover:bg-primary/90"
-              >
-                {language === 'ar' ? 'إضافة' : 'Add'}
-              </Button>
-              <Button
-                onClick={() => setShowAddMarkModal(false)}
-                variant="outline"
-                className="flex-1"
-              >
-                {language === 'ar' ? 'إلغاء' : 'Cancel'}
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Add Connector Type Modal */}
-      {showAddConnectorModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-[#0B1220]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        >
-          <motion.div
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            className="bg-card rounded-xl p-6 max-w-md w-full"
-          >
-            <h3 className="text-xl font-bold mb-4">{getText('add_new_connector')}</h3>
-            <Input
-              placeholder={language === 'ar' ? 'نوع الموصل' : 'Connector Type'}
-              value={newConnectorName}
-              onChange={(e) => setNewConnectorName(e.target.value)}
-              className="mb-4"
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={handleAddConnectorType}
-                className="flex-1 bg-primary hover:bg-primary/90"
-              >
-                {language === 'ar' ? 'إضافة' : 'Add'}
-              </Button>
-              <Button
-                onClick={() => setShowAddConnectorModal(false)}
-                variant="outline"
-                className="flex-1"
-              >
-                {language === 'ar' ? 'إلغاء' : 'Cancel'}
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Invoices List */}
-      {/* Recent Invoices Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mt-12 bg-card rounded-2xl shadow-sm p-8"
-      >
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-foreground">{getText('recent_invoices')}</h2>
-            <p className="text-muted-foreground mt-2">
-              {getText('showing_invoices').replace('{count}', Math.min(10, invoices.length).toString()).replace('{total}', invoices.length.toString())}
-            </p>
-          </div>
-          <div className="text-5xl opacity-30"></div>
-        </div>
-
-        {invoices.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <p className="text-2xl text-muted-foreground">{getText('no_invoices')}</p>
-            <p className="text-muted-foreground mt-2">{getText('start_creating')}</p>
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {invoices.slice(0, 10).map((invoice, index) => (
-              <motion.div
-                key={invoice.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ y: -5 }}
-              >
-                <Card className={`border-2 overflow-hidden hover:shadow-md transition-all h-full ${
-                  invoice.status === 'paid' 
-                    ? 'border-border bg-card' 
-                    : 'border-border bg-card'
-                }`}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{language === 'ar' ? 'فاتورة رقم' : 'Invoice #'}</p>
-                        <p className="text-2xl font-bold text-foreground mt-1">{invoice.invoice_number}</p>
-                      </div>
-                      <Badge className={`px-3 py-1 font-bold ${
-                        invoice.status === 'paid' 
-                          ? 'bg-success hover:bg-success/90 text-white' 
-                          : 'bg-warning hover:bg-warning/90 text-white'
-                      }`}>
-                        {invoice.status === 'paid' ? 'Paid' : 'Pending'}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-3 mb-4 pb-4 border-b border-border">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span></span>
-                        <span className="text-sm">{new Date(invoice.invoice_date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span></span>
-                        <span className="text-sm">{invoice.store_name || 'Unknown Store'}</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-4">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{language === 'ar' ? 'المجموع' : 'Total Amount'}</p>
-                      <p className="text-3xl font-bold text-electric">
-                        {parseFloat(invoice.total_amount).toFixed(2)}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {invoices.length > 10 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-8 text-center"
-          >
-            <Button
-              variant="outline"
-              className="px-6 py-3 font-bold"
-              onClick={() => {
-                // Can add navigation to full invoices list here
-              }}
-            >
-              {language === 'ar' ? `عرض جميع الفواتير (${invoices.length})` : `View all invoices (${invoices.length})`}
-            </Button>
-          </motion.div>
-        )}
-      </motion.div>
     </div>
   );
 }

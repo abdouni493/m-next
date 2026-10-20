@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
-  Phone, MessageCircle, Check, Truck, PackageCheck, X, Printer, MoreHorizontal, Home, Building2, Clock, LayoutList,
+  Phone, MessageCircle, Check, Truck, PackageCheck, X, Printer, MoreHorizontal, Home, Building2, Clock, LayoutList, Layers,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase, confirmOrder, startOrderDelivery, finalizeOrder, cancelOrder, getOrderByIdREST } from '@/lib/supabaseClient';
-import { PageHeader, DataTable, FilterBar, StatusBadge, ConfirmDialog, EmptyState, formatDA, ORDER_STATUS, type Column } from '@/admin/ui';
+import { PageHeader, DataTable, FilterBar, StatusBadge, ConfirmDialog, EmptyState, ChargerAvatar, formatDA, ORDER_STATUS, type Column } from '@/admin/ui';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { fetchOpenQuotaLines, type OpenQuotaLine } from '@/lib/quotas';
 
 interface Order {
   id: string; status: string; created_at: string; customer_name: string; customer_phone: string; customer_wilaya?: string | null;
@@ -29,6 +31,8 @@ const TABS: { key: string; label: string; match: (s: string) => boolean }[] = [
   { key: 'delivered', label: 'Livrées', match: (s) => s === 'delivered' },
   { key: 'cancelled', label: 'Annulées / retours', match: (s) => s === 'cancelled' || s === 'returned' },
 ];
+
+interface AssignLine { id: string; product_id: string; product_name: string; product_image?: string | null; quantity: number; options: OpenQuotaLine[]; choice: string }
 
 const waLink = (phone: string) => `https://wa.me/${phone.replace(/\D/g, '').replace(/^0/, '213')}`;
 const shortId = (id: string) => id.slice(0, 8).toUpperCase();
@@ -66,7 +70,20 @@ export default function Orders() {
 
   const refresh = () => { qc.invalidateQueries({ queryKey: ['orders-list'] }); qc.invalidateQueries({ queryKey: ['admin-alerts'] }); qc.invalidateQueries({ queryKey: ['dashboard'] }); };
 
-  const transition = async (o: Omit<Order, 'order_items'>, t: (typeof TRANSITIONS)[string][number]) => {
+  const [quotaAssign, setQuotaAssign] = useState<{ order: Omit<Order, 'order_items'>; t: (typeof TRANSITIONS)[string][number]; lines: AssignLine[] } | null>(null);
+
+  const transition = async (o: Omit<Order, 'order_items'>, t: (typeof TRANSITIONS)[string][number], skipQuota = false) => {
+    // Confirmation: let the admin choose which quota each charger is taken from.
+    if (t.to === 'confirmed' && !skipQuota) {
+      const { data: items } = await supabase.from('order_items').select('id, product_id, product_name, product_image, quantity, quota_item_id').eq('order_id', o.id);
+      const open = await fetchOpenQuotaLines([...new Set((items || []).map((i: any) => i.product_id).filter(Boolean))]);
+      const lines: AssignLine[] = (items || []).filter((i: any) => (open[i.product_id] || []).length > 0).map((i: any) => {
+        const opts = open[i.product_id];
+        const fifo = opts.find((l) => l.remaining >= i.quantity) || opts[0];
+        return { ...i, options: opts, choice: i.quota_item_id || fifo.id };
+      });
+      if (lines.length > 0) { setQuotaAssign({ order: o, t, lines }); return; }
+    }
     try {
       await t.run(o.id);
       // Timeline timestamp — optional column (see supabase_admin_fields.sql); ignore if absent.
@@ -138,6 +155,46 @@ export default function Orders() {
       <DataTable rows={rows} columns={columns} loading={isLoading} onRowClick={(o) => setOpenId(o.id)} csvName="commandes"
         mobileTitle={(o) => <span className="flex items-center justify-between gap-2"><span>{o.customer_name}</span><StatusBadge status={o.status} /></span>}
         empty={<EmptyState icon={PackageCheck} title="Aucune commande" text={search ? 'Aucun résultat pour cette recherche.' : 'Les commandes de la boutique apparaîtront ici.'} />} />
+
+      <Dialog open={!!quotaAssign} onOpenChange={(v) => !v && setQuotaAssign(null)}>
+        <DialogContent className="max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Layers className="h-5 w-5" />Quotas de la commande</DialogTitle>
+            <DialogDescription>Choisissez le quota d'où provient chaque chargeur. La vente sera comptée dans le quota à la livraison.</DialogDescription>
+          </DialogHeader>
+          <ul className="space-y-2">
+            {quotaAssign?.lines.map((l) => (
+              <li key={l.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                <ChargerAvatar src={l.product_image} alt={l.product_name} size={40} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{l.product_name} <span className="font-normal text-muted-foreground">× {l.quantity}</span></p>
+                  <select
+                    value={l.choice}
+                    onChange={(e) => setQuotaAssign((qa) => qa && { ...qa, lines: qa.lines.map((x) => (x.id === l.id ? { ...x, choice: e.target.value } : x)) })}
+                    className="mt-1 h-8 w-full rounded-md border border-border bg-card px-2 text-xs"
+                  >
+                    {l.options.map((q) => <option key={q.id} value={q.id}>{q.quota_name} — {q.remaining} restant(s)</option>)}
+                    <option value="">Hors quota</option>
+                  </select>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setQuotaAssign(null)}>Annuler</Button>
+            <Button
+              className="bg-volt text-volt-foreground hover:bg-volt/90"
+              onClick={async () => {
+                if (!quotaAssign) return;
+                const { order, t, lines } = quotaAssign;
+                setQuotaAssign(null);
+                for (const l of lines) await supabase.from('order_items').update({ quota_item_id: l.choice || null }).eq('id', l.id);
+                transition(order, t, true);
+              }}
+            ><Check className="h-4 w-4" />Confirmer la commande</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <OrderDrawer id={openId} onClose={() => setOpenId(null)} onTransition={transition} onCancel={(id) => setCancelId(id)} />
       <ConfirmDialog open={!!cancelId} onOpenChange={(o) => !o && setCancelId(null)} title="Annuler cette commande ?" description="La commande passera au statut « Annulée »."

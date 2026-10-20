@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ArrowDownRight, ArrowUpRight, ChevronDown, ChevronUp, ChevronsUpDown, Download, Inbox, Search, X } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, ChevronDown, ChevronUp, ChevronsUpDown, Download, Inbox, PlugZap, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -349,3 +349,14 @@ export function DataTable<T extends { id: string }>({
     </div>
   );
 }
+
+/* ---------------- Charger avatar ---------------- */
+/** Small round product thumbnail (falls back to a plug icon). */
+export const ChargerAvatar = ({ src, alt = '', size = 40, className }: { src?: string | null; alt?: string; size?: number; className?: string }) => (
+  <span
+    className={cn('inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface-2', className)}
+    style={{ width: size, height: size }}
+  >
+    {src ? <img src={src} alt={alt} loading="lazy" className="h-full w-full object-cover" /> : <PlugZap className="h-1/2 w-1/2 text-muted-foreground" />}
+  </span>
+);

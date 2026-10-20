@@ -16,6 +16,8 @@ const Sales = lazy(() => import("./pages/Sales"));
 const FactureDuStock = lazy(() => import("./pages/FactureDuStock"));
 const PurchaseInvoices = lazy(() => import("./pages/PurchaseInvoices"));
 const Suppliers = lazy(() => import("./pages/Suppliers"));
+const Quotas = lazy(() => import("./pages/Quotas"));
+const QuotaDetail = lazy(() => import("./pages/Quotas").then((m) => ({ default: m.QuotaDetail })));
 const Employees = lazy(() => import("./pages/Employees"));
 const Reports = lazy(() => import("./pages/Reports"));
 const POS = lazy(() => import("./pages/POS"));
@@ -132,6 +134,8 @@ const AppContent = () => {
           <Route path="clients" element={<Clients />} />
           <Route path="facturedustock" element={<FactureDuStock />} />
           <Route path="purchase-invoices" element={<PurchaseInvoices />} />
+          <Route path="quotas" element={<Quotas />} />
+          <Route path="quotas/:id" element={<QuotaDetail />} />
           <Route path="sales" element={<Sales />} />
           <Route path="suppliers" element={<Suppliers />} />
           <Route path="employees" element={<Employees />} />

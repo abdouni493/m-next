@@ -17,6 +17,7 @@ import {
   Store,
   Sparkles,
   MoreVertical,
+  Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +56,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase, getProducts, getStores } from '@/lib/supabaseClient';
+import { fetchOpenQuotaLines, recordQuotaSale, type OpenQuotaLine } from '@/lib/quotas';
+import { ChargerAvatar } from '@/admin/ui';
 
 // --- Type Definitions ---
 interface Product {
@@ -97,6 +100,7 @@ interface CartItem {
   quantity: number;
   discount: number;
   total: number;
+  quotaLineId?: string | null; // quota_items.id the units are taken from
 }
 
 interface GlobalDiscount {
@@ -170,6 +174,9 @@ export default function POS() {
     return localStorage.getItem('posStorePinned') === 'true';
   });
 
+  const [quotaLines, setQuotaLines] = useState<Record<string, OpenQuotaLine[]>>({});
+  const [quotaPicker, setQuotaPicker] = useState<Product | null>(null);
+
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // --- Fetch Stores from Supabase ---
@@ -220,6 +227,7 @@ export default function POS() {
         store_id: p.store_id || ''
       }));
       setProducts(formattedData);
+      setQuotaLines(await fetchOpenQuotaLines());
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({
@@ -354,7 +362,19 @@ export default function POS() {
   const remainingDebt = total - receivedAmount;
   const change = receivedAmount - total;
 
+  /** Products bought in several quotas ask which quota the sale comes from. */
   const addToCart = (product: Product) => {
+    if (cart.some(item => item.product.id === product.id)) return addToCartWithQuota(product);
+    const lines = quotaLines[product.id] || [];
+    if (lines.length > 1) { setQuotaPicker(product); return; }
+    addToCartWithQuota(product, lines[0]?.id ?? null);
+  };
+
+  const setItemQuota = (productId: string, quotaLineId: string | null) => {
+    setCart(cart.map(item => item.product.id === productId ? { ...item, quotaLineId } : item));
+  };
+
+  const addToCartWithQuota = (product: Product, quotaLineId: string | null = null) => {
     const existingItem = cart.find(item => item.product.id === product.id);
     
     if (product.quantity_actual <= 0) {
@@ -403,7 +423,8 @@ export default function POS() {
         product, 
         quantity: 1, 
         discount: 0,
-        total: selectedPrice
+        total: selectedPrice,
+        quotaLineId
       }]);
     }
     
@@ -654,6 +675,28 @@ export default function POS() {
         }
       }
 
+      // Quota tracking: spread the global discount / edited total over the lines so gains match the cash received.
+      const netBeforeGlobal = subtotal - totalDiscount;
+      const factor = netBeforeGlobal > 0 ? editableTotal / netBeforeGlobal : 1;
+      for (const item of cart) {
+        if (!item.quotaLineId || item.quantity <= 0) continue;
+        try {
+          const taken = await recordQuotaSale({
+            quotaItemId: item.quotaLineId,
+            quantity: item.quantity,
+            unitPrice: (item.total / item.quantity) * factor,
+            source: 'pos',
+            invoiceRef: String(createdInvoice.id),
+            clientName: trimmedClientName || 'Client de passage',
+          });
+          if (taken < item.quantity) {
+            toast({ title: 'Quota', description: `${item.product.name} : ${taken}/${item.quantity} comptabilisé(s) dans le quota (quota épuisé).` });
+          }
+        } catch (e) {
+          console.warn('Quota sale not recorded:', e);
+        }
+      }
+
       const fetchedInvoice: SaleInvoice = {
         id: createdInvoice.id,
         type: 'sale',
@@ -901,6 +944,15 @@ export default function POS() {
                                       {product.amperage ? <span className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] font-semibold tabular-nums">{product.amperage}A</span> : null}
                                     </div>
                                   )}
+                                  {(quotaLines[product.id] || []).length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                      {(quotaLines[product.id] || []).map((l) => (
+                                        <span key={l.id} className="inline-flex max-w-full items-center gap-1 truncate rounded-full bg-volt px-2 py-0.5 text-[10px] font-semibold text-volt-foreground" title={`Quota ${l.quota_name}`}>
+                                          <Layers className="h-3 w-3 shrink-0" />{l.quota_name} · {l.remaining}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
                                   <div className="mt-auto pt-3">
                                     <div className="grid grid-cols-3 gap-1.5">
                                       {tiers.map((tier) => (
@@ -1068,8 +1120,9 @@ export default function POS() {
                           animate={{ opacity: 1, x: 0 }}
                           className="rounded-lg p-3 space-y-2 border border-border bg-card"
                         >
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
+                          <div className="flex justify-between items-start gap-2">
+                            <ChargerAvatar src={item.product.primary_image} alt={item.product.name} size={36} />
+                            <div className="flex-1 min-w-0">
                               <h4 className="font-bold text-sm text-foreground">{item.product.name}</h4>
                               <p className="text-xs text-muted-foreground">{item.product.brand}</p>
                             </div>
@@ -1105,6 +1158,22 @@ export default function POS() {
                             </div>
                             <span className="font-bold text-success">{formatCurrencyLocal(item.total, language)}</span>
                           </div>
+
+                          {(quotaLines[item.product.id] || []).length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Layers className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                              <select
+                                value={item.quotaLineId || ''}
+                                onChange={(e) => setItemQuota(item.product.id, e.target.value || null)}
+                                className="h-7 flex-1 rounded-md border border-border bg-card px-2 text-xs"
+                              >
+                                <option value="">{language === 'ar' ? 'بدون حصة' : 'Hors quota'}</option>
+                                {(quotaLines[item.product.id] || []).map((l) => (
+                                  <option key={l.id} value={l.id}>{l.quota_name} — {l.remaining} restant(s)</option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
 
                           <div className="flex items-center gap-2">
                             <Input
@@ -1366,6 +1435,41 @@ export default function POS() {
       </AnimatePresence>
 
       {/* Payment Dialog */}
+      <Dialog open={!!quotaPicker} onOpenChange={(o) => !o && setQuotaPicker(null)}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Layers className="h-5 w-5" />{language === 'ar' ? 'اختر الحصة' : 'Choisir le quota'}</DialogTitle>
+            <DialogDescription>
+              {quotaPicker?.name} {language === 'ar' ? 'موجود في عدة حصص.' : 'existe dans plusieurs quotas. De quel quota provient cette vente ?'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {quotaPicker && (quotaLines[quotaPicker.id] || []).map((l) => (
+              <button
+                key={l.id}
+                onClick={() => { addToCartWithQuota(quotaPicker, l.id); setQuotaPicker(null); }}
+                className="flex w-full items-center gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:border-electric/40 hover:bg-surface-2"
+              >
+                <ChargerAvatar src={quotaPicker.primary_image} size={40} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">{l.quota_name}</span>
+                  <span className="block text-xs text-muted-foreground">{l.quota_date ? new Date(l.quota_date).toLocaleDateString('fr-FR') : ''} · {formatCurrencyLocal(l.purchase_price, language)}</span>
+                </span>
+                <span className="rounded-full bg-volt px-2.5 py-0.5 text-xs font-semibold text-volt-foreground">{l.remaining} {language === 'ar' ? 'متبقي' : 'restant(s)'}</span>
+              </button>
+            ))}
+            {quotaPicker && (
+              <button
+                onClick={() => { addToCartWithQuota(quotaPicker, null); setQuotaPicker(null); }}
+                className="w-full rounded-xl border border-dashed border-border p-3 text-sm text-muted-foreground hover:bg-surface-2"
+              >
+                {language === 'ar' ? 'بيع بدون حصة' : 'Vendre hors quota'}
+              </button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={paymentDialog} onOpenChange={setPaymentDialog}>
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>

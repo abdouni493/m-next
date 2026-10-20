@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, LineChart, PackageCheck, Receipt, ScanLine, Wallet, UsersRound, Boxes, Globe2, Barcode,
-  Truck, Store, UserCog, Settings2, Warehouse, type LucideIcon,
+  Truck, Store, Layers, UserCog, Settings2, Warehouse, type LucideIcon,
 } from 'lucide-react';
 
 export type BadgeKey = 'pendingOrders' | 'lowStock';
@@ -46,6 +46,7 @@ export const ADMIN_NAV: NavGroup[] = [
     items: [
       { title: 'Catalogue & stock', href: '/catalogue', icon: Warehouse, badge: 'lowStock', keywords: ['stock', 'mouvements', 'seuil', 'marge', 'vedette', 'images', 'slug'] },
       { title: "Factures d'achat", href: '/purchase-invoices', icon: Truck, keywords: ['achats', 'purchases', 'réapprovisionnement'] },
+      { title: 'Quotas', href: '/quotas', icon: Layers, keywords: ['quota', 'lots', 'gains', 'restant'] },
       { title: 'Fournisseurs', href: '/suppliers', icon: Store, keywords: ['suppliers', 'vendors'] },
     ],
   },
