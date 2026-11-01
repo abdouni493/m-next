@@ -352,28 +352,31 @@ export const getEmployees = async () => {
   return data;
 };
 
-export const createEmployee = async (employee: any) => {
-  const { data, error } = await supabase
-    .from('employees')
-    .insert([employee])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+// Retries a write, dropping any field whose column doesn't exist in the table.
+const writeDroppingMissingColumns = async (
+  payload: Record<string, any>,
+  run: (p: Record<string, any>) => PromiseLike<{ data: any; error: any }>
+) => {
+  const body = { ...payload };
+  for (let i = 0; i < 20; i++) {
+    const { data, error } = await run(body);
+    if (!error) return data;
+    const m = /Could not find the '([^']+)' column/.exec(error.message || '');
+    if (!m || !(m[1] in body)) throw error;
+    delete body[m[1]];
+  }
+  throw new Error('Failed to save employee');
 };
 
-export const updateEmployee = async (id: string, updates: any) => {
-  const { data, error } = await supabase
-    .from('employees')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
+export const createEmployee = async (employee: any) =>
+  writeDroppingMissingColumns(employee, (p) =>
+    supabase.from('employees').insert([p]).select().single()
+  );
 
-  if (error) throw error;
-  return data;
-};
+export const updateEmployee = async (id: string, updates: any) =>
+  writeDroppingMissingColumns(updates, (p) =>
+    supabase.from('employees').update(p).eq('id', id).select().single()
+  );
 
 export const deleteEmployee = async (id: string) => {
   const { error } = await supabase
