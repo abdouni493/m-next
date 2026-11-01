@@ -278,11 +278,11 @@ export default function Employees() {
         // Only send fields that exist in the employees table
         const newEmployeeData = {
           full_name: formData.full_name,
-          email: formData.email,
-          phone: formData.phone,
+          email: formData.email?.trim() || null,
+          phone: formData.phone?.trim() || null,
           position: formData.position,
-          salary: formData.salary,
-          address: formData.address,
+          salary: Number(formData.salary) || 0,
+          address: formData.address?.trim() || null,
           birth_date: formData.birth_date || null,
           hire_date: new Date().toISOString().split('T')[0],
           is_active: true
@@ -297,11 +297,11 @@ export default function Employees() {
         // Only send fields that exist in the employees table
         const updatedEmployeeData = {
           full_name: formData.full_name,
-          email: formData.email,
-          phone: formData.phone,
+          email: formData.email?.trim() || null,
+          phone: formData.phone?.trim() || null,
           position: formData.position,
-          salary: formData.salary,
-          address: formData.address,
+          salary: Number(formData.salary) || 0,
+          address: formData.address?.trim() || null,
           birth_date: formData.birth_date || null
         };
         await updateEmployee(String(selectedEmployee.id), updatedEmployeeData);
@@ -331,7 +331,8 @@ export default function Employees() {
       setIsDialogOpen(false);
       fetchEmployees();
     } catch (err) {
-      const errorMsg = language === 'ar' ? 'فشل في حفظ بيانات الموظف' : 'Failed to save employee data';
+      const detail = (err as any)?.message ? ` (${(err as any).message})` : '';
+      const errorMsg = (language === 'ar' ? 'فشل في حفظ بيانات الموظف' : 'Failed to save employee data') + detail;
       setError(errorMsg);
       toast({
         title: language === 'ar' ? 'خطأ' : 'Error',
@@ -928,10 +929,6 @@ export default function Employees() {
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
-                    </div>
-                    <div className="text-sm text-destructive flex items-center gap-2">
-                      <span></span>
-                      {language === 'ar' ? 'استخدم حروف وأرقام ورموز خاصة' : 'Utilisez des majuscules, minuscules et chiffres'}
                     </div>
                   </motion.div>
 
