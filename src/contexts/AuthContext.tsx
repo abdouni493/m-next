@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, loginToEmail, authPassword } from '@/lib/supabaseClient';
 
 export type Role = 'admin' | 'manager' | 'employee';
 
@@ -106,7 +106,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signIn = useCallback(async (email: string, password: string, remember = true) => {
     signingIn.current = true;
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      const authEmail = loginToEmail(email);
+      let { data, error } = await supabase.auth.signInWithPassword({ email: authEmail, password });
+      if (error && password.length < 6) {
+        ({ data, error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPassword(password) }));
+      }
       if (error || !data.session) throw error || new Error('Connexion impossible');
       localStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
       sessionStorage.setItem(ALIVE_KEY, '1');

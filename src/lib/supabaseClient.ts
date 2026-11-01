@@ -36,6 +36,50 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 
+// ========== WORKER LOGIN HELPERS ==========
+
+const WORKER_EMAIL_DOMAIN = 'mnext-worker.app';
+
+/** Turns what the user typed (an email or a worker identifiant) into the auth email. */
+export const loginToEmail = (login: string): string => {
+  const v = login.trim();
+  if (v.includes('@')) return v.toLowerCase();
+  const slug = v
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, '');
+  return `${slug || 'worker'}@${WORKER_EMAIL_DOMAIN}`;
+};
+
+/** Supabase needs at least 6 characters; short passwords are padded the same way on create and login. */
+export const authPassword = (password: string): string =>
+  password.length >= 6 ? password : `${password}#mnext!`;
+
+/** Creates a login account for a worker without logging the admin out. */
+export const createWorkerAccount = async (login: string, password: string, fullName?: string) => {
+  const email = loginToEmail(login);
+  const side = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'worker-signup' },
+  });
+  const { data, error } = await side.auth.signUp({
+    email,
+    password: authPassword(password),
+    options: { data: { username: login.trim(), full_name: fullName || login.trim(), role: 'employee' } },
+  });
+  if (error) {
+    if (/already registered|already exists/i.test(error.message)) throw new Error(`L'identifiant "${login}" est déjà utilisé.`);
+    throw error;
+  }
+  const id = data.user?.id;
+  if (!id) throw new Error('Création du compte impossible.');
+  // Profile row with the employee role (admin session is allowed to write users).
+  await writeDroppingMissingColumns(
+    { id, email, username: login.trim(), role: 'employee', is_active: true, created_at: new Date().toISOString() },
+    (p) => supabase.from('users').upsert([p]).select().single()
+  ).catch((e) => console.error('Worker profile error:', e));
+  try { await side.auth.signOut(); } catch { /* ignore */ }
+  return { id, email };
+};
+
 // ========== USER MANAGEMENT ==========
 
 export const signUp = async (email: string, password: string, username: string) => {

@@ -15,7 +15,7 @@ const readFailures = (): { count: number; until: number } => {
 
 const errorMessage = (err: unknown): string => {
   const msg = String((err as { message?: string })?.message || "");
-  if (/invalid login credentials|invalid_credentials/i.test(msg)) return "Email ou mot de passe incorrect.";
+  if (/invalid login credentials|invalid_credentials/i.test(msg)) return "Identifiant/email ou mot de passe incorrect.";
   if (/email not confirmed/i.test(msg)) return "Adresse email non confirmée. Vérifiez votre boîte mail.";
   if (/fetch|network/i.test(msg)) return "Connexion au serveur impossible. Vérifiez votre connexion internet.";
   if (/rate limit|too many/i.test(msg)) return "Trop de tentatives. Réessayez dans quelques minutes.";
@@ -54,7 +54,7 @@ export default function Login() {
     return () => clearInterval(t);
   }, []);
 
-  const emailError = !email.trim() ? "Entrez votre email." : !/^\S+@\S+\.\S+$/.test(email.trim()) ? "Format d'email invalide." : null;
+  const emailError = !email.trim() ? "Entrez votre email ou identifiant." : email.includes("@") && !/^\S+@\S+\.\S+$/.test(email.trim()) ? "Format d'email invalide." : null;
   const passwordError = !password ? "Entrez votre mot de passe." : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,13 +146,13 @@ export default function Login() {
             )}
 
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <label htmlFor="email" className="text-sm font-medium">Email ou identifiant</label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground" />
-                <input ref={emailRef} id="email" type="email" inputMode="email" autoComplete="username" value={email}
+                <input ref={emailRef} id="email" type="text" inputMode="email" autoCapitalize="none" autoCorrect="off" autoComplete="username" value={email}
                   onChange={(e) => setEmail(e.target.value)} onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                   aria-invalid={!!showEmailErr} aria-describedby={showEmailErr ? "email-err" : undefined}
-                  className={`${fieldBase} ${showEmailErr ? "border-destructive" : "border-input"}`} placeholder="vous@exemple.com" />
+                  className={`${fieldBase} ${showEmailErr ? "border-destructive" : "border-input"}`} placeholder="vous@exemple.com ou identifiant" />
               </div>
               {showEmailErr && <p id="email-err" className="text-xs font-medium text-destructive">{emailError}</p>}
             </div>

@@ -55,7 +55,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getEmployees, createEmployee, updateEmployee, deleteEmployee, createPayment, getPaymentHistory, deletePayment, getTotalPayments, getPaymentsThisMonth } from '@/lib/supabaseClient';
+import { getEmployees, createEmployee, createWorkerAccount, updateEmployee, deleteEmployee, createPayment, getPaymentHistory, deletePayment, getTotalPayments, getPaymentsThisMonth } from '@/lib/supabaseClient';
 import { useToast } from '@/hooks/use-toast';
 
 interface Employee {
@@ -275,6 +275,18 @@ export default function Employees() {
   const handleSubmit = async () => {
     try {
       if (dialogMode === 'create') {
+        if (formData.password !== formData.confirmPassword) {
+          throw new Error(language === 'ar' ? 'كلمتا المرور غير متطابقتين' : 'Les mots de passe ne correspondent pas');
+        }
+        if (formData.password && !formData.username.trim() && !formData.email.trim()) {
+          throw new Error(language === 'ar' ? 'أدخل اسم المستخدم' : "Entrez un identifiant pour le compte");
+        }
+        let loginInfo = '';
+        if (formData.password) {
+          const login = formData.username.trim() || formData.email.trim();
+          await createWorkerAccount(login, formData.password, formData.full_name);
+          loginInfo = ` — ${language === 'ar' ? 'الدخول بـ' : 'Connexion avec'}: ${login}`;
+        }
         // Only send fields that exist in the employees table
         const newEmployeeData = {
           full_name: formData.full_name,
@@ -284,13 +296,14 @@ export default function Employees() {
           salary: Number(formData.salary) || 0,
           address: formData.address?.trim() || null,
           birth_date: formData.birth_date || null,
+          username: formData.username.trim() || null,
           hire_date: new Date().toISOString().split('T')[0],
           is_active: true
         };
         await createEmployee(newEmployeeData);
         toast({
           title: language === 'ar' ? 'تم الإنشاء' : 'Created',
-          description: language === 'ar' ? 'تم إنشاء الموظف بنجاح' : 'Employee created successfully',
+          description: (language === 'ar' ? 'تم إنشاء الموظف بنجاح' : 'Employé créé avec succès') + loginInfo,
           variant: 'default'
         });
       } else if (dialogMode === 'edit' && selectedEmployee) {
