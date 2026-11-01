@@ -65,11 +65,18 @@ export const createWorkerAccount = async (login: string, password: string, fullN
     password: authPassword(password),
     options: { data: { username: login.trim(), full_name: fullName || login.trim(), role: 'employee' } },
   });
-  if (error) {
-    if (/already registered|already exists/i.test(error.message)) throw new Error(`L'identifiant "${login}" est déjà utilisé.`);
+  let id = data?.user?.id;
+  const alreadyExists = (error && /already registered|already exists/i.test(error.message)) ||
+    (!error && data?.user && (data.user.identities?.length ?? 0) === 0);
+  if (alreadyExists) {
+    // Account exists (e.g. a previous attempt failed half-way): reuse it if the password matches.
+    const { data: s2, error: e2 } = await side.auth.signInWithPassword({ email, password: authPassword(password) });
+    if (e2 || !s2.user) throw new Error(`L'identifiant "${login}" est déjà utilisé. Choisissez-en un autre.`);
+    id = s2.user.id;
+  } else if (error) {
+    if (/password/i.test(error.message)) throw new Error(`Mot de passe refusé par le serveur : ${error.message}`);
     throw error;
   }
-  const id = data.user?.id;
   if (!id) throw new Error('Création du compte impossible.');
   // Profile row with the employee role (admin session is allowed to write users).
   await writeDroppingMissingColumns(
@@ -77,7 +84,7 @@ export const createWorkerAccount = async (login: string, password: string, fullN
     (p) => supabase.from('users').upsert([p]).select().single()
   ).catch((e) => console.error('Worker profile error:', e));
   try { await side.auth.signOut(); } catch { /* ignore */ }
-  return { id, email };
+  return { id, email, needsConfirmation: !data?.session && !alreadyExists };
 };
 
 // ========== USER MANAGEMENT ==========
@@ -393,32 +400,56 @@ export const getEmployees = async () => {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data;
+  // The table may store the name as "name" or "full_name": expose both.
+  return (data || []).map((e: any) => ({ ...e, full_name: e.full_name ?? e.name ?? '', name: e.name ?? e.full_name ?? '' }));
 };
 
-// Retries a write, dropping any field whose column doesn't exist in the table.
+// Retries a write, adapting to the real table: drops fields whose column doesn't
+// exist and fills required (NOT NULL) columns with a sensible value.
 const writeDroppingMissingColumns = async (
   payload: Record<string, any>,
   run: (p: Record<string, any>) => PromiseLike<{ data: any; error: any }>
 ) => {
   const body = { ...payload };
-  for (let i = 0; i < 20; i++) {
+  const filled = new Set<string>();
+  for (let i = 0; i < 25; i++) {
     const { data, error } = await run(body);
     if (!error) return data;
-    const m = /Could not find the '([^']+)' column/.exec(error.message || '');
-    if (!m || !(m[1] in body)) throw error;
-    delete body[m[1]];
+    const msg = error.message || '';
+    const missing = /Could not find the '([^']+)' column/.exec(msg);
+    if (missing && missing[1] in body) { delete body[missing[1]]; continue; }
+    const notNull = /null value in column "([^"]+)"/.exec(msg);
+    if (notNull && !filled.has(notNull[1])) {
+      const col = notNull[1];
+      filled.add(col);
+      const fallbacks: Record<string, any> = {
+        name: body.full_name ?? body.username ?? body.email ?? 'Employé',
+        full_name: body.name ?? body.username ?? 'Employé',
+        phone: '', email: '', address: '', position: 'worker', role: 'employee',
+        salary: 0, is_active: true, status: 'active',
+        hire_date: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString(),
+      };
+      body[col] = col in fallbacks ? fallbacks[col] : '';
+      continue;
+    }
+    throw error;
   }
-  throw new Error('Failed to save employee');
+  throw new Error('Failed to save');
 };
 
+const withNameAlias = (e: any) =>
+  e && (e.full_name !== undefined || e.name !== undefined)
+    ? { ...e, name: e.name ?? e.full_name, full_name: e.full_name ?? e.name }
+    : e;
+
 export const createEmployee = async (employee: any) =>
-  writeDroppingMissingColumns(employee, (p) =>
+  writeDroppingMissingColumns(withNameAlias(employee), (p) =>
     supabase.from('employees').insert([p]).select().single()
   );
 
 export const updateEmployee = async (id: string, updates: any) =>
-  writeDroppingMissingColumns(updates, (p) =>
+  writeDroppingMissingColumns(withNameAlias(updates), (p) =>
     supabase.from('employees').update(p).eq('id', id).select().single()
   );
 

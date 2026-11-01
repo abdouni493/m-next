@@ -275,6 +275,9 @@ export default function Employees() {
   const handleSubmit = async () => {
     try {
       if (dialogMode === 'create') {
+        if (!formData.full_name.trim()) {
+          throw new Error(language === 'ar' ? 'أدخل الاسم الكامل' : 'Entrez le nom complet (onglet Personnel)');
+        }
         if (formData.password !== formData.confirmPassword) {
           throw new Error(language === 'ar' ? 'كلمتا المرور غير متطابقتين' : 'Les mots de passe ne correspondent pas');
         }
@@ -282,9 +285,18 @@ export default function Employees() {
           throw new Error(language === 'ar' ? 'أدخل اسم المستخدم' : "Entrez un identifiant pour le compte");
         }
         let loginInfo = '';
+        let accountId: string | null = null;
         if (formData.password) {
           const login = formData.username.trim() || formData.email.trim();
-          await createWorkerAccount(login, formData.password, formData.full_name);
+          const acc = await createWorkerAccount(login, formData.password, formData.full_name);
+          accountId = acc.id;
+          if (acc.needsConfirmation) {
+            toast({
+              title: 'Attention',
+              description: "Supabase exige la confirmation d'email : désactivez « Confirm email » (Authentication → Providers → Email) pour que ce travailleur puisse se connecter.",
+              variant: 'destructive'
+            });
+          }
           loginInfo = ` — ${language === 'ar' ? 'الدخول بـ' : 'Connexion avec'}: ${login}`;
         }
         // Only send fields that exist in the employees table
@@ -297,6 +309,7 @@ export default function Employees() {
           address: formData.address?.trim() || null,
           birth_date: formData.birth_date || null,
           username: formData.username.trim() || null,
+          user_id: accountId,
           hire_date: new Date().toISOString().split('T')[0],
           is_active: true
         };
