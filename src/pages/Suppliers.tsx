@@ -1,3 +1,4 @@
+import { useCan } from '@/lib/permissions';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -31,6 +32,7 @@ interface Supplier {
 }
 
 const SuppliersPage = () => {
+  const can = useCan('suppliers');
   const { language } = useLanguage();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,6 +213,7 @@ const SuppliersPage = () => {
               : `${suppliers.length} fournisseurs dans votre réseau`}
           </p>
         </div>
+        {can('add') && (
         <Button
           onClick={handleOpenAddModal}
           className="h-[46px] text-primary-foreground rounded-xl shadow-sm hover:shadow-md transition-all text-base font-semibold bg-primary"
@@ -218,6 +221,7 @@ const SuppliersPage = () => {
           <Plus className="w-4 h-4 mr-2" />
           {language === 'en' ? 'Add Supplier' : 'Ajouter Fournisseur'}
         </Button>
+        )}
       </motion.div>
 
       {/* Search */}
@@ -272,6 +276,7 @@ const SuppliersPage = () => {
                     </h3>
                   </div>
                   <div className="flex gap-2">
+                    {can('history') && (
                     <button
                       onClick={() => handleOpenHistoryModal(supplier)}
                       title={language === 'en' ? 'Purchase History' : 'Historique d\'Achats'}
@@ -279,6 +284,8 @@ const SuppliersPage = () => {
                     >
                       <span className="text-lg"></span>
                     </button>
+                    )}
+                    {can('edit') && (
                     <button
                       onClick={() => handleOpenEditModal(supplier)}
                       title={language === 'en' ? 'Edit' : 'Modifier'}
@@ -286,6 +293,8 @@ const SuppliersPage = () => {
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
+                    )}
+                    {can('delete') && (
                     <button
                       onClick={() => handleDeleteSupplier(supplier.id)}
                       title={language === 'en' ? 'Delete' : 'Supprimer'}
@@ -293,6 +302,7 @@ const SuppliersPage = () => {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                    )}
                   </div>
                 </div>
               </div>

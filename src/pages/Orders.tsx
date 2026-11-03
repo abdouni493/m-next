@@ -1,3 +1,4 @@
+import { useCan } from '@/lib/permissions';
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -45,6 +46,7 @@ const TRANSITIONS: Record<string, { to: string; label: string; icon: typeof Chec
 };
 
 export default function Orders() {
+  const can = useCan('commands');
   const qc = useQueryClient();
   const [sp, setSp] = useSearchParams();
   const tab = sp.get('status') || 'all';
@@ -124,10 +126,10 @@ export default function Orders() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Actions"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {(TRANSITIONS[o.status] || []).map((t) => <DropdownMenuItem key={t.to} onClick={() => transition(o, t)}><t.icon className="mr-2 h-4 w-4" />{t.label}</DropdownMenuItem>)}
-              <DropdownMenuItem onClick={() => setOpenId(o.id)}><LayoutList className="mr-2 h-4 w-4" />Détails</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => printDeliveryNote(o.id)}><Printer className="mr-2 h-4 w-4" />Bon de livraison</DropdownMenuItem>
-              {!['cancelled', 'returned', 'delivered'].includes(o.status) && (<><DropdownMenuSeparator /><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCancelId(o.id)}><X className="mr-2 h-4 w-4" />Annuler</DropdownMenuItem></>)}
+              {can('status') && (TRANSITIONS[o.status] || []).map((t) => <DropdownMenuItem key={t.to} onClick={() => transition(o, t)}><t.icon className="mr-2 h-4 w-4" />{t.label}</DropdownMenuItem>)}
+              {can('view') && <DropdownMenuItem onClick={() => setOpenId(o.id)}><LayoutList className="mr-2 h-4 w-4" />Détails</DropdownMenuItem>}
+              {can('print') && <DropdownMenuItem onClick={() => printDeliveryNote(o.id)}><Printer className="mr-2 h-4 w-4" />Bon de livraison</DropdownMenuItem>}
+              {can('status') && !['cancelled', 'returned', 'delivered'].includes(o.status) && (<><DropdownMenuSeparator /><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCancelId(o.id)}><X className="mr-2 h-4 w-4" />Annuler</DropdownMenuItem></>)}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -204,6 +206,7 @@ export default function Orders() {
 }
 
 function OrderDrawer({ id, onClose, onTransition, onCancel }: { id: string | null; onClose: () => void; onTransition: (o: Omit<Order, 'order_items'>, t: (typeof TRANSITIONS)[string][number]) => void; onCancel: (id: string) => void }) {
+  const can = useCan('commands');
   const { data: o, isLoading } = useQuery({
     queryKey: ['order', id],
     enabled: !!id,
@@ -229,9 +232,9 @@ function OrderDrawer({ id, onClose, onTransition, onCancel }: { id: string | nul
           <div className="mt-6 space-y-6">
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={o.status} />
-              {(TRANSITIONS[o.status] || []).map((t) => <Button key={t.to} size="sm" onClick={() => onTransition(o, t)} className={t.to === 'confirmed' ? 'bg-volt text-volt-foreground hover:bg-volt/90' : ''}><t.icon className="h-4 w-4" />{t.label}</Button>)}
-              <Button size="sm" variant="outline" onClick={() => printDeliveryNote(o.id)}><Printer className="h-4 w-4" />Bon de livraison</Button>
-              {!['cancelled', 'returned', 'delivered'].includes(o.status) && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => onCancel(o.id)}><X className="h-4 w-4" />Annuler</Button>}
+              {can('status') && (TRANSITIONS[o.status] || []).map((t) => <Button key={t.to} size="sm" onClick={() => onTransition(o, t)} className={t.to === 'confirmed' ? 'bg-volt text-volt-foreground hover:bg-volt/90' : ''}><t.icon className="h-4 w-4" />{t.label}</Button>)}
+              {can('print') && <Button size="sm" variant="outline" onClick={() => printDeliveryNote(o.id)}><Printer className="h-4 w-4" />Bon de livraison</Button>}
+              {can('status') && !['cancelled', 'returned', 'delivered'].includes(o.status) && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => onCancel(o.id)}><X className="h-4 w-4" />Annuler</Button>}
             </div>
 
             <section>

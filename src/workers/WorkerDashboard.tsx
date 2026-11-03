@@ -13,32 +13,36 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { ArrowRight } from 'lucide-react';
+import { usePermissions, canAccess, canDo } from "@/lib/permissions";
 
 // Quick Action Component (POS, Sales, Settings)
 const QuickActions = () => {
-  const actions = [
+  const permissions = usePermissions();
+  const allActions = [
     {
       title: "Point de Vente",
       description: "Lancer l'interface de caisse (POS).",
       icon: DollarSign,
-      href: "/pos",
+      href: "/employee/pos", perm: "pos",
       color: "text-success"
     },
     {
       title: "Mes Ventes",
       description: "Voir l'historique de mes ventes.",
       icon: ShoppingCart,
-      href: "/employee/sales",
+      href: "/employee/sales", perm: "sales",
       color: "text-electric"
     },
     {
       title: "Paramètres",
       description: "Gérer mes paramètres utilisateur.",
       icon: Settings,
-      href: "/employee/settings",
+      href: "/employee/workersettings", perm: "settings",
       color: "text-electric"
     }
   ];
+  const actions = allActions.filter((a) => canAccess(permissions, a.perm));
+  if (!canDo(permissions, "dashboard", "quick_actions") || actions.length === 0) return null;
 
   return (
     <Card className="animate-fade-in flex flex-col justify-between">

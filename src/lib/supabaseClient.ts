@@ -2581,3 +2581,47 @@ export const toggleProductVisibility = async (productId: string, isVisible: bool
     throw error;
   }
 };
+// ========== WORKER PERMISSIONS ==========
+
+/** Finds the auth/profile id of an employee's login account. */
+const resolveWorkerUserId = async (employee: { user_id?: string | null; username?: string | null; email?: string | null }) => {
+  if (employee.user_id) return employee.user_id;
+  const login = (employee.username || '').trim();
+  if (login) {
+    const { data } = await supabase.from('users').select('id').eq('username', login).maybeSingle();
+    if (data?.id) return data.id as string;
+    const { data: d2 } = await supabase.from('users').select('id').eq('email', loginToEmail(login)).maybeSingle();
+    if (d2?.id) return d2.id as string;
+  }
+  if (employee.email) {
+    const { data } = await supabase.from('users').select('id').eq('email', employee.email).maybeSingle();
+    if (data?.id) return data.id as string;
+  }
+  return null;
+};
+
+export const getWorkerPermissions = async (employee: { id: string; user_id?: string | null; username?: string | null; email?: string | null; permissions?: unknown }) => {
+  const userId = await resolveWorkerUserId(employee);
+  if (userId) {
+    const { data, error } = await supabase.from('users').select('permissions').eq('id', userId).maybeSingle();
+    if (!error && data?.permissions) return data.permissions as Record<string, string[]>;
+  }
+  return (employee.permissions as Record<string, string[]>) || null;
+};
+
+export const saveWorkerPermissions = async (
+  employee: { id: string; user_id?: string | null; username?: string | null; email?: string | null },
+  permissions: Record<string, string[]>
+) => {
+  const userId = await resolveWorkerUserId(employee);
+  if (!userId) throw new Error("Cet employé n'a pas de compte de connexion (identifiant + mot de passe).");
+  const { data, error } = await supabase.from('users').update({ permissions }).eq('id', userId).select('id');
+  if (error) {
+    if (/permissions/.test(error.message)) throw new Error('Colonne "permissions" manquante : exécutez le script SQL supabase_worker_permissions.sql.');
+    throw error;
+  }
+  if (!data || data.length === 0) throw new Error("Mise à jour refusée (droits insuffisants sur la table users).");
+  // Keep a copy on the employee row (ignored if the column does not exist).
+  await supabase.from('employees').update({ permissions }).eq('id', employee.id);
+  return permissions;
+};

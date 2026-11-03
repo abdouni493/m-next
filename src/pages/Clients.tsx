@@ -1,3 +1,4 @@
+import { useCan } from '@/lib/permissions';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -40,6 +41,7 @@ interface ClientFormData {
 }
 
 const Clients = () => {
+  const can = useCan('clients');
   const { language } = useLanguage();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -276,17 +278,20 @@ const Clients = () => {
             {clients.length} clients registered
           </p>
         </div>
+        {can('add') && (
         <Button
           onClick={() => {
             resetForm();
             setIsEditingMode(false);
             setShowAddModal(true);
           }}
+          data-perm="clients-add"
           className="gap-2 bg-primary text-primary-foreground"
         >
           <Plus className="w-4 h-4" />
           Add New Client
         </Button>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -406,6 +411,7 @@ const Clients = () => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2">
+                    {can('history') && (
                     <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Button
                         size="sm"
@@ -417,6 +423,8 @@ const Clients = () => {
                         
                       </Button>
                     </motion.div>
+                    )}
+                    {can('edit') && (
                     <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Button
                         size="sm"
@@ -428,6 +436,8 @@ const Clients = () => {
                         
                       </Button>
                     </motion.div>
+                    )}
+                    {can('delete') && (
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                       <Button
                         size="sm"
@@ -441,6 +451,7 @@ const Clients = () => {
                         
                       </Button>
                     </motion.div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

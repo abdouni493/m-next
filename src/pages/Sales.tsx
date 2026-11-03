@@ -1,3 +1,4 @@
+import { useCan } from '@/lib/permissions';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -791,6 +792,7 @@ function InvoiceDetailsDialog({ isOpen, onClose, invoice, invoiceItems }: {
 export default function Sales() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const isEmployee = currentUser?.role === 'employee';
+  const can = useCan('sales');
   const { toast } = useToast();
   const { language, isRTL } = useLanguage();
 
@@ -1126,6 +1128,7 @@ export default function Sales() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {can('import') && (
           <Button 
             variant="outline" 
             onClick={() => setIsImportDialogOpen(true)}
@@ -1134,6 +1137,8 @@ export default function Sales() {
             <Upload className="w-4 h-4 mr-2" />
             {language === 'ar' ? 'استيراد' : 'Importer'}
           </Button>
+          )}
+          {can('export') && (
           <Button 
             variant="outline" 
             onClick={handleExportSales}
@@ -1142,6 +1147,7 @@ export default function Sales() {
             <Download className="w-4 h-4 mr-2" />
             {language === 'ar' ? 'تصدير' : 'Exporter'}
           </Button>
+          )}
           <Button 
             onClick={() => window.location.href = '/point-of-sale'}
             className="text-primary-foreground font-semibold shadow-sm rounded-lg bg-primary"
@@ -1252,21 +1258,25 @@ export default function Sales() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
                               {/* View Details */}
+                              {can('view') && (
                               <DropdownMenuItemComponent
                                 icon={<Eye className="h-4 w-4" />}
                                 label={language === 'ar' ? 'عرض التفاصيل' : 'Voir les détails'}
                                 onClick={() => handleOpenDetailsModal(invoice)}
                               />
+                              )}
                               
                               {/* Edit Invoice */}
+                              {can('edit') && (
                               <DropdownMenuItemComponent
                                 icon={<Edit className="h-4 w-4" />}
                                 label={language === 'ar' ? 'تعديل' : 'Modifier'}
                                 onClick={() => handleOpenEditModal(invoice)}
                               />
+                              )}
                               
                               {/* Pay Debt (only for unpaid) */}
-                              {!isPaid && (
+                              {!isPaid && can('pay') && (
                                 <DropdownMenuItemComponent
                                   icon={<Check className="h-4 w-4" />}
                                   label={language === 'ar' ? 'دفع الدين' : 'Payer la dette'}
@@ -1276,14 +1286,16 @@ export default function Sales() {
                               )}
                               
                               {/* Print Invoice */}
+                              {can('print') && (
                               <DropdownMenuItemComponent
                                 icon={<Printer className="h-4 w-4" />}
                                 label={language === 'ar' ? 'طباعة' : 'Imprimer'}
                                 onClick={() => handlePrintInvoice(invoice.id)}
                               />
+                              )}
                               
                               {/* Delete (admin only) */}
-                              {!isEmployee && (
+                              {can('delete') && (
                                 <DropdownMenuItemComponent
                                   icon={<Trash2 className="h-4 w-4" />}
                                   label={language === 'ar' ? 'حذف' : 'Supprimer'}

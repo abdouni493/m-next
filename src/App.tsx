@@ -49,6 +49,7 @@ const WorkerSettings = lazy(() => import("@/workers/WorkerSettings"));
 
 // ✅ import worker layout + worker dashboard
 const WorkerDashboard = lazy(() => import("@/workers/WorkerDashboard"));
+const WorkerGuard = lazy(() => import("@/workers/WorkerGuard"));
 const WorkerLayout = lazy(() => import("@/workers/WorkerLayout").then((m) => ({ default: m.WorkerLayout })));
 
 const queryClient = new QueryClient();
@@ -160,10 +161,15 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<WorkerDashboard />} />
-          <Route path="pos" element={<POS />} />
-          <Route path="sales" element={<Sales />} />
-          <Route path="workersettings" element={<WorkerSettings />} />
+          <Route index element={<WorkerGuard perm="dashboard"><WorkerDashboard /></WorkerGuard>} />
+          <Route path="pos" element={<WorkerGuard perm="pos"><POS /></WorkerGuard>} />
+          <Route path="sales" element={<WorkerGuard perm="sales"><Sales /></WorkerGuard>} />
+          <Route path="caisse" element={<WorkerGuard perm="caisse"><Caisse /></WorkerGuard>} />
+          <Route path="clients" element={<WorkerGuard perm="clients"><Clients /></WorkerGuard>} />
+          <Route path="commands" element={<WorkerGuard perm="commands"><Orders /></WorkerGuard>} />
+          <Route path="suppliers" element={<WorkerGuard perm="suppliers"><Suppliers /></WorkerGuard>} />
+          <Route path="barcodes" element={<WorkerGuard perm="barcodes"><Barcodes /></WorkerGuard>} />
+          <Route path="workersettings" element={<WorkerGuard perm="settings"><WorkerSettings /></WorkerGuard>} />
         </Route>
 
         {/* 404 ROUTE */}

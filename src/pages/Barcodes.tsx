@@ -1,3 +1,4 @@
+import { useCan } from '@/lib/permissions';
 import { useState, useRef } from "react";
 import JsBarcode from "jsbarcode"; // offline import
 import { Printer, QrCode } from "lucide-react";
@@ -52,6 +53,7 @@ const texts = {
 };
 
 export default function Barcodes() {
+  const can = useCan('barcodes');
   const { language, isRTL } = useLanguage();
   const { toast } = useToast();
 
@@ -210,6 +212,7 @@ export default function Barcodes() {
             <Button variant="outline" onClick={() => setPrintDialogOpen(false)}>
               {texts[language].closeButton}
             </Button>
+            {can('print') && (
             <Button
               onClick={handlePrint}
               className="bg-primary text-primary-foreground"
@@ -218,6 +221,7 @@ export default function Barcodes() {
               <Printer className="mr-2 h-4 w-4" />{" "}
               {texts[language].printButton}
             </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,6 +1,7 @@
 // src/workers/WorkerSidebar.tsx
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Receipt, ScanLine, Settings2, BadgeCheck } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
+import { WORKER_INTERFACES, usePermissions, canAccess } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -10,15 +11,13 @@ interface SidebarProps {
 export default function WorkerSidebar({ isOpen }: SidebarProps) {
   const location = useLocation();
 
-  const navItems = [
-    { title: "Dashboard", href: "/employee", icon: LayoutDashboard },
-    { title: "POS", href: "/employee/pos", icon: ScanLine },
-    { title: "Sales", href: "/employee/sales", icon: Receipt },
-    { title: "Settings", href: "/employee/workersettings", icon: Settings2 },
-  ];
+  const permissions = usePermissions();
+  const navItems = WORKER_INTERFACES
+    .filter((i) => canAccess(permissions, i.key))
+    .map((i) => ({ title: i.label, href: i.href, icon: i.icon }));
 
   const isActiveRoute = (href: string) =>
-    location.pathname === href || location.pathname.startsWith(href);
+    href === "/employee" ? location.pathname === href || location.pathname === href + "/" : location.pathname.startsWith(href);
 
   return (
     <aside

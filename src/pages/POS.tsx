@@ -1,3 +1,4 @@
+import { useCan } from '@/lib/permissions';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -139,6 +140,7 @@ const formatCurrencyLocal = (amount: number, language: string) =>
   }).format(amount);
 
 export default function POS() {
+  const can = useCan('pos');
   const { toast } = useToast();
   const { language, isRTL } = useLanguage();
 
@@ -1020,6 +1022,7 @@ export default function POS() {
                           </span>
                         )}
                       </Label>
+                      {can('add_client') && (
                       <Button
                         size="sm"
                         onClick={() => setShowAddClientModal(true)}
@@ -1027,6 +1030,7 @@ export default function POS() {
                       >
                         <Plus className="w-3 h-3 mr-1" /> {language === 'en' ? 'New' : 'Nouveau'}
                       </Button>
+                      )}
                     </div>
                     <div className="relative mt-2">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1252,7 +1256,9 @@ export default function POS() {
                       </div>
                     </div>
 
+                    {can('checkout') && (
                     <Button 
+                      data-perm="pos-checkout"
                       onClick={() => {
                         setPaymentDialog(true);
                         setEditableTotal(total);
@@ -1263,6 +1269,7 @@ export default function POS() {
                       <CreditCard className={`${isRTL ? 'ml-2' : 'mr-2'} h-5 w-5`} />
                       {language === 'ar' ? `دفع الآن` : `Payer maintenant`}
                     </Button>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>

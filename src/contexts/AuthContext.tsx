@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, loginToEmail, authPassword } from '@/lib/supabaseClient';
+import { normalizePermissions, type WorkerPermissions } from '@/lib/permissions';
 
 export type Role = 'admin' | 'manager' | 'employee';
 
@@ -10,6 +11,8 @@ interface User {
   email: string;
   role: Role | 'unknown';
   name: string;
+  /** Worker permissions (null for admin/manager = full access). */
+  permissions: WorkerPermissions | null;
 }
 
 interface AuthContextType {
@@ -39,16 +42,21 @@ const ALIVE_KEY = 'auth:alive';
 
 async function loadProfile(session: Session): Promise<User> {
   const authUser = session.user;
-  let profile: { username?: string; role?: string } | null = null;
+  let profile: { username?: string; role?: string; permissions?: unknown } | null = null;
   try {
-    const { data } = await supabase.from('users').select('username, role').eq('id', authUser.id).maybeSingle();
-    profile = data;
+    const res = await supabase.from('users').select('username, role, permissions').eq('id', authUser.id).maybeSingle();
+    if (res.error) {
+      // "permissions" column not created yet: load the profile without it.
+      const { data } = await supabase.from('users').select('username, role').eq('id', authUser.id).maybeSingle();
+      profile = data;
+    } else profile = res.data;
   } catch { /* profile table unreachable — handled below */ }
   // Accounts created before roles existed have no profile row: they are the shop owner (admin).
   const rawRole = profile?.role ?? 'admin';
   const role: User['role'] = ['admin', 'manager', 'employee'].includes(rawRole) ? (rawRole as Role) : 'unknown';
   const username = profile?.username || authUser.email?.split('@')[0] || 'Utilisateur';
-  return { id: authUser.id, email: authUser.email || '', username, name: username, role };
+  const permissions = role === 'employee' ? normalizePermissions(profile?.permissions) : null;
+  return { id: authUser.id, email: authUser.email || '', username, name: username, role, permissions };
 }
 
 interface AuthProviderProps {

@@ -5,9 +5,13 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useIsDesktop } from "@/components/Layout/AppLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { PermissionsContext, DEFAULT_PERMISSIONS } from "@/lib/permissions";
 
 export const WorkerLayout = () => {
   const isDesktop = useIsDesktop();
+  const { user } = useAuth();
+  const permissions = user?.permissions ?? DEFAULT_PERMISSIONS;
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(() => window.matchMedia("(min-width: 1024px)").matches);
 
@@ -15,6 +19,7 @@ export const WorkerLayout = () => {
   useEffect(() => { if (!isDesktop) setIsOpen(false); }, [location.pathname, isDesktop]);
 
   return (
+    <PermissionsContext.Provider value={permissions}>
     <div className="flex h-dvh flex-col bg-background">
       <WorkerHeader onMenuClick={() => setIsOpen(!isOpen)} sidebarOpen={isOpen} />
 
@@ -60,5 +65,6 @@ export const WorkerLayout = () => {
         </main>
       </div>
     </div>
+    </PermissionsContext.Provider>
   );
 };

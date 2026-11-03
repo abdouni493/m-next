@@ -1,3 +1,4 @@
+import { useCan } from '@/lib/permissions';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -41,6 +42,7 @@ interface FormData {
 }
 
 const Caisse = () => {
+  const can = useCan('caisse');
   const { language, isRTL } = useLanguage();
   const [transactions, setTransactions] = useState<CaisseTransaction[]>([]);
   const [summary, setSummary] = useState<CaisseSummary | null>(null);
@@ -322,6 +324,7 @@ const Caisse = () => {
             </h1>
             <p className="text-muted-foreground mt-2">{getText('subtitle')}</p>
           </div>
+          {can('add') && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -329,11 +332,13 @@ const Caisse = () => {
               resetForm();
               setShowAddModal(true);
             }}
+            data-perm="caisse-add"
             className="text-primary-foreground px-8 py-3 rounded-lg font-bold flex items-center gap-2 shadow-sm bg-primary"
           >
             <Plus className="w-5 h-5" />
             {getText('add_transaction')}
           </motion.button>
+          )}
         </div>
 
         {/* Summary Cards */}
@@ -486,6 +491,7 @@ const Caisse = () => {
 
                     {/* Actions */}
                     <div className="flex gap-2">
+                      {can('edit') && (
                       <button
                         onClick={() => handleEditTransaction(transaction)}
                         className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground py-2 px-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
@@ -493,6 +499,8 @@ const Caisse = () => {
                         <Edit2 className="w-4 h-4" />
                         {getText('edit')}
                       </button>
+                      )}
+                      {can('delete') && (
                       <button
                         onClick={() => {
                           setTransactionToDelete(transaction.id);
@@ -503,6 +511,7 @@ const Caisse = () => {
                         <Trash2 className="w-4 h-4" />
                         {getText('delete')}
                       </button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

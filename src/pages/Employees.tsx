@@ -22,7 +22,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Building2,
-  Sparkles
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +56,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
+import WorkerPermissionsDialog from '@/components/WorkerPermissionsDialog';
 import { getEmployees, createEmployee, createWorkerAccount, updateEmployee, deleteEmployee, createPayment, getPaymentHistory, deletePayment, getTotalPayments, getPaymentsThisMonth } from '@/lib/supabaseClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -73,6 +75,8 @@ interface Employee {
   created_at: string;
   updated_at?: string;
   username?: string;
+  user_id?: string | null;
+  permissions?: unknown;
   hasAccount?: boolean;
   lastPayment?: {
     amount: number;
@@ -101,6 +105,7 @@ export default function Employees() {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit' | 'payment'>('create');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [permEmployee, setPermEmployee] = useState<Employee | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -633,7 +638,7 @@ export default function Employees() {
 
                   {/* Card Actions Footer */}
                   <div className="px-6 py-4 border-t-2 border-border bg-card">
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-5 gap-2">
                       {/* View History Button */}
                       <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
@@ -667,6 +672,18 @@ export default function Employees() {
                         >
                           <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'تعديل' : 'Éditer'}</span>
+                        </Button>
+                      </motion.div>
+
+                      {/* Permissions Button */}
+                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          onClick={() => setPermEmployee(employee)}
+                          className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
+                          title={language === 'ar' ? 'الصلاحيات' : 'Permissions'}
+                        >
+                          <ShieldCheck className="h-4 w-4" />
+                          <span className="text-xs font-bold">{language === 'ar' ? 'صلاحيات' : 'Accès'}</span>
                         </Button>
                       </motion.div>
 
@@ -1035,6 +1052,8 @@ export default function Employees() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <WorkerPermissionsDialog employee={permEmployee} onClose={() => setPermEmployee(null)} />
 
       {/* Payment History Dialog */}
       <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
