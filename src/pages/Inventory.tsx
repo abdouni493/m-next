@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useCan } from '@/lib/permissions';
 import { motion } from 'framer-motion';
 import {
   Plus,
@@ -70,6 +71,7 @@ interface Supplier {
 }
 
 const Inventory = () => {
+  const can = useCan('inventory');
   const { language } = useLanguage();
   const [chargers, setChargers] = useState<Charger[]>([]);
   const [marks, setMarks] = useState<Mark[]>([]);
@@ -1038,18 +1040,18 @@ const Inventory = () => {
 
   const renderActions = (charger: Charger, compact?: boolean) => (
     <div className={compact ? 'flex items-center justify-end gap-1' : 'grid grid-cols-3 gap-1.5'}>
-      <button type="button" onClick={() => openDetails(charger)} title={language === 'en' ? 'View details' : 'Voir les détails'}
+      {can('view') && (<button type="button" onClick={() => openDetails(charger)} title={language === 'en' ? 'View details' : 'Voir les détails'}
         className={compact ? 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-surface-2 hover:text-foreground' : 'inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-surface-2 text-xs font-semibold text-foreground transition-colors hover:bg-primary hover:text-primary-foreground'}>
         <Eye className="h-4 w-4" />{!compact && (language === 'en' ? 'View' : 'Voir')}
-      </button>
-      <button type="button" onClick={() => openEdit(charger)} title={language === 'en' ? 'Edit' : 'Modifier'}
+      </button>)}
+      {can('edit') && (<button type="button" onClick={() => openEdit(charger)} title={language === 'en' ? 'Edit' : 'Modifier'}
         className={compact ? 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-electric/10 hover:text-electric' : 'inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-electric/10 text-xs font-semibold text-electric transition-colors hover:bg-electric hover:text-white'}>
         <Edit2 className="h-4 w-4" />{!compact && (language === 'en' ? 'Edit' : 'Modifier')}
-      </button>
-      <button type="button" onClick={() => askDelete(charger)} title={language === 'en' ? 'Delete' : 'Supprimer'}
+      </button>)}
+      {can('delete') && (<button type="button" onClick={() => askDelete(charger)} title={language === 'en' ? 'Delete' : 'Supprimer'}
         className={compact ? 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive' : 'inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px] bg-destructive/10 text-xs font-semibold text-destructive transition-colors hover:bg-destructive hover:text-white'}>
         <Trash2 className="h-4 w-4" />{!compact && (language === 'en' ? 'Delete' : 'Suppr.')}
-      </button>
+      </button>)}
     </div>
   );
 
@@ -1078,10 +1080,10 @@ const Inventory = () => {
               className="inline-flex h-11 items-center gap-2 rounded-[10px] border border-white/15 bg-white/[0.04] px-4 text-sm font-semibold text-white transition-colors hover:bg-white/10">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> {language === 'en' ? 'Refresh' : 'Actualiser'}
             </button>
-            <button type="button" onClick={openCreate}
+            {can('add') && (<button type="button" onClick={openCreate}
               className="inline-flex h-11 items-center gap-2 rounded-[10px] bg-[#C6F432] px-5 text-sm font-bold text-[#0B1220] transition-transform hover:scale-[1.02] active:scale-[0.98]">
               <Plus className="h-4 w-4" /> {language === 'en' ? 'New charger' : 'Nouveau chargeur'}
-            </button>
+            </button>)}
           </div>
         </div>
       </motion.div>
@@ -1136,7 +1138,7 @@ const Inventory = () => {
         <div className="rounded-2xl border border-dashed border-border bg-card">
           <EmptyState icon={BatteryCharging} title={language === 'en' ? 'No chargers found' : 'Aucun chargeur trouvé'}
             text={language === 'en' ? 'Change the filters or add a new charger.' : 'Modifiez les filtres ou ajoutez un nouveau chargeur.'}
-            action={<Button onClick={openCreate}><Plus className="h-4 w-4" /> {language === 'en' ? 'New charger' : 'Nouveau chargeur'}</Button>} />
+            action={can('add') && <Button onClick={openCreate}><Plus className="h-4 w-4" /> {language === 'en' ? 'New charger' : 'Nouveau chargeur'}</Button>} />
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

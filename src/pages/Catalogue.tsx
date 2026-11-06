@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { useCan } from '@/lib/permissions';
 import { Package, Star, Eye, EyeOff, ImagePlus, ArrowUp, ArrowDown, Trash2, X, ArrowUpRight, ArrowDownRight, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ const margin = (p: Product) => (n(p.selling_price) > 0 && cost(p) > 0 ? ((n(p.se
 const slugify = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
 
 export default function Catalogue() {
+  const can = useCan('catalogue');
   const qc = useQueryClient();
   const [tab, setTab] = useState<'products' | 'movements'>('products');
   const [search, setSearch] = useState('');
@@ -74,12 +76,12 @@ export default function Catalogue() {
     { key: 'stock', header: 'Stock', cell: (p) => <span className="flex items-center gap-2"><span className="tabular-nums">{n(p.quantity_on_hand)}</span><StockBadge qty={n(p.quantity_on_hand)} threshold={lowStockOf(p) || n(p.quantity_minimal)} /></span>, sortValue: (p) => n(p.quantity_on_hand), csv: (p) => n(p.quantity_on_hand) },
     {
       key: 'published', header: 'En ligne', csv: (p) => (p.is_active ? 'oui' : 'non'),
-      cell: (p) => <span onClick={(e) => e.stopPropagation()}><Switch checked={!!p.is_active} onCheckedChange={(v) => patch(p, { is_active: v }, v ? 'Produit publié' : 'Produit masqué')} aria-label="Publié sur la boutique" /></span>,
+      cell: (p) => <span onClick={(e) => e.stopPropagation()}><Switch disabled={!can('edit')} checked={!!p.is_active} onCheckedChange={(v) => patch(p, { is_active: v }, v ? 'Produit publié' : 'Produit masqué')} aria-label="Publié sur la boutique" /></span>,
     },
     {
       key: 'featured', header: 'Vedette', csv: (p) => (p.featured ? 'oui' : 'non'),
       cell: (p) => (
-        <button onClick={(e) => { e.stopPropagation(); patch(p, { featured: !p.featured }); }} disabled={!data?.hasWebFields}
+        <button onClick={(e) => { e.stopPropagation(); patch(p, { featured: !p.featured }); }} disabled={!data?.hasWebFields || !can('edit')}
           className={cn('rounded-lg p-1.5 disabled:opacity-40', p.featured ? 'text-warning' : 'text-muted-foreground hover:text-foreground')} aria-label={p.featured ? 'Retirer de la sélection' : 'Mettre en avant'} aria-pressed={!!p.featured}>
           <Star className={cn('h-4 w-4', p.featured && 'fill-current')} />
         </button>
@@ -108,7 +110,7 @@ export default function Catalogue() {
       {tab === 'products' ? (
         <>
           <FilterBar search={search} onSearch={setSearch} placeholder="Nom, marque, connecteur, modèle compatible…" />
-          <DataTable<Product> rows={filtered} columns={columns} loading={isLoading} onRowClick={setEditing} csvName="catalogue" pageSize={25}
+          <DataTable<Product> rows={filtered} columns={columns} loading={isLoading} onRowClick={can('edit') ? setEditing : undefined} csvName="catalogue" pageSize={25}
             mobileTitle={(p) => p.name} empty={<EmptyState icon={Package} title="Aucun produit" />} />
         </>
       ) : <Movements />}

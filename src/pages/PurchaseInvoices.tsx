@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCan, useBasePath } from '@/lib/permissions';
 import { X, Truck, Plus, Layers, ShoppingBag, CalendarDays, Wallet, Receipt, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -20,6 +21,8 @@ interface Invoice {
 const emptyQuota = () => ({ name: '', description: '', date: todayISO() });
 
 export default function PurchaseInvoices() {
+  const can = useCan('purchase_invoices');
+  const base = useBasePath();
   const { toast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -146,7 +149,7 @@ export default function PurchaseInvoices() {
         icon={Truck}
         title="Factures d'achat"
         description="Enregistrez vos achats fournisseurs, en simple ou regroupés dans un quota."
-        actions={<Button onClick={() => setOpen(true)} className="bg-primary"><Plus className="h-4 w-4" />Nouvel achat</Button>}
+        actions={can('add') && <Button onClick={() => setOpen(true)} className="bg-primary"><Plus className="h-4 w-4" />Nouvel achat</Button>}
         stats={[
           { label: 'Factures', value: invoices.length },
           { label: 'Payées', value: paidCount },
@@ -157,7 +160,7 @@ export default function PurchaseInvoices() {
 
       <Panel title="Factures récentes" description={`${invoices.length} facture(s) d'achat`}>
         {invoices.length === 0 ? (
-          <EmptyState icon={Receipt} title="Aucune facture" text="Commencez par créer un nouvel achat." action={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" />Nouvel achat</Button>} />
+          <EmptyState icon={Receipt} title="Aucune facture" text="Commencez par créer un nouvel achat." action={can('add') && <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" />Nouvel achat</Button>} />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {invoices.slice(0, 30).map((inv) => {
@@ -179,7 +182,7 @@ export default function PurchaseInvoices() {
                     {inv.supplier_id && supplierName[inv.supplier_id] && <span className="inline-flex items-center gap-1"><Truck className="h-3.5 w-3.5" />{supplierName[inv.supplier_id]}</span>}
                   </div>
                   {q && (
-                    <Link to={`/quotas/${q.id}`} className="mt-3 inline-flex items-center gap-1 rounded-full bg-volt px-2.5 py-0.5 text-xs font-semibold text-volt-foreground">
+                    <Link to={`${base}/quotas/${q.id}`} className="mt-3 inline-flex items-center gap-1 rounded-full bg-volt px-2.5 py-0.5 text-xs font-semibold text-volt-foreground">
                       <Layers className="h-3.5 w-3.5" />{q.name}
                     </Link>
                   )}

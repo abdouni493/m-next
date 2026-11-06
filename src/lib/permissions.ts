@@ -1,7 +1,8 @@
 // Worker permissions: which interfaces (sidebar pages) and which button actions a worker can see.
 import { createContext, useContext } from 'react';
 import {
-  LayoutDashboard, ScanLine, Receipt, Wallet, UsersRound, Store, Barcode, PackageCheck, Settings2, type LucideIcon,
+  LayoutDashboard, ScanLine, Receipt, Wallet, UsersRound, Store, Barcode, PackageCheck, Settings2, LineChart, Boxes,
+  Globe2, Warehouse, Truck, Layers, UserCog, SlidersHorizontal, type LucideIcon,
 } from 'lucide-react';
 
 export interface PermAction { key: string; label: string }
@@ -52,7 +53,34 @@ export const WORKER_INTERFACES: PermInterface[] = [
   { key: 'barcodes', label: 'Codes-barres', href: '/employee/barcodes', icon: Barcode, actions: [
     { key: 'print', label: 'Imprimer' },
   ] },
-  { key: 'settings', label: 'Paramètres', href: '/employee/workersettings', icon: Settings2, actions: [] },
+  { key: 'reports', label: 'Rapports', href: '/employee/reports', icon: LineChart, actions: [] },
+  { key: 'inventory', label: 'Chargeurs', href: '/employee/inventory', icon: Boxes, actions: [
+    { key: 'add', label: 'Nouveau chargeur' },
+    { key: 'view', label: 'Voir les détails' },
+    { key: 'edit', label: 'Modifier' },
+    { key: 'delete', label: 'Supprimer' },
+  ] },
+  { key: 'website', label: 'Boutique en ligne', href: '/employee/website', icon: Globe2, actions: [] },
+  { key: 'catalogue', label: 'Catalogue & stock', href: '/employee/catalogue', icon: Warehouse, actions: [
+    { key: 'edit', label: 'Modifier un produit (publication, vedette, images…)' },
+  ] },
+  { key: 'purchase_invoices', label: "Factures d'achat", href: '/employee/purchase-invoices', icon: Truck, actions: [
+    { key: 'add', label: 'Nouvel achat' },
+  ] },
+  { key: 'quotas', label: 'Quotas', href: '/employee/quotas', icon: Layers, actions: [
+    { key: 'view', label: 'Détails' },
+    { key: 'edit', label: 'Modifier' },
+    { key: 'delete', label: 'Supprimer' },
+  ] },
+  { key: 'employees', label: 'Employés', href: '/employee/employees', icon: UserCog, actions: [
+    { key: 'add', label: 'Ajouter un employé' },
+    { key: 'history', label: 'Historique' },
+    { key: 'pay', label: 'Paiement' },
+    { key: 'edit', label: 'Modifier' },
+    { key: 'delete', label: 'Supprimer' },
+  ] },
+  { key: 'admin_settings', label: 'Paramètres (boutique)', href: '/employee/settings', icon: SlidersHorizontal, actions: [] },
+  { key: 'settings', label: 'Mon compte', href: '/employee/workersettings', icon: Settings2, actions: [] },
 ];
 
 /** { interfaceKey: [allowed action keys] } — an interface absent from the map is hidden. */
@@ -86,6 +114,8 @@ export const canDo = (p: WorkerPermissions | null, iface: string, action: string
   !p || (iface in p && p[iface].includes(action));
 
 export const usePermissions = () => useContext(PermissionsContext);
+/** Route prefix for links inside shared pages: '/employee' in the worker space, '' for admins. */
+export const useBasePath = () => (usePermissions() ? '/employee' : '');
 /** Returns a checker for the button actions of one interface. Always true outside the worker space. */
 export const useCan = (iface: string) => {
   const p = usePermissions();

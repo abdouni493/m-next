@@ -169,6 +169,15 @@ const AppContent = () => {
           <Route path="commands" element={<WorkerGuard perm="commands"><Orders /></WorkerGuard>} />
           <Route path="suppliers" element={<WorkerGuard perm="suppliers"><Suppliers /></WorkerGuard>} />
           <Route path="barcodes" element={<WorkerGuard perm="barcodes"><Barcodes /></WorkerGuard>} />
+          <Route path="reports" element={<WorkerGuard perm="reports"><Reports /></WorkerGuard>} />
+          <Route path="inventory" element={<WorkerGuard perm="inventory"><Inventory /></WorkerGuard>} />
+          <Route path="website" element={<WorkerGuard perm="website"><Website_Enhanced /></WorkerGuard>} />
+          <Route path="catalogue" element={<WorkerGuard perm="catalogue"><Catalogue /></WorkerGuard>} />
+          <Route path="purchase-invoices" element={<WorkerGuard perm="purchase_invoices"><PurchaseInvoices /></WorkerGuard>} />
+          <Route path="quotas" element={<WorkerGuard perm="quotas"><Quotas /></WorkerGuard>} />
+          <Route path="quotas/:id" element={<WorkerGuard perm="quotas"><QuotaDetail /></WorkerGuard>} />
+          <Route path="employees" element={<WorkerGuard perm="employees"><Employees /></WorkerGuard>} />
+          <Route path="settings" element={<WorkerGuard perm="admin_settings"><Settings /></WorkerGuard>} />
           <Route path="workersettings" element={<WorkerGuard perm="settings"><WorkerSettings /></WorkerGuard>} />
         </Route>
 

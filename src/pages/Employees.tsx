@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useCan } from '@/lib/permissions';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -94,6 +95,7 @@ interface Payment {
 }
 
 export default function Employees() {
+  const can = useCan('employees');
   const { language, isRTL } = useLanguage();
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -397,7 +399,7 @@ export default function Employees() {
           </h1>
           <p className="text-white/90 text-lg">{language === 'ar' ? 'ادارة فريقك والرواتب والصلاحيات' : 'Gérez votre équipe, salaires et permissions'}</p>
         </div>
-        <motion.div
+        {can('add') && (<motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -411,7 +413,7 @@ export default function Employees() {
               {language === 'ar' ? 'موظف جديد' : 'Nouvel Employé'}
             </span>
           </Button>
-        </motion.div>
+        </motion.div>)}
       </motion.div>
 
       {/* Statistics Cards */}
@@ -640,7 +642,7 @@ export default function Employees() {
                   <div className="px-6 py-4 border-t-2 border-border bg-card">
                     <div className="grid grid-cols-5 gap-2">
                       {/* View History Button */}
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                      {can('history') && (<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handleViewHistory(employee)}
                           className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
@@ -649,10 +651,10 @@ export default function Employees() {
                           <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'السجل' : 'Histo.'}</span>
                         </Button>
-                      </motion.div>
+                      </motion.div>)}
 
                       {/* Payment Button */}
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                      {can('pay') && (<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handlePayment(employee)}
                           className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
@@ -661,10 +663,10 @@ export default function Employees() {
                           <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'دفع' : 'Payer'}</span>
                         </Button>
-                      </motion.div>
+                      </motion.div>)}
 
                       {/* Edit Button */}
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                      {can('edit') && (<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handleEditEmployee(employee)}
                           className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
@@ -673,10 +675,10 @@ export default function Employees() {
                           <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'تعديل' : 'Éditer'}</span>
                         </Button>
-                      </motion.div>
+                      </motion.div>)}
 
                       {/* Permissions Button */}
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                      {can('edit') && (<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => setPermEmployee(employee)}
                           className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
@@ -685,10 +687,10 @@ export default function Employees() {
                           <ShieldCheck className="h-4 w-4" />
                           <span className="text-xs font-bold">{language === 'ar' ? 'صلاحيات' : 'Accès'}</span>
                         </Button>
-                      </motion.div>
+                      </motion.div>)}
 
                       {/* Delete Button */}
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                      {can('delete') && (<motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => handleDeleteEmployee(employee.id)}
                           className="w-full h-12 rounded-lg text-primary-foreground font-bold shadow-sm flex flex-col items-center justify-center gap-0.5 transition-all bg-primary"
@@ -697,7 +699,7 @@ export default function Employees() {
                           <span className="text-lg"></span>
                           <span className="text-xs font-bold">{language === 'ar' ? 'حذف' : 'Suppr.'}</span>
                         </Button>
-                      </motion.div>
+                      </motion.div>)}
                     </div>
                   </div>
                 </Card>

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useCan, useBasePath } from '@/lib/permissions';
 import { Layers, CalendarDays, Pencil, Trash2, Eye, ArrowLeft, Truck, TrendingUp, Package, X, Store, Globe2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -42,6 +43,8 @@ const useSuppliers = () =>
 
 /* =========================== List =========================== */
 export default function Quotas() {
+  const can = useCan('quotas');
+  const base = useBasePath();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
@@ -76,7 +79,7 @@ export default function Quotas() {
         icon={Layers}
         title="Quotas"
         description="Suivez chaque lot d'achat : quantité restante et gains réalisés par chargeur."
-        actions={<Button asChild className="bg-primary"><Link to="/purchase-invoices"><Plus className="h-4 w-4" />Nouveau quota</Link></Button>}
+        actions={<Button asChild className="bg-primary"><Link to={`${base}/purchase-invoices`}><Plus className="h-4 w-4" />Nouveau quota</Link></Button>}
         stats={[
           { label: 'Quotas', value: quotas.length },
           { label: 'Quantité totale', value: totals.qty },
@@ -92,7 +95,7 @@ export default function Quotas() {
       ) : error ? (
         <Panel><EmptyState icon={Layers} title="Quotas indisponibles" text="Exécutez le script supabase_quotas.sql dans Supabase puis rechargez la page." /></Panel>
       ) : filtered.length === 0 ? (
-        <Panel><EmptyState icon={Layers} title="Aucun quota" text="Créez un achat en activant l'option « Achat en quota »." action={<Button asChild><Link to="/purchase-invoices">Créer un achat</Link></Button>} /></Panel>
+        <Panel><EmptyState icon={Layers} title="Aucun quota" text="Créez un achat en activant l'option « Achat en quota »." action={<Button asChild><Link to={`${base}/purchase-invoices`}>Créer un achat</Link></Button>} /></Panel>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((q, i) => (
@@ -130,9 +133,9 @@ export default function Quotas() {
               </div>
 
               <div className="mt-4 flex gap-2 border-t border-border pt-4">
-                <Button size="sm" className="flex-1" onClick={() => navigate(`/quotas/${q.id}`)}><Eye className="h-4 w-4" />Détails</Button>
-                <Button size="sm" variant="outline" onClick={() => setEditId(q.id)} aria-label="Modifier"><Pencil className="h-4 w-4" /></Button>
-                <Button size="sm" variant="outline" className="text-destructive" onClick={() => setDeleteId(q.id)} aria-label="Supprimer"><Trash2 className="h-4 w-4" /></Button>
+                {can('view') && (<Button size="sm" className="flex-1" onClick={() => navigate(`${base}/quotas/${q.id}`)}><Eye className="h-4 w-4" />Détails</Button>)}
+                {can('edit') && (<Button size="sm" variant="outline" onClick={() => setEditId(q.id)} aria-label="Modifier"><Pencil className="h-4 w-4" /></Button>)}
+                {can('delete') && (<Button size="sm" variant="outline" className="text-destructive" onClick={() => setDeleteId(q.id)} aria-label="Supprimer"><Trash2 className="h-4 w-4" /></Button>)}
               </div>
             </motion.article>
           ))}
@@ -155,6 +158,8 @@ export default function Quotas() {
 
 /* =========================== Details =========================== */
 export function QuotaDetail() {
+  const can = useCan('quotas');
+  const base = useBasePath();
   const { id } = useParams();
   const qc = useQueryClient();
   const [salesFor, setSalesFor] = useState<QuotaItemRow | null>(null);
@@ -193,13 +198,13 @@ export function QuotaDetail() {
 
   return (
     <div>
-      <Link to="/quotas" className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Tous les quotas</Link>
+      <Link to={`${base}/quotas`} className="mb-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" />Tous les quotas</Link>
       <PageHero
         eyebrow={`Quota · ${fmtDate(q.quota_date)}`}
         icon={Layers}
         title={q.name}
         description={q.description || undefined}
-        actions={<Button variant="outline" onClick={() => setEditing(true)}><Pencil className="h-4 w-4" />Modifier</Button>}
+        actions={can('edit') && <Button variant="outline" onClick={() => setEditing(true)}><Pencil className="h-4 w-4" />Modifier</Button>}
         stats={[
           { label: 'Quantité totale', value: q.total_quantity },
           { label: 'Restant', value: q.remaining_quantity },
